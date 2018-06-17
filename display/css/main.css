@@ -1,0 +1,40 @@
+body {
+  font-family: sans-serif;
+  background-color: #0b2191;
+  background-image: url("../img/background.jpg"); }
+
+main {
+  height: 98vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0px 100px; }
+
+div#category {
+  font-family: swiss911;
+  font-size: 60px;
+  color: white;
+  text-shadow: 5px 5px 0px black;
+  text-transform: uppercase;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  letter-spacing: 2px; }
+
+div#dollars {
+  color: #e3a147;
+  font-size: 60px;
+  font-family: swiss911;
+  text-shadow: 5px 5px 0px black; }
+
+div#clue {
+  text-align: center;
+  font-family: korinna;
+  color: white;
+  font-size: 80px;
+  text-transform: uppercase;
+  text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black; }
+  div#clue span.this {
+    font-family: korinna-bold; }
+
+/*# sourceMappingURL=main.css.map */
