@@ -1,13 +1,27 @@
 
-
+var divClue, divCategory, divDollars, spinner, imgLogoJeopardy;
 $(document).ready(function () {
 //    return;
-    var clueDiv = $("div#clue");
-    var categoryDiv = $("div#category");
-    var dollarsDiv = $("div#dollars");
+    divClue = $("div#clue");
+    divCategory = $("div#category");
+    divDollars = $("div#dollars");
+    imgLogoJeopardy = $("img#logo-jeopardy");
 
-    var spinner = $("div#spinner");
+    spinner = $("div#spinner");
 
+
+
+
+});
+
+function showClue() {
+
+    divClue.html("");
+    divCategory.html("");
+    divDollars.html("");
+    
+    imgLogoJeopardy.css("display", "none");
+    spinner.css("display", "");
     $.getJSON("http://jservice.io/api/random", function (data) {
 
         spinner.css("display", "none");
@@ -31,12 +45,11 @@ $(document).ready(function () {
          */
 
 
-        clueDiv.html(obj.question);
-        categoryDiv.html(obj.category.title);
-        dollarsDiv.html("$" + obj.value);
+        divClue.html(obj.question);
+        divCategory.html(obj.category.title);
+        divDollars.html("$" + obj.value);
 
 
     });
 
-
-});
+}
