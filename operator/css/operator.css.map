@@ -1,7 +1,7 @@
 {
 "version": 3,
 "mappings": "AAAA,IAAK;EACD,WAAW,EAAE,UAAU",
-"sources": ["../scss/main.scss"],
+"sources": ["../scss/operator.scss"],
 "names": [],
-"file": "main.css"
+"file": "operator.css"
 }
