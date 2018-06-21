@@ -1,16 +1,19 @@
 
 
 $(document).ready(function () {
-
+//    return;
     var clueDiv = $("div#clue");
     var categoryDiv = $("div#category");
     var dollarsDiv = $("div#dollars");
 
+    var spinner = $("div#spinner");
+
     $.getJSON("http://jservice.io/api/random", function (data) {
 
+        spinner.css("display", "none");
 
         var obj = data[0];
-        
+
         /*
          var regex = /(?:this)|(?:these)/i;
          var result = regex.exec(clueStr);
@@ -26,11 +29,11 @@ $(document).ready(function () {
          foundWord + '</span>' + clueStr.substring(startIndex + foundWord.length);
          }
          */
-        
-        
+
+
         clueDiv.html(obj.question);
         categoryDiv.html(obj.category.title);
-        dollarsDiv.html("$"+obj.value);
+        dollarsDiv.html("$" + obj.value);
 
 
     });

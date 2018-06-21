@@ -1,53 +1,119 @@
+$height-header: 70px;
+$height-footer: 100px;
+
+$big-shadow: 3px 3px 0px black,
+5px 5px 0px black,
+7px 7px 0px black,
+9px 9px 0px black,
+11px 11px 0px black;
+
+
 body {
     font-family: sans-serif;
     background-color: #0b2191;
     background-image: url("../img/background.jpg");
+    color: white;
+}
 
+div#spinner {
+    border: 10px solid rgba(255, 255, 255, 0.2);
+    border-left-color: white;
+    animation: spin 0.5s infinite linear;
+    border-radius: 50%;
+    width: 250px;
+    height: 250px;
+    position: absolute;
+    box-sizing: border-box;
+}
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 
+
+header {
+
+    border-bottom: 1px solid white;
+    height: $height-header;
+    font-family: swiss911;
+    font-size: 60px;
+    letter-spacing: 2px;
+    text-shadow: $big-shadow;
+
+    div#category {
+        text-transform: uppercase;
+        display: inline-block;
+    }
+
+    div#dollars {
+        color: #e3a147;
+        display: inline-block;
+        position: absolute;
+        right: 8px;
+    }
+}
+
 main {
-    height: 98vh;
+    height: calc(100vh - #{$height-header} - #{$height-footer});
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 0px 100px;
 }
 
-div#category {
-    font-family: swiss911;
-    font-size: 60px;
-    color: white;
-    text-shadow: 5px 5px 0px black;
-    text-transform: uppercase;
-    position: absolute;
-    top: 10px;
-    left: 10px; 
-    letter-spacing: 2px;
-}
-
-div#dollars {
-    color: #e3a147;
-    font-size: 60px;
-    font-family: swiss911;
-    text-shadow: 5px 5px 0px black;
-}
-
 div#clue {
     text-align: center;
     font-family: korinna;
-    color: white;
     font-size: 80px;
     text-transform: uppercase;
-    text-shadow: 
-        3px 3px 0px black,
-        5px 5px 0px black,
-        7px 7px 0px black,
-        9px 9px 0px black
-        ;
+    text-shadow: $big-shadow;
 
-    span.this {
-        font-family: korinna-bold;
-    }
+    /*span.this {*/
+    /*font-family: korinna-bold;*/
+    /*}*/
+}
+
+footer {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: 100%;
+    position: absolute;
+    bottom: 0px;
+
+    border-top: 1px solid white;
+    height: $height-footer;
+
+    div.team {
+        /*border: 1px solid white;*/
+        padding: 10px;
+        text-align: center;
+        flex: 1;
+
+        div.team-money {
+            font-family: swiss911;
+            font-size: 30px;
+            text-shadow: 3px 3px 0px black;
+        }
+
+        table.countdown-dots {
+            margin-left: auto;
+            margin-right: auto;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+            td {
+                border: 2px solid gray;
+                width: 14px;
+                height: 8px;
+            }
+        }
+
+    }   
+
 
 }
