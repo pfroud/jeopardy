@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Countdown timer test</title>
+        <meta charset="UTF-8">
+        <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <script src="jquery-3.3.1.min.js"></script>
+        <script src="CountdownTimer.js"></script>
+
+        <script>
+            $(document).ready(function () {
+
+                var countdown = new CountdownTimer(5000);
+                countdown.textElement = $("#countdown-text");
+                countdown.progressElement = $("progress");
+                $("button").on("click", function () {
+                    countdown.start();
+                });
+                
+            });
+        </script>
+
+        <div id="countdown-text">countdown text goes here</div>
+
+        <progress value="0" style="width:100%"></progress>
+
+        <button>start</button>
+
+    </body>
+</html>

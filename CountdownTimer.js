@@ -23,8 +23,8 @@ class CountdownTimer {
 
         // display elements
         this.textElement = null;
-//        this.progressElement = null;
-//        this.dotsElement = null;
+        this.progressElement = null;
+        this.dotsElement = null;
     }
 
     pause() {
@@ -55,6 +55,9 @@ class CountdownTimer {
         if (!this.isRunning) {
             this.onStart && this.onStart();
             this.isRunning = true;
+            
+            this.progressElement && this.progressElement.attr("max", this.durationMs * this.intervalMs);
+            
             this.intervalID = window.setInterval(this._intervalHandler, this.intervalMs, this);
         }
     }
@@ -69,9 +72,14 @@ class CountdownTimer {
             var tenthSeconds = (instance.remainingMs % 1000) / 100;
             instance.textElement.html(secondsRoundedDown + "." + tenthSeconds);
         }
+        
+        if(instance.progressElement){
+            instance.progressElement.attr("value", instance.remainingMs * instance.intervalMs);
+        }
 
         if (instance.remainingMs <= 0) {
             instance.isRunning = false;
+            instance.textElement.html("done");
             window.clearInterval(instance.intervalID);
             instance.onFinished && instance.onFinished();
         }
