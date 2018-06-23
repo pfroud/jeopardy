@@ -55,10 +55,19 @@ class CountdownTimer {
         if (!this.isRunning) {
             this.onStart && this.onStart();
             this.isRunning = true;
-            
+
             this.progressElement && this.progressElement.attr("max", this.durationMs * this.intervalMs);
-            
+
             this.intervalID = window.setInterval(this._intervalHandler, this.intervalMs, this);
+
+            if (this.dotsElement) {
+                var tds = this.dotsElement.find("td");
+                var len = tds.length;
+                if (len !== len) {
+                    console.warn("found " + len + "dots element(s), expected exactly 9");
+                }
+                tds.css("background-color", "red");
+            }
         }
     }
 
@@ -72,9 +81,14 @@ class CountdownTimer {
             var tenthSeconds = (instance.remainingMs % 1000) / 100;
             instance.textElement.html(secondsRoundedDown + "." + tenthSeconds);
         }
-        
-        if(instance.progressElement){
+
+        if (instance.progressElement) {
             instance.progressElement.attr("value", instance.remainingMs * instance.intervalMs);
+        }
+
+        if (instance.dotsElement && instance.remainingMs % 1000 === 0) {
+            var secondsThatJustPassed = (instance.remainingMs / 1000) + 1;
+            instance.dotsElement.find('[data-countdown="' + secondsThatJustPassed + '"]').css("background-color", "");
         }
 
         if (instance.remainingMs <= 0) {

@@ -5,6 +5,19 @@
         <meta charset="UTF-8">
         <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <style>
+            table.countdown-dots {
+                border-collapse: collapse;
+            }
+            td {
+                border: 2px solid gray;
+                width: 14px;
+                height: 8px;
+            }
+        </style>
+
+
     </head>
     <body>
         <script src="jquery-3.3.1.min.js"></script>
@@ -16,16 +29,26 @@
                 var countdown = new CountdownTimer(5000);
                 countdown.textElement = $("#countdown-text");
                 countdown.progressElement = $("progress");
+                countdown.dotsElement = $("table");
+                
                 $("button").on("click", function () {
                     countdown.start();
                 });
-                
+
             });
         </script>
 
         <div id="countdown-text">countdown text goes here</div>
 
         <progress value="0" style="width:100%"></progress>
+
+        <table class="countdown-dots"><tr>
+                <td data-countdown="5"></td><td data-countdown="4"></td>
+                <td data-countdown="3"></td><td data-countdown="2"></td>
+                <td data-countdown="1"></td>
+                <td data-countdown="2"></td><td data-countdown="3"></td>
+                <td data-countdown="4"></td><td data-countdown="5"></td>
+            </tr></table>
 
         <button>start</button>
 
