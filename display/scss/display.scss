@@ -35,6 +35,8 @@ div#spinner {
 }
 
 
+$color-dollars: #e3a147;
+
 
 header {
 
@@ -51,7 +53,7 @@ header {
     }
 
     div#dollars {
-        color: #e3a147;
+        color: $color-dollars;
         display: inline-block;
         position: absolute;
         right: 8px;
@@ -64,20 +66,33 @@ main {
     justify-content: center;
     align-items: center;
     padding: 0px 100px;
+
+    div#pre-question {
+        font-family: swiss911;
+        text-shadow: $big-shadow;
+        font-size: 80px;
+        text-align: center;
+        text-transform: uppercase;
+
+        div#dollars-big {
+            color: $color-dollars;
+        }
+
+    }
+
+    div#clue {
+        text-align: center;
+        font-family: korinna;
+        font-size: 80px;
+        text-transform: uppercase;
+        text-shadow: $big-shadow;
+
+        /*span.this {*/
+        /*font-family: korinna-bold;*/
+        /*}*/
+    }
+
 }
-
-div#clue {
-    text-align: center;
-    font-family: korinna;
-    font-size: 80px;
-    text-transform: uppercase;
-    text-shadow: $big-shadow;
-
-    /*span.this {*/
-    /*font-family: korinna-bold;*/
-    /*}*/
-}
-
 footer {
     display: flex;
     flex-wrap: nowrap;

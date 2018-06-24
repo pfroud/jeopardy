@@ -1,26 +1,60 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Jeopardy operator</title>
+        <title>J operator</title>
         <meta charset="UTF-8">
         <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
         <link rel="stylesheet" href="css/operator.css">
     </head>
     <body>
         <script src="../jquery-3.3.1.min.js"></script>
-        <!--<script src="../CountdownTimer.js"></script>-->
+        <script src="../CountdownTimer.js"></script>
+        <script src="../Team.js"></script>
+        <script src="../Settings.js"></script>
         <script src="operator.js"></script>
-        
-        
+
+
         <main>
-            
-            
-            
+
+
+
             <button id="openDisplayWindow">open the display window</button>
-            
-            <button id="showClue">show clue</button>
-            
+            <button id="init">init</button>
+
+            <button id="showClue">get clue</button>
+
+            <progress value="10"></progress>
+
+            <div id="clue-category"></div>
+            <div id="clue-dollars"></div>
+            <div id="clue-airdate"> </div>
+            <div id="clue-question"></div>
         </main>
-        
+
+        <footer>
+            <div class="team" data-team-number="0">
+                <div class="team-state"></div>
+                <div class="team-dollars"></div>
+                <div class="team-name"></div>
+            </div>
+            <div class="team"  data-team-number="1">
+                <div class="team-state"></div>
+                <div class="team-dollars"></div>
+                <div class="team-name"></div>
+            </div>
+            <div class="team"  data-team-number="2">
+                <div class="team-state"></div>
+                <div class="team-dollars"></div>
+                <div class="team-name"></div>
+            </div>
+            <div class="team"  data-team-number="3">
+                <div class="team-state"></div>
+                <div class="team-dollars"></div>
+                <div class="team-name"></div>
+            </div>
+
+        </footer>
+
+
     </body>
 </html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Jeopardy display</title>
+        <title>J display</title>
         <meta charset="UTF-8">
         <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
         <link rel="stylesheet" href="font/korinna/korinna.css">
@@ -15,11 +15,15 @@
         <header>
             <div id="category"></div>
             <div id="dollars"></div>
-
         </header>
 
 
         <main>
+
+            <div id="pre-question">
+                <div id="category-big"></div>
+                <div id="dollars-big"></div>
+            </div>
 
 
 
@@ -29,58 +33,58 @@
             <div id="spinner" style="display:none"></div>
             <div id="clue"></div>
 
-
-
-            <footer>
-                <div class="team">
-                    <table class="countdown-dots"><tr>
-                            <td data-countdown="5"></td><td data-countdown="4"></td>
-                            <td data-countdown="3"></td><td data-countdown="2"></td>
-                            <td data-countdown="1"></td>
-                            <td data-countdown="2"></td><td data-countdown="3"></td>
-                            <td data-countdown="4"></td><td data-countdown="5"></td>
-                        </tr></table>
-
-                    <div class="team-money">$0000</div>
-                    <div class="team-name">Team 1</div>
-                </div>
-                <div class="team">
-                    <table class="countdown-dots"><tr>
-                            <td data-countdown="5"></td><td data-countdown="4"></td>
-                            <td data-countdown="3"></td><td data-countdown="2"></td>
-                            <td data-countdown="1"></td>
-                            <td data-countdown="2"></td><td data-countdown="3"></td>
-                            <td data-countdown="4"></td><td data-countdown="5"></td>
-                        </tr></table>
-                    <div class="team-money">$0000</div>
-                    <div class="team-name">Team 2</div>
-                </div>
-                <div class="team">
-                    <table class="countdown-dots"><tr>
-                            <td data-countdown="5"></td><td data-countdown="4"></td>
-                            <td data-countdown="3"></td><td data-countdown="2"></td>
-                            <td data-countdown="1"></td>
-                            <td data-countdown="2"></td><td data-countdown="3"></td>
-                            <td data-countdown="4"></td><td data-countdown="5"></td>
-                        </tr></table>
-                    <div class="team-money">$0000</div>
-                    <div class="team-name">Team 3</div>
-                </div>
-                <div class="team">
-                    <table class="countdown-dots"><tr>
-                            <td data-countdown="5"></td><td data-countdown="4"></td>
-                            <td data-countdown="3"></td><td data-countdown="2"></td>
-                            <td data-countdown="1"></td>
-                            <td data-countdown="2"></td><td data-countdown="3"></td>
-                            <td data-countdown="4"></td><td data-countdown="5"></td>
-                        </tr></table>
-                    <div class="team-money">$0000</div>
-                    <div class="team-name">Team 4</div>
-                </div>
-
-            </footer>
-
         </main>
+
+
+        <footer>
+            <div class="team" data-team-number="0">
+                <table class="countdown-dots"><tr>
+                        <td data-countdown="5"></td><td data-countdown="4"></td>
+                        <td data-countdown="3"></td><td data-countdown="2"></td>
+                        <td data-countdown="1"></td>
+                        <td data-countdown="2"></td><td data-countdown="3"></td>
+                        <td data-countdown="4"></td><td data-countdown="5"></td>
+                    </tr></table>
+
+                <div class="team-dollars"></div>
+                <div class="team-name"></div>
+            </div>
+            <div class="team"  data-team-number="1">
+                <table class="countdown-dots"><tr>
+                        <td data-countdown="5"></td><td data-countdown="4"></td>
+                        <td data-countdown="3"></td><td data-countdown="2"></td>
+                        <td data-countdown="1"></td>
+                        <td data-countdown="2"></td><td data-countdown="3"></td>
+                        <td data-countdown="4"></td><td data-countdown="5"></td>
+                    </tr></table>
+                <div class="team-dollars"></div>
+                <div class="team-name"></div>
+            </div>
+            <div class="team"  data-team-number="2">
+                <table class="countdown-dots"><tr>
+                        <td data-countdown="5"></td><td data-countdown="4"></td>
+                        <td data-countdown="3"></td><td data-countdown="2"></td>
+                        <td data-countdown="1"></td>
+                        <td data-countdown="2"></td><td data-countdown="3"></td>
+                        <td data-countdown="4"></td><td data-countdown="5"></td>
+                    </tr></table>
+                <div class="team-dollars"></div>
+                <div class="team-name"></div>
+            </div>
+            <div class="team"  data-team-number="3">
+                <table class="countdown-dots"><tr>
+                        <td data-countdown="5"></td><td data-countdown="4"></td>
+                        <td data-countdown="3"></td><td data-countdown="2"></td>
+                        <td data-countdown="1"></td>
+                        <td data-countdown="2"></td><td data-countdown="3"></td>
+                        <td data-countdown="4"></td><td data-countdown="5"></td>
+                    </tr></table>
+                <div class="team-dollars"></div>
+                <div class="team-name"></div>
+            </div>
+
+        </footer>
+
 
     </body>
 </html>

@@ -56,7 +56,10 @@ class CountdownTimer {
             this.onStart && this.onStart();
             this.isRunning = true;
 
-            this.progressElement && this.progressElement.attr("max", this.durationMs * this.intervalMs);
+            if (this.progressElement) {
+                var numTicks = this.durationMs * this.intervalMs;
+                this.progressElement.attr("max", numTicks).attr("value", numTicks);
+            }
 
             this.intervalID = window.setInterval(this._intervalHandler, this.intervalMs, this);
 
@@ -93,7 +96,7 @@ class CountdownTimer {
 
         if (instance.remainingMs <= 0) {
             instance.isRunning = false;
-            instance.textElement.html("done");
+            instance.textElement && instance.textElement.html("done");
             window.clearInterval(instance.intervalID);
             instance.onFinished && instance.onFinished();
         }

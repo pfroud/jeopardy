@@ -41,16 +41,23 @@ main {
   justify-content: center;
   align-items: center;
   padding: 0px 100px; }
-
-div#clue {
-  text-align: center;
-  font-family: korinna;
-  font-size: 80px;
-  text-transform: uppercase;
-  text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black;
-  /*span.this {*/
-  /*font-family: korinna-bold;*/
-  /*}*/ }
+  main div#pre-question {
+    font-family: swiss911;
+    text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black;
+    font-size: 80px;
+    text-align: center;
+    text-transform: uppercase; }
+    main div#pre-question div#dollars-big {
+      color: #e3a147; }
+  main div#clue {
+    text-align: center;
+    font-family: korinna;
+    font-size: 80px;
+    text-transform: uppercase;
+    text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black;
+    /*span.this {*/
+    /*font-family: korinna-bold;*/
+    /*}*/ }
 
 footer {
   display: flex;
