@@ -4,4 +4,18 @@ body {
 span.clue-keyword {
   font-weight: bold; }
 
+footer {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  width: 100%;
+  position: absolute;
+  bottom: 0px;
+  border-top: 1px solid white; }
+  footer div.team {
+    text-align: center;
+    flex: 1; }
+    footer div.team div.team-name, footer div.team div.team-dollars, footer div.team div.team-state {
+      /*! supress netbeans warning */ }
+
 /*# sourceMappingURL=operator.css.map */

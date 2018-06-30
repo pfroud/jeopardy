@@ -20,9 +20,6 @@ class Operator {
 
         this.initKeyboardListeners();
         this.initMouseListeners();
-
-
-
     }
 
     initKeyboardListeners() {
@@ -48,54 +45,29 @@ class Operator {
         });
     }
 
-    handleBuzzerPress(teamNumber) {
+    initTeams() {
+        if (!this.windowPresentation) {
+            console.warn("can't init teams because no presentation window");
+            return;
+        }
+
+        for (var i = 0; i < 4; i++) {
+            var t = this.teamArray[i] = new Team(i);
+            t.setDivOperator($('div[data-team-number="' + i + '"]'));
+            t.setDivPresentation(this.windowPresentation.getTeamDiv(i));
+        }
+        this.hasInitializedTeams = true;
+    }
+
+    handleBuzzerPress(teamIdx) {
         if (!isQuestionActive) {
             return;
         }
 
-        var teamObj = this.teamArray[teamNumber];
+        var teamObj = this.teamArray[teamIdx];
 
-        if (teamObj.hasAnswered) {
-
-            if (SETTINGS.isAllowedMultipleTries) {
-                doBuzz();
-            } else {
-                // do nothing, the team already answered and settings only allow one attempt
-            }
-
-        } else {
-            doBuzz(teamObj);
-        }
-    }
-
-    doBuzz(teamObj) {
-        teamObj.displayBuzz();
-
-//        var countdown = new CountdownTimer(5000);
-
-    }
-
-    initTeams() {
-        if (!this.windowPresentation) {
-            console.warn("can't init, no presentation window");
-            return;
-        }
-
-        for (var i = 0; i < 4; i++) {
-            var team = this.teamArray[i] = new Team(i);
-//        team.setDisplayDiv(windowDisplay.getTeamDiv(i));
-            var divOperator = $('div[data-team-number="' + i + '"]');
-            team.setOperatorDiv(divOperator);
-            team.setTeamName("team " + i);
-        }
-        this.setTeamDisplayDivs();
-
-        this.hasInitializedTeams = true;
-    }
-
-    setTeamDisplayDivs() {
-        for (var i = 0; i < 4; i++) {
-            this.teamArray[i].setDisplayDiv(this.windowPresentation.getTeamDiv(i));
+        if (!teamObj.hasAnswered || (teamObj.hasAnswered && SETTINGS.isAllowedMultipleTries)) {
+            teamObj.displayBuzz();
         }
     }
 

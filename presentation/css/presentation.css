@@ -73,10 +73,12 @@ footer {
     padding: 10px;
     text-align: center;
     flex: 1; }
-    footer div.team div.team-money {
+    footer div.team div.team-dollars {
       font-family: swiss911;
       font-size: 30px;
       text-shadow: 3px 3px 0px black; }
+    footer div.team div.team-name {
+      /*! supress netbeans warning */ }
     footer div.team table.countdown-dots {
       margin-left: auto;
       margin-right: auto;
@@ -87,4 +89,4 @@ footer {
         width: 14px;
         height: 8px; }
 
-/*# sourceMappingURL=display.css.map */
+/*# sourceMappingURL=presentation.css.map */

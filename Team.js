@@ -1,39 +1,49 @@
 class Team {
 
-    constructor(teamNumber) {
-        this.teamNumber = teamNumber;
+    constructor(teamIdx) {
+        this.teamIdx = teamIdx;
         this.dollars = 0;
-        this.teamName = null;
+        this.teamName = "team " + teamIdx;
         this.isAnswering = false;
         this.hasAnswered = false;
-        this.displayDiv = null;
 
-        this.operatorDiv = null;
-        //todo add stasictics
+        this.div = {
+            operator: {
+                wrapper: null,
+                dollars: null,
+                teamName: null,
+                state: null
+            },
+            presentation: {
+                wrapper: null,
+                dollars: null,
+                teamName: null
+            }
+        };
     }
 
-    setDisplayDiv(displayDiv) {
-        this.displayDiv = displayDiv;
-        this.teamName && displayDiv.find(".team-name").html(this.teamName);
-        displayDiv.find(".team-dollars").html("$" + this.dollars);
+    setDivPresentation(divPresentationWrapper) {
+        this.div.presentation.wrapper = divPresentationWrapper;
+        this.div.presentation.dollars = divPresentationWrapper.find(".team-dollars").html("$" + this.dollars);
+        this.div.presentation.teamName = divPresentationWrapper.find(".team-name").html(this.teamName);
     }
 
-    setOperatorDiv(operatorDiv) {
-        this.operatorDiv = operatorDiv;
-        this.teamName && operatorDiv.find(".team-name").html(this.teamName);
-        operatorDiv.find(".team-dollars").html("$" + this.dollars);
-        operatorDiv.find(".team-state").html("initialized");
+    setDivOperator(divOperatorWrapper) {
+        this.div.operator.wrapper = divOperatorWrapper;
+        this.div.operator.teamName = divOperatorWrapper.find(".team-name").html(this.teamName);
+        this.div.operator.dollars = divOperatorWrapper.find(".team-dollars").html("$" + this.dollars);
+        this.div.operator.state = divOperatorWrapper.find(".team-state").html("initialized");
     }
 
     setTeamName(teamName) {
         this.teamName = teamName;
-        this.displayDiv && this.displayDiv.find(".team-name").html(teamName);
-        this.operatorDiv && this.operatorDiv.find(".team-name").html(teamName);
+        this.div.operator.teamName.html(teamName);
+        this.div.presentation.teamName.html(teamName);
     }
 
     displayBuzz() {
-        this.operatorDiv.find(".team-state").html("answering");
-        this.displayDiv.css("background-color", "orange");
+        this.div.operator.state.html("answering");
+        this.this.presentation.wrapper.css("background-color", "orange");
     }
 
 }

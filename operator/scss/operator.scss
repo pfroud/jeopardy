@@ -5,3 +5,28 @@ body {
 span.clue-keyword {
     font-weight: bold;
 }
+
+
+footer {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: 100%;
+    position: absolute;
+    bottom: 0px;
+
+    border-top: 1px solid white;
+
+    div.team {
+        text-align: center;
+        flex: 1;
+
+
+        div.team-name, div.team-dollars, div.team-state {
+            /*! supress netbeans warning */
+        }
+
+    }   
+
+
+}

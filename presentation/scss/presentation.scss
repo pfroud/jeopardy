@@ -8,6 +8,7 @@ $big-shadow: 3px 3px 0px black,
 11px 11px 0px black;
 
 
+
 body {
     font-family: sans-serif;
     background-color: #0b2191;
@@ -93,6 +94,7 @@ main {
     }
 
 }
+
 footer {
     display: flex;
     flex-wrap: nowrap;
@@ -110,10 +112,14 @@ footer {
         text-align: center;
         flex: 1;
 
-        div.team-money {
+        div.team-dollars {
             font-family: swiss911;
             font-size: 30px;
             text-shadow: 3px 3px 0px black;
+        }
+        
+        div.team-name {
+            /*! supress netbeans warning */
         }
 
         table.countdown-dots {
