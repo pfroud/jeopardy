@@ -11,7 +11,8 @@ class CountdownTimer {
         this.durationMs = durationMs;
         this.remainingMs = durationMs;
         this.intervalID = null;
-        this.isRunning = false;
+        this.hasStarted = false;
+        this.isPaused = false;
 
         // events
         this.onStart = null;
@@ -28,33 +29,43 @@ class CountdownTimer {
     }
 
     pause() {
-        if (this.isRunning) {
+        if (this.hasStarted && !this.isPaused) {
             window.clearInterval(this.intervalID);
             this.onPause && this.onPause();
-            this.isRunning = false;
+            this.isPaused = true;
+            this.progressElement && this.progressElement.addClass("paused");
+        }
+    }
+
+    togglePaused() {
+        if (this.isPaused) {
+            this.resume();
+        } else {
+            this.pause();
         }
     }
 
     resume() {
-        if (!this.isRunning) {
-            this.onResume & this.onResume();
-            this.isRunning = true;
-            this.intervalID = window.setInterval(this._intervalHandler, this.intervalMs);
+        if (this.hasStarted && this.isPaused) {
+            this.onResume && this.onResume();
+            this.isPaused = false;
+            this.intervalID = window.setInterval(this._intervalHandler, this.intervalMs, this);
+            this.progressElement && this.progressElement.removeClass("paused");
         }
     }
 
     reset() {
         this.onReset && this.onReset();
-        this.isRunning = false;
+        this.hasStarted = false;
         this.remainingMs = this.durationMs;
         window.clearInterval(this.intervalID);
         this.textElement && this.textElement.html(this.remainingMs + ".0");
     }
 
     start() {
-        if (!this.isRunning) {
+        if (!this.hasStarted) {
             this.onStart && this.onStart();
-            this.isRunning = true;
+            this.hasStarted = true;
 
             if (this.progressElement) {
                 var numTicks = this.durationMs * this.intervalMs;

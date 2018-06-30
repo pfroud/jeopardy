@@ -21,14 +21,19 @@
 
             <button id="openDisplayWindow">open the presentation window</button>
 
-            <button id="showClue">get clue</button>
+            <button id="showClue" disabled>get clue</button>
+            
+            <div id="instructions">Click "open the presentation window" to begin.</div>
+            
+            <progress id="primary" value="10" max="10"></progress>
 
-            <progress value="10"></progress>
+            <div id="clue">
+                <div id="clue-category"></div>
+                <div id="clue-dollars"></div>
+                <div id="clue-airdate"> </div>
+                <div id="clue-question"></div>
+            </div>
 
-            <div id="clue-category"></div>
-            <div id="clue-dollars"></div>
-            <div id="clue-airdate"> </div>
-            <div id="clue-question"></div>
         </main>
 
         <footer>

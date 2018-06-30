@@ -1,7 +1,7 @@
 class Settings {
     
     constructor() {
-        this.displayDurationCategoryBeforeQuestion = 2000;
+        this.displayDurationCategory = 3000;
         this.isAllowedMultipleTries = false;
     }
     

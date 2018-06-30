@@ -21,14 +21,17 @@ $(document).ready(function () {
 
 function setVisibleSpinner(isVisible) {
     spinner.css("display", isVisible ? "" : "none");
+    return this;
 }
 
 function setVisibleJeopardyLogo(isVisible) {
     imgLogoJeopardy.css("display", isVisible ? "" : "none");
+    return this;
 }
 
 function setVisibleTeams(isVisible) {
     footerTeams.css("display", isVisible ? "" : "none");
+    return this;
 }
 
 function showCategoryAndDollars(clueObj) {

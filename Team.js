@@ -6,6 +6,7 @@ class Team {
         this.teamName = "team " + teamIdx;
         this.isAnswering = false;
         this.hasAnswered = false;
+        this.isBuzzerOpen = false;
 
         this.div = {
             operator: {
@@ -32,7 +33,7 @@ class Team {
         this.div.operator.wrapper = divOperatorWrapper;
         this.div.operator.teamName = divOperatorWrapper.find(".team-name").html(this.teamName);
         this.div.operator.dollars = divOperatorWrapper.find(".team-dollars").html("$" + this.dollars);
-        this.div.operator.state = divOperatorWrapper.find(".team-state").html("initialized");
+        this.div.operator.state = divOperatorWrapper.find(".team-state").html("Initialized.");
     }
 
     setTeamName(teamName) {
@@ -43,7 +44,14 @@ class Team {
 
     displayBuzz() {
         this.div.operator.state.html("answering");
-        this.this.presentation.wrapper.css("background-color", "orange");
+        this.div.operator.wrapper.css("background-color", "orange");
+        this.div.presentation.wrapper.css("background-color", "orange");
+    }
+
+    setBuzzerOpen(isOpen) {
+        this.isBuzzerOpen = isOpen;
+        this.div.presentation.wrapper.toggleClass("buzzer-closed", !isOpen);
+        this.div.operator.state.html("buzzer " + (isOpen ? "open" : "closed"));
     }
 
 }

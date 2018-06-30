@@ -112,12 +112,16 @@ footer {
         text-align: center;
         flex: 1;
 
+        &.buzzer-closed {
+            opacity: 0.4;
+        }
+
         div.team-dollars {
             font-family: swiss911;
             font-size: 30px;
             text-shadow: 3px 3px 0px black;
         }
-        
+
         div.team-name {
             /*! supress netbeans warning */
         }
