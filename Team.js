@@ -7,7 +7,7 @@ class Team {
         this.isAnswering = false;
         this.hasAnswered = false;
         this.displayDiv = null;
-        
+
         this.operatorDiv = null;
         //todo add stasictics
     }
@@ -29,7 +29,11 @@ class Team {
         this.teamName = teamName;
         this.displayDiv && this.displayDiv.find(".team-name").html(teamName);
         this.operatorDiv && this.operatorDiv.find(".team-name").html(teamName);
+    }
 
+    displayBuzz() {
+        this.operatorDiv.find(".team-state").html("answering");
+        this.displayDiv.css("background-color", "orange");
     }
 
 }

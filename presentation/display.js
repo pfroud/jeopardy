@@ -1,4 +1,5 @@
 
+//rename this to 'presentation'
 var divClue, divCategoryHeader, divDollarsHeader,
         spinner, imgLogoJeopardy, footerTeams, divCategoryBig,
         divDollarsBig, divPreQuestion;
@@ -14,6 +15,8 @@ $(document).ready(function () {
     imgLogoJeopardy = $("img#logo-jeopardy");
     fooerTeams = $("footer");
     spinner = $("div#spinner");
+    
+    window.opener.handleDisplayWindowReady();
 });
 
 function setVisibleSpinner(isVisible) {
