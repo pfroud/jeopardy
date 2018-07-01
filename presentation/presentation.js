@@ -17,7 +17,11 @@ $(document).ready(function () {
     fooerTeams = $("footer");
     spinner = $("div#spinner");
 
-    window.opener.handleDisplayWindowReady();
+    if (window.opener) {
+        window.opener.handleDisplayWindowReady();
+    } else {
+        console.warn("no window.opener");
+    }
 });
 
 function setVisibleSpinner(isVisible) {
