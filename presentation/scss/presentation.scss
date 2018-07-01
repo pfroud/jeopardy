@@ -44,7 +44,7 @@ div#spinner {
 $color-dollars: #e3a147;
 
 
-div#paused-indicator {
+div#paused {
     background-color: #ffa900;
     color: black;
     font-weight: bold;
@@ -54,6 +54,7 @@ div#paused-indicator {
     padding: 20px;
     border: 1px solid darkorange;
     text-shadow: 3px 3px rgba(0,0,0,0.2);
+    filter: drop-shadow(10px 13px rgba(0,0,0,0.4));
 }
 
 header {

@@ -16,6 +16,18 @@ div#clue {
 progress#primary {
   width: 100%; }
 
+div#paused {
+  background-color: #ffa900;
+  color: black;
+  font-weight: bold;
+  position: absolute;
+  font-size: 30px;
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid darkorange;
+  text-shadow: 3px 3px rgba(0, 0, 0, 0.2);
+  filter: drop-shadow(10px 13px rgba(0, 0, 0, 0.4)); }
+
 footer {
   display: flex;
   flex-wrap: nowrap;

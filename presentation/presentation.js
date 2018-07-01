@@ -2,7 +2,7 @@
 //rename this to 'presentation'
 var divQuestion, divCategoryInHeader, divDollarsInHeader,
         spinner, imgLogoJeopardy, footerTeams, divCategoryBig,
-        divDollarsBig, divPreQuestion, divClueAnswer;
+        divDollarsBig, divPreQuestion, divClueAnswer, divPaused;
 $(document).ready(function () {
     divQuestion = $("div#clue");
 
@@ -12,6 +12,7 @@ $(document).ready(function () {
     divDollarsBig = $("div#dollars-big");
     divPreQuestion = $("div#pre-question");
     divClueAnswer = $("div#clue-answer");
+    divPaused = $("div#paused");
 
     imgLogoJeopardy = $("img#logo-jeopardy");
     fooerTeams = $("footer");
@@ -72,4 +73,8 @@ function showTimeoutMessage(clueObj) {
     divClueAnswer.css("display", "").html("Answer:<p><div style=\"font-weight:bold\">"
             + clueObj.answer + "</div>");
 
+}
+
+function setPausedVisible(isVisible) {
+    this.divPaused.css("display", isVisible ? "" : "none");
 }
