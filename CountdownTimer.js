@@ -69,7 +69,7 @@ class CountdownTimer {
 
             if (this.progressElement) {
                 var numTicks = this.durationMs * this.intervalMs;
-                this.progressElement.attr("max", numTicks).attr("value", numTicks);
+                this.progressElement.attr("max", numTicks).attr("value", numTicks).css("display", "");
             }
 
             this.intervalID = window.setInterval(this._intervalHandler, this.intervalMs, this);
@@ -106,11 +106,19 @@ class CountdownTimer {
         }
 
         if (instance.remainingMs <= 0) {
-            instance.isRunning = false;
-            instance.textElement && instance.textElement.html("done");
-            window.clearInterval(instance.intervalID);
-            instance.onFinished && instance.onFinished();
+            instance._finish();
         }
+    }
+
+    _finish() {
+        this.isRunning = false;
+        this.textElement && this.textElement.html("done");
+        window.clearInterval(this.intervalID);
+        this.progressElement && this.progressElement.css("display", "none");
+
+        this.onFinished && this.onFinished();
+
+
     }
 
 }

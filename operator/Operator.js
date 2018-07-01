@@ -3,18 +3,19 @@
 class Operator {
 
     constructor() {
-
-
         this.windowPresentation = null;
         this.divClueWrapper = $("div#clue");
         this.divClueQuestion = $("div#clue-question");
         this.divClueDollars = $("div#clue-dollars");
         this.divClueCategory = $("div#clue-category");
-        this.divClueAirdate = $("div#clue-airdate");
+//        this.divClueAirdate = $("div#clue-airdate");
+        this.trQuestion = $("tr#question");
 
         this.progressPrimary = $("progress#primary");
 
         this.divInstructions = $("div#instructions");
+
+        this.presentClueObj = null;
 
 
         this.teamArray = new Array(4);
@@ -53,11 +54,11 @@ class Operator {
     }
 
     initMouseListeners() {
-        $("button#openDisplayWindow").on("click", () => {
+        $("button#openDisplayWindow").click(() => {
             this.windowPresentation = window.open("../presentation/presentation.html", "windowPresentation");
         });
 
-        this.buttonShowClue = $("button#showClue").on("click", () => {
+        this.buttonShowClue = $("button#showClue").click(() => {
             this.getClue();
         });
     }
@@ -95,9 +96,13 @@ class Operator {
             return;
         }
 
+        this.buttonShowClue.blur();
+        this.trQuestion.css("display", "none");
+
         this.windowPresentation
                 .setVisibleJeopardyLogo(false)
-                .setVisibleSpinner(true);
+                .setVisibleSpinner(true)
+                .setVisibleClueAnswer(false);
 
         this.setAllBuzzersIsOpen(false);
 
@@ -112,15 +117,16 @@ class Operator {
 
             var clueObj = response[0];
 
-            this.divClueCategory.html("Category: " + clueObj.category.title);
-            this.divClueDollars.html("Value: $" + clueObj.value);
-            this.divClueAirdate.html("Airdate: " + clueObj.airdate);
+            this.divClueWrapper.css("display", "");
+            this.divClueCategory.html(clueObj.category.title);
+            this.divClueDollars.html("$" + clueObj.value);
+//            this.divClueAirdate.html("Airdate: " + clueObj.airdate);
 
             this.windowPresentation.showCategoryAndDollars(clueObj);
 
             this.divInstructions.html("read aloud the category and dollar value.");
 
-            var countdownShowCategory = new CountdownTimer(SETTINGS.displayDurationCategory);
+            var countdownShowCategory = this.presentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationCategory);
             countdownShowCategory.progressElement = this.progressPrimary;
             countdownShowCategory.onFinished = () => this.showClueQuestion(clueObj);
             countdownShowCategory.start();
@@ -132,20 +138,17 @@ class Operator {
 
     showClueQuestion(clueObj) {
 
+        this.presentCountdownTimer = null;
         this.windowPresentation.showClue(clueObj);
+        this.presentClueObj = clueObj;
 
         this.divInstructions.html("read aloud the clue. buzzers open when you press space.");
 
-        this.divClueQuestion.html("Question: " + getClueQuestionHtml(clueObj));
-        
+        this.divClueQuestion.html(getClueQuestionHtml(clueObj));
+        this.trQuestion.css("display", "");
+
         this.isClueQuestionBeingRead = true;
 
-
-//        var countdown = this.presentCountdownTimer = new CountdownTimer(5000);
-//        countdown.progressElement = $("progress");
-//        countdown.onFinished = () => this.handleQuestionTimeout(clueObj);
-//        countdown.start();
-//        this.isClueQuestionVisible = true;
 
         function getClueQuestionHtml(clueObj) {
             var clueStr = clueObj.question;
@@ -171,13 +174,28 @@ class Operator {
             return;
         }
         this.setAllBuzzersIsOpen(true);
+
+        this.divInstructions.html("wait for people to answer.");
+
+        var countdownQuestionTimeout = this.presentCountdownTimer = new CountdownTimer(SETTINGS.questionTimeout);
+        countdownQuestionTimeout.progressElement = this.progressPrimary;
+        countdownQuestionTimeout.onFinished = () => this.handleQuestionTimeout();
+        countdownQuestionTimeout.start();
+
     }
 
-    handleQuestionTimeout(clueObj) {
-        // probably display something
-        console.log("question timed out");
+    handleQuestionTimeout() {
+        this.divInstructions.html("question timed out.");
+        this.setAllBuzzersIsOpen(false);
         this.isClueQuestionVisible = false;
-        this.countdownQuestion = null;
+        this.presentCountdownTimer = null;
+        this.windowPresentation.showTimeoutMessage(this.presentClueObj);
+
+
+        var countdownQuestionTimeout = this.presentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationAnswer);
+        countdownQuestionTimeout.progressElement = this.progressPrimary;
+        countdownQuestionTimeout.onFinished = () => this.getClue();
+        countdownQuestionTimeout.start();
     }
 
     setAllBuzzersIsOpen(isOpen) {

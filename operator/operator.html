@@ -16,25 +16,38 @@
 
 
         <main>
-
-
-
             <button id="openDisplayWindow">open the presentation window</button>
 
             <button id="showClue" disabled>get clue</button>
-            
-            <div id="instructions">Click "open the presentation window" to begin.</div>
-            
-            <progress id="primary" value="10" max="10"></progress>
 
-            <div id="clue">
-                <div id="clue-category"></div>
-                <div id="clue-dollars"></div>
-                <div id="clue-airdate"> </div>
-                <div id="clue-question"></div>
+            <div id="instructions">Click "open the presentation window" to begin.</div>
+
+
+
+            <div id="clue" style="display:none">
+                <table>
+                    <tr>
+                        <td>Category:</td>
+                        <td><div id="clue-category"></div></td>
+                    </tr><tr>
+                        <td>Value:</td>
+                        <td><div id="clue-dollars"></div></td>
+                    </tr><tr id="question">
+                        <td>Question:</td>
+                        <td><div id="clue-question"></div></td>
+                    </tr>
+                    <!--<tr><td>Airdate</td><td> <div id="clue-airdate"> </div></td></tr>-->
+                </table>
+
+
+
+
             </div>
 
+            <progress  style="display:none" id="primary"></progress>
+
         </main>
+
 
         <footer>
             <div class="team" data-team-number="0">

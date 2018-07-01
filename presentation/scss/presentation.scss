@@ -7,6 +7,11 @@ $big-shadow: 3px 3px 0px black,
 9px 9px 0px black,
 11px 11px 0px black;
 
+$slightly-smaller-shadow: 3px 3px 0px black,
+5px 5px 0px black,
+7px 7px 0px black,
+9px 9px 0px black;
+
 
 
 body {
@@ -41,7 +46,7 @@ $color-dollars: #e3a147;
 
 header {
 
-    border-bottom: 1px solid white;
+    /*border-bottom: 1px solid white;*/
     height: $height-header;
     font-family: swiss911;
     font-size: 60px;
@@ -93,6 +98,17 @@ main {
         /*}*/
     }
 
+    div#clue-answer {
+        text-shadow: $slightly-smaller-shadow;
+        /*text-align: center;*/
+        /*font-family: swiss911;*/
+        font-size: 60px;
+        /*background-color: rgba(255,255,255,0.1);*/
+        /*border-radius: 50px;*/
+        /*padding: 100px;*/
+        /*border: 1px solid white;*/
+    }
+
 }
 
 footer {
@@ -103,7 +119,7 @@ footer {
     position: absolute;
     bottom: 0px;
 
-    border-top: 1px solid white;
+    /*border-top: 1px solid white;*/
     height: $height-footer;
 
     div.team {

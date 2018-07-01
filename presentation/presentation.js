@@ -1,21 +1,22 @@
 
 //rename this to 'presentation'
-var divClue, divCategoryHeader, divDollarsHeader,
+var divQuestion, divCategoryInHeader, divDollarsInHeader,
         spinner, imgLogoJeopardy, footerTeams, divCategoryBig,
-        divDollarsBig, divPreQuestion;
+        divDollarsBig, divPreQuestion, divClueAnswer;
 $(document).ready(function () {
-    divClue = $("div#clue");
+    divQuestion = $("div#clue");
 
-    divCategoryHeader = $("header div#category");
-    divDollarsHeader = $("header div#dollars");
+    divCategoryInHeader = $("header div#category");
+    divDollarsInHeader = $("header div#dollars");
     divCategoryBig = $("div#category-big");
     divDollarsBig = $("div#dollars-big");
     divPreQuestion = $("div#pre-question");
+    divClueAnswer = $("div#clue-answer");
 
     imgLogoJeopardy = $("img#logo-jeopardy");
     fooerTeams = $("footer");
     spinner = $("div#spinner");
-    
+
     window.opener.handleDisplayWindowReady();
 });
 
@@ -34,11 +35,16 @@ function setVisibleTeams(isVisible) {
     return this;
 }
 
+function setVisibleClueAnswer(isVisible) {
+    divClueAnswer.css("display", isVisible ? "" : "none");
+    return this;
+}
+
 function showCategoryAndDollars(clueObj) {
-    divClue.css("display", "none");
-    divCategoryHeader.css("display", "none");
-    divDollarsHeader.css("display", "none");
-    
+    divQuestion.css("display", "none");
+    divCategoryInHeader.css("display", "none");
+    divDollarsInHeader.css("display", "none");
+
     divPreQuestion.css("display", "");
     divCategoryBig.html(clueObj.category.title);
     divDollarsBig.html("$" + clueObj.value);
@@ -47,12 +53,19 @@ function showCategoryAndDollars(clueObj) {
 
 function showClue(clueObj) {
     divPreQuestion.css("display", "none");
-    divClue.css("display","").html(clueObj.question);
-    divCategoryHeader.css("display","").html(clueObj.category.title);
-    divDollarsHeader.css("display","").html("$" + clueObj.value);
+    divQuestion.css("display", "").html(clueObj.question);
+    divCategoryInHeader.css("display", "").html(clueObj.category.title);
+    divDollarsInHeader.css("display", "").html("$" + clueObj.value);
 
 }
 
 function getTeamDiv(teamNumber) {
     return $('div[data-team-number="' + teamNumber + '"]');
+}
+
+function showTimeoutMessage(clueObj) {
+    divQuestion.css("display", "none");
+    divClueAnswer.css("display", "").html("Answer:<p><div style=\"font-weight:bold\">"
+            + clueObj.answer + "</div>");
+
 }
