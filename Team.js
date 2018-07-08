@@ -8,6 +8,9 @@ class Team {
         this.hasAnswered = false;
         this.isBuzzerOpen = false;
 
+        this.operatorProgress = null;
+        this.presentationCountdownDots = null;
+
         this.div = {
             operator: {
                 wrapper: null,
@@ -25,15 +28,17 @@ class Team {
 
     setDivPresentation(divPresentationWrapper) {
         this.div.presentation.wrapper = divPresentationWrapper;
-        this.div.presentation.dollars = divPresentationWrapper.find(".team-dollars").html("$" + this.dollars);
-        this.div.presentation.teamName = divPresentationWrapper.find(".team-name").html(this.teamName);
+        this.div.presentation.dollars = divPresentationWrapper.find("div.team-dollars").html("$" + this.dollars);
+        this.div.presentation.teamName = divPresentationWrapper.find("div.team-name").html(this.teamName);
+        this.presentationCountdownDots = divPresentationWrapper.find("table.countdown-dots");
     }
 
     setDivOperator(divOperatorWrapper) {
         this.div.operator.wrapper = divOperatorWrapper;
-        this.div.operator.teamName = divOperatorWrapper.find(".team-name").html(this.teamName);
-        this.div.operator.dollars = divOperatorWrapper.find(".team-dollars").html("$" + this.dollars);
-        this.div.operator.state = divOperatorWrapper.find(".team-state").html("Initialized.");
+        this.div.operator.teamName = divOperatorWrapper.find("div.team-name").html(this.teamName);
+        this.div.operator.dollars = divOperatorWrapper.find("div.team-dollars").html("$" + this.dollars);
+        this.div.operator.state = divOperatorWrapper.find("div.team-state").html("Initialized.");
+        this.operatorProgress = divOperatorWrapper.find("progress.time-left");
     }
 
     setTeamName(teamName) {
@@ -42,10 +47,10 @@ class Team {
         this.div.presentation.teamName.html(teamName);
     }
 
-    displayBuzz() {
-        this.div.operator.state.html("answering");
-        this.div.operator.wrapper.css("background-color", "orange");
-        this.div.presentation.wrapper.css("background-color", "orange");
+    setIsAnswering(isAnswering) {
+        this.div.operator.state.html(isAnswering ? "answering" : "");
+        this.div.operator.wrapper.css("background-color", isAnswering ? "orange" : "");
+        this.div.presentation.wrapper.css("background-color", isAnswering ? "orange" : "");
     }
 
     setBuzzerOpen(isOpen) {

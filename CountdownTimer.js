@@ -62,6 +62,12 @@ class CountdownTimer {
         this.textElement && this.textElement.html(this.remainingMs + ".0");
     }
 
+    cancel() {
+        this.isRunning = false;
+        window.clearInterval(this.intervalID);
+        this.progressElement && this.progressElement.css("display", "none");
+    }
+
     start() {
         if (!this.hasStarted) {
             this.onStart && this.onStart();
