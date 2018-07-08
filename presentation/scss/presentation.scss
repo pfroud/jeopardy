@@ -21,6 +21,13 @@ body {
     color: white;
 }
 
+#logo-jeopardy-shadow {
+    position: absolute;
+    z-index: -1;
+    filter: brightness(0) blur(2px) opacity(0.6);
+    transform: translateY(35px) scale(0.9);
+}
+
 div#spinner {
     border: 10px solid rgba(255, 255, 255, 0.2);
     border-left-color: white;

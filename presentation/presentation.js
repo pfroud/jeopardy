@@ -1,7 +1,7 @@
 
 //rename this to 'presentation'
 var divQuestion, divCategoryInHeader, divDollarsInHeader,
-        spinner, imgLogoJeopardy, footerTeams, divCategoryBig,
+        spinner, imgLogoJeopardy, imgLogoJeopardyShadow, footerTeams, divCategoryBig,
         divDollarsBig, divPreQuestion, divClueAnswer, divPaused;
 $(document).ready(function () {
     divQuestion = $("div#clue");
@@ -15,6 +15,7 @@ $(document).ready(function () {
     divPaused = $("div#paused");
 
     imgLogoJeopardy = $("img#logo-jeopardy");
+    imgLogoJeopardyShadow = $("img#logo-jeopardy-shadow");
     fooerTeams = $("footer");
     spinner = $("div#spinner");
 
@@ -32,6 +33,7 @@ function setVisibleSpinner(isVisible) {
 
 function setVisibleJeopardyLogo(isVisible) {
     imgLogoJeopardy.css("display", isVisible ? "" : "none");
+    imgLogoJeopardyShadow.css("display", isVisible ? "" : "none");
     return this;
 }
 
