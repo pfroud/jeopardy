@@ -39,7 +39,7 @@ footer {
   footer div.team {
     text-align: center;
     flex: 1; }
-    footer div.team div.team-name, footer div.team div.team-dollars, footer div.team div.team-state {
+    footer div.team div.team-name, footer div.team div.team-dollars, footer div.team div.team-state, footer div.team progress.time-left {
       /*! supress netbeans warning */ }
 
 /*# sourceMappingURL=operator.css.map */
