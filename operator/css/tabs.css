@@ -1,0 +1,33 @@
+body {
+  font-family: sans-serif; }
+
+div.section {
+  display: none;
+  padding-top: 20px;
+  border-top: 1px solid black; }
+
+label {
+  display: inline-block;
+  margin: 0 0 -1px;
+  padding: 15px 25px;
+  text-align: center;
+  color: #aaa;
+  border: 1px solid transparent; }
+  label:hover {
+    color: #666;
+    cursor: pointer; }
+
+input {
+  display: none; }
+  input:checked + label {
+    color: black;
+    border: 1px solid black;
+    border-bottom: 1px solid #fff;
+    border-radius: 4px 4px 0px 0px;
+    font-weight: bold; }
+    input:checked + label:hover {
+      cursor: default; }
+  input#tabSetup:checked ~ div#contentSetup, input#tabOperate:checked ~ div#contentOperate, input#tabAdmin:checked ~ div#contentAdmin {
+    display: block; }
+
+/*# sourceMappingURL=tabs.css.map */

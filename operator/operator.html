@@ -4,6 +4,7 @@
         <title>J operator</title>
         <meta charset="UTF-8">
         <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="css/tabs.css">
         <link rel="stylesheet" href="css/operator.css">
     </head>
     <body>
@@ -16,41 +17,74 @@
 
         <div id="paused"  style="display:none">&#9612;&#9612; PAUSED</div>
 
+
+        <header>
+            Jeopardy operator
+        </header>
+
         <main>
-            <button id="openDisplayWindow">open the presentation window</button>
 
-            <button id="showClue" disabled>get clue</button>
+            <input id="tabSetup" type="radio" name="tabs" checked>
+            <label for="tabSetup">Setup</label>
 
-            <div id="instructions">Click "open the presentation window" to begin.</div>
+            <input id="tabOperate" type="radio" name="tabs">
+            <label for="tabOperate">Operate</label>
 
+            <input id="tabAdmin" type="radio" name="tabs">
+            <label for="tabAdmin">Admin</label>
 
-
-            <div id="clue" style="display:none">
-                <table>
-                    <tr>
-                        <td>Category:</td>
-                        <td><div id="clue-category"></div></td>
-                    </tr><tr>
-                        <td>Value:</td>
-                        <td><div id="clue-dollars"></div></td>
-                    </tr><tr id="question">
-                        <td>Question:</td>
-                        <td><div id="clue-question"></div></td>
-                    </tr><tr id="answer" style="display:none">
-                        <td>Answer:</td>
-                        <td><div id="clue-answer"></div></td>
-                    </tr>
-                    <!--<tr><td>Airdate</td><td> <div id="clue-airdate"> </div></td></tr>-->
-                </table>
+            <!--<input id="tab4" type="radio" name="tabs">-->
+            <!--<label for="tab4">Organizer</label>-->
 
 
 
+            <div class="section" id="contentSetup">
+                This is the setup content.
+            </div>
+
+
+            <div class="section" id="contentOperate">
+
+                <button id="openDisplayWindow">open the presentation window</button>
+
+                <button id="showClue" disabled>get clue</button>
+
+                <div id="instructions">Click "open the presentation window" to begin.</div>
+
+
+
+                <div id="clue" style="display:none">
+                    <table>
+                        <tr>
+                            <td>Category:</td>
+                            <td><div id="clue-category"></div></td>
+                        </tr><tr>
+                            <td>Value:</td>
+                            <td><div id="clue-dollars"></div></td>
+                        </tr><tr id="question">
+                            <td>Question:</td>
+                            <td><div id="clue-question"></div></td>
+                        </tr><tr id="answer" style="display:none">
+                            <td>Answer:</td>
+                            <td><div id="clue-answer"></div></td>
+                        </tr>
+                        <!--<tr><td>Airdate</td><td> <div id="clue-airdate"> </div></td></tr>-->
+                    </table>
+
+
+
+
+                </div>
+
+                <progress  style="display:none" id="primary"></progress>
+
+                <button id="logClueToConsole">log clue to console</button>
 
             </div>
 
-            <progress  style="display:none" id="primary"></progress>
-            
-            <button id="logClueToConsole">log clue to console</button>
+            <div class="section" id="contentAdmin">
+                This is the admin content.
+            </div>
 
         </main>
 
