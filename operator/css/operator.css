@@ -46,4 +46,10 @@ footer {
     footer div.team div.team-name, footer div.team div.team-dollars, footer div.team div.team-state, footer div.team progress.time-left {
       /*! supress netbeans warning */ }
 
+span.key-shortcut-letter {
+  text-decoration: underline; }
+
+table#tableSettings input[type="number"] {
+  width: 60px; }
+
 /*# sourceMappingURL=operator.css.map */

@@ -9,20 +9,25 @@ div.section {
     padding-top: 20px;
     border-top: 1px solid black;
 }
-
-label {
+nav {
+    
+}
+label[for^="tab"] {
+    $color-inactive: #bbb;
+    
     display: inline-block;
     margin: 0 0 -1px;
     padding: 10px 20px;
     text-align: center;
-    color: #aaa;
-    border: 1px solid #aaa;
+    color: $color-inactive;
+    border: 1px solid $color-inactive;
     border-bottom: none;
     border-radius: 4px 4px 0px 0px;
 
     &:hover {
-        color: #666;
-        border-color: #666;
+        $color-inactive-hover: #777;
+        color: $color-inactive-hover;
+        border-color: $color-inactive-hover;
         cursor: pointer;
     }
 
@@ -31,18 +36,16 @@ label {
 input[type="radio"] {
     display: none;
 
-    &:checked {
-        & + label {
-            color: black; 
-            border: 1px solid black;
-            border-bottom: 1px solid #fff;
-            font-weight: bold;
+    &:checked  + label {
+        color: black; 
+        border: 1px solid black;
+        border-bottom: 1px solid #fff;
 
-            &:hover {
-                cursor: default;
-            }
+        &:hover {
+            cursor: default;
         }
     }
+
 
     &#tabSetup:checked ~ div#contentSetup,
         &#tabOperate:checked ~ div#contentOperate,

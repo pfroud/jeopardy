@@ -24,18 +24,17 @@
         -->
 
         <main>
+                <input id="tabSetup" type="radio" name="tabs" checked>
+                <label for="tabSetup"><span class="key-shortcut-letter">S</span>etup</label>
 
-            <input id="tabSetup" type="radio" name="tabs" checked>
-            <label for="tabSetup">Setup</label>
+                <input id="tabOperate" type="radio" name="tabs">
+                <label for="tabOperate"><span class="key-shortcut-letter">O</span>perate</label>
 
-            <input id="tabOperate" type="radio" name="tabs">
-            <label for="tabOperate">Operate</label>
+                <input id="tabAdmin" type="radio" name="tabs">
+                <label for="tabAdmin"><span class="key-shortcut-letter">A</span>dmin</label>
 
-            <input id="tabAdmin" type="radio" name="tabs">
-            <label for="tabAdmin">Admin</label>
-
-            <input id="tabSettings" type="radio" name="tabs">
-            <label for="tabSettings">Settings</label>
+                <input id="tabSettings" type="radio" name="tabs">
+                <label for="tabSettings">S<span class="key-shortcut-letter">e</span>ttings</label>
 
 
             <!-- ====================================================================== -->
@@ -57,11 +56,9 @@
             <!-- ====================================================================== -->
             <div class="section" id="contentOperate">
 
-                <button id="openDisplayWindow">open the presentation window</button>
+                <button id="showClue" disabled>start game</button>
 
-                <button id="showClue" disabled>get clue</button>
-
-                <div id="instructions">Click "open the presentation window" to begin.</div>
+                <div id="instructions">waiting for presentation window</div>
 
 
 
@@ -100,12 +97,12 @@
             <!-- ====================================================================== -->
             <div class="section" id="contentAdmin">
                 <button>show Jeopardy logo </button>
-                
+
                 <p><button>show cost</button></p>
-                
+
                 <p>Display teams: <button>show</button> <button>hide</button></p>
-                
-                
+
+
 
 
                 <p><button>override money</button></p>
@@ -113,14 +110,28 @@
 
             <!-- ====================================================================== -->
             <div class="section" id="contentSettings">
-                Display duration for category: <input type="number"> ms
 
-                <p>Question timeout: <input type="number"> ms</p>
-                <p>Display duration for answer: <input type="number"> ms</p>
-                <p>Answer timeout: <input type="number"> ms</p>
+                <table id="tableSettings">
+                    <tr>
+                        <td>Display duration for category:</td>
+                        <td><input type="number" id="displayDurationCategory"> ms</td>
+                    </tr>
+                    <tr>
+                        <td>Question timeout:</td>
+                        <td><input type="number" id="timeoutQuestion"> ms</td>
+                    </tr>
+                    <tr>
+                        <td>Display duration for answer:</td>
+                        <td><input type="number" id="displayDurationAnswer"> ms</td>
+                    </tr>
+                    <tr>
+                        <td>Answer timeout:</td>
+                        <td><input type="number" id="timeoutAnswer"> ms</td>
+                    </tr>
+                </table>
 
-                <p><input type="checkbox">Allow team to buzz multiple times in same question </p>
-                
+                <p><label><input type="checkbox">Allow team to buzz multiple times in same question </label></p>
+
                 <p><button>save settings</button></p>
 
             </div>
