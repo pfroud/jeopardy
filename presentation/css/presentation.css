@@ -118,4 +118,7 @@ footer {
         width: 14px;
         height: 8px; }
 
+img#cost-chart {
+  filter: drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black); }
+
 /*# sourceMappingURL=presentation.css.map */

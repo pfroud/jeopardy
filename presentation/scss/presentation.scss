@@ -1,13 +1,15 @@
 $height-header: 70px;
 $height-footer: 100px;
 
-$big-shadow: 3px 3px 0px black,
+$big-shadow:
+3px 3px 0px black,
 5px 5px 0px black,
 7px 7px 0px black,
 9px 9px 0px black,
 11px 11px 0px black;
 
-$slightly-smaller-shadow: 3px 3px 0px black,
+$slightly-smaller-shadow:
+3px 3px 0px black,
 5px 5px 0px black,
 7px 7px 0px black,
 9px 9px 0px black;
@@ -177,4 +179,22 @@ footer {
     }   
 
 
+}
+
+img#cost-chart {
+    $offset: 1px;
+    filter:
+        drop-shadow($offset $offset 0px black)
+        drop-shadow($offset $offset 0px black)
+        drop-shadow($offset $offset 0px black)
+        drop-shadow($offset $offset 0px black)
+        drop-shadow($offset $offset 0px black)
+        drop-shadow($offset $offset 0px black)
+        drop-shadow($offset $offset 0px black)
+        drop-shadow($offset $offset 0px black)
+        drop-shadow($offset $offset 0px black)
+        drop-shadow($offset $offset 0px black)
+        drop-shadow($offset $offset 0px black)
+        drop-shadow($offset $offset 0px black)
+        ;
 }
