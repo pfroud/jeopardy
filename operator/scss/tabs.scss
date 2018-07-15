@@ -13,19 +13,22 @@ div.section {
 label {
     display: inline-block;
     margin: 0 0 -1px;
-    padding: 15px 25px;
+    padding: 10px 20px;
     text-align: center;
     color: #aaa;
-    border: 1px solid transparent;
+    border: 1px solid #aaa;
+    border-bottom: none;
+    border-radius: 4px 4px 0px 0px;
 
     &:hover {
         color: #666;
+        border-color: #666;
         cursor: pointer;
     }
 
 }
 
-input {
+input[type="radio"] {
     display: none;
 
     &:checked {
@@ -33,7 +36,6 @@ input {
             color: black; 
             border: 1px solid black;
             border-bottom: 1px solid #fff;
-            border-radius: 4px 4px 0px 0px;
             font-weight: bold;
 
             &:hover {
@@ -44,7 +46,9 @@ input {
 
     &#tabSetup:checked ~ div#contentSetup,
         &#tabOperate:checked ~ div#contentOperate,
-        &#tabAdmin:checked ~ div#contentAdmin {
+        &#tabAdmin:checked ~ div#contentAdmin,
+        &#tabSettings:checked ~ div#contentSettings
+        {
         display: block;
     }
 

@@ -17,10 +17,11 @@
 
         <div id="paused"  style="display:none">&#9612;&#9612; PAUSED</div>
 
-
+        <!--
         <header>
             Jeopardy operator
         </header>
+        -->
 
         <main>
 
@@ -33,16 +34,27 @@
             <input id="tabAdmin" type="radio" name="tabs">
             <label for="tabAdmin">Admin</label>
 
-            <!--<input id="tab4" type="radio" name="tabs">-->
-            <!--<label for="tab4">Organizer</label>-->
+            <input id="tabSettings" type="radio" name="tabs">
+            <label for="tabSettings">Settings</label>
 
 
-
+            <!-- ====================================================================== -->
             <div class="section" id="contentSetup">
-                This is the setup content.
+
+                Team 0 name: <input type="text"><br>
+                Team 1 name: <input type="text"><br>
+                Team 2 name: <input type="text"><br>
+                Team 3 name: <input type="text"><br>
+                <button>save team names</button>
+
+
+                <p><button>start buzzer test</button></p>
+
+                <p><button>display rules</button></p>
             </div>
 
 
+            <!-- ====================================================================== -->
             <div class="section" id="contentOperate">
 
                 <button id="openDisplayWindow">open the presentation window</button>
@@ -76,14 +88,41 @@
 
                 </div>
 
-                <progress  style="display:none" id="primary"></progress>
+                <progress style="display:none" id="primary"></progress>
 
-                <button id="logClueToConsole">log clue to console</button>
+                <p><button id="logClueToConsole">log clue to console</button></p>
+
+                <p> <button>skip question</button></p>
+                <p><button>save game to localstorage</button></p>
 
             </div>
 
+            <!-- ====================================================================== -->
             <div class="section" id="contentAdmin">
-                This is the admin content.
+                <button>show Jeopardy logo </button>
+                
+                <p><button>show cost</button></p>
+                
+                <p>Display teams: <button>show</button> <button>hide</button></p>
+                
+                
+
+
+                <p><button>override money</button></p>
+            </div>
+
+            <!-- ====================================================================== -->
+            <div class="section" id="contentSettings">
+                Display duration for category: <input type="number"> ms
+
+                <p>Question timeout: <input type="number"> ms</p>
+                <p>Display duration for answer: <input type="number"> ms</p>
+                <p>Answer timeout: <input type="number"> ms</p>
+
+                <p><input type="checkbox">Allow team to buzz multiple times in same question </p>
+                
+                <p><button>save settings</button></p>
+
             </div>
 
         </main>

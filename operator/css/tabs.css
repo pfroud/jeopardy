@@ -9,25 +9,27 @@ div.section {
 label {
   display: inline-block;
   margin: 0 0 -1px;
-  padding: 15px 25px;
+  padding: 10px 20px;
   text-align: center;
   color: #aaa;
-  border: 1px solid transparent; }
+  border: 1px solid #aaa;
+  border-bottom: none;
+  border-radius: 4px 4px 0px 0px; }
   label:hover {
     color: #666;
+    border-color: #666;
     cursor: pointer; }
 
-input {
+input[type="radio"] {
   display: none; }
-  input:checked + label {
+  input[type="radio"]:checked + label {
     color: black;
     border: 1px solid black;
     border-bottom: 1px solid #fff;
-    border-radius: 4px 4px 0px 0px;
     font-weight: bold; }
-    input:checked + label:hover {
+    input[type="radio"]:checked + label:hover {
       cursor: default; }
-  input#tabSetup:checked ~ div#contentSetup, input#tabOperate:checked ~ div#contentOperate, input#tabAdmin:checked ~ div#contentAdmin {
+  input[type="radio"]#tabSetup:checked ~ div#contentSetup, input[type="radio"]#tabOperate:checked ~ div#contentOperate, input[type="radio"]#tabAdmin:checked ~ div#contentAdmin, input[type="radio"]#tabSettings:checked ~ div#contentSettings {
     display: block; }
 
 /*# sourceMappingURL=tabs.css.map */

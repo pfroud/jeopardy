@@ -6,7 +6,7 @@ const SETTINGS = new Settings();
 var operatorInstance = null;
 $(document).ready(function () {
 
-    operatorInstance = new Operator();
+//    operatorInstance = new Operator();
 
 });
 
