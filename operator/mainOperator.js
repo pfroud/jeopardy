@@ -18,7 +18,7 @@ function handleDisplayWindowReady() {
 
 function initKeyboardShortcuts() {
     const inputSetup = $("input#tabSetup");
-    const inputOperate = $("input#tabOperate");
+    const inputGame = $("input#tabGame");
     const inputAdmin = $("input#tabAdmin");
     const inputSettings = $("input#tabSettings");
 
@@ -27,16 +27,20 @@ function initKeyboardShortcuts() {
 //            return;
 //        }
 
-/*
- $('input[type="radio"]:checked').attr("id") 
- */
+        if (document.activeElement.tagName === "INPUT") {
+            return;
+        }
+
+        /*
+         $('input[type="radio"]:checked').attr("id") 
+         */
 
         switch (keyboardEvent.key.toLowerCase()) {
             case "s":
                 inputSetup.prop("checked", true);
                 break;
-            case "o":
-                inputOperate.prop("checked", true);
+            case "g":
+                inputGame.prop("checked", true);
                 break;
             case "a":
                 inputAdmin.prop("checked", true);

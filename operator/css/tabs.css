@@ -1,7 +1,4 @@
-body {
-  font-family: sans-serif; }
-
-div.section {
+div.tabContent {
   display: none;
   padding-top: 20px;
   border-top: 1px solid black; }
@@ -9,7 +6,7 @@ div.section {
 label[for^="tab"] {
   display: inline-block;
   margin: 0 0 -1px;
-  padding: 10px 20px;
+  padding: 10px 20px 6px;
   text-align: center;
   color: #bbb;
   border: 1px solid #bbb;
@@ -28,7 +25,7 @@ input[type="radio"] {
     border-bottom: 1px solid #fff; }
     input[type="radio"]:checked + label:hover {
       cursor: default; }
-  input[type="radio"]#tabSetup:checked ~ div#contentSetup, input[type="radio"]#tabOperate:checked ~ div#contentOperate, input[type="radio"]#tabAdmin:checked ~ div#contentAdmin, input[type="radio"]#tabSettings:checked ~ div#contentSettings {
+  input[type="radio"]#tabSetup:checked ~ div#contentSetup, input[type="radio"]#tabGame:checked ~ div#contentGame, input[type="radio"]#tabAdmin:checked ~ div#contentAdmin, input[type="radio"]#tabSettings:checked ~ div#contentSettings {
     display: block; }
 
 /*# sourceMappingURL=tabs.css.map */

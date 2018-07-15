@@ -1,5 +1,7 @@
 /* global SETTINGS */
 
+const NUM_TEAMS = 4;
+
 class Operator {
 
     constructor() {
@@ -21,7 +23,7 @@ class Operator {
         this.currentClueObj = null;
 
 
-        this.teamArray = new Array(4);
+        this.teamArray = new Array(NUM_TEAMS);
         this.hasInitializedTeams = false;
 
         this.isClueQuestionAnswerable = false;
@@ -68,6 +70,17 @@ class Operator {
             console.log(this.currentClueObj);
         });
 
+        var inputTeamNames = new Array(NUM_TEAMS);
+        for (var i = 0; i < NUM_TEAMS; i++) {
+            inputTeamNames[i] = $("input#teamName" + i);
+        }
+        $("button#saveTeamNames").click(() => {
+            for (var i = 0; i < NUM_TEAMS; i++) {
+                this.teamArray[i].setTeamName(inputTeamNames[i].prop("value"));
+            }
+            this.windowPresentation.setVisibleTeams(true);
+        });
+
         this.buttonShowClue = $("button#showClue").click(() => {
             this.getClue();
         });
@@ -79,7 +92,7 @@ class Operator {
             return;
         }
 
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i < NUM_TEAMS; i++) {
             var t = this.teamArray[i] = new Team(i);
             t.setDivOperator($('div[data-team-number="' + i + '"]'));
             t.setDivPresentation(this.windowPresentation.getTeamDiv(i));

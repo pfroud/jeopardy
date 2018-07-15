@@ -1,5 +1,6 @@
 body {
     font-family: sans-serif;
+    overflow-x: hidden;
 }
 
 header {
@@ -46,7 +47,7 @@ footer {
     align-items: stretch;
     width: 100%;
     position: absolute;
-    bottom: 0px;
+    bottom: 5px;
 
     border-top: 1px solid white;
 

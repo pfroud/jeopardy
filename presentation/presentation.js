@@ -1,8 +1,9 @@
+"use strict";
 
-//rename this to 'presentation'
 var divQuestion, divCategoryInHeader, divDollarsInHeader,
         spinner, imgLogoJeopardy, imgLogoJeopardyShadow, footerTeams, divCategoryBig,
         divDollarsBig, divPreQuestion, divClueAnswer, divPaused;
+
 $(document).ready(function () {
     divQuestion = $("div#clue");
 
@@ -16,7 +17,7 @@ $(document).ready(function () {
 
     imgLogoJeopardy = $("img#logo-jeopardy");
     imgLogoJeopardyShadow = $("img#logo-jeopardy-shadow");
-    fooerTeams = $("footer");
+    footerTeams = $("footer");
     spinner = $("div#spinner");
 
     if (window.opener) {

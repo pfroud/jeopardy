@@ -40,7 +40,7 @@ class Team {
         this.div.operator.state = divOperatorWrapper.find("div.team-state").html("Initialized.");
         this.operatorProgress = divOperatorWrapper.find("progress.time-left");
     }
-
+    
     setTeamName(teamName) {
         this.teamName = teamName;
         this.div.operator.teamName.html(teamName);

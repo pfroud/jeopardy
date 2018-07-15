@@ -27,8 +27,8 @@
                 <input id="tabSetup" type="radio" name="tabs" checked>
                 <label for="tabSetup"><span class="key-shortcut-letter">S</span>etup</label>
 
-                <input id="tabOperate" type="radio" name="tabs">
-                <label for="tabOperate"><span class="key-shortcut-letter">O</span>perate</label>
+                <input id="tabGame" type="radio" name="tabs">
+                <label for="tabGame"><span class="key-shortcut-letter">G</span>ame</label>
 
                 <input id="tabAdmin" type="radio" name="tabs">
                 <label for="tabAdmin"><span class="key-shortcut-letter">A</span>dmin</label>
@@ -38,13 +38,13 @@
 
 
             <!-- ====================================================================== -->
-            <div class="section" id="contentSetup">
+            <div class="tabContent" id="contentSetup">
 
-                Team 0 name: <input type="text"><br>
-                Team 1 name: <input type="text"><br>
-                Team 2 name: <input type="text"><br>
-                Team 3 name: <input type="text"><br>
-                <button>save team names</button>
+                Team 0 name: <input type="text" id="teamName0"><br>
+                Team 1 name: <input type="text" id="teamName1"><br>
+                Team 2 name: <input type="text" id="teamName2"><br>
+                Team 3 name: <input type="text" id="teamName3"><br>
+                <button id="saveTeamNames">save team names</button>
 
 
                 <p><button>start buzzer test</button></p>
@@ -54,7 +54,7 @@
 
 
             <!-- ====================================================================== -->
-            <div class="section" id="contentOperate">
+            <div class="tabContent" id="contentGame">
 
                 <button id="showClue" disabled>start game</button>
 
@@ -95,21 +95,18 @@
             </div>
 
             <!-- ====================================================================== -->
-            <div class="section" id="contentAdmin">
+            <div class="tabContent" id="contentAdmin">
                 <button>show Jeopardy logo </button>
 
-                <p><button>show cost</button></p>
+                <p><button>show event cost</button></p>
 
                 <p>Display teams: <button>show</button> <button>hide</button></p>
 
-
-
-
-                <p><button>override money</button></p>
+                <p><a href="#">Override...</a></p>
             </div>
 
             <!-- ====================================================================== -->
-            <div class="section" id="contentSettings">
+            <div class="tabContent" id="contentSettings">
 
                 <table id="tableSettings">
                     <tr>

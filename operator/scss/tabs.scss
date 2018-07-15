@@ -1,23 +1,17 @@
 // https://codepen.io/oknoblich/pen/tfjFl
 
-body {
-    font-family: sans-serif;
-}
-
-div.section {
+div.tabContent {
     display: none;
     padding-top: 20px;
     border-top: 1px solid black;
 }
-nav {
-    
-}
+
 label[for^="tab"] {
     $color-inactive: #bbb;
     
     display: inline-block;
     margin: 0 0 -1px;
-    padding: 10px 20px;
+    padding: 10px 20px 6px;
     text-align: center;
     color: $color-inactive;
     border: 1px solid $color-inactive;
@@ -48,7 +42,7 @@ input[type="radio"] {
 
 
     &#tabSetup:checked ~ div#contentSetup,
-        &#tabOperate:checked ~ div#contentOperate,
+        &#tabGame:checked ~ div#contentGame,
         &#tabAdmin:checked ~ div#contentAdmin,
         &#tabSettings:checked ~ div#contentSettings
         {
