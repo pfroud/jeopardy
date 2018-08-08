@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="css/presentation.css">
     </head>
     <body>
-        <script src="../jquery-3.3.1.min.js"></script>
+        <script src="../lib/jquery-3.3.1.min.js"></script>
         <script src="presentation.js"></script>
 
         <header>
@@ -18,28 +18,45 @@
         </header>
 
         <div id="paused" style="display:none">
+            <!-- https://stackoverflow.com/a/22885848 -->
             &#9612;&#9612; PAUSED
         </div>
 
         <main>
-
-            <!--<img id="cost-chart" src="img/cost-chart/cost-chart.svg" alt="cost chart">-->
-            
-            <div id="pre-question">
-                <div id="category-big"></div>
-                <div id="dollars-big"></div>
+            <!-- exactly one page is displayed at a time -->
+            <!-- TODO rename these slides-->
+            <div class="page" id="pageJeopardyLogo">
+                <img id="logo-jeopardy" src="img/j-logo.png" alt="Jeopardy logo">
+                <img id="logo-jeopardy-shadow" src="img/j-logo.png" alt="Jeopardy logo shadow">
             </div>
 
+            <div class="page" id="pageGameRules">
+                <p>these are the game rules.</p>
+            </div>
 
+            <div class="page" id="pageSpinner">
+                <div id="spinner"></div>
+            </div>
 
-            <img id="logo-jeopardy" src="img/j-logo.png" alt="Jeopardy logo">
-            <img id="logo-jeopardy-shadow" src="img/j-logo.png" alt="Jeopardy logo shadow">
+            <div class="page" id="pagePreQuestion">
+                <div id="pre-question">
+                    <div id="category-big"></div>
+                    <div id="dollars-big"></div>
+                </div>
+            </div>
 
+            <div class="page" id="pageClueQuestion">
+                <div id="clue"></div>
+            </div>
 
-            <div id="spinner" style="display:none"></div>
-            <div id="clue"></div>
+            <div class="page" id="pageClueAnswer">
+                <div id="clue-answer"></div>
+            </div>
 
-            <div id="clue-answer" style="display:none"></div>
+            <div class="page" id="pageEventCostChart">
+                <img id="cost-chart" src="img/cost-chart/cost-chart.svg" alt="cost chart">
+            </div>
+
         </main>
 
 

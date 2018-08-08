@@ -1,83 +1,88 @@
-"use strict";
-
-var divQuestion, divCategoryInHeader, divDollarsInHeader,
-        spinner, imgLogoJeopardy, imgLogoJeopardyShadow, footerTeams, divCategoryBig,
-        divDollarsBig, divPreQuestion, divClueAnswer, divPaused;
-
 $(document).ready(function () {
-    divQuestion = $("div#clue");
-
-    divCategoryInHeader = $("header div#category");
-    divDollarsInHeader = $("header div#dollars");
-    divCategoryBig = $("div#category-big");
-    divDollarsBig = $("div#dollars-big");
-    divPreQuestion = $("div#pre-question");
-    divClueAnswer = $("div#clue-answer");
-    divPaused = $("div#paused");
-
-    imgLogoJeopardy = $("img#logo-jeopardy");
-    imgLogoJeopardyShadow = $("img#logo-jeopardy-shadow");
-    footerTeams = $("footer");
-    spinner = $("div#spinner");
-
-    if (window.opener) {
-        window.opener.handleDisplayWindowReady();
-    } else {
-        console.warn("no window.opener");
-    }
+    new Presentation();
 });
 
-function setVisibleSpinner(isVisible) {
-    spinner.css("display", isVisible ? "" : "none");
-    return this;
-}
+// https://stackoverflow.com/questions/7012364/jquery-show-only-one-div-at-any-time
 
-function setVisibleJeopardyLogo(isVisible) {
-    imgLogoJeopardy.css("display", isVisible ? "" : "none");
-    imgLogoJeopardyShadow.css("display", isVisible ? "" : "none");
-    return this;
-}
+class Presentation {
 
-function setVisibleTeams(isVisible) {
-    footerTeams.css("display", isVisible ? "" : "none");
-    return this;
-}
+    constructor() {
 
-function setVisibleClueAnswer(isVisible) {
-    divClueAnswer.css("display", isVisible ? "" : "none");
-    return this;
-}
+        this.divQuestion = $("div#clue");
 
-function showCategoryAndDollars(clueObj) {
-    divQuestion.css("display", "none");
-    divCategoryInHeader.css("display", "none");
-    divDollarsInHeader.css("display", "none");
+        this.divCategoryInHeader = $("header div#category");
+        this.divDollarsInHeader = $("header div#dollars");
+        this.divCategoryBig = $("div#category-big");
+        this.divDollarsBig = $("div#dollars-big");
+        this.divPreQuestion = $("div#pre-question");
+        this.divClueAnswer = $("div#clue-answer");
+        this.divPaused = $("div#paused");
 
-    divPreQuestion.css("display", "");
-    divCategoryBig.html(clueObj.category.title);
-    divDollarsBig.html("$" + clueObj.value);
-}
+        this.imgLogoJeopardy = $("img#logo-jeopardy");
+        this.imgLogoJeopardyShadow = $("img#logo-jeopardy-shadow");
+        this.footerTeams = $("footer");
+        this.spinner = $("div#spinner");
+
+        if (window.opener) {
+            window.opener.handleDisplayWindowReady(this);
+        } else {
+            console.warn("no window.opener");
+        }
+    }
+
+    setVisibleSpinner(isVisible) {
+        this.spinner.css("display", isVisible ? "" : "none");
+        return this;
+    }
+
+    setVisibleJeopardyLogo(isVisible) {
+        this.imgLogoJeopardy.css("display", isVisible ? "" : "none");
+        this.imgLogoJeopardyShadow.css("display", isVisible ? "" : "none");
+        return this;
+    }
+
+    setVisibleTeams(isVisible) {
+        this.footerTeams.css("display", isVisible ? "" : "none");
+        return this;
+    }
+
+    setVisibleClueAnswer(isVisible) {
+        this.divClueAnswer.css("display", isVisible ? "" : "none");
+        return this;
+    }
+
+    showCategoryAndDollars(clueObj) {
+        this.divQuestion.css("display", "none");
+        this.divCategoryInHeader.css("display", "none");
+        this.divDollarsInHeader.css("display", "none");
 
 
-function showClue(clueObj) {
-    divPreQuestion.css("display", "none");
-    divQuestion.css("display", "").html(clueObj.question);
-    divCategoryInHeader.css("display", "").html(clueObj.category.title);
-    divDollarsInHeader.css("display", "").html("$" + clueObj.value);
+        this.divPreQuestion.css("display", "");
+        this.divCategoryBig.html(clueObj.category.title);
+        this.divDollarsBig.html("$" + clueObj.value);
+    }
 
-}
+    showClue(clueObj) {
+        this.divPreQuestion.css("display", "none");
+        this.divQuestion.css("display", "").html(clueObj.question);
+        this.divCategoryInHeader.css("display", "").html(clueObj.category.title);
+        this.divDollarsInHeader.css("display", "").html("$" + clueObj.value);
 
-function getTeamDiv(teamNumber) {
-    return $('div[data-team-number="' + teamNumber + '"]');
-}
+    }
 
-function showTimeoutMessage(clueObj) {
-    divQuestion.css("display", "none");
-    divClueAnswer.css("display", "").html("Answer:<p><div style=\"font-weight:bold\">"
-            + clueObj.answer + "</div>");
+    getTeamDiv(teamNumber) {
+        return $('div[data-team-number="' + teamNumber + '"]');
+    }
 
-}
+    showTimeoutMessage(clueObj) {
+        this.divQuestion.css("display", "none");
+        this.divClueAnswer.css("display", "").html(
+                "Answer:<p><div style=\"font-weight:bold\">"
+                + clueObj.answer + "</div>");
 
-function setPausedVisible(isVisible) {
-    this.divPaused.css("display", isVisible ? "" : "none");
+    }
+
+    setPausedVisible(isVisible) {
+        this.divPaused.css("display", isVisible ? "" : "none");
+    }
 }

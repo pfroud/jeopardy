@@ -38,7 +38,6 @@ div#paused {
   filter: drop-shadow(10px 13px rgba(0, 0, 0, 0.4)); }
 
 header {
-  /*border-bottom: 1px solid white;*/
   height: 70px;
   font-family: swiss911;
   font-size: 60px;
@@ -72,19 +71,10 @@ main {
     font-family: korinna;
     font-size: 80px;
     text-transform: uppercase;
-    text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black;
-    /*span.this {*/
-    /*font-family: korinna-bold;*/
-    /*}*/ }
+    text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black; }
   main div#clue-answer {
     text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black;
-    /*text-align: center;*/
-    /*font-family: swiss911;*/
-    font-size: 60px;
-    /*background-color: rgba(255,255,255,0.1);*/
-    /*border-radius: 50px;*/
-    /*padding: 100px;*/
-    /*border: 1px solid white;*/ }
+    font-size: 60px; }
 
 footer {
   display: flex;
@@ -118,5 +108,8 @@ footer {
 
 img#cost-chart {
   filter: drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black); }
+
+div.page {
+  display: none; }
 
 /*# sourceMappingURL=presentation.css.map */
