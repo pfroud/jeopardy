@@ -65,9 +65,12 @@ class Operator {
             this.windowPresentation = window.open("../presentation/presentation.html", "windowPresentation");
         });
 
-
         $("button#logClueToConsole").click(() => {
             console.log(this.currentClueObj);
+        });
+        
+        $("button#showRules").click(() => {
+            this.windowPresentation.showRules();
         });
 
         var inputTeamNames = new Array(NUM_TEAMS);
