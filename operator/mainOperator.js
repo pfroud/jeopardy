@@ -1,20 +1,12 @@
-
-
-
-
 const SETTINGS = new Settings();
 
-var operatorInstance = null;
+var operatorInstance;
 $(document).ready(function () {
     if (window.location.search.length < 1) {
         operatorInstance = new Operator();
     }
     initKeyboardShortcuts();
 });
-
-function handleDisplayWindowReady() {
-    operatorInstance.initTeams();
-}
 
 function initKeyboardShortcuts() {
     const inputSetup = $("input#tabSetup");
@@ -31,10 +23,6 @@ function initKeyboardShortcuts() {
             return;
         }
 
-        /*
-         $('input[type="radio"]:checked').attr("id") 
-         */
-
         switch (keyboardEvent.key.toLowerCase()) {
             case "s":
                 inputSetup.prop("checked", true);
@@ -47,7 +35,7 @@ function initKeyboardShortcuts() {
                 break;
             case "e":
                 inputSettings.prop("checked", true);
-//                keyboardEvent.preventDefault(); //chrome opens its menu
+//                keyboardEvent.preventDefault(); //chrome opens its menu if holding Alt
                 break;
 
         }

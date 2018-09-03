@@ -14,6 +14,7 @@ $slightly-smaller-shadow:
 7px 7px 0px black,
 9px 9px 0px black;
 
+$color-dollars: #e3a147;
 
 
 body {
@@ -23,7 +24,7 @@ body {
     color: white;
 }
 
-#logo-jeopardy-shadow {
+img#logo-jeopardy-shadow {
     position: absolute;
     z-index: -1;
     filter: brightness(0) blur(2px) opacity(0.6);
@@ -48,9 +49,6 @@ div#spinner {
         transform: rotate(360deg);
     }
 }
-
-
-$color-dollars: #e3a147;
 
 
 div#paused {
@@ -185,6 +183,6 @@ img#cost-chart {
         ;
 }
 
-div.page {
+div.slide {
     display: none;
 }

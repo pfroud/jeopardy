@@ -4,7 +4,7 @@ body {
   background-image: url("../img/background.jpg");
   color: white; }
 
-#logo-jeopardy-shadow {
+img#logo-jeopardy-shadow {
   position: absolute;
   z-index: -1;
   filter: brightness(0) blur(2px) opacity(0.6);
@@ -109,7 +109,7 @@ footer {
 img#cost-chart {
   filter: drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black); }
 
-div.page {
+div.slide {
   display: none; }
 
 /*# sourceMappingURL=presentation.css.map */

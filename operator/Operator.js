@@ -5,7 +5,7 @@ const NUM_TEAMS = 4;
 class Operator {
 
     constructor() {
-        this.windowPresentation = window.open("../presentation/presentation.html", "windowPresentation");
+        this.presentationInstance = null;
         this.divClueWrapper = $("div#clue");
         this.divClueQuestion = $("div#clue-question");
         this.divClueDollars = $("div#clue-dollars");
@@ -37,6 +37,7 @@ class Operator {
 
         this.initKeyboardListeners();
         this.initMouseListeners();
+        window.open("../presentation/presentation.html", "windowPresentation");
     }
 
     initKeyboardListeners() {
@@ -61,16 +62,13 @@ class Operator {
     }
 
     initMouseListeners() {
-        $("button#openDisplayWindow").click(() => {
-            this.windowPresentation = window.open("../presentation/presentation.html", "windowPresentation");
-        });
-
         $("button#logClueToConsole").click(() => {
             console.log(this.currentClueObj);
         });
-        
+
         $("button#showRules").click(() => {
-            this.windowPresentation.showRules();
+            console.warn("show rules button not implemented");
+//            this.windowPresentation.showRules();
         });
 
         var inputTeamNames = new Array(NUM_TEAMS);
@@ -81,7 +79,8 @@ class Operator {
             for (var i = 0; i < NUM_TEAMS; i++) {
                 this.teamArray[i].setTeamName(inputTeamNames[i].prop("value"));
             }
-            this.windowPresentation.setVisibleTeams(true);
+
+            this.presentationInstance.setVisibleTeams(true);
         });
 
         this.buttonShowClue = $("button#showClue").click(() => {
@@ -89,16 +88,21 @@ class Operator {
         });
     }
 
+    handlePresentationReady(presentationInstance) {
+        this.presentationInstance = presentationInstance;
+        this.initTeams();
+    }
+
     initTeams() {
-        if (!this.windowPresentation) {
-            console.warn("can't init teams because no presentation window");
+        if (!this.presentationInstance) {
+            console.warn("can't init teams because no Presentation instance");
             return;
         }
 
         for (var i = 0; i < NUM_TEAMS; i++) {
             var t = this.teamArray[i] = new Team(i);
             t.setDivOperator($('div[data-team-number="' + i + '"]'));
-            t.setDivPresentation(this.windowPresentation.getTeamDiv(i));
+            t.setDivPresentation(this.presentationInstance.getTeamDiv(i));
         }
         this.hasInitializedTeams = true;
         this.buttonShowClue.prop("disabled", false);
@@ -152,15 +156,11 @@ class Operator {
         this.buttonShowClue.blur();
         this.trQuestion.css("display", "none");
 
-        this.windowPresentation
-                .setVisibleJeopardyLogo(false)
-                .setVisibleSpinner(true)
-                .setVisibleClueAnswer(false);
+        this.presentationInstance.showSlideSpinner();
 
         this.setAllBuzzersIsOpen(false);
 
         $.getJSON("http://jservice.io/api/random", response => {
-            this.windowPresentation.setVisibleSpinner(false);
 
             if (response.length < 1) {
                 console.warn("respones from jservice.io is empty");
@@ -181,7 +181,9 @@ class Operator {
             this.divClueDollars.html("$" + clueObj.value);
 //            this.divClueAirdate.html("Airdate: " + clueObj.airdate);
 
-            this.windowPresentation.showCategoryAndDollars(clueObj);
+
+            this.presentationInstance.setClueObj(clueObj);
+            this.presentationInstance.showSlidePreQuestion();
 
             this.divInstructions.html("read aloud the category and dollar value.");
 
@@ -207,7 +209,7 @@ class Operator {
     showClueQuestion(clueObj) {
 
         this.currentCountdownTimer = null;
-        this.windowPresentation.showClue(clueObj);
+        this.presentationInstance.showSlideClueQuestion();
 
 
         this.divInstructions.html("read aloud the clue. buzzers open when you press space.");
@@ -265,7 +267,7 @@ class Operator {
         this.setAllBuzzersIsOpen(false);
         this.isClueQuestionAnswerable = false;
         this.currentCountdownTimer = null;
-        this.windowPresentation.showTimeoutMessage(this.currentClueObj);
+        this.presentationInstance.showTimeoutMessage(this.currentClueObj); //TODO maybe make this a slide
 
 
         var countdownNextClue = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationAnswer);
@@ -283,7 +285,7 @@ class Operator {
     setIsPaused(isPaused) {
         this.isPaused = isPaused;
         this.divPaused.css("display", isPaused ? "" : "none");
-        this.windowPresentation.setPausedVisible(isPaused);
+        this.presentationInstance.setPausedVisible(isPaused);
     }
 
 }
