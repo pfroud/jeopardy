@@ -150,7 +150,7 @@ class Operator {
         }
 
         this.buttonShowClue.blur();
-        this.trQuestion.css("display", "none");
+        this.trQuestion.hide();
         this.divInstructions.html("Loading clue...");
 
         this.presentationInstance.showSlideSpinner();
@@ -172,10 +172,10 @@ class Operator {
 
             this.currentClueObj = clueObj;
 
-            this.divClueWrapper.css("display", "");
+            this.divClueWrapper.show();
             this.divClueCategory.html(clueObj.category.title);
             this.divClueDollars.html("$" + clueObj.value);
-            this.trAnswer.css("display", "none");
+            this.trAnswer.hide();
 
 
 
@@ -211,8 +211,8 @@ class Operator {
         this.divInstructions.html("read aloud the clue. buzzers open when you press space.");
 
         this.divClueQuestion.html(getClueQuestionHtml(clueObj));
-        this.trQuestion.css("display", "");
-        this.trAnswer.css("display", "none");
+        this.trQuestion.show();
+        this.trAnswer.hide();
 
         this.isClueQuestionBeingRead = true;
         // then wait for spacebar to be pressed. that calls handleDoneReadingClueQuestion()
@@ -245,7 +245,7 @@ class Operator {
         this.isClueQuestionAnswerable = true;
         this.setAllBuzzersIsOpen(true);
 
-        this.trAnswer.css("display", "");
+        this.trAnswer.show();
         this.divClueAnswer.html(this.currentClueObj.answer);
         this.divInstructions.html("wait for people to answer.");
 
@@ -280,7 +280,7 @@ class Operator {
 
     setPaused(isPaused) {
         this.isPaused = isPaused;
-        this.divPaused.css("display", isPaused ? "" : "none");
+        this.divPaused.toggle(isPaused);
         this.presentationInstance.setPaused(isPaused);
     }
 

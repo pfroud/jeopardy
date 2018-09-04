@@ -22,7 +22,7 @@ body {
     background-color: #0b2191;
     background-image: url("../img/background.jpg");
     color: white;
-    
+
     overflow: hidden;
 }
 
@@ -34,7 +34,7 @@ div#slideJeopardyLogo{
 
     img {
         position: absolute;
-        
+
         // https://stackoverflow.com/a/17624161
         left: 0;
         right: 0;
@@ -129,7 +129,7 @@ main {
         font-size: 80px;
         text-transform: uppercase;
         text-shadow: $big-shadow;
-
+        word-spacing: 10px;
     }
 
     div#clue-answer {

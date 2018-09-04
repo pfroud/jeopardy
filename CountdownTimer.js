@@ -7,11 +7,20 @@ class CountdownTimer {
             console.error("duration is required");
             return;
         }
+
         this.intervalMs = 100;
+
+        if (durationMs % intervalMs !== 0) {
+            console.warn("CountdownTimer implementation is pretty shitty and expects duration to be multiple of 100");
+        }
+
         this.durationMs = durationMs;
         this.remainingMs = durationMs;
-        this.intervalID = null;
+
+        this.intervalID = null; //from window.setInterval()
+
         this.hasStarted = false;
+        this.hasFinished = false;
         this.isPaused = false;
 
         // events
@@ -28,15 +37,6 @@ class CountdownTimer {
         this.dotsElement = null;
     }
 
-    pause() {
-        if (this.hasStarted && !this.isPaused) {
-            window.clearInterval(this.intervalID);
-            this.onPause && this.onPause();
-            this.isPaused = true;
-            this.progressElement && this.progressElement.addClass("paused");
-        }
-    }
-
     togglePaused() {
         if (this.isPaused) {
             this.resume();
@@ -45,11 +45,20 @@ class CountdownTimer {
         }
     }
 
+    pause() {
+        if (this.hasStarted && !this.hasFinished && !this.isPaused) {
+            window.clearInterval(this.intervalID); //actually pauses at next 100ms interval
+            this.onPause && this.onPause();
+            this.isPaused = true;
+            this.progressElement && this.progressElement.addClass("paused");
+        }
+    }
+
     resume() {
-        if (this.hasStarted && this.isPaused) {
+        if (this.hasStarted && !this.hasFinished && this.isPaused) {
+            this.intervalID = window.setInterval(this._intervalHandler, this.intervalMs, this);
             this.onResume && this.onResume();
             this.isPaused = false;
-            this.intervalID = window.setInterval(this._intervalHandler, this.intervalMs, this);
             this.progressElement && this.progressElement.removeClass("paused");
         }
     }
@@ -57,37 +66,31 @@ class CountdownTimer {
     reset() {
         this.onReset && this.onReset();
         this.hasStarted = false;
+        this.hasFinished = false;
         this.remainingMs = this.durationMs;
         window.clearInterval(this.intervalID);
         this.textElement && this.textElement.html(this.remainingMs + ".0");
     }
 
-    cancel() {
-        this.isRunning = false;
-        window.clearInterval(this.intervalID);
-        this.progressElement && this.progressElement.css("display", "none");
-    }
-
     start() {
-        if (!this.hasStarted) {
+        if (!this.hasStarted && !this.hasFinished) {
             this.onStart && this.onStart();
             this.hasStarted = true;
 
             if (this.progressElement) {
                 var numTicks = this.durationMs * this.intervalMs;
-                this.progressElement.attr("max", numTicks).attr("value", numTicks).css("display", "");
+                this.progressElement.attr("max", numTicks).attr("value", numTicks).show();
             }
-
-            this.intervalID = window.setInterval(this._intervalHandler, this.intervalMs, this);
 
             if (this.dotsElement) {
                 var tds = this.dotsElement.find("td");
-                var len = tds.length;
-                if (len !== len) {
-                    console.warn("found " + len + "dots element(s), expected exactly 9");
+                if (tds.length !== 9) {
+                    console.warn("found " + tds.length + "dot(s) element(s), expected exactly 9");
                 }
                 tds.css("background-color", "red");
             }
+
+            this.intervalID = window.setInterval(this._intervalHandler, this.intervalMs, this);
         }
     }
 
@@ -117,14 +120,11 @@ class CountdownTimer {
     }
 
     _finish() {
-        this.isRunning = false;
+        this.hasFinished = true;
         this.textElement && this.textElement.html("done");
         window.clearInterval(this.intervalID);
-        this.progressElement && this.progressElement.css("display", "none");
-
+        this.progressElement && this.progressElement.hide();
         this.onFinished && this.onFinished();
-
-
     }
 
 }

@@ -82,7 +82,8 @@ main {
     font-family: korinna;
     font-size: 80px;
     text-transform: uppercase;
-    text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black; }
+    text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black;
+    word-spacing: 10px; }
   main div#clue-answer {
     text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black;
     font-size: 60px; }
