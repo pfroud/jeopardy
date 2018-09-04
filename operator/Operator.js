@@ -64,10 +64,10 @@ class Operator {
             console.log(this.currentClueObj);
         });
 
-        $("button#showRules").click(() => {
-            console.warn("show rules button not implemented");
+//        $("button#showRules").click(() => {
+//            console.warn("show rules button not implemented");
 //            this.windowPresentation.showRules();
-        });
+//        });
 
         this.buttonShowClue = $("button#showClue").click(() => {
             this.getClue();
@@ -82,7 +82,7 @@ class Operator {
                 this.teamArray[i].setTeamName(inputTeamNames[i].prop("value"));
             }
 
-            this.presentationInstance.setVisibleTeams(true);
+            this.presentationInstance.setTeamsVisible(true);
         });
     }
 
@@ -151,55 +151,55 @@ class Operator {
 
         this.buttonShowClue.blur();
         this.trQuestion.css("display", "none");
+        this.divInstructions.html("Loading clue...");
 
         this.presentationInstance.showSlideSpinner();
 
         this.setAllBuzzersIsOpen(false);
 
-        $.getJSON("http://jservice.io/api/random", handleClueLoaded);
-    }
+        $.getJSON("http://jservice.io/api/random", response => {
+            if (response.length < 1) {
+                console.warn("respones from jservice.io is empty");
+                return;
+            }
 
-    handleClueLoaded(response) {
-        if (response.length < 1) {
-            console.warn("respones from jservice.io is empty");
-            return;
-        }
+            var clueObj = response[0];
 
-        var clueObj = response[0];
+            if (!isClueValid(clueObj)) {
+                console.warn("clue is messed up");
+                return;
+            }
 
-        if (!isClueValid(clueObj)) {
-            console.warn("clue is messed up");
-            return;
-        }
+            this.currentClueObj = clueObj;
 
-        this.currentClueObj = clueObj;
-
-        this.divClueWrapper.css("display", "");
-        this.divClueCategory.html(clueObj.category.title);
-        this.divClueDollars.html("$" + clueObj.value);
-//            this.divClueAirdate.html("Airdate: " + clueObj.airdate);
+            this.divClueWrapper.css("display", "");
+            this.divClueCategory.html(clueObj.category.title);
+            this.divClueDollars.html("$" + clueObj.value);
+            this.trAnswer.css("display", "none");
 
 
-        this.presentationInstance.setClueObj(clueObj);
-        this.presentationInstance.showSlidePreQuestion();
 
-        this.divInstructions.html("read aloud the category and dollar value.");
+            this.presentationInstance.setClueObj(clueObj);
+            this.presentationInstance.showSlidePreQuestion();
 
-        var countdownShowCategory = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationCategory);
-        countdownShowCategory.progressElement = this.progressPrimary;
-        countdownShowCategory.onFinished = () => this.showClueQuestion(clueObj);
-        countdownShowCategory.onPause = () => this.setPausedVisible(true);
-        countdownShowCategory.onResume = () => this.setPausedVisible(false);
-        countdownShowCategory.start();
+            this.divInstructions.html("read aloud the category and dollar value.");
 
-        function isClueValid(clueObj) {
-            return clueObj.value !== null &&
-                    clueObj.question.length > 0 &&
-                    clueObj.answer.length > 0 &&
-                    clueObj.category !== null &&
-                    clueObj.category.title.length > 0
-                    ;
-        }
+            var countdownShowCategory = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationCategory);
+            countdownShowCategory.progressElement = this.progressPrimary;
+            countdownShowCategory.onFinished = () => this.showClueQuestion(clueObj);
+            countdownShowCategory.onPause = () => this.setPausedVisible(true);
+            countdownShowCategory.onResume = () => this.setPausedVisible(false);
+            countdownShowCategory.start();
+
+            function isClueValid(clueObj) {
+                return clueObj.value !== null &&
+                        clueObj.question.length > 0 &&
+                        clueObj.answer.length > 0 &&
+                        clueObj.category !== null &&
+                        clueObj.category.title.length > 0
+                        ;
+            }
+        });
     }
 
     showClueQuestion(clueObj) {
@@ -278,10 +278,10 @@ class Operator {
         this.teamArray.forEach(team => team.setBuzzerOpen(isOpen));
     }
 
-    setIsPaused(isPaused) {
+    setPaused(isPaused) {
         this.isPaused = isPaused;
         this.divPaused.css("display", isPaused ? "" : "none");
-        this.presentationInstance.setPausedVisible(isPaused);
+        this.presentationInstance.setPaused(isPaused);
     }
 
 }

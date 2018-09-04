@@ -16,6 +16,8 @@ class Presentation {
 
 
         this._initSlides();
+        
+        this.showSlideJeopardyLogo();
 
         if (window.opener) {
             window.opener.operatorInstance.handlePresentationReady(this);
