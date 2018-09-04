@@ -21,19 +21,17 @@ class Operator {
         this.divInstructions = $("div#instructions");
 
         this.currentClueObj = null;
-
+        this.currentCountdownTimer = null;
 
         this.teamArray = new Array(NUM_TEAMS);
-        this.hasInitializedTeams = false;
 
+        // TODO remove these booleans and use a state machine
+        this.hasInitializedTeams = false;
         this.isClueQuestionAnswerable = false;
         this.isClueQuestionBeingRead = false;
         this.isPaused = false;
-
         this.isATeamAnswering = false;
 
-
-        this.currentCountdownTimer = null;
 
         this.initKeyboardListeners();
         this.initMouseListeners();
@@ -71,6 +69,10 @@ class Operator {
 //            this.windowPresentation.showRules();
         });
 
+        this.buttonShowClue = $("button#showClue").click(() => {
+            this.getClue();
+        });
+
         var inputTeamNames = new Array(NUM_TEAMS);
         for (var i = 0; i < NUM_TEAMS; i++) {
             inputTeamNames[i] = $("input#teamName" + i);
@@ -82,13 +84,10 @@ class Operator {
 
             this.presentationInstance.setVisibleTeams(true);
         });
-
-        this.buttonShowClue = $("button#showClue").click(() => {
-            this.getClue();
-        });
     }
 
     handlePresentationReady(presentationInstance) {
+        // called from Presentation instance in other window
         this.presentationInstance = presentationInstance;
         this.initTeams();
     }
@@ -100,9 +99,9 @@ class Operator {
         }
 
         for (var i = 0; i < NUM_TEAMS; i++) {
-            var t = this.teamArray[i] = new Team(i);
-            t.setDivOperator($('div[data-team-number="' + i + '"]'));
-            t.setDivPresentation(this.presentationInstance.getTeamDiv(i));
+            var newTeam = this.teamArray[i] = new Team(i);
+            newTeam.setDivOperator($('div[data-team-number="' + i + '"]'));
+            newTeam.setDivPresentation(this.presentationInstance.getTeamDiv(i));
         }
         this.hasInitializedTeams = true;
         this.buttonShowClue.prop("disabled", false);
@@ -123,6 +122,7 @@ class Operator {
                 teamObj.setIsAnswering(true);
 
                 this.divInstructions.html("did they answer correctly? y / n");
+                // TODO add keyboard listeners for Y and N
 
 
                 var countdownAnswer = this.currentCountdownTimer = new CountdownTimer(SETTINGS.answerTimeout);
@@ -134,10 +134,6 @@ class Operator {
                 countdownAnswer.start();
 
             }
-
-
-
-
         }
     }
 
@@ -160,40 +156,41 @@ class Operator {
 
         this.setAllBuzzersIsOpen(false);
 
-        $.getJSON("http://jservice.io/api/random", response => {
+        $.getJSON("http://jservice.io/api/random", handleClueLoaded);
+    }
 
-            if (response.length < 1) {
-                console.warn("respones from jservice.io is empty");
-                return;
-            }
+    handleClueLoaded(response) {
+        if (response.length < 1) {
+            console.warn("respones from jservice.io is empty");
+            return;
+        }
 
-            var clueObj = response[0];
+        var clueObj = response[0];
 
-            if (!isClueValid(clueObj)) {
-                console.warn("clue is messed up");
-                return;
-            }
+        if (!isClueValid(clueObj)) {
+            console.warn("clue is messed up");
+            return;
+        }
 
-            this.currentClueObj = clueObj;
+        this.currentClueObj = clueObj;
 
-            this.divClueWrapper.css("display", "");
-            this.divClueCategory.html(clueObj.category.title);
-            this.divClueDollars.html("$" + clueObj.value);
+        this.divClueWrapper.css("display", "");
+        this.divClueCategory.html(clueObj.category.title);
+        this.divClueDollars.html("$" + clueObj.value);
 //            this.divClueAirdate.html("Airdate: " + clueObj.airdate);
 
 
-            this.presentationInstance.setClueObj(clueObj);
-            this.presentationInstance.showSlidePreQuestion();
+        this.presentationInstance.setClueObj(clueObj);
+        this.presentationInstance.showSlidePreQuestion();
 
-            this.divInstructions.html("read aloud the category and dollar value.");
+        this.divInstructions.html("read aloud the category and dollar value.");
 
-            var countdownShowCategory = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationCategory);
-            countdownShowCategory.progressElement = this.progressPrimary;
-            countdownShowCategory.onFinished = () => this.showClueQuestion(clueObj);
-            countdownShowCategory.onPause = () => this.setPausedVisible(true);
-            countdownShowCategory.onResume = () => this.setPausedVisible(false);
-            countdownShowCategory.start();
-        });
+        var countdownShowCategory = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationCategory);
+        countdownShowCategory.progressElement = this.progressPrimary;
+        countdownShowCategory.onFinished = () => this.showClueQuestion(clueObj);
+        countdownShowCategory.onPause = () => this.setPausedVisible(true);
+        countdownShowCategory.onResume = () => this.setPausedVisible(false);
+        countdownShowCategory.start();
 
         function isClueValid(clueObj) {
             return clueObj.value !== null &&
@@ -203,7 +200,6 @@ class Operator {
                     clueObj.category.title.length > 0
                     ;
         }
-
     }
 
     showClueQuestion(clueObj) {
@@ -219,7 +215,7 @@ class Operator {
         this.trAnswer.css("display", "none");
 
         this.isClueQuestionBeingRead = true;
-        // then wait for spacebar to be pressed
+        // then wait for spacebar to be pressed. that calls handleDoneReadingClueQuestion()
 
         function getClueQuestionHtml(clueObj) {
             var clueStr = clueObj.question;
@@ -267,7 +263,7 @@ class Operator {
         this.setAllBuzzersIsOpen(false);
         this.isClueQuestionAnswerable = false;
         this.currentCountdownTimer = null;
-        this.presentationInstance.showTimeoutMessage(this.currentClueObj); //TODO maybe make this a slide
+        this.presentationInstance.showSlideClueAnswer();
 
 
         var countdownNextClue = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationAnswer);

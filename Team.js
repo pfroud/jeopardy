@@ -5,10 +5,10 @@ class Team {
         this.dollars = 0;
         this.teamName = "team " + teamIdx;
         this.isAnswering = false;
-        this.hasAnswered = false;
+        this.hasAnswered = false; // TODO probably rename this `hasAnsweredThisRound`
         this.isBuzzerOpen = false;
 
-        this.operatorProgress = null;
+        this.operatorProgress = null; //TODO give this a better name
         this.presentationCountdownDots = null;
 
         this.div = {
