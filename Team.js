@@ -26,6 +26,21 @@ class Team {
         };
     }
 
+    moneyAdd(amount) {
+        this.dollars += amount;
+        this._updateDollarsDisplay();
+    }
+
+    moneySubtract(amount) {
+        this.dollars += amount;
+        this._updateDollarsDisplay();
+    }
+
+    _updateDollarsDisplay() {
+        this.div.presentation.dollars.html.html("$" + this.dollars);
+        this.div.operator.dollars.html.html("$" + this.dollars);
+    }
+
     setDivPresentation(divPresentationWrapper) {
         this.div.presentation.wrapper = divPresentationWrapper;
         this.div.presentation.dollars = divPresentationWrapper.find("div.team-dollars").html("$" + this.dollars);
@@ -40,7 +55,7 @@ class Team {
         this.div.operator.state = divOperatorWrapper.find("div.team-state").html("Initialized.");
         this.operatorProgress = divOperatorWrapper.find("progress.time-left");
     }
-    
+
     setTeamName(teamName) {
         this.teamName = teamName;
         this.div.operator.teamName.html(teamName);
@@ -48,9 +63,9 @@ class Team {
     }
 
     setIsAnswering(isAnswering) {
-        this.div.operator.state.html(isAnswering ? "answering" : "");
-        this.div.operator.wrapper.css("background-color", isAnswering ? "orange" : "");
-        this.div.presentation.wrapper.css("background-color", isAnswering ? "orange" : "");
+        this.div.operator.state.html(isAnswering ? "answering" : "not answering");
+//        this.div.operator.wrapper.css("background-color", isAnswering ? "orange" : "");
+//        this.div.presentation.wrapper.css("background-color", isAnswering ? "orange" : "");
     }
 
     setBuzzerOpen(isOpen) {

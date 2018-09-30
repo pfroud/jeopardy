@@ -48,6 +48,7 @@ footer {
     width: 100%;
     position: absolute;
     bottom: 5px;
+    height: 80px;
 
     border-top: 1px solid white;
 
@@ -74,5 +75,38 @@ table#tableSettings {
         width: 60px;
     }
 
+
+}
+
+
+// https://css-tricks.com/html5-progress-element/
+progress[value] {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    border: none;
+
+
+    &::-webkit-progress-bar{
+        // backgroudn of bar in Chrome
+        background-color: lightgray;
+    }
+
+    &::-moz-progress-bar {
+        // foreground of bar in Firefox
+        background-color: lightgray;
+    }
+
+    &::-webkit-progress-value {
+        // foreground of bar in Chrome
+        background-color: limegreen;
+    }
+
+    &.paused {
+        &::-webkit-progress-value {
+            // foreground of bar in Chrome
+            background-color: darkgreen;
+        }
+    }
 
 }

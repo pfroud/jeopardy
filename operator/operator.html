@@ -9,9 +9,12 @@
     </head>
     <body>
         <script src="../lib/jquery-3.3.1.min.js"></script>
+        <!--<script src="../lib/state-machine/state-machine.js"></script>-->
+        <!--<script src="../lib/state-machine/state-machine-visualize.min.js"></script>-->
         <script src="../CountdownTimer.js"></script>
         <script src="../Team.js"></script>
         <script src="../Settings.js"></script>
+        <!--<script src="fsm.js"></script>-->
         <script src="Operator.js"></script>
         <script src="mainOperator.js"></script>
 
@@ -24,10 +27,10 @@
         -->
 
         <main>
-            <input id="tabSetup" type="radio" name="tabs" checked>
+            <input id="tabSetup" type="radio" name="tabs">
             <label for="tabSetup"><span class="key-shortcut-letter">S</span>etup</label>
 
-            <input id="tabGame" type="radio" name="tabs">
+            <input id="tabGame" type="radio" name="tabs" checked>
             <label for="tabGame"><span class="key-shortcut-letter">G</span>ame</label>
 
             <input id="tabAdmin" type="radio" name="tabs">
@@ -56,7 +59,7 @@
             <!-- ====================================================================== -->
             <div class="tabContent" id="contentGame">
 
-                <button id="showClue" disabled>start game</button>
+                <button id="startGame" disabled>start game</button>
 
                 <div id="instructions">waiting for presentation window</div>
 

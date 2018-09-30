@@ -21,6 +21,8 @@ body {
     font-family: sans-serif;
     background-color: #0b2191;
     background-image: url("../img/background.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
     color: white;
 
     overflow: hidden;
@@ -144,7 +146,7 @@ footer {
     flex-wrap: nowrap;
     align-items: stretch;
     width: 100%;
-    position: absolute;
+    position: absolute; // this makes the backgound image on <body> not go to the bottom of the page
     bottom: 0px;
     left: 0px;
     height: $height-footer;
@@ -177,7 +179,17 @@ footer {
                 border: 2px solid gray;
                 width: 14px;
                 height: 8px;
+
+                &.active {
+                    background-color: red;
+                }
+
             }
+            
+            &.paused td.active {
+                background-color: firebrick;
+            }
+            
         }
 
     }   

@@ -1,4 +1,4 @@
-/* global SETTINGS */
+/* global SETTINGS, fsm */
 
 const NUM_TEAMS = 4;
 
@@ -45,18 +45,49 @@ class Operator {
                 case "2":
                 case "3":
                 case "4":
-                    const teamIdx = Number(event.key) - 1; //team zero buzzes by pressing one key
+                    const teamIdx = Number(event.key) - 1; //team zero buzzes by pressing key for digit one
                     this.handleBuzzerPress(teamIdx);
                     break;
 
                 case "p":
                     this.currentCountdownTimer && this.currentCountdownTimer.togglePaused();
                     break;
+                    
+                case "y":
+                    this.handleAnswer(true);
+                    break;
+                    
+                case "n":
+                    this.handleAnswer(true);
+                    break;
+                    
                 case " ": //space
                     this.handleDoneReadingClueQuestion();
                     break;
             }
         });
+    }
+
+    handleAnswer(isCorrect) {
+
+        if (!this.isClueQuestionAnswerable || this.isPaused || !this.isATeamAnswering) {
+            return;
+        }
+
+        var teamObj = this.answerimgTeam;
+        var clueObj = this.curentClueObj;
+
+        if (isCorrect) {
+            teamObj.moneyAdd(clueObj.dollars);
+            // cancel all countdowns
+            // get another clue
+        } else {
+            teamObj.moneySubtract(clueObj.dollars);
+            // close buzzer, depending on settings
+            // cancel team countdown
+            // resume question countdown
+        }
+
     }
 
     initMouseListeners() {
@@ -69,21 +100,24 @@ class Operator {
 //            this.windowPresentation.showRules();
 //        });
 
-        this.buttonShowClue = $("button#showClue").click(() => {
+        this.buttonStartGame = $("button#startGame").click(() => {
             this.getClue();
         });
 
+
+        $("button#saveTeamNames").click(() => this.saveTeamNames());
+    }
+
+    saveTeamNames() {
         var inputTeamNames = new Array(NUM_TEAMS);
         for (var i = 0; i < NUM_TEAMS; i++) {
             inputTeamNames[i] = $("input#teamName" + i);
         }
-        $("button#saveTeamNames").click(() => {
-            for (var i = 0; i < NUM_TEAMS; i++) {
-                this.teamArray[i].setTeamName(inputTeamNames[i].prop("value"));
-            }
+        for (var i = 0; i < NUM_TEAMS; i++) {
+            this.teamArray[i].setTeamName(inputTeamNames[i].prop("value"));
+        }
 
-            this.presentationInstance.setTeamsVisible(true);
-        });
+        this.presentationInstance.setTeamsVisible(true);
     }
 
     handlePresentationReady(presentationInstance) {
@@ -104,8 +138,10 @@ class Operator {
             newTeam.setDivPresentation(this.presentationInstance.getTeamDiv(i));
         }
         this.hasInitializedTeams = true;
-        this.buttonShowClue.prop("disabled", false);
+        this.buttonStartGame.prop("disabled", false);
         this.divInstructions.html("click button to fetch a clue.");
+        
+        this.saveTeamNames();
     }
 
     handleBuzzerPress(teamIdx) {
@@ -118,8 +154,13 @@ class Operator {
         if (!teamObj.hasAnswered || (teamObj.hasAnswered && SETTINGS.isAllowedMultipleTries)) {
 
             if (teamObj.isBuzzerOpen) {
+
+                this.answerimgTeam = teamObj;
+
                 this.isATeamAnswering = true;
                 teamObj.setIsAnswering(true);
+
+                this.countdownQuestionTimeout.pause();
 
                 this.divInstructions.html("did they answer correctly? y / n");
                 // TODO add keyboard listeners for Y and N
@@ -129,8 +170,8 @@ class Operator {
                 countdownAnswer.progressElement = teamObj.operatorProgress;
                 countdownAnswer.dotsElement = teamObj.presentationCountdownDots;
                 countdownAnswer.onFinished = () => this.handleAnswerTimeout(teamObj);
-//                countdownAnswer.onPause = () => this.setPausedVisible(true);
-//                countdownAnswer.onResume = () => this.setPausedVisible(false);
+                countdownAnswer.onPause = () => this.pause();
+                countdownAnswer.onResume = () => this.resume();
                 countdownAnswer.start();
 
             }
@@ -141,6 +182,8 @@ class Operator {
         teamObj.setIsAnswering(false);
         this.isATeamAnswering = false;
         this.divInstructions.html("wait for people to answer.");
+        this.countdownQuestionTimeout.resume();
+        this.currentCountdownTimer = this.countdownQuestionTimeout;
     }
 
     getClue() {
@@ -149,7 +192,7 @@ class Operator {
             return;
         }
 
-        this.buttonShowClue.blur();
+        this.buttonStartGame.blur();
         this.trQuestion.hide();
         this.divInstructions.html("Loading clue...");
 
@@ -166,7 +209,8 @@ class Operator {
             var clueObj = response[0];
 
             if (!isClueValid(clueObj)) {
-                console.warn("clue is messed up");
+                console.warn("skipping this clue because something is null");
+                getClue();
                 return;
             }
 
@@ -187,8 +231,8 @@ class Operator {
             var countdownShowCategory = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationCategory);
             countdownShowCategory.progressElement = this.progressPrimary;
             countdownShowCategory.onFinished = () => this.showClueQuestion(clueObj);
-            countdownShowCategory.onPause = () => this.setPausedVisible(true);
-            countdownShowCategory.onResume = () => this.setPausedVisible(false);
+            countdownShowCategory.onPause = () => this.pause();
+            countdownShowCategory.onResume = () => this.resume();
             countdownShowCategory.start();
 
             function isClueValid(clueObj) {
@@ -203,7 +247,6 @@ class Operator {
     }
 
     showClueQuestion(clueObj) {
-
         this.currentCountdownTimer = null;
         this.presentationInstance.showSlideClueQuestion();
 
@@ -252,9 +295,12 @@ class Operator {
         var countdownQuestionTimeout = this.currentCountdownTimer = new CountdownTimer(SETTINGS.questionTimeout);
         countdownQuestionTimeout.progressElement = this.progressPrimary;
         countdownQuestionTimeout.onFinished = () => this.handleQuestionTimeout();
-        countdownQuestionTimeout.onPause = () => this.setPausedVisible(true);
-        countdownQuestionTimeout.onResume = () => this.setPausedVisible(false);
+        countdownQuestionTimeout.onPause = () => !this.isATeamAnswering && this.pause();
+        countdownQuestionTimeout.onResume = () => !this.isATeamAnswering && this.resume();
         countdownQuestionTimeout.start();
+
+        // so we can pause the timeout when a team is answering. TODO find a better way
+        this.countdownQuestionTimeout = countdownQuestionTimeout;
 
     }
 
@@ -269,13 +315,21 @@ class Operator {
         var countdownNextClue = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationAnswer);
         countdownNextClue.progressElement = this.progressPrimary;
         countdownNextClue.onFinished = () => this.getClue();
-        countdownNextClue.onPause = () => this.setPausedVisible(true);
-        countdownNextClue.onResume = () => this.setPausedVisible(false);
+        countdownNextClue.onPause = () => this.pause();
+        countdownNextClue.onResume = () => this.resume();
         countdownNextClue.start();
     }
 
     setAllBuzzersIsOpen(isOpen) {
         this.teamArray.forEach(team => team.setBuzzerOpen(isOpen));
+    }
+
+    pause() {
+        this.setPaused(true);
+    }
+
+    resume() {
+        this.setPaused(false);
     }
 
     setPaused(isPaused) {

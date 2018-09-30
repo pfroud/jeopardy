@@ -2,6 +2,8 @@ body {
   font-family: sans-serif;
   background-color: #0b2191;
   background-image: url("../img/background.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
   color: white;
   overflow: hidden; }
 
@@ -118,6 +120,10 @@ footer {
         border: 2px solid gray;
         width: 14px;
         height: 8px; }
+        footer div.team table.countdown-dots td.active {
+          background-color: red; }
+      footer div.team table.countdown-dots.paused td.active {
+        background-color: firebrick; }
 
 img#cost-chart {
   filter: drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black); }

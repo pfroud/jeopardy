@@ -10,7 +10,7 @@ class CountdownTimer {
 
         this.intervalMs = 100;
 
-        if (durationMs % intervalMs !== 0) {
+        if (durationMs % this.intervalMs !== 0) {
             console.warn("CountdownTimer implementation is pretty shitty and expects duration to be multiple of 100");
         }
 
@@ -51,6 +51,7 @@ class CountdownTimer {
             this.onPause && this.onPause();
             this.isPaused = true;
             this.progressElement && this.progressElement.addClass("paused");
+            this.dotsElement && this.dotsElement.addClass("paused");
         }
     }
 
@@ -60,6 +61,7 @@ class CountdownTimer {
             this.onResume && this.onResume();
             this.isPaused = false;
             this.progressElement && this.progressElement.removeClass("paused");
+              this.dotsElement && this.dotsElement.removeClass("paused");
         }
     }
 
@@ -87,7 +89,7 @@ class CountdownTimer {
                 if (tds.length !== 9) {
                     console.warn("found " + tds.length + "dot(s) element(s), expected exactly 9");
                 }
-                tds.css("background-color", "red");
+                tds.addClass("active");
             }
 
             this.intervalID = window.setInterval(this._intervalHandler, this.intervalMs, this);
@@ -111,7 +113,7 @@ class CountdownTimer {
 
         if (instance.dotsElement && instance.remainingMs % 1000 === 0) {
             var secondsThatJustPassed = (instance.remainingMs / 1000) + 1;
-            instance.dotsElement.find('[data-countdown="' + secondsThatJustPassed + '"]').css("background-color", "");
+            instance.dotsElement.find('[data-countdown="' + secondsThatJustPassed + '"]').removeClass("active");
         }
 
         if (instance.remainingMs <= 0) {
