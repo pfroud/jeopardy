@@ -61,7 +61,7 @@ class CountdownTimer {
             this.onResume && this.onResume();
             this.isPaused = false;
             this.progressElement && this.progressElement.removeClass("paused");
-              this.dotsElement && this.dotsElement.removeClass("paused");
+            this.dotsElement && this.dotsElement.removeClass("paused");
         }
     }
 
@@ -69,9 +69,15 @@ class CountdownTimer {
         this.onReset && this.onReset();
         this.hasStarted = false;
         this.hasFinished = false;
+        this.isPaused = false;
         this.remainingMs = this.durationMs;
         window.clearInterval(this.intervalID);
         this.textElement && this.textElement.html(this.remainingMs + ".0");
+        this.progressElement && this.progressElement.hide();
+        if (this.dotsElement) {
+            this.dotsElement.find("td").removeClass("active");
+            this.dotsElement.removeClass("paused");
+        }
     }
 
     start() {

@@ -52,15 +52,15 @@ class Operator {
                 case "p":
                     this.currentCountdownTimer && this.currentCountdownTimer.togglePaused();
                     break;
-                    
+
                 case "y":
                     this.handleAnswer(true);
                     break;
-                    
+
                 case "n":
-                    this.handleAnswer(true);
+                    this.handleAnswer(false);
                     break;
-                    
+
                 case " ": //space
                     this.handleDoneReadingClueQuestion();
                     break;
@@ -74,27 +74,46 @@ class Operator {
             return;
         }
 
-        var teamObj = this.answerimgTeam;
-        var clueObj = this.curentClueObj;
+        var teamObj = this.answeringTeam;
+        var clueObj = this.currentClueObj;
 
         if (isCorrect) {
-            teamObj.moneyAdd(clueObj.dollars);
-            // cancel all countdowns
-            // get another clue
+            teamObj.moneyAdd(clueObj.value);
+
+            teamObj.setIsAnswering(false);
+            this.isATeamAnswering = false;
+
+            this.currentCountdownTimer.reset(); //countdown for that team's answer
+            this.countdownQuestionTimeout.reset();
+
+            this.divInstructions.html("let people read question now that they know the answer");
+            window.setTimeout(() => {
+                this.divInstructions.html("let people read answer");
+                this.presentationInstance.showSlideClueAnswer();
+                window.setTimeout(() => {
+                    this.getClue();
+                }, 2000);
+            }, 1000);
+
+
+
         } else {
-            teamObj.moneySubtract(clueObj.dollars);
-            // close buzzer, depending on settings
-            // cancel team countdown
-            // resume question countdown
+            teamObj.moneySubtract(clueObj.value);
+
+            teamObj.setIsAnswering(false);
+            this.isATeamAnswering = false;
+
+            this.currentCountdownTimer.reset(); //countdown for that team's answer
+            this.divInstructions.html("wait for people to answer.");
+            this.countdownQuestionTimeout.resume();
+            this.currentCountdownTimer = this.countdownQuestionTimeout;
+
+            teamObj.setBuzzerOpen(SETTINGS.isAllowedMultipleTries);
         }
 
     }
 
     initMouseListeners() {
-        $("button#logClueToConsole").click(() => {
-            console.log(this.currentClueObj);
-        });
-
 //        $("button#showRules").click(() => {
 //            console.warn("show rules button not implemented");
 //            this.windowPresentation.showRules();
@@ -140,7 +159,7 @@ class Operator {
         this.hasInitializedTeams = true;
         this.buttonStartGame.prop("disabled", false);
         this.divInstructions.html("click button to fetch a clue.");
-        
+
         this.saveTeamNames();
     }
 
@@ -155,7 +174,7 @@ class Operator {
 
             if (teamObj.isBuzzerOpen) {
 
-                this.answerimgTeam = teamObj;
+                this.answeringTeam = teamObj;
 
                 this.isATeamAnswering = true;
                 teamObj.setIsAnswering(true);
@@ -163,7 +182,6 @@ class Operator {
                 this.countdownQuestionTimeout.pause();
 
                 this.divInstructions.html("did they answer correctly? y / n");
-                // TODO add keyboard listeners for Y and N
 
 
                 var countdownAnswer = this.currentCountdownTimer = new CountdownTimer(SETTINGS.answerTimeout);
@@ -179,11 +197,16 @@ class Operator {
     }
 
     handleAnswerTimeout(teamObj) {
+        teamObj.moneySubtract(this.currentClueObj.value);
         teamObj.setIsAnswering(false);
+
+        this.currentCountdownTimer.reset(); //countdown for that team's answer
         this.isATeamAnswering = false;
         this.divInstructions.html("wait for people to answer.");
         this.countdownQuestionTimeout.resume();
         this.currentCountdownTimer = this.countdownQuestionTimeout;
+
+        teamObj.setBuzzerOpen(SETTINGS.isAllowedMultipleTries);
     }
 
     getClue() {
@@ -210,7 +233,7 @@ class Operator {
 
             if (!isClueValid(clueObj)) {
                 console.warn("skipping this clue because something is null");
-                getClue();
+                this.getClue();
                 return;
             }
 

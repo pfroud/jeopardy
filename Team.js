@@ -32,13 +32,13 @@ class Team {
     }
 
     moneySubtract(amount) {
-        this.dollars += amount;
+        this.dollars -= amount;
         this._updateDollarsDisplay();
     }
 
     _updateDollarsDisplay() {
-        this.div.presentation.dollars.html.html("$" + this.dollars);
-        this.div.operator.dollars.html.html("$" + this.dollars);
+        this.div.presentation.dollars.html("$" + this.dollars);
+        this.div.operator.dollars.html("$" + this.dollars);
     }
 
     setDivPresentation(divPresentationWrapper) {
@@ -63,6 +63,7 @@ class Team {
     }
 
     setIsAnswering(isAnswering) {
+        this.hasAnswered = true;
         this.div.operator.state.html(isAnswering ? "answering" : "not answering");
 //        this.div.operator.wrapper.css("background-color", isAnswering ? "orange" : "");
 //        this.div.presentation.wrapper.css("background-color", isAnswering ? "orange" : "");
