@@ -66,6 +66,17 @@ class Operator {
                     break;
             }
         });
+        window.addEventListener("keyup", event => {
+            switch (event.key) {
+                case "1":
+                case "2":
+                case "3":
+                case "4":
+                    const teamIdx = Number(event.key) - 1; //team zero buzzes by pressing key for digit one
+                    this.handleBuzzerRelease(teamIdx);
+                    break;
+            }
+        });
     }
 
     handleAnswer(isCorrect) {
@@ -86,9 +97,9 @@ class Operator {
             this.currentCountdownTimer.reset(); //countdown for that team's answer
             this.countdownQuestionTimeout.reset();
 
-            this.divInstructions.html("let people read question now that they know the answer");
+            this.divInstructions.html("Let people read question now that they know the answer");
             window.setTimeout(() => {
-                this.divInstructions.html("let people read answer");
+                this.divInstructions.html("Let people read answer");
                 this.presentationInstance.showSlideClueAnswer();
                 window.setTimeout(() => {
                     this.getClue();
@@ -104,7 +115,7 @@ class Operator {
             this.isATeamAnswering = false;
 
             this.currentCountdownTimer.reset(); //countdown for that team's answer
-            this.divInstructions.html("wait for people to answer.");
+            this.divInstructions.html("Wait for people to answer.");
             this.countdownQuestionTimeout.resume();
             this.currentCountdownTimer = this.countdownQuestionTimeout;
 
@@ -114,17 +125,42 @@ class Operator {
     }
 
     initMouseListeners() {
-//        $("button#showRules").click(() => {
-//            console.warn("show rules button not implemented");
-//            this.windowPresentation.showRules();
-//        });
+        $("button#goToGameRules").click(() => this.presentationInstance.showSlideGameRules());
+        $("button#goToJeopardyLogo").click(() => this.presentationInstance.showSlideJeopardyLogo());
+        $("button#goToEventCost").click(() => this.presentationInstance.showSlideEventCost());
+        $("button#teamsHide").click(() => this.presentationInstance.setTeamsVisible(false));
+        $("button#teamsShow").click(() => this.presentationInstance.setTeamsVisible(true));
 
-        this.buttonStartGame = $("button#startGame").click(() => {
-            this.getClue();
-        });
+        this.buttonStartGame = $("button#startGame").click(() => this.getClue());
 
+        $("button#buzzerTestStart").click(() => this.buzzerTestStart());
+        $("button#buzzerTestStop").click(() => this.buzzerTestStop());
 
         $("button#saveTeamNames").click(() => this.saveTeamNames());
+        $("button#skipClue").click(() => this.skipClue());
+    }
+
+    buzzerTestStart() {
+        this.buzzerTest = true;
+        $("span#buzzerTestMessage").show();
+        this.presentationInstance.showSlideBuzzerTest();
+    }
+
+    buzzerTestStop() {
+        this.buzzerTest = false;
+        $("span#buzzerTestMessage").hide();
+        this.presentationInstance.showSlideJeopardyLogo(); //i guess
+    }
+
+    skipClue() {
+        // TODO probably need more rigorous checks here
+        if (this.isATeamAnswering) {
+            return;
+        }
+
+        this.currentCountdownTimer && this.currentCountdownTimer.reset();
+        this.getClue();
+
     }
 
     saveTeamNames() {
@@ -158,41 +194,55 @@ class Operator {
         }
         this.hasInitializedTeams = true;
         this.buttonStartGame.prop("disabled", false);
-        this.divInstructions.html("click button to fetch a clue.");
+        this.divInstructions.html("Click button to start game");
 
         this.saveTeamNames();
     }
 
     handleBuzzerPress(teamIdx) {
-        if (!this.isClueQuestionAnswerable || this.isPaused || this.isATeamAnswering) {
-            return;
+        const teamObj = this.teamArray[teamIdx];
+        if (this.buzzerTest) {
+            teamObj.buzzerTestShow();
+        } else {
+
+
+            if (!this.isClueQuestionAnswerable || this.isPaused || this.isATeamAnswering) {
+                return;
+            }
+
+
+            if (!teamObj.hasAnswered || (teamObj.hasAnswered && SETTINGS.isAllowedMultipleTries)) {
+
+                if (teamObj.isBuzzerOpen) {
+
+                    this.answeringTeam = teamObj;
+
+                    this.isATeamAnswering = true;
+                    teamObj.setIsAnswering(true);
+
+                    this.countdownQuestionTimeout.pause();
+
+                    this.divInstructions.html("Did they answer correctly? y / n");
+
+
+                    var countdownAnswer = this.currentCountdownTimer = new CountdownTimer(SETTINGS.answerTimeout);
+                    countdownAnswer.progressElement = teamObj.operatorProgress;
+                    countdownAnswer.dotsElement = teamObj.presentationCountdownDots;
+                    countdownAnswer.onFinished = () => this.handleAnswerTimeout(teamObj);
+                    countdownAnswer.onPause = () => this.pause();
+                    countdownAnswer.onResume = () => this.resume();
+                    countdownAnswer.start();
+
+                }
+            }
         }
 
-        var teamObj = this.teamArray[teamIdx];
+    }
 
-        if (!teamObj.hasAnswered || (teamObj.hasAnswered && SETTINGS.isAllowedMultipleTries)) {
-
-            if (teamObj.isBuzzerOpen) {
-
-                this.answeringTeam = teamObj;
-
-                this.isATeamAnswering = true;
-                teamObj.setIsAnswering(true);
-
-                this.countdownQuestionTimeout.pause();
-
-                this.divInstructions.html("did they answer correctly? y / n");
-
-
-                var countdownAnswer = this.currentCountdownTimer = new CountdownTimer(SETTINGS.answerTimeout);
-                countdownAnswer.progressElement = teamObj.operatorProgress;
-                countdownAnswer.dotsElement = teamObj.presentationCountdownDots;
-                countdownAnswer.onFinished = () => this.handleAnswerTimeout(teamObj);
-                countdownAnswer.onPause = () => this.pause();
-                countdownAnswer.onResume = () => this.resume();
-                countdownAnswer.start();
-
-            }
+    handleBuzzerRelease(teamIdx) {
+        if (this.buzzerTest) {
+            const teamObj = this.teamArray[teamIdx];
+            teamObj.buzzerTestHide();
         }
     }
 
@@ -202,7 +252,7 @@ class Operator {
 
         this.currentCountdownTimer.reset(); //countdown for that team's answer
         this.isATeamAnswering = false;
-        this.divInstructions.html("wait for people to answer.");
+        this.divInstructions.html("Wait for people to answer");
         this.countdownQuestionTimeout.resume();
         this.currentCountdownTimer = this.countdownQuestionTimeout;
 
@@ -232,7 +282,6 @@ class Operator {
             var clueObj = response[0];
 
             if (!isClueValid(clueObj)) {
-                console.warn("skipping this clue because something is null");
                 this.getClue();
                 return;
             }
@@ -249,7 +298,7 @@ class Operator {
             this.presentationInstance.setClueObj(clueObj);
             this.presentationInstance.showSlidePreQuestion();
 
-            this.divInstructions.html("read aloud the category and dollar value.");
+            this.divInstructions.html("Read aloud the category and dollar value.");
 
             var countdownShowCategory = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationCategory);
             countdownShowCategory.progressElement = this.progressPrimary;
@@ -274,7 +323,7 @@ class Operator {
         this.presentationInstance.showSlideClueQuestion();
 
 
-        this.divInstructions.html("read aloud the clue. buzzers open when you press space.");
+        this.divInstructions.html("Read aloud the question. Buzzers open when you press space");
 
         this.divClueQuestion.html(getClueQuestionHtml(clueObj));
         this.trQuestion.show();
@@ -313,7 +362,7 @@ class Operator {
 
         this.trAnswer.show();
         this.divClueAnswer.html(this.currentClueObj.answer);
-        this.divInstructions.html("wait for people to answer.");
+        this.divInstructions.html("Wait for people to answer");
 
         var countdownQuestionTimeout = this.currentCountdownTimer = new CountdownTimer(SETTINGS.questionTimeout);
         countdownQuestionTimeout.progressElement = this.progressPrimary;
@@ -328,7 +377,7 @@ class Operator {
     }
 
     handleQuestionTimeout() {
-        this.divInstructions.html("question timed out.");
+        this.divInstructions.html("Question timed out.");
         this.setAllBuzzersIsOpen(false);
         this.isClueQuestionAnswerable = false;
         this.currentCountdownTimer = null;

@@ -31,7 +31,8 @@ class Presentation {
         this.visibleSlide = null;
 
         var slideNames = ["jeopardyLogo", "gameRules", "spinner",
-            "preQuestion", "clueQuestion", "clueAnswer", "eventCostChart"];
+            "preQuestion", "clueQuestion", "clueAnswer", "eventCost", "buzzerTest"];
+        
         slideNames.forEach(slideName => {
             var slideNameCap = capitalizeFirstLetter(slideName);
             this.slides[slideName] = $("div#slide" + slideNameCap);

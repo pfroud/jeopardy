@@ -47,19 +47,15 @@
                 Team 1 name: <input type="text" id="teamName1" value="teamOne"><br>
                 Team 2 name: <input type="text" id="teamName2" value="teamTwo"><br>
                 Team 3 name: <input type="text" id="teamName3" value="teamThree"><br>
-                <button id="saveTeamNames">save team names</button>
+                <button id="saveTeamNames">Save team names</button>
 
-
-                <p><button>start buzzer test - not impl.</button></p>
-
-                <p><button id="showRules">show rules  - not impl.</button></p>
             </div>
 
 
             <!-- ====================================================================== -->
             <div class="tabContent" id="contentGame">
 
-                <button id="startGame" disabled>start game</button>
+                <button id="startGame" disabled>Start game</button>
 
                 <div id="instructions">waiting for presentation window</div>
 
@@ -92,20 +88,25 @@
 
                 <progress style="display:none" id="primary"></progress>
 
-                <p> <button>skip question - not impl.</button></p>
-                <p><button>save game to localstorage - not impl.</button></p>
+                <p><button id="skipClue">Skip clue</button></p>
+                <!--<p><button>save game to localstorage - not impl.</button></p>-->
 
             </div>
 
             <!-- ====================================================================== -->
             <div class="tabContent" id="contentAdmin">
-                <button>show Jeopardy logo  - not impl.</button>
 
-                <p><button>show event cost - not impl.</button></p>
+                <p>Buzzer test: <button id="buzzerTestStart">start</button> <button id="buzzerTestStop">stop</button> <span id="buzzerTestMessage" style="display:none">buzzer test is underway</span></p>
 
-                <p>Display teams  - not impl.: <button>show</button> <button>hide</button></p>
+                <p><button id="goToGameRules">Go to game rules</button></p>
 
-                <p><a href="#">Override...  - not impl.</a></p>
+                <button id="goToJeopardyLogo">Go to Jeopardy logo</button>
+
+                <p><button id="goToEventCost">Go to event cost</button></p>
+
+                <p>Display teams: <button id="teamsHide">show</button> <button id="teamsShow">hide</button></p>
+
+                <!--<p><a href="#">Override...  - not impl.</a></p>-->
             </div>
 
             <!-- ====================================================================== -->
@@ -117,12 +118,12 @@
                         <td><input type="number" id="displayDurationCategory"> ms</td>
                     </tr>
                     <tr>
-                        <td>Question timeout:</td>
-                        <td><input type="number" id="timeoutQuestion"> ms</td>
-                    </tr>
-                    <tr>
                         <td>Display duration for answer:</td>
                         <td><input type="number" id="displayDurationAnswer"> ms</td>
+                    </tr>
+                    <tr>
+                        <td>Question timeout:</td>
+                        <td><input type="number" id="timeoutQuestion"> ms</td>
                     </tr>
                     <tr>
                         <td>Answer timeout:</td>
@@ -130,9 +131,9 @@
                     </tr>
                 </table>
 
-                <p><label><input type="checkbox">Allow team to buzz multiple times in same question </label></p>
+                <p><label><input type="checkbox" id="allowMultipleTries">Allow team to buzz multiple times in same question </label></p>
 
-                <p><button>save settings  - not impl.</button></p>
+                <p><button id="saveSettings">Save settings</button></p>
 
             </div>
 

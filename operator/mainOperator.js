@@ -1,7 +1,8 @@
-const SETTINGS = new Settings();
-
+var SETTINGS;
 var operatorInstance;
+
 $(document).ready(function () {
+    SETTINGS = new Settings();
     if (window.location.search.length < 1) {
         operatorInstance = new Operator();
     }

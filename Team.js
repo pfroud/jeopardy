@@ -75,4 +75,14 @@ class Team {
         this.div.operator.state.html("buzzer " + (isOpen ? "open" : "closed"));
     }
 
+    buzzerTestShow() {
+        this.presentationCountdownDots.find("td").addClass("active");
+        this.div.operator.state.html("down");
+    }
+
+    buzzerTestHide() {
+        this.presentationCountdownDots.find("td").removeClass("active");
+        this.div.operator.state.html("up");
+    }
+
 }

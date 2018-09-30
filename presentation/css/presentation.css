@@ -48,7 +48,8 @@ div#paused {
   padding: 20px;
   border: 1px solid darkorange;
   text-shadow: 3px 3px rgba(0, 0, 0, 0.2);
-  filter: drop-shadow(10px 13px rgba(0, 0, 0, 0.4)); }
+  filter: drop-shadow(10px 13px rgba(0, 0, 0, 0.4));
+  top: 100px; }
 
 header {
   height: 70px;
@@ -95,7 +96,7 @@ footer {
   flex-wrap: nowrap;
   align-items: stretch;
   width: 100%;
-  position: absolute;
+  /*position: absolute; // this makes the backgound image on <body> not go to the bottom of the page*/
   bottom: 0px;
   left: 0px;
   height: 100px; }
