@@ -57,15 +57,20 @@ footer {
         text-align: center;
         flex: 1;
 
+        &.answering {
+            background-color: orange;
+            font-weight: bold;
+        }            
+    }
 
-        div.team-name, div.team-dollars, div.team-state, progress.time-left {
-            /*! supress netbeans warning */
-        }
+    div.team-name, div.team-dollars, div.team-state, progress.time-left {
+        /*! supress netbeans warning */
+    }
 
-    }   
+}   
 
 
-}
+
 
 span.key-shortcut-letter {
     text-decoration: underline;
@@ -110,4 +115,9 @@ progress[value] {
         }
     }
 
+}
+
+
+audio {
+    display: none;
 }

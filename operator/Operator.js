@@ -16,6 +16,13 @@ class Operator {
         this.trAnswer = $("tr#answer");
         this.divPaused = $("div#paused");
 
+        this.audioAnswerCorrect = $("audio#answer-correct")[0];
+        this.audioAnswerIncorrect = $("audio#answer-incorrect")[0];
+        this.audioMusicOpening = $("audio#music-opening")[0];
+        this.audioQuestionTimeout = $("audio#question-timeout")[0];
+        this.audioRoundEnd = $("audio#round-end")[0];
+        this.audioTeamBuzz = $("audio#team-buzz")[0];
+
         this.progressPrimary = $("progress#primary");
 
         this.divInstructions = $("div#instructions");
@@ -91,6 +98,8 @@ class Operator {
         if (isCorrect) {
             teamObj.moneyAdd(clueObj.value);
 
+            this.audioAnswerCorrect.play();
+
             teamObj.setIsAnswering(false);
             this.isATeamAnswering = false;
 
@@ -110,16 +119,36 @@ class Operator {
 
         } else {
             teamObj.moneySubtract(clueObj.value);
+            this.audioAnswerIncorrect.play();
 
             teamObj.setIsAnswering(false);
             this.isATeamAnswering = false;
-
-            this.currentCountdownTimer.reset(); //countdown for that team's answer
-            this.divInstructions.html("Wait for people to answer.");
-            this.countdownQuestionTimeout.resume();
-            this.currentCountdownTimer = this.countdownQuestionTimeout;
-
             teamObj.setBuzzerOpen(SETTINGS.isAllowedMultipleTries);
+
+            // TODO do this check when team answer times out
+            if (this.teamArray.every(teamObj => teamObj.hasAnswered)) {
+                this.divInstructions.html("Everyone answered wrong.");
+                this.setAllBuzzersIsOpen(false);
+                this.isClueQuestionAnswerable = false;
+                this.currentCountdownTimer.reset(); //stop counting down team's answer
+                this.currentCountdownTimer = null;
+
+                this.presentationInstance.showSlideClueAnswer();
+
+                var countdownNextClue = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationAnswer);
+                countdownNextClue.progressElement = this.progressPrimary;
+                countdownNextClue.onFinished = () => this.getClue();
+                countdownNextClue.onPause = () => this.pause();
+                countdownNextClue.onResume = () => this.resume();
+                countdownNextClue.start();
+            } else {
+                this.currentCountdownTimer.reset(); //countdown for that team's answer
+                this.divInstructions.html("Wait for people to answer.");
+                this.countdownQuestionTimeout.resume();
+                this.currentCountdownTimer = this.countdownQuestionTimeout;
+            }
+
+
         }
 
     }
@@ -137,7 +166,7 @@ class Operator {
         $("button#buzzerTestStop").click(() => this.buzzerTestStop());
 
         $("button#saveTeamNames").click(() => this.saveTeamNames());
-        $("button#skipClue").click(() => this.skipClue());
+        this.buttonSkipClue = $("button#skipClue").click(() => this.skipClue());
     }
 
     buzzerTestStart() {
@@ -158,6 +187,7 @@ class Operator {
             return;
         }
 
+        this.buttonSkipClue.blur();
         this.currentCountdownTimer && this.currentCountdownTimer.reset();
         this.getClue();
 
@@ -215,6 +245,8 @@ class Operator {
 
                 if (teamObj.isBuzzerOpen) {
 
+                    this.audioTeamBuzz.play();
+
                     this.answeringTeam = teamObj;
 
                     this.isATeamAnswering = true;
@@ -249,6 +281,7 @@ class Operator {
     handleAnswerTimeout(teamObj) {
         teamObj.moneySubtract(this.currentClueObj.value);
         teamObj.setIsAnswering(false);
+        this.audioAnswerIncorrect.play();
 
         this.currentCountdownTimer.reset(); //countdown for that team's answer
         this.isATeamAnswering = false;
@@ -378,22 +411,30 @@ class Operator {
 
     handleQuestionTimeout() {
         this.divInstructions.html("Question timed out.");
+        this.audioQuestionTimeout.play();
         this.setAllBuzzersIsOpen(false);
         this.isClueQuestionAnswerable = false;
         this.currentCountdownTimer = null;
-        this.presentationInstance.showSlideClueAnswer();
 
 
-        var countdownNextClue = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationAnswer);
-        countdownNextClue.progressElement = this.progressPrimary;
-        countdownNextClue.onFinished = () => this.getClue();
-        countdownNextClue.onPause = () => this.pause();
-        countdownNextClue.onResume = () => this.resume();
-        countdownNextClue.start();
+        // wait for timeout sound to play
+        window.setTimeout(() => {
+            this.presentationInstance.showSlideClueAnswer();
+
+            var countdownNextClue = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationAnswer);
+            countdownNextClue.progressElement = this.progressPrimary;
+            countdownNextClue.onFinished = () => this.getClue();
+            countdownNextClue.onPause = () => this.pause();
+            countdownNextClue.onResume = () => this.resume();
+            countdownNextClue.start();
+        }, 1000);
     }
 
     setAllBuzzersIsOpen(isOpen) {
-        this.teamArray.forEach(team => team.setBuzzerOpen(isOpen));
+        this.teamArray.forEach(team => {
+            team.setBuzzerOpen(isOpen);
+            team.hasAnswered = false;
+        });
     }
 
     pause() {

@@ -65,8 +65,7 @@ class Team {
     setIsAnswering(isAnswering) {
         this.hasAnswered = true;
         this.div.operator.state.html(isAnswering ? "answering" : "not answering");
-//        this.div.operator.wrapper.css("background-color", isAnswering ? "orange" : "");
-//        this.div.presentation.wrapper.css("background-color", isAnswering ? "orange" : "");
+        this.div.operator.wrapper.toggleClass("answering", isAnswering);
     }
 
     setBuzzerOpen(isOpen) {
@@ -84,5 +83,16 @@ class Team {
         this.presentationCountdownDots.find("td").removeClass("active");
         this.div.operator.state.html("up");
     }
+    
+    /*
+    dumpJson(){
+        return {};
+    }
+    
+    parseJson(jsonObj) {
+        
+    }
+    */
+
 
 }

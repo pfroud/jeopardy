@@ -20,12 +20,6 @@
 
         <div id="paused"  style="display:none">&#9612;&#9612; PAUSED</div>
 
-        <!--
-        <header>
-            Jeopardy operator
-        </header>
-        -->
-
         <main>
             <input id="tabSetup" type="radio" name="tabs">
             <label for="tabSetup"><span class="key-shortcut-letter">S</span>etup</label>
@@ -138,6 +132,15 @@
             </div>
 
         </main>
+
+        <div style="display:none">
+            <audio preload="auto" src="../sound/answer-correct.mp3"   id="answer-correct" ></audio>
+            <audio preload="auto" src="../sound/answer-incorrect.mp3" id="answer-incorrect"></audio>
+            <audio preload="auto" src="../sound/music-opening.mp3"    id="music-opening" ></audio>
+            <audio preload="auto" src="../sound/question-timeout.mp3" id="question-timeout"></audio>
+            <audio preload="auto" src="../sound/round-end.wav"        id="round-end" ></audio>
+            <audio preload="auto" src="../sound/team-buzz.wav"        id="team-buzz"></audio>
+        </div>
 
 
         <footer>
