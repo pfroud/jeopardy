@@ -7,41 +7,66 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <style>
+            body {
+                font-family: sans-serif;
+                font-size: 2em;
+            }
+            button {
+                font-size: 2em;
+            }
             table.countdown-dots {
                 border-collapse: collapse;
             }
             td {
                 border: 2px solid gray;
-                width: 14px;
-                height: 8px;
+                width: 56px;
+                height: 32px;
             }
+            td.active {
+                background-color: red;
+            }
+
+            progress[value] {
+                -webkit-appearance: none !important;
+                -moz-appearance: none !important;
+                appearance: none !important;
+                border: none; }
+            progress[value]::-webkit-progress-bar {
+                background-color: lightgray; }
+            progress[value]::-moz-progress-bar {
+                background-color: lightgray; }
+            progress[value]::-webkit-progress-value {
+                background-color: limegreen; }
+            progress[value].paused::-webkit-progress-value {
+                background-color: darkgreen; }
+
         </style>
 
 
     </head>
     <body>
-        <script src="jquery-3.3.1.min.js"></script>
+        <script src="lib/jquery-3.3.1.min.js"></script>
         <script src="CountdownTimer.js"></script>
 
         <script>
             $(document).ready(function () {
 
-                var countdown = new CountdownTimer(5000);
+                var countdown = new CountdownTimer(10 * 1000);
                 countdown.textElement = $("#countdown-text");
                 countdown.progressElement = $("progress");
                 countdown.dotsElement = $("table");
-                
-                $("button").on("click", function () {
-                    countdown.start();
-                });
+
+                $("button#start").on("click", () => countdown.start());
+                $("button#toggle-pause").on("click", () => countdown.togglePaused());
+                $("button#reset").on("click", () => countdown.reset());
 
             });
         </script>
 
         <div id="countdown-text">countdown text goes here</div>
-
+        <br>    
         <progress value="1" style="width:100%"></progress>
-
+        <p></p>
         <table class="countdown-dots"><tr>
                 <td data-countdown="5"></td><td data-countdown="4"></td>
                 <td data-countdown="3"></td><td data-countdown="2"></td>
@@ -49,8 +74,10 @@
                 <td data-countdown="2"></td><td data-countdown="3"></td>
                 <td data-countdown="4"></td><td data-countdown="5"></td>
             </tr></table>
-
-        <button>start</button>
+        <br>
+        <button id="start">start</button>
+        <button id="toggle-pause">pause/unpause</button>
+        <button id="reset">reset</button>
 
     </body>
 </html>
