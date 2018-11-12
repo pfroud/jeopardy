@@ -118,7 +118,7 @@ class Operator {
 
 
         } else {
-            teamObj.moneySubtract(clueObj.value);
+            teamObj.moneySubtract(clueObj.value * SETTINGS.incorrectAnswerPenaltyMultiplier);
             this.audioAnswerIncorrect.play();
 
             teamObj.setIsAnswering(false);

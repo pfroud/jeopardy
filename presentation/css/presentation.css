@@ -18,6 +18,22 @@ div#slideJeopardyLogo {
     bottom: 0;
     margin: auto; }
 
+div#slideGameRules {
+  font-size: 30px;
+  font-weight: bold;
+  line-height: 150%;
+  text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black; }
+  div#slideGameRules li {
+    margin-bottom: 25px; }
+
+div#slideBuzzerTest {
+  font-size: 90px;
+  font-family: Korinna;
+  text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-align: center; }
+
 img#logo-jeopardy-shadow {
   z-index: -1;
   filter: brightness(0) blur(2px) opacity(0.6);

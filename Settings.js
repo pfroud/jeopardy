@@ -8,6 +8,8 @@ class Settings {
         this.answerTimeout = 5 * 1000;
         
         this.lockoutDuration = 3 * 1000;
+        
+        this.incorrectAnswerPenaltyMultiplier = 0.5; // 1 for the TV show, 0 for no guessing penalty
 
         this.isAllowedMultipleTries = false;
 

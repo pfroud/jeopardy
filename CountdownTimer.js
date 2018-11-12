@@ -107,7 +107,7 @@ class CountdownTimer {
 
         this.dotsElement && this.dotsElement.find("td").removeClass("active");
 
-        this.progressElement && this.progressElement.attr("value", this.durationMs);
+        this.progressElement && this.progressElement.attr("value", this.durationMs).hide();
         this.textElement && this.textElement.html((this.durationMs / 1000).toFixed(1));
 
     }
