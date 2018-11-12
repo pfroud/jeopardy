@@ -198,7 +198,7 @@ class CountdownTimer {
         this.textElement && this.textElement.html("done");
         clearInterval(this.intervalID);
 
-//        this.progressElement && this.progressElement.hide();
+        this.progressElement && this.progressElement.hide();
         this.onFinished && this.onFinished();
     }
 

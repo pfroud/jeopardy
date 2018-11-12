@@ -94,13 +94,13 @@ progress[value] {
 
 
     &::-webkit-progress-bar{
-        // backgroudn of bar in Chrome
+        // background of bar in Chrome
         background-color: lightgray;
     }
 
     &::-moz-progress-bar {
         // foreground of bar in Firefox
-        background-color: lightgray;
+        background-color: limegreen;
     }
 
     &::-webkit-progress-value {
@@ -113,7 +113,39 @@ progress[value] {
             // foreground of bar in Chrome
             background-color: darkgreen;
         }
+
+        &::-moz-progress-bar {
+            // foreground of bar in Firefox
+            background-color: darkgreen;
+        }
     }
+
+    &.lockout {
+
+        &::-moz-progress-bar {
+            // foreground of bar in Firefox
+            background-color: red;
+        }
+
+        &::-webkit-progress-value {
+            // foreground of bar in Chrome
+            background-color: red;
+        }
+
+        &.paused {
+            &::-webkit-progress-value {
+                // foreground of bar in Chrome
+                background-color: darkred;
+            }
+
+            &::-moz-progress-bar {
+                // foreground of bar in Firefox
+                background-color: darkred;
+            }
+        }
+    }
+
+
 
 }
 

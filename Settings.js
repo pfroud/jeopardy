@@ -6,6 +6,8 @@ class Settings {
 
         this.questionTimeout = 10 * 1000;
         this.answerTimeout = 5 * 1000;
+        
+        this.lockoutDuration = 3 * 1000;
 
         this.isAllowedMultipleTries = false;
 

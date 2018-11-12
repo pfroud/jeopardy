@@ -52,7 +52,7 @@ class Operator {
                 case "2":
                 case "3":
                 case "4":
-                    const teamIdx = Number(event.key) - 1; //team zero buzzes by pressing key for digit one
+                    const teamIdx = Number(event.key) - 1; //team zero buzzes by pressing the key for digit one
                     this.handleBuzzerPress(teamIdx);
                     break;
 
@@ -235,9 +235,34 @@ class Operator {
             teamObj.buzzerTestShow();
         } else {
 
-
-            if (!this.isClueQuestionAnswerable || this.isPaused || this.isATeamAnswering) {
+            if (this.isPaused) {
                 return;
+            }
+
+            if (this.isClueQuestionBeingRead || (this.isATeamAnswering && this.answeringTeam !== teamObj)) {
+
+                if (!teamObj.isLockedOut) {
+
+                    // do lockout
+                    teamObj.setLockout(true);
+
+                    teamObj.operatorProgress.addClass("lockout");
+
+                    var countdownLockout = new CountdownTimer(SETTINGS.lockoutDuration);
+                    countdownLockout.progressElement = teamObj.operatorProgress;
+                    countdownLockout.onFinished = endLockout;
+//                countdownLockout.onPause = () => this.pause();
+//                countdownLockout.onResume = () => this.resume();
+                    countdownLockout.start();
+
+                    return;
+
+                    function endLockout() {
+                        teamObj.setLockout(false);
+                        teamObj.operatorProgress.removeClass("lockout");
+                    }
+
+                }
             }
 
 
@@ -432,8 +457,11 @@ class Operator {
 
     setAllBuzzersIsOpen(isOpen) {
         this.teamArray.forEach(team => {
-            team.setBuzzerOpen(isOpen);
+            if (!team.isLockedOut) {
+                team.setBuzzerOpen(isOpen);
+            }
             team.hasAnswered = false;
+
         });
     }
 

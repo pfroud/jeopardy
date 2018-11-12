@@ -7,6 +7,7 @@ class Team {
         this.isAnswering = false;
         this.hasAnswered = false; // TODO probably rename this `hasAnsweredThisRound`
         this.isBuzzerOpen = false;
+        this.isLockedOut = false;
 
         this.operatorProgress = null; //TODO give this a better name
         this.presentationCountdownDots = null;
@@ -73,6 +74,13 @@ class Team {
         this.div.presentation.wrapper.toggleClass("buzzer-closed", !isOpen);
         this.div.operator.state.html("buzzer " + (isOpen ? "open" : "closed"));
     }
+    
+    setLockout(isLocked) {
+        this.isLockedOut = isLocked;
+        this.isBuzzerOpen = !isLocked;
+        this.div.presentation.wrapper.toggleClass("buzzer-closed", isLocked);
+        this.div.operator.state.html(isLocked ? "lockout!" : "buzzer open");
+    }
 
     buzzerTestShow() {
         this.presentationCountdownDots.find("td").addClass("active");
@@ -84,7 +92,7 @@ class Team {
         this.div.operator.state.html("up");
     }
     
-    /*
+    /* 
     dumpJson(){
         return {};
     }
