@@ -1,12 +1,17 @@
 var SETTINGS;
 var operatorInstance;
 
+var stateMachine;
+var audioManager;
+
 $(document).ready(function () {
     SETTINGS = new Settings();
+    audioManager = new AudioManager();
     if (window.location.search.length < 1) {
         operatorInstance = new Operator();
     }
     initKeyboardShortcuts();
+    stateMachine = new StateMachine();
 });
 
 function initKeyboardShortcuts() {

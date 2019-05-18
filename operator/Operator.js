@@ -2,6 +2,8 @@
 
 const NUM_TEAMS = 4;
 
+var pres;
+
 class Operator {
 
     constructor() {
@@ -15,32 +17,19 @@ class Operator {
         this.trQuestion = $("tr#question");
         this.trAnswer = $("tr#answer");
         this.divPaused = $("div#paused");
-
-        this.audioAnswerCorrect = $("audio#answer-correct")[0];
-        this.audioAnswerIncorrect = $("audio#answer-incorrect")[0];
-        this.audioMusicOpening = $("audio#music-opening")[0];
-        this.audioQuestionTimeout = $("audio#question-timeout")[0];
-        this.audioRoundEnd = $("audio#round-end")[0];
-        this.audioTeamBuzz = $("audio#team-buzz")[0];
+        this.divInstructions = $("div#instructions");
 
         this.progressPrimary = $("progress#primary");
 
-        this.divInstructions = $("div#instructions");
 
         this.currentClueObj = null;
         this.currentCountdownTimer = null;
 
         this.teamArray = new Array(NUM_TEAMS);
 
-        // TODO remove these booleans and use a state machine
-        this.hasInitializedTeams = false;
-        this.isClueQuestionAnswerable = false;
-        this.isClueQuestionBeingRead = false;
         this.isPaused = false;
-        this.isATeamAnswering = false;
 
-
-        this.initKeyboardListeners();
+//        this.initKeyboardListeners();
         this.initMouseListeners();
         window.open("../presentation/presentation.html", "windowPresentation");
     }
@@ -160,7 +149,7 @@ class Operator {
         $("button#teamsHide").click(() => this.presentationInstance.setTeamsVisible(false));
         $("button#teamsShow").click(() => this.presentationInstance.setTeamsVisible(true));
 
-        this.buttonStartGame = $("button#startGame").click(() => this.getClue());
+        this.buttonStartGame = $("button#startGame").click(() => stateMachine.startGame());
 
         $("button#buzzerTestStart").click(() => this.buzzerTestStart());
         $("button#buzzerTestStop").click(() => this.buzzerTestStop());
@@ -208,12 +197,17 @@ class Operator {
     handlePresentationReady(presentationInstance) {
         // called from Presentation instance in other window
         this.presentationInstance = presentationInstance;
+        pres = presentationInstance;
         this.initTeams();
+
+        this.buttonStartGame.prop("disabled", false);
+        this.divInstructions.html("Click button to start game");
+
     }
 
     initTeams() {
         if (!this.presentationInstance) {
-            console.warn("can't init teams because no Presentation instance");
+            console.log("can't init teams because no Presentation instance");
             return;
         }
 
@@ -222,10 +216,6 @@ class Operator {
             newTeam.setDivOperator($('div[data-team-number="' + i + '"]'));
             newTeam.setDivPresentation(this.presentationInstance.getTeamDiv(i));
         }
-        this.hasInitializedTeams = true;
-        this.buttonStartGame.prop("disabled", false);
-        this.divInstructions.html("Click button to start game");
-
         this.saveTeamNames();
     }
 
@@ -318,63 +308,63 @@ class Operator {
     }
 
     getClue() {
-        if (!this.hasInitializedTeams) {
-            console.warn("can't get clue because teams not initailzied");
-            return;
-        }
+        return new Promise((resolve, reject) => {
+            this.buttonStartGame.blur();
+            this.trQuestion.hide();
+            this.divInstructions.html("Loading clue...");
+            //        this.setAllBuzzersIsOpen(false);
 
-        this.buttonStartGame.blur();
-        this.trQuestion.hide();
-        this.divInstructions.html("Loading clue...");
-
-        this.presentationInstance.showSlideSpinner();
-
-        this.setAllBuzzersIsOpen(false);
-
-        $.getJSON("http://jservice.io/api/random", response => {
-            if (response.length < 1) {
-                console.warn("respones from jservice.io is empty");
-                return;
-            }
-
-            var clueObj = response[0];
-
-            if (!isClueValid(clueObj)) {
-                this.getClue();
-                return;
-            }
-
-            this.currentClueObj = clueObj;
-
-            this.divClueWrapper.show();
-            this.divClueCategory.html(clueObj.category.title);
-            this.divClueDollars.html("$" + clueObj.value);
-            this.trAnswer.hide();
+            $.getJSON("http://jservice.io/api/random", response => {
+                const clueObj = response[0];
+                this.currentClueObj = clueObj;
+                
+                this.divClueWrapper.show();
+                this.divClueCategory.html(clueObj.category.title);
+                this.divClueDollars.html("$" + clueObj.value);
+                this.trAnswer.hide();
+                this.presentationInstance.setClueObj(clueObj);
+//                this.presentationInstance.showSlidePreQuestion();
+                this.divInstructions.html("Read aloud the category and dollar value.");
+                
+                /*
+                var countdownShowCategory = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationCategory);
+                countdownShowCategory.progressElement = this.progressPrimary;
+                countdownShowCategory.onFinished = () => this.showClueQuestion(clueObj);
+                countdownShowCategory.onPause = () => this.pause();
+                countdownShowCategory.onResume = () => this.resume();
+                countdownShowCategory.start();
+                                        */
 
 
+                resolve(response[0]);
+            });
 
-            this.presentationInstance.setClueObj(clueObj);
-            this.presentationInstance.showSlidePreQuestion();
-
-            this.divInstructions.html("Read aloud the category and dollar value.");
-
-            var countdownShowCategory = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationCategory);
-            countdownShowCategory.progressElement = this.progressPrimary;
-            countdownShowCategory.onFinished = () => this.showClueQuestion(clueObj);
-            countdownShowCategory.onPause = () => this.pause();
-            countdownShowCategory.onResume = () => this.resume();
-            countdownShowCategory.start();
-
-            function isClueValid(clueObj) {
-                return clueObj.value !== null &&
-                        clueObj.question.length > 0 &&
-                        clueObj.answer.length > 0 &&
-                        clueObj.category !== null &&
-                        clueObj.category.title.length > 0
-                        ;
-            }
         });
     }
+    /*
+     
+     
+     
+     
+     if (!isClueValid(clueObj)) {
+     this.getClue();
+     return;
+     }
+     
+     
+     function isClueValid(clueObj) {
+     return clueObj.value !== null &&
+     clueObj.question.length > 0 &&
+     clueObj.answer.length > 0 &&
+     clueObj.category !== null &&
+     clueObj.category.title.length > 0
+     ;
+     }
+     //        });
+     }
+     */
+
+
 
     showClueQuestion(clueObj) {
         this.currentCountdownTimer = null;

@@ -16,7 +16,7 @@ class Presentation {
 
 
         this._initSlides();
-        
+
         this.showSlideJeopardyLogo();
 
         if (window.opener) {
@@ -30,9 +30,9 @@ class Presentation {
         this.slides = {};
         this.visibleSlide = null;
 
-        var slideNames = ["jeopardyLogo", "gameRules", "spinner",
+        var slideNames = this.slideNames = ["jeopardyLogo", "gameRules", "spinner",
             "preQuestion", "clueQuestion", "clueAnswer", "eventCost", "buzzerTest"];
-        
+
         slideNames.forEach(slideName => {
             var slideNameCap = capitalizeFirstLetter(slideName);
             this.slides[slideName] = $("div#slide" + slideNameCap);
