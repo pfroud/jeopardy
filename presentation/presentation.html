@@ -13,9 +13,7 @@
         <script src="Presentation.js"></script>
         <script>
             var presentationInstance;
-            $(document).ready(function () {
-                presentationInstance = new Presentation();
-            });
+            $(document).ready(() => presentationInstance = new Presentation());
         </script>
 
         <header>
@@ -36,7 +34,7 @@
 
             <div class="slide" id="slideGameRules">
                 <p>
-                Non-exhaustive list of rules. The word "you" means your entire team.
+                    Non-exhaustive list of rules. The word "you" means your entire team.
                 </p>
 
                 <ul>
@@ -63,6 +61,7 @@
                 <div id="spinner"></div>
             </div>
 
+           <!-- TODO rename slide to slidePreClue --> 
             <div class="slide" id="slidePreQuestion">
                 <div id="pre-question">
                     <div id="category-big"></div>

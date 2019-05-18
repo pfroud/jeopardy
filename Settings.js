@@ -1,13 +1,13 @@
 class Settings {
 
     constructor() {
-        this.displayDurationCategory = 3 * 1000;
+        this.displayDurationCategory = 4 * 1000;
         this.displayDurationAnswer = 3 * 1000;
 
         this.questionTimeout = 10 * 1000;
         this.answerTimeout = 5 * 1000;
         
-        this.lockoutDuration = 3 * 1000;
+        this.lockoutDuration = 2 * 1000;
         
         this.incorrectAnswerPenaltyMultiplier = 0.5; // 1 for the TV show, 0 for no guessing penalty
 
