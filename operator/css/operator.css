@@ -1,6 +1,13 @@
 body {
   font-family: sans-serif;
-  overflow-x: hidden; }
+  overflow-x: hidden;
+  font-size: 26px; }
+
+input, button {
+  font-size: 26px; }
+
+main {
+  line-height: 200%; }
 
 header {
   margin-bottom: 25px;
@@ -10,7 +17,6 @@ span.clue-keyword {
   font-weight: bold; }
 
 div#instructions {
-  font-size: 18px;
   font-weight: bold; }
 
 div#clue {
@@ -40,7 +46,7 @@ footer {
   align-items: stretch;
   width: 100%;
   position: absolute;
-  bottom: 5px;
+  bottom: 15px;
   height: 80px;
   border-top: 1px solid white; }
   footer div.team {

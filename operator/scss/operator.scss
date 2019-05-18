@@ -1,6 +1,17 @@
+
+$font-size: 26px;
 body {
     font-family: sans-serif;
     overflow-x: hidden;
+    font-size: $font-size;
+}
+
+input, button{
+    font-size: $font-size;
+}
+
+main {
+    line-height: 200%;
 }
 
 header {
@@ -13,7 +24,6 @@ span.clue-keyword {
 }
 
 div#instructions {
-    font-size: 18px;
     font-weight: bold;
 }
 
@@ -48,7 +58,7 @@ footer {
     align-items: stretch;
     width: 100%;
     position: absolute;
-    bottom: 5px;
+    bottom: 15px;
     height: 80px;
 
     border-top: 1px solid white;
