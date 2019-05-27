@@ -9,6 +9,7 @@ class StateMachine {
 
         this.initStates();
         this.validateStates();
+
         this.state = this.stateMap.idle;
     }
 
@@ -34,7 +35,7 @@ class StateMachine {
                 slide: "preQuestion",
                 transitions: [{
                         type: "timeout",
-                        duration: 4000, //replace with reference to Settings
+                        duration: 4000, //todo replace with reference to Settings
                         state: "showQuestion"
                     }]
             }, {
@@ -49,13 +50,13 @@ class StateMachine {
                 name: "waitForBuzz",
                 transitions: [{
                         type: "timeout",
-                        duration: 10 * 1000, //replace with reference to Settings
+                        duration: 10 * 1000, //todo replace with reference to Settings
                         state: "showAnswer"
                     }, {
                         type: "keyboard",
                         keys: "1234",
                         state: "waitForAnswer",
-                        fun: "handleKeyPressed" //something better needs to happen ehre
+                        fun: "handleKeyPressed" //todo something better needs to happen here
                     }]
             }, {
                 name: "waitForAnswer",
@@ -87,8 +88,8 @@ class StateMachine {
                 slide: "answer",
                 transitions: [{
                         type: "timeout",
-                        duration: "1000",
-                        slide: "fetchClue"
+                        duration: 1000,
+                        state: "fetchClue"
                     }]
             }
         ];
@@ -121,7 +122,7 @@ class StateMachine {
                 console.log(`calling method for state ${this.state.name} returned ${constructorName}, expected Promise`);
             }
 
-            // TODO make this search the array of transitions
+            // TODO make this search the array of transitions instead of always using index zero
             if (this.state.transitions[0].type === "promise") {
                 rv.then(returnedByPromise => {
                     console.log("returned by promise:");
@@ -156,6 +157,7 @@ class StateMachine {
             validateProp(name, index, obj, prop, "Array");
         }
 
+
         // pass one of two
         this.states.forEach(function (stateObj, index) {
             this.stateMap[stateObj.name] = stateObj;
@@ -167,28 +169,59 @@ class StateMachine {
         this.states.forEach(function (stateObj, stateIndex) {
             stateObj.transitions.forEach(function (transitionObj, transitionIndex) {
 
+                if (!transitionObj.state) {
+                    printWarning(stateObj.name, transitionIndex,
+                            "no destination state");
+                    return;
+                }
+
                 if (!(transitionObj.state in this.stateMap)) {
-                    console.log(`state "${stateObj.name}": transition ${transitionIndex}: unknown destination state "${transitionObj.state}"`);
+                    printWarning(stateObj.name, transitionIndex,
+                            `unknown destination state "${transitionObj.state}"`);
                 }
 
                 switch (transitionObj.type) {
                     case "timeout":
+                        const duration = transitionObj.duration;
+                        if (!Number.isInteger(duration)) {
+                            printWarning(stateObj.name, transitionIndex,
+                                    `duration for timeout transition is not an integer: ${duration}`);
+                        }
                         break;
+
                     case "keyboard":
+                        const keys = transitionObj.keys;
+                        if (!keys) {
+                            printWarning(stateObj.name, transitionIndex,
+                                    `no keys for keyboard transition`);
+                        }
                         break;
+
                     case "manual":
+                        // add function to state machine instance
                         this[transitionObj.name] = () => this._goToState(transitionObj.state);
                         break;
+
                     case "immediate":
+                        printWarning(stateObj.name, transitionIndex,
+                                "replace transition type immediate with promise");
                         break;
+
                     case "promise":
+                        // no further validation needed
                         break;
+
                     default:
-                        console.log(`state "${stateObj.name}": transition ${transitionIndex}: unknown type "${transitionObj.type}"`);
+                        printWarning(stateObj.name, transitionIndex,
+                                `unknown transition type "${transitionObj.type}"`);
                         break;
 
                 }
 
+
+                function printWarning(stateName, transitionIndex, message) {
+                    console.log(`state "${stateName}": transition ${transitionIndex}: ${message}`);
+                }
 
             }, this);
 
