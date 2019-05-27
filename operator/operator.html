@@ -50,7 +50,7 @@
 
                 <button id="startGame" disabled>Start game</button>
 
-                <div id="instructions">waiting for presentation window</div>
+                <div id="instructions">waiting for presentation window...</div>
 
 
 
@@ -78,10 +78,18 @@
 
 
                 </div>
+                
+                 <p><button id="skipClue">Skip clue</button></p>
 
-                <progress style="display:none" id="primary"></progress>
+                <div id="state-machine-viz">
+                    <hr>
+                    Current state:<br>
+                    <progress id="countdown"></progress>
+                    <div id="state-name">not initialized...</div>
+                    <div id="remaining">0.0</div>
+                </div>
 
-                <p><button id="skipClue">Skip clue</button></p>
+               
                 <!--<p><button>save game to localstorage - not impl.</button></p>-->
 
             </div>

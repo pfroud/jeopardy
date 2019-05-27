@@ -87,7 +87,7 @@ class CountdownTimer {
     _guiSetPaused(isPaused) {
         this.progressElement && this.progressElement.toggleClass("paused", isPaused);
         this.dotsElement && this.dotsElement.toggleClass("paused", isPaused);
-        this.textElement && this.dotsElement.toggleClass("paused", isPaused);
+        this.textElement && this.textElement.toggleClass("paused", isPaused);
     }
 
     reset() {
@@ -198,7 +198,7 @@ class CountdownTimer {
         this.textElement && this.textElement.html("done");
         clearInterval(this.intervalID);
 
-        this.progressElement && this.progressElement.hide();
+//        this.progressElement && this.progressElement.hide();
         this.onFinished && this.onFinished();
     }
 

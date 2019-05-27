@@ -39,6 +39,8 @@ class Presentation {
 
             // Add method to self so you can call showSlideFoo() instead of showSlide("foo")
             // https://stackoverflow.com/a/32498473
+            
+            // TODO don't do this http://jamie-wong.com/2013/07/12/grep-test/
             this["showSlide" + slideNameCap] = function () {
                 this.showSlide(slideName);
             };

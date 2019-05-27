@@ -4,16 +4,30 @@ class StateMachine {
 
     constructor() {
 
+        this.countdownProgress = $("div#state-machine-viz progress#countdown");
+        this.countdownText = $("div#state-machine-viz div#remaining");
+        this.divStateName = $("div#state-machine-viz div#state-name");
 
-        this.stateMap = [];
+        this.stateMap = {};
+        this.manualTriggerMap = {};
 
-        this.initStates();
-        this.validateStates();
+        this._initStates();
+        this._validateStates();
 
-        this.state = this.stateMap.idle;
+        this._goToState("idle");
+
+//        this.state = this.stateMap.idle;
     }
 
-    initStates() {
+    _startCountdown(durationMs, destinationStateName) {
+        const countdownTimer = new CountdownTimer(durationMs);
+        countdownTimer.progressElement = this.countdownProgress;
+        countdownTimer.textElement = this.countdownText;
+        countdownTimer.onFinished = () => this._goToState(destinationStateName);
+        countdownTimer.start();
+    }
+
+    _initStates() {
         this.states = [
             {
                 name: "idle",
@@ -25,7 +39,7 @@ class StateMachine {
             }, {
                 name: "fetchClue",
                 slide: "spinner",
-                call: operatorInstance.getClue,
+                onEnter: operatorInstance.getClue,
                 transitions: [{
                         type: "promise",
                         state: "showCategoryAndDollars"
@@ -40,7 +54,7 @@ class StateMachine {
                     }]
             }, {
                 name: "showQuestion",
-                slide: "question",
+                slide: "clueQuestion",
                 transitions: [{
                         type: "keyboard",
                         keys: " ", //space
@@ -72,20 +86,20 @@ class StateMachine {
             }, {
                 name: "addMoney",
                 transitions: [{
-                        type: "immediate",
+                        type: "promise",
                         state: "showAnswer",
                         fun: "add the money, somehow"
                     }]
             }, {
                 name: "subtractMoney",
                 transitions: [{
-                        type: "immediate",
+                        type: "promise",
                         state: "showAnswer",
                         fun: "add the money, somehow"
                     }]
             }, {
                 name: "showAnswer",
-                slide: "answer",
+                slide: "clueAnswer",
                 transitions: [{
                         type: "timeout",
                         duration: 1000,
@@ -95,46 +109,80 @@ class StateMachine {
         ];
     }
 
+    manualTrigger(triggerName) {
+        if (triggerName in this.manualTriggerMap) {
+            const transitionObj = this.manualTriggerMap[triggerName];
+            this._goToState(transitionObj.state);
+        } else {
+            console.warn(`manual trigger failed: trigger "${triggerName}" not in map of known triggers`);
+        }
+
+    }
+
     _goToState(stateName) {
 
         if (!(stateName in this.stateMap)) {
-            throw new Error(`can't go to state named "$stateName", state not found`);
+            throw new Error(`can't go to state named "${stateName}", state not found`);
         }
 
         this.state = this.stateMap[stateName];
-        if (this.state.slide) {
-            if (pres.slideNames.includes(this.state.slide)) {
-                pres.showSlide(this.state.slide);
-            } else {
-                throw new Error(`entering state ${this.state.slide.name}: can't present slide ${this.state.slide}, slide not found`);
+
+        this.divStateName.html(stateName);
+
+        handleSlide.call(this);
+        handleOnEnter.call(this);
+        handleTimeoutTransition.call(this);
+
+        function handleSlide() {
+            if (this.state.slide) {
+                if (pres.slideNames.includes(this.state.slide)) {
+                    pres.showSlide(this.state.slide);
+                } else {
+                    console.warn(`entering state "${this.state.name}": can't present slide "${this.state.slide}", slide not found`);
+                }
             }
         }
 
-        if (this.state.call) {
+        function handleOnEnter() {
+            if (this.state.onEnter) {
 
-            const rv = this.state.call.call(operatorInstance); //todo make this not suck. need function.call to set value of 'this'
+                const functionToCall = this.state.onEnter;
+                const rv = functionToCall.call(operatorInstance); //todo don't use global reference to operator instnace!
 
-            if (!rv) {
-                console.log(`calling method for state ${this.state.name} returned undefined, expected Promise`);
+                if (!rv) {
+                    console.log(`calling method for state ${this.state.name} returned void, expected Promise`);
+                }
+                const constructorName = rv.constructor.name;
+                if (constructorName !== "Promise") {
+                    console.log(`calling method for state ${this.state.name} returned ${constructorName}, expected Promise`);
+                }
+
+                // TODO make this search the array of transitions instead of always using index zero
+                if (this.state.transitions[0].type === "promise") {
+                    rv.then(
+                            () => this._goToState(this.state.transitions[0].state)
+                    ).catch(
+                            returnedByPromise => {
+                                console.warn("promise rejected:");
+                                throw returnedByPromise;
+                            }
+                    );
+                } else {
+                    // not sure what to do
+                }
             }
-            const constructorName = rv.constructor.name;
-            if (constructorName !== "Promise") {
-                console.log(`calling method for state ${this.state.name} returned ${constructorName}, expected Promise`);
-            }
+        }
 
-            // TODO make this search the array of transitions instead of always using index zero
-            if (this.state.transitions[0].type === "promise") {
-                rv.then(returnedByPromise => {
-                    console.log("returned by promise:");
-                    console.log(returnedByPromise);
-                    this._goToState(this.state.transitions[0].state);
-                });
+        function handleTimeoutTransition() {
+            // todo make this search for timeout transition instead of using index zero
+            const transitionZero = this.state.transitions[0];
+            if (transitionZero.type === "timeout") {
+                this._startCountdown(transitionZero.duration, transitionZero.state);
             }
-
         }
     }
 
-    validateStates() {
+    _validateStates() {
 
         function validateProp(name, index, obj, prop, expectedType) {
             if (!prop in obj) {
@@ -198,8 +246,7 @@ class StateMachine {
                         break;
 
                     case "manual":
-                        // add function to state machine instance
-                        this[transitionObj.name] = () => this._goToState(transitionObj.state);
+                        this.manualTriggerMap[transitionObj.name] = transitionObj;
                         break;
 
                     case "immediate":

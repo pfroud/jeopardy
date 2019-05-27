@@ -1,4 +1,4 @@
-/* global SETTINGS, fsm */
+/* global SETTINGS, fsm, stateMachine */
 
 const NUM_TEAMS = 4;
 
@@ -19,12 +19,7 @@ class Operator {
         this.divPaused = $("div#paused");
         this.divInstructions = $("div#instructions");
 
-        this.progressPrimary = $("progress#primary");
-
-
         this.currentClueObj = null;
-        this.currentCountdownTimer = null;
-
         this.teamArray = new Array(NUM_TEAMS);
 
         this.isPaused = false;
@@ -143,19 +138,23 @@ class Operator {
     }
 
     initMouseListeners() {
-        $("button#goToGameRules").click(() => this.presentationInstance.showSlideGameRules());
-        $("button#goToJeopardyLogo").click(() => this.presentationInstance.showSlideJeopardyLogo());
-        $("button#goToEventCost").click(() => this.presentationInstance.showSlideEventCost());
-        $("button#teamsHide").click(() => this.presentationInstance.setTeamsVisible(false));
-        $("button#teamsShow").click(() => this.presentationInstance.setTeamsVisible(true));
+        /*
+         $("button#goToGameRules").click(() => this.presentationInstance.showSlideGameRules());
+         $("button#goToJeopardyLogo").click(() => this.presentationInstance.showSlideJeopardyLogo());
+         $("button#goToEventCost").click(() => this.presentationInstance.showSlideEventCost());
+         $("button#teamsHide").click(() => this.presentationInstance.setTeamsVisible(false));
+         $("button#teamsShow").click(() => this.presentationInstance.setTeamsVisible(true));
+         */
 
-        this.buttonStartGame = $("button#startGame").click(() => stateMachine.startGame());
+        this.buttonStartGame = $("button#startGame").click(() => stateMachine.manualTrigger("startGame"));
 
-        $("button#buzzerTestStart").click(() => this.buzzerTestStart());
-        $("button#buzzerTestStop").click(() => this.buzzerTestStop());
-
-        $("button#saveTeamNames").click(() => this.saveTeamNames());
-        this.buttonSkipClue = $("button#skipClue").click(() => this.skipClue());
+        /*
+         $("button#buzzerTestStart").click(() => this.buzzerTestStart());
+         $("button#buzzerTestStop").click(() => this.buzzerTestStop());
+         
+         $("button#saveTeamNames").click(() => this.saveTeamNames());
+         this.buttonSkipClue = $("button#skipClue").click(() => this.skipClue());
+         */
     }
 
     buzzerTestStart() {
@@ -316,8 +315,9 @@ class Operator {
 
             $.getJSON("http://jservice.io/api/random", response => {
                 const clueObj = response[0];
+                // todo ensure the response isn't messed up
                 this.currentClueObj = clueObj;
-                
+
                 this.divClueWrapper.show();
                 this.divClueCategory.html(clueObj.category.title);
                 this.divClueDollars.html("$" + clueObj.value);
@@ -325,15 +325,15 @@ class Operator {
                 this.presentationInstance.setClueObj(clueObj);
 //                this.presentationInstance.showSlidePreQuestion();
                 this.divInstructions.html("Read aloud the category and dollar value.");
-                
+
                 /*
-                var countdownShowCategory = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationCategory);
-                countdownShowCategory.progressElement = this.progressPrimary;
-                countdownShowCategory.onFinished = () => this.showClueQuestion(clueObj);
-                countdownShowCategory.onPause = () => this.pause();
-                countdownShowCategory.onResume = () => this.resume();
-                countdownShowCategory.start();
-                                        */
+                 var countdownShowCategory = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationCategory);
+                 countdownShowCategory.progressElement = this.progressPrimary;
+                 countdownShowCategory.onFinished = () => this.showClueQuestion(clueObj);
+                 countdownShowCategory.onPause = () => this.pause();
+                 countdownShowCategory.onResume = () => this.resume();
+                 countdownShowCategory.start();
+                 */
 
 
                 resolve(response[0]);

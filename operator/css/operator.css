@@ -11,7 +11,7 @@ main {
 
 header {
   margin-bottom: 25px;
-  font-size: 20px; }
+  font-size: 40px; }
 
 span.clue-keyword {
   font-weight: bold; }
@@ -24,8 +24,14 @@ div#clue {
   border-radius: 30px;
   padding: 20px; }
 
-progress#primary {
+div#state-machine-viz progress#countdown {
   width: 100%; }
+div#state-machine-viz div {
+  line-height: 100%;
+  margin-top: -40px;
+  font-size: 26px; }
+  div#state-machine-viz div#remaining {
+    text-align: right; }
 
 div#paused {
   background-color: #ffa900;
@@ -64,7 +70,7 @@ span.key-shortcut-letter {
 table#tableSettings input[type="number"] {
   width: 60px; }
 
-progress[value] {
+progress {
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
   appearance: none !important;
@@ -87,6 +93,8 @@ progress[value] {
     background-color: darkred; }
   progress[value].lockout.paused::-moz-progress-bar {
     background-color: darkred; }
+  progress:not([value])::-webkit-progress-bar {
+    background-image: repeating-linear-gradient(-45deg, #ddd, #ddd 10px, #eee 10px, #eee 20px); }
 
 audio {
   display: none; }
