@@ -30,13 +30,13 @@ class Operator {
     }
 
     initKeyboardListeners() {
-        window.addEventListener("keydown", event => {
-            switch (event.key) {
+        window.addEventListener("keydown", keyboardevent => {
+            switch (keyboardevent.key) {
                 case "1":
                 case "2":
                 case "3":
                 case "4":
-                    const teamIdx = Number(event.key) - 1; //team zero buzzes by pressing the key for digit one
+                    const teamIdx = Number(keyboardevent.key) - 1; //team zero buzzes by pressing the key for digit one
                     this.handleBuzzerPress(teamIdx);
                     break;
 
@@ -67,6 +67,27 @@ class Operator {
                     this.handleBuzzerRelease(teamIdx);
                     break;
             }
+        });
+    }
+
+    handleAnswerRight() {
+        return new Promise((resolve, reject) => {
+            const teamObj = this.answeringTeam;
+            const clueObj = this.currentClueObj;
+            teamObj.setIsAnswering(false);
+            teamObj.moneyAdd(clueObj.value);
+            resolve();
+        });
+    }
+
+    handleAnswerWrong() {
+        return new Promise((resolve, reject) => {
+            var teamObj = this.answeringTeam;
+            var clueObj = this.currentClueObj;
+            teamObj.setIsAnswering(false);
+            teamObj.moneySubtract(clueObj.value * SETTINGS.incorrectAnswerPenaltyMultiplier);
+            teamObj.setBuzzerOpen(SETTINGS.isAllowedMultipleTries);
+            resolve();
         });
     }
 
@@ -218,6 +239,18 @@ class Operator {
         this.saveTeamNames();
     }
 
+    handleBuzzerPressNew(keyboardEvent) {
+        const teamIndex = Number(keyboardEvent.key) - 1;
+        const teamObj = this.teamArray[teamIndex];
+//        this.audioTeamBuzz.play();
+
+        this.answeringTeam = teamObj;
+
+        teamObj.setIsAnswering(true);
+
+        this.divInstructions.html("Did they answer correctly? y / n");
+    }
+
     handleBuzzerPress(teamIdx) {
         const teamObj = this.teamArray[teamIdx];
         if (this.buzzerTest) {
@@ -366,18 +399,27 @@ class Operator {
 
 
 
-    showClueQuestion(clueObj) {
-        this.currentCountdownTimer = null;
-        this.presentationInstance.showSlideClueQuestion();
+    showClueQuestion() {
+//        this.currentCountdownTimer = null;
+//        this.presentationInstance.showSlideClueQuestion();
 
+        this.teamArray.forEach(team => {
+            /*
+             if (!team.isLockedOut) {
+             team.setBuzzerOpen(isOpen);
+             }
+             */
+            team.hasAnswered = false;
+
+        });
 
         this.divInstructions.html("Read aloud the question. Buzzers open when you press space");
 
-        this.divClueQuestion.html(getClueQuestionHtml(clueObj));
+        this.divClueQuestion.html(getClueQuestionHtml(this.currentClueObj));
         this.trQuestion.show();
         this.trAnswer.hide();
 
-        this.isClueQuestionBeingRead = true;
+//        this.isClueQuestionBeingRead = true;
         // then wait for spacebar to be pressed. that calls handleDoneReadingClueQuestion()
 
         function getClueQuestionHtml(clueObj) {
@@ -397,6 +439,22 @@ class Operator {
             }
         }
 
+    }
+
+    handleDoneReadingClueQuestionNew() {
+        this.trAnswer.show();
+        this.divClueAnswer.html(this.currentClueObj.answer);
+        this.divInstructions.html("Wait for people to answer");
+    }
+
+    canTeamBuzz(keyboardEvent) {
+        const teamIndex = Number(keyboardEvent.key) - 1;
+        const teamObj = this.teamArray[teamIndex];
+        return !teamObj.hasAnswered;
+    }
+
+    haveAllTeamsAnswered() {
+        return this.teamArray.every(teamObj => teamObj.hasAnswered);
     }
 
     handleDoneReadingClueQuestion() {

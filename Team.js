@@ -67,6 +67,7 @@ class Team {
         this.hasAnswered = true;
         this.div.operator.state.html(isAnswering ? "answering" : "not answering");
         this.div.operator.wrapper.toggleClass("answering", isAnswering);
+        this.div.presentation.wrapper.toggleClass("answering", isAnswering);
     }
 
     setBuzzerOpen(isOpen) {

@@ -122,6 +122,9 @@ footer {
     flex: 1; }
     footer div.team.buzzer-closed {
       opacity: 0.4; }
+    footer div.team.answering {
+      background-color: rgba(255, 255, 255, 0.3);
+      font-weight: bold; }
     footer div.team div.team-dollars {
       font-family: swiss911;
       font-size: 30px;

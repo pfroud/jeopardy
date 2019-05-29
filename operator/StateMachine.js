@@ -1,8 +1,10 @@
-/* global pres, operatorInstance */
+/* global pres, operatorInstance, Function */
 
 class StateMachine {
 
     constructor() {
+
+        this.DEBUG = true;
 
         this.countdownProgress = $("div#state-machine-viz progress#countdown");
         this.countdownText = $("div#state-machine-viz div#remaining");
@@ -10,6 +12,10 @@ class StateMachine {
 
         this.stateMap = {};
         this.manualTriggerMap = {};
+
+        window.addEventListener("keydown", keyboardEvent => this._handleKeyboardEvent(keyboardEvent));
+
+        this.countdownTimer = null;
 
         this._initStates();
         this._validateStates();
@@ -19,8 +25,32 @@ class StateMachine {
 //        this.state = this.stateMap.idle;
     }
 
-    _startCountdown(durationMs, destinationStateName) {
-        const countdownTimer = new CountdownTimer(durationMs);
+    _handleKeyboardEvent(keyboardEvent) {
+        const transitionArray = this.state.transitions;
+        for (var i = 0; i < transitionArray.length; i++) {
+            const transitionObj = transitionArray[i];
+            if (transitionObj.type === "keyboard" && transitionObj.keys.includes(keyboardEvent.key)) {
+
+                const hasCondition = Boolean(transitionObj.condition);
+                if (hasCondition) {
+                    if (transitionObj.condition.call(operatorInstance, keyboardEvent)) {
+                        this._goToState(transitionObj.state, keyboardEvent);
+                    }
+                    
+                } else {
+                    this._goToState(transitionObj.state, keyboardEvent);
+                }
+
+                break;
+            }
+        }
+    }
+
+    _startCountdown(transitionObj) {
+        const durationMs = transitionObj.duration;
+        const destinationStateName = transitionObj.state;
+
+        var countdownTimer = this.countdownTimer = new CountdownTimer(durationMs);
         countdownTimer.progressElement = this.countdownProgress;
         countdownTimer.textElement = this.countdownText;
         countdownTimer.onFinished = () => this._goToState(destinationStateName);
@@ -55,25 +85,28 @@ class StateMachine {
             }, {
                 name: "showQuestion",
                 slide: "clueQuestion",
+                onEnter: operatorInstance.showClueQuestion,
                 transitions: [{
                         type: "keyboard",
                         keys: " ", //space
-                        state: "waitForBuzz"
+                        state: "waitForBuzzes"
                     }]
             }, {
-                name: "waitForBuzz",
+                name: "waitForBuzzes",
+                onEnter: operatorInstance.handleDoneReadingClueQuestionNew,
                 transitions: [{
                         type: "timeout",
                         duration: 10 * 1000, //todo replace with reference to Settings
                         state: "showAnswer"
                     }, {
                         type: "keyboard",
+                        condition: operatorInstance.canTeamBuzz,
                         keys: "1234",
-                        state: "waitForAnswer",
-                        fun: "handleKeyPressed" //todo something better needs to happen here
+                        state: "waitForTeamAnswer"
                     }]
             }, {
-                name: "waitForAnswer",
+                name: "waitForTeamAnswer",
+                onEnter: operatorInstance.handleBuzzerPressNew,
                 transitions: [{
                         type: "keyboard",
                         keys: "y",
@@ -82,27 +115,34 @@ class StateMachine {
                         type: "keyboard",
                         keys: "n",
                         state: "subtractMoney"
-                    }]
+                    }, {
+                        type: "timeout",
+                        duration: 3000, //todo replace with refrence to settings
+                        state: "subtractMoney"
+                    }
+                ]
             }, {
                 name: "addMoney",
+                onEnter: operatorInstance.handleAnswerRight,
                 transitions: [{
                         type: "promise",
-                        state: "showAnswer",
-                        fun: "add the money, somehow"
+                        state: "showAnswer"
                     }]
             }, {
                 name: "subtractMoney",
+                onEnter: operatorInstance.handleAnswerWrong,
                 transitions: [{
-                        type: "promise",
-                        state: "showAnswer",
-                        fun: "add the money, somehow"
+                        type: "if",
+                        condition: operatorInstance.haveAllTeamsAnswered,
+                        then: "showAnswer",
+                        else: "waitForBuzzes"
                     }]
             }, {
                 name: "showAnswer",
                 slide: "clueAnswer",
                 transitions: [{
                         type: "timeout",
-                        duration: 1000,
+                        duration: 2000,
                         state: "fetchClue"
                     }]
             }
@@ -119,19 +159,35 @@ class StateMachine {
 
     }
 
-    _goToState(stateName) {
+    _goToState(stateName, paramsToPassToFunctionToCall) {
 
         if (!(stateName in this.stateMap)) {
             throw new Error(`can't go to state named "${stateName}", state not found`);
         }
 
-        this.state = this.stateMap[stateName];
+        if (this.countdownTimer) {
+            this.countdownTimer.pause();
+        }
 
+        if(this.DEBUG){
+            console.log(`going to state "${stateName}"`);
+        }
+
+        this.state = this.stateMap[stateName];
         this.divStateName.html(stateName);
 
         handleSlide.call(this);
         handleOnEnter.call(this);
         handleTimeoutTransition.call(this);
+
+        const transitionZero = this.state.transitions[0];
+        if (transitionZero.type === "if") {
+            if (transitionZero.condition.call(operatorInstance, paramsToPassToFunctionToCall)) {
+                this._goToState(transitionZero.then);
+            } else {
+                this._goToState(transitionZero.else);
+            }
+        }
 
         function handleSlide() {
             if (this.state.slide) {
@@ -147,37 +203,49 @@ class StateMachine {
             if (this.state.onEnter) {
 
                 const functionToCall = this.state.onEnter;
-                const rv = functionToCall.call(operatorInstance); //todo don't use global reference to operator instnace!
 
-                if (!rv) {
-                    console.log(`calling method for state ${this.state.name} returned void, expected Promise`);
-                }
-                const constructorName = rv.constructor.name;
-                if (constructorName !== "Promise") {
-                    console.log(`calling method for state ${this.state.name} returned ${constructorName}, expected Promise`);
+                if (!(functionToCall instanceof Function)) {
+                    console.info(`state "${this.state.name}": cannot call onEnter function "${functionToCall}", not a function`);
+                    return;
                 }
 
-                // TODO make this search the array of transitions instead of always using index zero
-                if (this.state.transitions[0].type === "promise") {
-                    rv.then(
-                            () => this._goToState(this.state.transitions[0].state)
-                    ).catch(
-                            returnedByPromise => {
-                                console.warn("promise rejected:");
-                                throw returnedByPromise;
-                            }
-                    );
-                } else {
-                    // not sure what to do
+                //todo don't use global reference to operator instnace!
+                const rv = functionToCall.call(operatorInstance, paramsToPassToFunctionToCall);
+
+                if (rv && rv.constructor.name === "Promise") {
+
+                    const transitionArray = this.state.transitions;
+                    for (var i = 0; i < transitionArray.length; i++) {
+                        const transitionObj = transitionArray[i];
+                        if (transitionObj.type === "promise") {
+                            rv.then(
+                                    () => this._goToState(transitionObj.state)
+                            ).catch(
+                                    returnedByPromise => {
+                                        console.warn("promise rejected:");
+                                        throw returnedByPromise;
+                                    }
+                            );
+                            break;
+                        }
+                    }
+
+
+
+
                 }
             }
         }
 
         function handleTimeoutTransition() {
-            // todo make this search for timeout transition instead of using index zero
-            const transitionZero = this.state.transitions[0];
-            if (transitionZero.type === "timeout") {
-                this._startCountdown(transitionZero.duration, transitionZero.state);
+            const transitionArray = this.state.transitions;
+            for (var i = 0; i < transitionArray.length; i++) {
+                const transitionObj = transitionArray[i];
+                if (transitionObj.type === "timeout") {
+                    this._startCountdown(transitionObj);
+                    this.divStateName.html(stateName + " &rarr; " + transitionObj.state);
+                    break;
+                }
             }
         }
     }
@@ -243,6 +311,7 @@ class StateMachine {
                             printWarning(stateObj.name, transitionIndex,
                                     `no keys for keyboard transition`);
                         }
+                        // todo validate no keys are in multiple transitions
                         break;
 
                     case "manual":
@@ -256,6 +325,10 @@ class StateMachine {
 
                     case "promise":
                         // no further validation needed
+                        break;
+
+                    case "if":
+                        //todo add validation
                         break;
 
                     default:
