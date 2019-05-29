@@ -345,6 +345,8 @@ class Operator {
             this.divInstructions.html("Loading clue...");
             //        this.setAllBuzzersIsOpen(false);
 
+            //todo validate response
+
             $.getJSON("http://jservice.io/api/random", response => {
                 const clueObj = response[0];
                 // todo ensure the response isn't messed up
@@ -399,8 +401,7 @@ class Operator {
 
 
     showClueQuestion() {
-//        this.currentCountdownTimer = null;
-//        this.presentationInstance.showSlide("clue-question");
+        this.presentationInstance.fitQuestionToScreen();
 
         this.teamArray.forEach(team => {
             /*

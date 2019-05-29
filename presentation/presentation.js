@@ -4,7 +4,7 @@ class Presentation {
         this.divCategoryInHeader = $("header div#category");
         this.divDollarsInHeader = $("header div#dollars");
 
-        this.divQuestion = $("div#clue");
+        this.divQuestion = $("div#clue-question");
         this.divCategoryBig = $("div#category-big");
         this.divDollarsBig = $("div#dollars-big");
         this.divPreQuestion = $("div#pre-question");
@@ -62,6 +62,23 @@ class Presentation {
 
         this.divClueAnswer.html("Answer:<p><div style=\"font-weight:bold\">"
                 + clueObj.answer + "</div>");
+    }
+
+    fitQuestionToScreen() {
+        
+        //remove the style tag which may have been set by previus call to thsi function
+        this.divQuestion.css("font-size", "");
+        
+        const heightOfMain = $("main").height();
+
+        while (this.divQuestion.height() > heightOfMain) {
+            const newFontSize = getFontSize(this.divQuestion) - 10;
+            this.divQuestion.css("font-size", newFontSize + "px");
+        }
+
+        function getFontSize(elem) {
+            return Number(elem.css("font-size").replace("px", ""));
+        }
     }
 
     setTeamsVisible(isVisible) {

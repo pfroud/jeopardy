@@ -1,20 +1,22 @@
 $height-header: 70px;
 $height-footer: 100px;
 
-// todo use sass for loop?
-$big-shadow:
-3px 3px 0px black,
-5px 5px 0px black,
-7px 7px 0px black,
-9px 9px 0px black,
-11px 11px 0px black;
+@function big-shadow($count) {
+    $result: "";
+    @for $i from 0 to $count {
+        $size: ($i + 1) * 2 + 1;
+        $result: $result + $size + "px " + $size + "px 0px black";
+        @if $i+1 < $count{
+            $result: $result + ", ";
+        }
+    }
+    @return unquote($result);
+}
 
 // todo use sass for loop?
-$slightly-smaller-shadow:
-3px 3px 0px black,
-5px 5px 0px black,
-7px 7px 0px black,
-9px 9px 0px black;
+$big-shadow: big-shadow(5);
+
+$slightly-smaller-shadow: big-shadow(4);
 
 $color-dollars: #e3a147;
 
@@ -148,7 +150,7 @@ main {
 
     }
 
-    div#clue {
+    div#clue-question {
         text-align: center;
         font-family: korinna;
         font-size: 80px;
@@ -225,24 +227,16 @@ footer {
 
 }
 
+@function repeat($value, $count) {
+    $result: "";
+    @for $i from 0 to $count {
+        $result: $result + $value +" ";
+    }
+    @return unquote($result);
+}
+
 img#cost-chart {
-    $offset: 1px;
-    
-    // todo use sass for loop?
-    filter:
-        drop-shadow($offset $offset 0px black)
-        drop-shadow($offset $offset 0px black)
-        drop-shadow($offset $offset 0px black)
-        drop-shadow($offset $offset 0px black)
-        drop-shadow($offset $offset 0px black)
-        drop-shadow($offset $offset 0px black)
-        drop-shadow($offset $offset 0px black)
-        drop-shadow($offset $offset 0px black)
-        drop-shadow($offset $offset 0px black)
-        drop-shadow($offset $offset 0px black)
-        drop-shadow($offset $offset 0px black)
-        drop-shadow($offset $offset 0px black)
-        ;
+    filter: repeat(drop-shadow(1px 1px 0px black), 12);
 }
 
 div.slide {

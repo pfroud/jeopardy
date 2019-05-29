@@ -5,7 +5,7 @@ class StateMachine {
     constructor() {
 
         this.DEBUG = false;
-        
+
         this.countdownProgress = $("div#state-machine-viz progress#countdown");
         this.countdownText = $("div#state-machine-viz div#remaining");
         this.divStateName = $("div#state-machine-viz div#state-name");

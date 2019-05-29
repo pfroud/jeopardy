@@ -96,7 +96,7 @@ main {
     text-transform: uppercase; }
     main div#pre-question div#dollars-big {
       color: #e3a147; }
-  main div#clue {
+  main div#clue-question {
     text-align: center;
     font-family: korinna;
     font-size: 80px;
@@ -146,7 +146,7 @@ footer {
         background-color: firebrick; }
 
 img#cost-chart {
-  filter: drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black); }
+  filter: drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) ; }
 
 div.slide {
   display: none; }
