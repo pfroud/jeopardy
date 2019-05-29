@@ -1,4 +1,4 @@
-/* global pres, operatorInstance, Function */
+/* global pres, operatorInstance, Function, SETTINGS */
 
 class StateMachine {
 
@@ -76,7 +76,7 @@ class StateMachine {
                     }]
             }, {
                 name: "showCategoryAndDollars",
-                showSlide: "preQuestion",
+                showSlide: "pre-question",
                 transitions: [{
                         type: "timeout",
                         duration: SETTINGS.displayDurationCategory,
@@ -84,7 +84,7 @@ class StateMachine {
                     }]
             }, {
                 name: "showQuestion",
-                showSlide: "clueQuestion",
+                showSlide: "clue-question",
                 onEnter: operatorInstance.showClueQuestion,
                 transitions: [{
                         type: "keyboard",
@@ -139,7 +139,7 @@ class StateMachine {
                     }]
             }, {
                 name: "showAnswer",
-                showSlide: "clueAnswer",
+                showSlide: "clue-answer",
                 transitions: [{
                         type: "timeout",
                         duration: 2000,
@@ -162,7 +162,7 @@ class StateMachine {
     _goToState(stateName, paramsToPassToFunctionToCall) {
 
         if (!(stateName in this.stateMap)) {
-            throw new Error(`can't go to state named "${stateName}", state not found`);
+            throw new RangeError(`can't go to state named "${stateName}", state not found`);
         }
 
         if (this.countdownTimer) {

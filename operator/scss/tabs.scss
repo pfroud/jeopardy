@@ -1,6 +1,6 @@
 // https://codepen.io/oknoblich/pen/tfjFl
 
-div.tabContent {
+div.tab-content {
     display: none;
     padding-top: 20px;
     border-top: 1px solid black;
@@ -8,7 +8,7 @@ div.tabContent {
 
 label[for^="tab"] {
     $color-inactive: #bbb;
-    
+
     display: inline-block;
     margin: 0 0 -1px;
     padding: 10px 20px 6px;
@@ -41,10 +41,10 @@ input[type="radio"] {
     }
 
 
-    &#tabSetup:checked ~ div#contentSetup,
-        &#tabGame:checked ~ div#contentGame,
-        &#tabAdmin:checked ~ div#contentAdmin,
-        &#tabSettings:checked ~ div#contentSettings
+    &#tab-setup:checked ~ div#content-setup,
+        &#tab-game:checked ~ div#content-game,
+        &#tab-admin:checked ~ div#content-admin,
+        &#tab-settings:checked ~ div#content-settings
         {
         display: block;
     }

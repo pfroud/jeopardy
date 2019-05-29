@@ -1,6 +1,7 @@
 $height-header: 70px;
 $height-footer: 100px;
 
+// todo use sass for loop?
 $big-shadow:
 3px 3px 0px black,
 5px 5px 0px black,
@@ -8,6 +9,7 @@ $big-shadow:
 9px 9px 0px black,
 11px 11px 0px black;
 
+// todo use sass for loop?
 $slightly-smaller-shadow:
 3px 3px 0px black,
 5px 5px 0px black,
@@ -29,7 +31,7 @@ body {
 }
 
 
-div#slideJeopardyLogo{
+div#slide-jeopardy-logo{
     // need special treatment to get the logo and shadow to center
     width: 100%;
     height: 100%;   
@@ -46,7 +48,7 @@ div#slideJeopardyLogo{
     }
 }
 
-div#slideGameRules {
+div#slide-game-rules {
     font-size: 30px;
     font-weight: bold;
     line-height: 150%;
@@ -57,7 +59,7 @@ div#slideGameRules {
     }
 }
 
-div#slideBuzzerTest {
+div#slide-buzzer-test {
     font-size: 90px;
     font-family: Korinna;
     text-shadow: $big-shadow;
@@ -225,6 +227,8 @@ footer {
 
 img#cost-chart {
     $offset: 1px;
+    
+    // todo use sass for loop?
     filter:
         drop-shadow($offset $offset 0px black)
         drop-shadow($offset $offset 0px black)

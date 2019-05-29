@@ -20,35 +20,35 @@
         <div id="paused"  style="display:none">&#9612;&#9612; PAUSED</div>
 
         <main>
-            <input id="tabSetup" type="radio" name="tabs">
-            <label for="tabSetup"><span class="key-shortcut-letter">S</span>etup</label>
+            <input id="tab-setup" type="radio" name="tabs">
+            <label for="tab-setup"><span class="key-shortcut-letter">S</span>etup</label>
 
-            <input id="tabGame" type="radio" name="tabs" checked>
-            <label for="tabGame"><span class="key-shortcut-letter">G</span>ame</label>
+            <input id="tab-game" type="radio" name="tabs" checked>
+            <label for="tab-game"><span class="key-shortcut-letter">G</span>ame</label>
 
-            <input id="tabAdmin" type="radio" name="tabs">
-            <label for="tabAdmin"><span class="key-shortcut-letter">A</span>dmin</label>
+            <input id="tab-admin" type="radio" name="tabs">
+            <label for="tab-admin"><span class="key-shortcut-letter">A</span>dmin</label>
 
-            <input id="tabSettings" type="radio" name="tabs">
-            <label for="tabSettings">S<span class="key-shortcut-letter">e</span>ttings</label>
+            <input id="tab-settings" type="radio" name="tabs">
+            <label for="tab-settings">S<span class="key-shortcut-letter">e</span>ttings</label>
 
 
             <!-- ====================================================================== -->
-            <div class="tabContent" id="contentSetup">
+            <div class="tab-content" id="content-setup">
 
-                Team 1 name: <input type="text" id="teamName0" value="teamOne"><br>
-                Team 2 name: <input type="text" id="teamName1" value="teamTwo"><br>
-                Team 3 name: <input type="text" id="teamName2" value="teamThree"><br>
-                Team 4 name: <input type="text" id="teamName3" value="teamFour"><br>
-                <button id="saveTeamNames">Save team names</button>
+                Team 1 name: <input type="text" id="team-name-0" value="team one"><br>
+                Team 2 name: <input type="text" id="team-name-1" value="team two"><br>
+                Team 3 name: <input type="text" id="team-name-2" value="team three"><br>
+                Team 4 name: <input type="text" id="team-name-3" value="team four"><br>
+                <button id="save-team-names">Save team names</button>
 
             </div>
 
 
             <!-- ====================================================================== -->
-            <div class="tabContent" id="contentGame">
+            <div class="tab-content" id="content-game">
 
-                <button id="startGame" disabled>Start game</button>
+                <button id="start-game" disabled>Start game</button>
 
                 <div id="instructions">waiting for presentation window...</div>
 
@@ -79,7 +79,7 @@
 
                 </div>
                 
-                 <p><button id="skipClue">Skip clue</button></p>
+                 <p><button id="skip-clue">Skip clue</button></p>
 
                  
                  
@@ -98,46 +98,46 @@
             </div>
 
             <!-- ====================================================================== -->
-            <div class="tabContent" id="contentAdmin">
+            <div class="tab-content" id="content-admin">
 
-                <p>Buzzer test: <button id="buzzerTestStart">start</button> <button id="buzzerTestStop">stop</button> <span id="buzzerTestMessage" style="display:none">buzzer test is underway</span></p>
+                <p>Buzzer test: <button id="buzzer-test-start">start</button> <button id="buzzer-test-stop">stop</button> <span id="buzzer-test-message" style="display:none">buzzer test is underway</span></p>
 
-                <p><button id="goToGameRules">Go to game rules</button></p>
+                <p><button id="go-to-game-rules">Go to game rules</button></p>
 
-                <button id="goToJeopardyLogo">Go to Jeopardy logo</button>
+                <button id="go-to-jeopardy-logo">Go to Jeopardy logo</button>
 
-                <p><button id="goToEventCost">Go to event cost</button></p>
+                <p><button id="go-to-event-cost">Go to event cost</button></p>
 
-                <p>Display teams: <button id="teamsHide">hide</button> <button id="teamsShow">show</button></p>
+                <p>Display teams: <button id="teams-hide">hide</button> <button id="teams-show">show</button></p>
 
                 <!--<p><a href="#">Override...  - not impl.</a></p>-->
             </div>
 
             <!-- ====================================================================== -->
-            <div class="tabContent" id="contentSettings">
+            <div class="tab-content" id="content-settings">
 
-                <table id="tableSettings">
+                <table id="table-settings">
                     <tr>
                         <td>Display duration for category:</td>
-                        <td><input type="number" id="displayDurationCategory"> ms</td>
+                        <td><input type="number" id="display-duration-category"> ms</td>
                     </tr>
                     <tr>
                         <td>Display duration for answer:</td>
-                        <td><input type="number" id="displayDurationAnswer"> ms</td>
+                        <td><input type="number" id="display-duration-answer"> ms</td>
                     </tr>
                     <tr>
                         <td>Question timeout:</td>
-                        <td><input type="number" id="timeoutQuestion"> ms</td>
+                        <td><input type="number" id="timeout-question"> ms</td>
                     </tr>
                     <tr>
                         <td>Answer timeout:</td>
-                        <td><input type="number" id="timeoutAnswer"> ms</td>
+                        <td><input type="number" id="timeout-answer"> ms</td>
                     </tr>
                 </table>
 
-                <p><label><input type="checkbox" id="allowMultipleTries">Allow team to buzz multiple times in same question </label></p>
+                <p><label><input type="checkbox" id="allow-multiple-tries">Allow team to buzz multiple times in same question </label></p>
 
-                <p><button id="saveSettings">Save settings</button></p>
+                <p><button id="save-settings">Save settings</button></p>
 
             </div>
 

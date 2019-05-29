@@ -18,10 +18,10 @@ $(document).ready(function () {
 });
 
 function initKeyboardShortcuts() {
-    const inputSetup = $("input#tabSetup");
-    const inputGame = $("input#tabGame");
-    const inputAdmin = $("input#tabAdmin");
-    const inputSettings = $("input#tabSettings");
+    const inputSetup = $("input#tab-setup");
+    const inputGame = $("input#tab-game");
+    const inputAdmin = $("input#tab-admin");
+    const inputSettings = $("input#tab-settings");
 
     document.addEventListener("keydown", function (keyboardEvent) {
 //        if (!keyboardEvent.altKey) {

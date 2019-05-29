@@ -114,7 +114,7 @@ class Operator {
             this.divInstructions.html("Let people read question now that they know the answer");
             window.setTimeout(() => {
                 this.divInstructions.html("Let people read answer");
-                this.presentationInstance.showSlideClueAnswer();
+                this.presentationInstance.showSlide("clue-answer");
                 window.setTimeout(() => {
                     this.getClue();
                 }, 2000);
@@ -137,7 +137,7 @@ class Operator {
                 this.currentCountdownTimer.reset(); //stop counting down team's answer
                 this.currentCountdownTimer = null;
 
-                this.presentationInstance.showSlideClueAnswer();
+                this.presentationInstance.showSlide("clue-answer");
 
                 var countdownNextClue = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationAnswer);
                 countdownNextClue.progressElement = this.progressPrimary;
@@ -159,34 +159,34 @@ class Operator {
 
     initMouseListeners() {
         /*
-         $("button#goToGameRules").click(() => this.presentationInstance.showSlideGameRules());
-         $("button#goToJeopardyLogo").click(() => this.presentationInstance.showSlideJeopardyLogo());
-         $("button#goToEventCost").click(() => this.presentationInstance.showSlideEventCost());
-         $("button#teamsHide").click(() => this.presentationInstance.setTeamsVisible(false));
-         $("button#teamsShow").click(() => this.presentationInstance.setTeamsVisible(true));
+         $("button#go-to-game-rules").click(() => this.presentationInstance.showSlide("game-rules"));
+         $("button#go-to-jeopardy-logo").click(() => this.presentationInstance.showSlide("jeopardy-logo"));
+         $("button#go-to-event-cost").click(() => this.presentationInstance.showSlide("event-cost"));
+         $("button#teams-hide").click(() => this.presentationInstance.setTeamsVisible(false));
+         $("button#teams-show").click(() => this.presentationInstance.setTeamsVisible(true));
          */
 
-        this.buttonStartGame = $("button#startGame").click(() => stateMachine.manualTrigger("startGame"));
+        this.buttonStartGame = $("button#start-game").click(() => stateMachine.manualTrigger("startGame"));
 
         /*
-         $("button#buzzerTestStart").click(() => this.buzzerTestStart());
-         $("button#buzzerTestStop").click(() => this.buzzerTestStop());
+         $("button#buzzer-test-start").click(() => this.buzzerTestStart());
+         $("button#buzzer-test-stop").click(() => this.buzzerTestStop());
          
-         $("button#saveTeamNames").click(() => this.saveTeamNames());
-         this.buttonSkipClue = $("button#skipClue").click(() => this.skipClue());
+         $("button#save-team-names").click(() => this.saveTeamNames());
+         this.buttonSkipClue = $("button#skip-clue").click(() => this.skipClue());
          */
     }
 
     buzzerTestStart() {
         this.buzzerTest = true;
-        $("span#buzzerTestMessage").show();
-        this.presentationInstance.showSlideBuzzerTest();
+        $("span#buzzer-test-message").show();
+        this.presentationInstance.showSlide("buzzer-test");
     }
 
     buzzerTestStop() {
         this.buzzerTest = false;
-        $("span#buzzerTestMessage").hide();
-        this.presentationInstance.showSlideJeopardyLogo(); //i guess
+        $("span#buzzer-test-message").hide();
+        this.presentationInstance.showSlide("jeopardy-logo"); //i guess
     }
 
     skipClue() {
@@ -204,7 +204,7 @@ class Operator {
     saveTeamNames() {
         var inputTeamNames = new Array(NUM_TEAMS);
         for (var i = 0; i < NUM_TEAMS; i++) {
-            inputTeamNames[i] = $("input#teamName" + i);
+            inputTeamNames[i] = $("input#team-name-" + i);
         }
         for (var i = 0; i < NUM_TEAMS; i++) {
             this.teamArray[i].setTeamName(inputTeamNames[i].prop("value"));
@@ -355,7 +355,7 @@ class Operator {
                 this.divClueDollars.html("$" + clueObj.value);
                 this.trAnswer.hide();
                 this.presentationInstance.setClueObj(clueObj);
-//                this.presentationInstance.showSlidePreQuestion();
+//                this.presentationInstance.showSlide("pre-question");
                 this.divInstructions.html("Read aloud the category and dollar value.");
 
                 /*
@@ -400,7 +400,7 @@ class Operator {
 
     showClueQuestion() {
 //        this.currentCountdownTimer = null;
-//        this.presentationInstance.showSlideClueQuestion();
+//        this.presentationInstance.showSlide("clue-question");
 
         this.teamArray.forEach(team => {
             /*
@@ -490,7 +490,7 @@ class Operator {
 
         // wait for timeout sound to play
         window.setTimeout(() => {
-            this.presentationInstance.showSlideClueAnswer();
+            this.presentationInstance.showSlide("clue-answer");
 
             var countdownNextClue = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationAnswer);
             countdownNextClue.progressElement = this.progressPrimary;

@@ -1,4 +1,4 @@
-div.tabContent {
+div.tab-content {
   display: none;
   padding-top: 20px;
   border-top: 1px solid black; }
@@ -25,7 +25,7 @@ input[type="radio"] {
     border-bottom: 1px solid #fff; }
     input[type="radio"]:checked + label:hover {
       cursor: default; }
-  input[type="radio"]#tabSetup:checked ~ div#contentSetup, input[type="radio"]#tabGame:checked ~ div#contentGame, input[type="radio"]#tabAdmin:checked ~ div#contentAdmin, input[type="radio"]#tabSettings:checked ~ div#contentSettings {
+  input[type="radio"]#tab-setup:checked ~ div#content-setup, input[type="radio"]#tab-game:checked ~ div#content-game, input[type="radio"]#tab-admin:checked ~ div#content-admin, input[type="radio"]#tab-settings:checked ~ div#content-settings {
     display: block; }
 
 /*# sourceMappingURL=tabs.css.map */

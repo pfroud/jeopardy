@@ -17,7 +17,7 @@ class Presentation {
 
         this._initSlides();
 
-        this.showSlideJeopardyLogo();
+        this.showSlide("jeopardy-logo");
 
         if (window.opener) {
             window.opener.operatorInstance.handlePresentationReady(this);
@@ -30,25 +30,13 @@ class Presentation {
         this.slides = {};
         this.visibleSlide = null;
 
-        var slideNames = this.slideNames = ["jeopardyLogo", "gameRules", "spinner",
-            "preQuestion", "clueQuestion", "clueAnswer", "eventCost", "buzzerTest"];
+        var slideNames = this.slideNames = ["jeopardy-logo", "game-rules", "spinner",
+            "pre-question", "clue-question", "clue-answer", "event-cost", "buzzer-test"];
 
         slideNames.forEach(slideName => {
-            var slideNameCap = capitalizeFirstLetter(slideName);
-            this.slides[slideName] = $("div#slide" + slideNameCap);
-
-            // Add method to self so you can call showSlideFoo() instead of showSlide("foo")
-            // https://stackoverflow.com/a/32498473
-            
-            // TODO don't do this http://jamie-wong.com/2013/07/12/grep-test/
-            this["showSlide" + slideNameCap] = function () {
-                this.showSlide(slideName);
-            };
+            this.slides[slideName] = $("div#slide-" + slideName);
         });
 
-        function capitalizeFirstLetter(str) {
-            return str.charAt(0).toUpperCase() + str.substring(1);
-        }
     }
 
     showSlide(slideName) {
@@ -59,7 +47,7 @@ class Presentation {
             this.visibleSlide && this.visibleSlide.hide();
             this.visibleSlide = targetSlide;
         } else {
-            throw 'slide name "' + slideName + 'not in known slides: ' + slides;
+            throw new RangeError('slide name "' + slideName + 'not in known slides: ' + slides);
         }
     }
 
