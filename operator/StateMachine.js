@@ -4,8 +4,8 @@ class StateMachine {
 
     constructor() {
 
-        this.DEBUG = true;
-
+        this.DEBUG = false;
+        
         this.countdownProgress = $("div#state-machine-viz progress#countdown");
         this.countdownText = $("div#state-machine-viz div#remaining");
         this.divStateName = $("div#state-machine-viz div#state-name");
@@ -17,16 +17,16 @@ class StateMachine {
 
         this.countdownTimer = null;
 
+        this.currentState = null;
+
         this._initStates();
         this._validateStates();
 
         this._goToState("idle");
-
-//        this.state = this.stateMap.idle;
     }
 
     _handleKeyboardEvent(keyboardEvent) {
-        const transitionArray = this.state.transitions;
+        const transitionArray = this.currentState.transitions;
         for (var i = 0; i < transitionArray.length; i++) {
             const transitionObj = transitionArray[i];
             if (transitionObj.type === "keyboard" && transitionObj.keys.includes(keyboardEvent.key)) {
@@ -34,11 +34,11 @@ class StateMachine {
                 const hasCondition = Boolean(transitionObj.condition);
                 if (hasCondition) {
                     if (transitionObj.condition.call(operatorInstance, keyboardEvent)) {
-                        this._goToState(transitionObj.state, keyboardEvent);
+                        this._goToState(transitionObj.dest, keyboardEvent);
                     }
-                    
+
                 } else {
-                    this._goToState(transitionObj.state, keyboardEvent);
+                    this._goToState(transitionObj.dest, keyboardEvent);
                 }
 
                 break;
@@ -48,7 +48,7 @@ class StateMachine {
 
     _startCountdown(transitionObj) {
         const durationMs = transitionObj.duration;
-        const destinationStateName = transitionObj.state;
+        const destinationStateName = transitionObj.dest;
 
         var countdownTimer = this.countdownTimer = new CountdownTimer(durationMs);
         countdownTimer.progressElement = this.countdownProgress;
@@ -64,45 +64,45 @@ class StateMachine {
                 transitions: [{
                         type: "manual",
                         name: "startGame",
-                        state: "fetchClue"
+                        dest: "fetchClue"
                     }]
             }, {
                 name: "fetchClue",
-                slide: "spinner",
+                showSlide: "spinner",
                 onEnter: operatorInstance.getClue,
                 transitions: [{
                         type: "promise",
-                        state: "showCategoryAndDollars"
+                        dest: "showCategoryAndDollars"
                     }]
             }, {
                 name: "showCategoryAndDollars",
-                slide: "preQuestion",
+                showSlide: "preQuestion",
                 transitions: [{
                         type: "timeout",
-                        duration: 4000, //todo replace with reference to Settings
-                        state: "showQuestion"
+                        duration: SETTINGS.displayDurationCategory,
+                        dest: "showQuestion"
                     }]
             }, {
                 name: "showQuestion",
-                slide: "clueQuestion",
+                showSlide: "clueQuestion",
                 onEnter: operatorInstance.showClueQuestion,
                 transitions: [{
                         type: "keyboard",
                         keys: " ", //space
-                        state: "waitForBuzzes"
+                        dest: "waitForBuzzes"
                     }]
             }, {
                 name: "waitForBuzzes",
                 onEnter: operatorInstance.handleDoneReadingClueQuestionNew,
                 transitions: [{
                         type: "timeout",
-                        duration: 10 * 1000, //todo replace with reference to Settings
-                        state: "showAnswer"
+                        duration: SETTINGS.questionTimeout,
+                        dest: "showAnswer"
                     }, {
                         type: "keyboard",
                         condition: operatorInstance.canTeamBuzz,
                         keys: "1234",
-                        state: "waitForTeamAnswer"
+                        dest: "waitForTeamAnswer"
                     }]
             }, {
                 name: "waitForTeamAnswer",
@@ -110,15 +110,15 @@ class StateMachine {
                 transitions: [{
                         type: "keyboard",
                         keys: "y",
-                        state: "addMoney"
+                        dest: "addMoney"
                     }, {
                         type: "keyboard",
                         keys: "n",
-                        state: "subtractMoney"
+                        dest: "subtractMoney"
                     }, {
                         type: "timeout",
-                        duration: 3000, //todo replace with refrence to settings
-                        state: "subtractMoney"
+                        duration: SETTINGS.answerTimeout,
+                        dest: "subtractMoney"
                     }
                 ]
             }, {
@@ -126,7 +126,7 @@ class StateMachine {
                 onEnter: operatorInstance.handleAnswerRight,
                 transitions: [{
                         type: "promise",
-                        state: "showAnswer"
+                        dest: "showAnswer"
                     }]
             }, {
                 name: "subtractMoney",
@@ -139,11 +139,11 @@ class StateMachine {
                     }]
             }, {
                 name: "showAnswer",
-                slide: "clueAnswer",
+                showSlide: "clueAnswer",
                 transitions: [{
                         type: "timeout",
                         duration: 2000,
-                        state: "fetchClue"
+                        dest: "fetchClue"
                     }]
             }
         ];
@@ -152,7 +152,7 @@ class StateMachine {
     manualTrigger(triggerName) {
         if (triggerName in this.manualTriggerMap) {
             const transitionObj = this.manualTriggerMap[triggerName];
-            this._goToState(transitionObj.state);
+            this._goToState(transitionObj.dest);
         } else {
             console.warn(`manual trigger failed: trigger "${triggerName}" not in map of known triggers`);
         }
@@ -169,18 +169,18 @@ class StateMachine {
             this.countdownTimer.pause();
         }
 
-        if(this.DEBUG){
+        if (this.DEBUG) {
             console.log(`going to state "${stateName}"`);
         }
 
-        this.state = this.stateMap[stateName];
+        this.currentState = this.stateMap[stateName];
         this.divStateName.html(stateName);
 
         handleSlide.call(this);
         handleOnEnter.call(this);
         handleTimeoutTransition.call(this);
 
-        const transitionZero = this.state.transitions[0];
+        const transitionZero = this.currentState.transitions[0];
         if (transitionZero.type === "if") {
             if (transitionZero.condition.call(operatorInstance, paramsToPassToFunctionToCall)) {
                 this._goToState(transitionZero.then);
@@ -190,22 +190,22 @@ class StateMachine {
         }
 
         function handleSlide() {
-            if (this.state.slide) {
-                if (pres.slideNames.includes(this.state.slide)) {
-                    pres.showSlide(this.state.slide);
+            if (this.currentState.showSlide) {
+                if (pres.slideNames.includes(this.currentState.showSlide)) {
+                    pres.showSlide(this.currentState.showSlide);
                 } else {
-                    console.warn(`entering state "${this.state.name}": can't present slide "${this.state.slide}", slide not found`);
+                    console.warn(`entering state "${this.currentState.name}": can't show slide "${this.currentState.showSlide}", slide not found`);
                 }
             }
         }
 
         function handleOnEnter() {
-            if (this.state.onEnter) {
+            if (this.currentState.onEnter) {
 
-                const functionToCall = this.state.onEnter;
+                const functionToCall = this.currentState.onEnter;
 
                 if (!(functionToCall instanceof Function)) {
-                    console.info(`state "${this.state.name}": cannot call onEnter function "${functionToCall}", not a function`);
+                    console.info(`state "${this.currentState.name}": cannot call onEnter function "${functionToCall}", not a function`);
                     return;
                 }
 
@@ -214,12 +214,12 @@ class StateMachine {
 
                 if (rv && rv.constructor.name === "Promise") {
 
-                    const transitionArray = this.state.transitions;
+                    const transitionArray = this.currentState.transitions;
                     for (var i = 0; i < transitionArray.length; i++) {
                         const transitionObj = transitionArray[i];
                         if (transitionObj.type === "promise") {
                             rv.then(
-                                    () => this._goToState(transitionObj.state)
+                                    () => this._goToState(transitionObj.dest)
                             ).catch(
                                     returnedByPromise => {
                                         console.warn("promise rejected:");
@@ -238,12 +238,12 @@ class StateMachine {
         }
 
         function handleTimeoutTransition() {
-            const transitionArray = this.state.transitions;
+            const transitionArray = this.currentState.transitions;
             for (var i = 0; i < transitionArray.length; i++) {
                 const transitionObj = transitionArray[i];
                 if (transitionObj.type === "timeout") {
                     this._startCountdown(transitionObj);
-                    this.divStateName.html(stateName + " &rarr; " + transitionObj.state);
+                    this.divStateName.html(stateName + " &rarr; " + transitionObj.dest);
                     break;
                 }
             }
@@ -251,28 +251,6 @@ class StateMachine {
     }
 
     _validateStates() {
-
-        function validateProp(name, index, obj, prop, expectedType) {
-            if (!prop in obj) {
-                console.log(`${name} at index ${index} does not have property "${prop}"`);
-            }
-            const theProp = obj[prop];
-            const constructorName = theProp.constructor.name;
-            if (constructorName !== expectedType) {
-                console.log(`${name} at index ${index}: property "${prop}": type is ${constructorName}, expected ${expectedType}`);
-            }
-            if (theProp.length < 1) {
-                console.log(`${name} at index ${index} has empty ${prop}`);
-            }
-        }
-
-        function validatePropString(name, index, obj, prop) {
-            validateProp(name, index, obj, prop, "String");
-        }
-        function validatePropArray(name, index, obj, prop) {
-            validateProp(name, index, obj, prop, "Array");
-        }
-
 
         // pass one of two
         this.states.forEach(function (stateObj, index) {
@@ -283,17 +261,23 @@ class StateMachine {
 
         // pass two of two
         this.states.forEach(function (stateObj, stateIndex) {
+
+            var keysUsed = {};
+
             stateObj.transitions.forEach(function (transitionObj, transitionIndex) {
 
-                if (!transitionObj.state) {
-                    printWarning(stateObj.name, transitionIndex,
-                            "no destination state");
-                    return;
-                }
+                if (transitionObj.type !== "if") {
 
-                if (!(transitionObj.state in this.stateMap)) {
-                    printWarning(stateObj.name, transitionIndex,
-                            `unknown destination state "${transitionObj.state}"`);
+                    if (!transitionObj.dest) {
+                        printWarning(stateObj.name, transitionIndex,
+                                "no destination state");
+                        return;
+                    }
+
+                    if (!(transitionObj.dest in this.stateMap)) {
+                        printWarning(stateObj.name, transitionIndex,
+                                `unknown destination state "${transitionObj.dest}"`);
+                    }
                 }
 
                 switch (transitionObj.type) {
@@ -311,16 +295,26 @@ class StateMachine {
                             printWarning(stateObj.name, transitionIndex,
                                     `no keys for keyboard transition`);
                         }
-                        // todo validate no keys are in multiple transitions
+
+                        if (keys.constructor.name !== "String") {
+                            printWarning(stateObj.name, transitionIndex,
+                                    `property keys has type ${keys.constructor.name}, expected String`);
+                        }
+
+                        for (var i = 0; i < keys.length; i++) {
+                            const key = keys.charAt(i);
+                            if (key in keysUsed) {
+                                printWarning(stateObj.name, transitionIndex,
+                                        `keyboard key "${key}" already used in transition ${keysUsed[key]}`);
+                            } else {
+                                keysUsed[key] = transitionIndex;
+                            }
+                        }
+
                         break;
 
                     case "manual":
                         this.manualTriggerMap[transitionObj.name] = transitionObj;
-                        break;
-
-                    case "immediate":
-                        printWarning(stateObj.name, transitionIndex,
-                                "replace transition type immediate with promise");
                         break;
 
                     case "promise":
@@ -328,7 +322,18 @@ class StateMachine {
                         break;
 
                     case "if":
-                        //todo add validation
+                        if (!(transitionObj.condition instanceof Function)) {
+                            printWarning(stateObj.name, transitionIndex,
+                                    "condition is not a function: " + transitionObj.condition);
+                        }
+                        if (!(transitionObj.then in this.stateMap)) {
+                            printWarning(stateObj.name, transitionIndex,
+                                    `unknown 'then' state "${transitionObj.then}"`);
+                        }
+                        if (!(transitionObj.else in this.stateMap)) {
+                            printWarning(stateObj.name, transitionIndex,
+                                    `unknown 'else' state "${transitionObj.else}"`);
+                        }
                         break;
 
                     default:
@@ -340,14 +345,33 @@ class StateMachine {
 
 
                 function printWarning(stateName, transitionIndex, message) {
-                    console.log(`state "${stateName}": transition ${transitionIndex}: ${message}`);
+                    console.warn(`state "${stateName}": transition ${transitionIndex}: ${message}`);
                 }
 
             }, this);
 
         }, this);
 
+        function validateProp(name, index, obj, prop, expectedType) {
+            if (!prop in obj) {
+                console.warn(`${name} at index ${index} does not have property "${prop}"`);
+            }
+            const theProp = obj[prop];
+            const constructorName = theProp.constructor.name;
+            if (constructorName !== expectedType) {
+                console.warn(`${name} at index ${index}: property "${prop}": type is ${constructorName}, expected ${expectedType}`);
+            }
+            if (theProp.length < 1) {
+                console.warn(`${name} at index ${index} has empty ${prop}`);
+            }
+        }
 
+        function validatePropString(name, index, obj, prop) {
+            validateProp(name, index, obj, prop, "String");
+        }
+        function validatePropArray(name, index, obj, prop) {
+            validateProp(name, index, obj, prop, "Array");
+        }
 
 
     }

@@ -130,7 +130,6 @@ class Operator {
             this.isATeamAnswering = false;
             teamObj.setBuzzerOpen(SETTINGS.isAllowedMultipleTries);
 
-            // TODO do this check when team answer times out
             if (this.teamArray.every(teamObj => teamObj.hasAnswered)) {
                 this.divInstructions.html("Everyone answered wrong.");
                 this.setAllBuzzersIsOpen(false);
@@ -477,7 +476,6 @@ class Operator {
         countdownQuestionTimeout.onResume = () => !this.isATeamAnswering && this.resume();
         countdownQuestionTimeout.start();
 
-        // so we can pause the timeout when a team is answering. TODO find a better way
         this.countdownQuestionTimeout = countdownQuestionTimeout;
 
     }
