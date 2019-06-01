@@ -29,7 +29,7 @@ class StateMachine {
     }
 
     _handleKeyboardEvent(keyboardEvent) {
-        if (this.currentState) {
+        if (this.currentState && !operatorInstance.isPaused) {
             const transitionArray = this.currentState.transitions;
             for (var i = 0; i < transitionArray.length; i++) {
                 const transitionObj = transitionArray[i];
@@ -47,6 +47,16 @@ class StateMachine {
 
                     break;
                 }
+            }
+        }
+    }
+
+    setPaused(isPaused) {
+        if (this.countdownTimer) {
+            if (isPaused) {
+                this.countdownTimer.pause();
+            } else {
+                this.countdownTimer.resume();
             }
         }
     }
@@ -225,7 +235,9 @@ class StateMachine {
     }
 
     saveRemainingTime() {
-        this.remainingQuestionTime = this.countdownTimer.remainingMs;
+        if (this.countdownTimer) {
+            this.remainingQuestionTime = this.countdownTimer.remainingMs;
+        }
     }
 
     manualTrigger(triggerName) {
@@ -246,6 +258,7 @@ class StateMachine {
 
         if (this.countdownTimer) {
             this.countdownTimer.pause();
+//            this.countdownTimer = null;
         }
 
         if (this.DEBUG) {

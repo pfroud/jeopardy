@@ -24,6 +24,7 @@ class Team {
         };
         this.presentationCountdownDots = null;
         this.presentationProgressLockout = null;
+        this.countdownTimer = null;
 
         this.setDivOperator($('div[data-team-number="' + teamIdx + '"]'));
         this.setDivPresentation(presentationInstance.getTeamDiv(teamIdx));
@@ -56,6 +57,16 @@ class Team {
         return this.state === Team.stateEnum.CAN_ANSWER;
     }
 
+    setPaused(isPaused) {
+        if (this.countdownTimer) {
+            if (isPaused) {
+                this.countdownTimer.pause();
+            } else {
+                this.countdownTimer.resume();
+            }
+        }
+    }
+
     _updateDollarsDisplay() {
         this.div.presentation.dollars.html("$" + this.dollars);
         this.div.operator.dollars.html("$" + this.dollars);
@@ -82,14 +93,19 @@ class Team {
         this.div.presentation.teamName.html(teamName);
     }
 
-    setState(targetState) {
+    setState(targetState, endLockout) {
         if (!(Team.stateValues.includes(targetState))) {
             throw new RangeError(`team ${this.teamIdx}: can't go to state "${targetState}", not in the enum of avaliable states`);
         }
-        this.state = targetState;
-        this.div.operator.wrapper.attr("data-team-state", targetState);
-        this.div.presentation.wrapper.attr("data-team-state", targetState);
-        this.div.operator.state.html(this.state);
+
+        if (this.state === Team.stateEnum.LOCKOUT && !endLockout) {
+            this.stateBeforeLockout = targetState;
+        } else {
+            this.state = targetState;
+            this.div.operator.wrapper.attr("data-team-state", targetState);
+            this.div.presentation.wrapper.attr("data-team-state", targetState);
+            this.div.operator.state.html(this.state);
+        }
     }
 
     canBeLockedOut() {
@@ -100,7 +116,7 @@ class Team {
         this.stateBeforeLockout = this.state;
         this.setState(Team.stateEnum.LOCKOUT);
 
-        var countdownShowCategory = new CountdownTimer(SETTINGS.lockoutDuration);
+        var countdownShowCategory = this.countdownTimer = new CountdownTimer(SETTINGS.lockoutDuration);
         // todo would be nice to show progress element on display and presentation. need to change CountdownTimer to allow that
         countdownShowCategory.progressElement = this.presentationProgressLockout;
         countdownShowCategory.intervalMs = 50; //high resolution mode!!
@@ -110,8 +126,9 @@ class Team {
     }
 
     endLockout() {
-        this.setState(this.stateBeforeLockout);
+        this.setState(this.stateBeforeLockout, true);
         this.stateBeforeLockout = null;
+        this.countdownTimer = null;
     }
 
     startAnswer() {

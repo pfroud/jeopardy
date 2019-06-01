@@ -24,9 +24,17 @@ class Operator {
 
         this.isPaused = false;
 
-//        this.initKeyboardListeners();
+        this.initKeyboardListener();
         this.initMouseListeners();
         window.open("../presentation/presentation.html", "windowPresentation");
+    }
+    
+    initKeyboardListener() {
+        window.addEventListener("keydown", keyboardEvent => {
+            if(keyboardEvent.key === "p"){
+                this.togglePaused();
+            }
+        });
     }
 
     handleAnswerRight() {
@@ -245,18 +253,16 @@ class Operator {
     haveAllTeamsAnswered() {
         return this.teamArray.every(teamObj => teamObj.hasAnswered);
     }
-
-    pause() {
-        this.setPaused(true);
-    }
-
-    resume() {
-        this.setPaused(false);
+    
+    togglePaused() {
+        this.setPaused(!this.isPaused);
     }
 
     setPaused(isPaused) {
         this.isPaused = isPaused;
         this.divPaused.toggle(isPaused);
+        stateMachine.setPaused(isPaused);
+        this.teamArray.forEach(teamObj => teamObj.setPaused(isPaused));
         this.presentationInstance.setPaused(isPaused);
     }
 
