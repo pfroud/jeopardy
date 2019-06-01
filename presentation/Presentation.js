@@ -4,7 +4,7 @@ class Presentation {
         this.divCategoryInHeader = $("header div#category");
         this.divDollarsInHeader = $("header div#dollars");
 
-        this.divQuestion = $("div#clue");
+        this.divQuestion = $("div#clue-question");
         this.divCategoryBig = $("div#category-big");
         this.divDollarsBig = $("div#dollars-big");
         this.divPreQuestion = $("div#pre-question");
@@ -16,8 +16,8 @@ class Presentation {
 
 
         this._initSlides();
-        
-        this.showSlideJeopardyLogo();
+
+        this.showSlide("jeopardy-logo");
 
         if (window.opener) {
             window.opener.operatorInstance.handlePresentationReady(this);
@@ -30,22 +30,13 @@ class Presentation {
         this.slides = {};
         this.visibleSlide = null;
 
-        var slideNames = ["jeopardyLogo", "gameRules", "spinner",
-            "preQuestion", "clueQuestion", "clueAnswer", "eventCostChart"];
-        slideNames.forEach(slideName => {
-            var slideNameCap = capitalizeFirstLetter(slideName);
-            this.slides[slideName] = $("div#slide" + slideNameCap);
+        var slideNames = this.slideNames = ["jeopardy-logo", "game-rules", "spinner",
+            "pre-question", "clue-question", "clue-answer", "event-cost", "buzzer-test"];
 
-            // Add method to self so you can call showSlideFoo() instead of showSlide("foo")
-            // https://stackoverflow.com/a/32498473
-            this["showSlide" + slideNameCap] = function () {
-                this.showSlide(slideName);
-            };
+        slideNames.forEach(slideName => {
+            this.slides[slideName] = $("div#slide-" + slideName);
         });
 
-        function capitalizeFirstLetter(str) {
-            return str.charAt(0).toUpperCase() + str.substring(1);
-        }
     }
 
     showSlide(slideName) {
@@ -56,7 +47,7 @@ class Presentation {
             this.visibleSlide && this.visibleSlide.hide();
             this.visibleSlide = targetSlide;
         } else {
-            throw 'slide name "' + slideName + 'not in known slides: ' + slides;
+            throw new RangeError('slide name "' + slideName + 'not in known slides: ' + slides);
         }
     }
 
@@ -71,6 +62,23 @@ class Presentation {
 
         this.divClueAnswer.html("Answer:<p><div style=\"font-weight:bold\">"
                 + clueObj.answer + "</div>");
+    }
+
+    fitQuestionToScreen() {
+        
+        //remove the style tag which may have been set by previus call to thsi function
+        this.divQuestion.css("font-size", "");
+        
+        const heightOfMain = $("main").height();
+
+        while (this.divQuestion.height() > heightOfMain) {
+            const newFontSize = getFontSize(this.divQuestion) - 10;
+            this.divQuestion.css("font-size", newFontSize + "px");
+        }
+
+        function getFontSize(elem) {
+            return Number(elem.css("font-size").replace("px", ""));
+        }
     }
 
     setTeamsVisible(isVisible) {
