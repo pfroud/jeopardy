@@ -145,70 +145,52 @@ class Operator {
             this.buttonStartGame.blur();
             this.trQuestion.hide();
             this.divInstructions.html("Loading clue...");
-            //        this.setAllBuzzersIsOpen(false);
 
-            //todo validate response
+            fetchClueHelper.call(this, 1, 5);
 
-            $.getJSON("http://jservice.io/api/random", response => {
-                const clueObj = response[0];
-                // todo ensure the response isn't messed up
-                this.currentClueObj = clueObj;
+            function fetchClueHelper(tryNum, maxTries) {
+                $.getJSON("http://jservice.io/api/random", response => {
+                    var clueObj = response[0];
+                    this.currentClueObj = clueObj;
 
-                this.divClueWrapper.show();
-                this.divClueCategory.html(clueObj.category.title);
-                this.divClueDollars.html("$" + clueObj.value);
-                this.trAnswer.hide();
-                this.presentationInstance.setClueObj(clueObj);
-//                this.presentationInstance.showSlide("pre-question");
-                this.divInstructions.html("Read aloud the category and dollar value.");
+                    if (isClueValid.call(this, clueObj)) {
+                        showClue.call(this, clueObj);
+                        resolve(clueObj);
 
-                /*
-                 var countdownShowCategory = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationCategory);
-                 countdownShowCategory.progressElement = this.progressPrimary;
-                 countdownShowCategory.onFinished = () => this.showClueQuestion(clueObj);
-                 countdownShowCategory.onPause = () => this.pause();
-                 countdownShowCategory.onResume = () => this.resume();
-                 countdownShowCategory.start();
-                 */
-
-
-                resolve(response[0]);
-
-                function isClueValid(clueObj) {
-                    return clueObj.value !== null &&
-                            clueObj.question.length > 0 &&
-                            clueObj.answer.length > 0 &&
-                            clueObj.category !== null &&
-                            clueObj.category.title.length > 0;
-                }
-            });
-
+                    } else {
+                        if (tryNum < maxTries) {
+                            fetchClueHelper.call(this, tryNum + 1, maxTries);
+                        } else {
+                            resolve({
+                                answer: `couldn't fetch clue after ${maxTries} tries`,
+                                question: `couldn't fetch clue after ${maxTries} tries`,
+                                value: 0,
+                                category: {title: "error"}
+                            });
+                        }
+                    }
+                });
+            }
         });
+
+        function isClueValid(clueObj) {
+            return clueObj.value !== null &&
+                    clueObj.question.length > 0 &&
+                    clueObj.answer.length > 0 &&
+                    clueObj.category !== null &&
+                    clueObj.category.title.length > 0;
+        }
+
+        function showClue(clueObj) {
+            this.divClueWrapper.show();
+            this.divClueCategory.html(clueObj.category.title);
+            this.divClueDollars.html("$" + clueObj.value);
+            this.trAnswer.hide();
+            this.presentationInstance.setClueObj(clueObj);
+            this.divInstructions.html("Read aloud the category and dollar value.");
+        }
+
     }
-    /*
-     
-     
-     
-     
-     if (!isClueValid(clueObj)) {
-     this.getClue();
-     return;
-     }
-     
-     
-     function isClueValid(clueObj) {
-     return clueObj.value !== null &&
-     clueObj.question.length > 0 &&
-     clueObj.answer.length > 0 &&
-     clueObj.category !== null &&
-     clueObj.category.title.length > 0
-     ;
-     }
-     //        });
-     }
-     */
-
-
 
     showClueQuestion() {
         this.presentationInstance.fitQuestionToScreen();
@@ -220,9 +202,6 @@ class Operator {
         this.divClueQuestion.html(getClueQuestionHtml(this.currentClueObj));
         this.trQuestion.show();
         this.trAnswer.hide();
-
-//        this.isClueQuestionBeingRead = true;
-        // then wait for spacebar to be pressed. that calls handleDoneReadingClueQuestion()
 
         function getClueQuestionHtml(clueObj) {
             var clueStr = clueObj.question;
@@ -266,19 +245,6 @@ class Operator {
     haveAllTeamsAnswered() {
         return this.teamArray.every(teamObj => teamObj.hasAnswered);
     }
-
-    /*
-     setAllBuzzersIsOpen(isOpen) {
-     this.teamArray.forEach(team => {
-     if (!team.isLockedOut) {
-     team.setBuzzerOpen(isOpen);
-     }
-     team.hasAnswered = false;
-     
-     });
-     }
-     * 
-     */
 
     pause() {
         this.setPaused(true);
