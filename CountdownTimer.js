@@ -15,6 +15,7 @@ class CountdownTimer {
         this.intervalMs = 100;
 
         this.durationMs = durationMs;
+        this.maxMs = durationMs;
         this.remainingMs = durationMs;
 
         // timestamps in Unix epoch
@@ -128,7 +129,7 @@ class CountdownTimer {
 
         this.progressElement &&
                 this.progressElement
-                .attr("max", this.durationMs)
+                .attr("max", this.maxMs)
                 .attr("value", this.durationMs)
                 .show();
 

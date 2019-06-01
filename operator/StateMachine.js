@@ -13,6 +13,8 @@ class StateMachine {
         this.stateMap = {};
         this.manualTriggerMap = {};
 
+        this.remainingQuestionTime = -1;
+
         window.addEventListener("keydown", keyboardEvent => this._handleKeyboardEvent(keyboardEvent));
 
         this.countdownTimer = null;
@@ -21,6 +23,8 @@ class StateMachine {
 
         this._initStates();
         this._validateStates();
+
+        this.currentState = this.states[0]; //idle state
 
     }
 
@@ -48,10 +52,22 @@ class StateMachine {
     }
 
     _startCountdown(transitionObj) {
-        const durationMs = transitionObj.duration;
+        var durationMs;
+        var setMax = false;
+        if (transitionObj.duration instanceof Function) {
+            durationMs = transitionObj.duration();
+            setMax = true;
+        } else {
+            durationMs = transitionObj.duration;
+        }
+
+
         const destinationStateName = transitionObj.dest;
 
         var countdownTimer = this.countdownTimer = new CountdownTimer(durationMs);
+        if (setMax) {
+            countdownTimer.maxMs = SETTINGS.questionTimeout;
+        }
         countdownTimer.progressElement = this.countdownProgress;
         countdownTimer.textElement = this.countdownText;
         countdownTimer.onFinished = () => this._goToState(destinationStateName);
@@ -99,7 +115,7 @@ class StateMachine {
                 transitions: [{
                         type: "keyboard",
                         keys: " ", //space
-                        dest: "waitForBuzzesInit"
+                        dest: "waitForBuzzesRestartTimer"
                     }, {
                         type: "keyboard",
                         keys: "1234",
@@ -113,17 +129,24 @@ class StateMachine {
                         dest: "showQuestion"
                     }]
             }, {
-                name: "waitForBuzzesInit",
+                name: "waitForBuzzesRestartTimer",
                 onEnter: operatorInstance.handleDoneReadingClueQuestionNew,
-                transitions: [{
-                        type: "immediate",
-                        dest: "waitForBuzzes"
-                }]
-            }, {
-                name: "waitForBuzzes",
+                onExit: this.saveRemainingTime,
                 transitions: [{
                         type: "timeout",
                         duration: SETTINGS.questionTimeout,
+                        dest: "showAnswer"
+                    }, {
+                        type: "keyboard",
+                        keys: "1234",
+                        dest: "tryTeamAnswer"
+                    }]
+            }, {
+                name: "waitForBuzzesResumeTimer",
+                onExit: this.saveRemainingTime,
+                transitions: [{
+                        type: "timeout",
+                        duration: () => this.remainingQuestionTime,
                         dest: "showAnswer"
                     }, {
                         type: "keyboard",
@@ -137,7 +160,7 @@ class StateMachine {
                         type: "if",
                         condition: operatorInstance.canTeamBuzz,
                         then: "waitForTeamAnswer",
-                        else: "waitForBuzzes"
+                        else: "waitForBuzzesResumeTimer"
                     }]
             }, {
                 name: "waitForTeamAnswer",
@@ -170,7 +193,7 @@ class StateMachine {
                         type: "if",
                         condition: operatorInstance.haveAllTeamsAnswered,
                         then: "showAnswer",
-                        else: "waitForBuzzes"
+                        else: "waitForBuzzesResumeTimer"
                     }]
             }, {
                 name: "showAnswer",
@@ -201,6 +224,10 @@ class StateMachine {
         ];
     }
 
+    saveRemainingTime() {
+        this.remainingQuestionTime = this.countdownTimer.remainingMs;
+    }
+
     manualTrigger(triggerName) {
         if (triggerName in this.manualTriggerMap) {
             const transitionObj = this.manualTriggerMap[triggerName];
@@ -225,6 +252,8 @@ class StateMachine {
             console.log(`going to state "${stateName}"`);
         }
 
+        handleOnExit.call(this);
+
         this.currentState = this.stateMap[stateName];
         this.divStateName.html(stateName);
 
@@ -233,6 +262,21 @@ class StateMachine {
         handleTransitionTimeout.call(this);
         handleTransitionImmedaite.call(this);
         handleTransitionIf.call(this);
+
+        function handleOnExit() {
+            if (this.currentState.onExit) {
+
+                const functionToCall = this.currentState.onExit;
+
+                if (!(functionToCall instanceof Function)) {
+                    console.info(`state "${this.currentState.name}": cannot call onExit function "${functionToCall}", not a function`);
+                    return;
+                }
+
+                functionToCall.call(this); //todo fix this, because onEnter always is an operatorInstance call
+
+            }
+        }
 
         function handleTransitionIf() {
             //TODO search for transition with type if instead of using position zero
@@ -267,6 +311,7 @@ class StateMachine {
                 }
 
                 //todo don't use global reference to operator instnace!
+                //todo make this not suck, because onExit call is not an operatorInstance call
                 const rv = functionToCall.call(operatorInstance, paramsToPassToFunctionToCall);
 
                 if (rv && rv.constructor.name === "Promise") {
