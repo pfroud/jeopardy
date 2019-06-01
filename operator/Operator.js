@@ -1,4 +1,4 @@
-/* global SETTINGS, fsm, stateMachine */
+/* global SETTINGS, fsm, stateMachine, Team */
 
 const NUM_TEAMS = 4;
 
@@ -29,132 +29,12 @@ class Operator {
         window.open("../presentation/presentation.html", "windowPresentation");
     }
 
-    initKeyboardListeners() {
-        window.addEventListener("keydown", keyboardevent => {
-            switch (keyboardevent.key) {
-                case "1":
-                case "2":
-                case "3":
-                case "4":
-                    const teamIdx = Number(keyboardevent.key) - 1; //team zero buzzes by pressing the key for digit one
-                    this.handleBuzzerPress(teamIdx);
-                    break;
-
-                case "p":
-                    this.currentCountdownTimer && this.currentCountdownTimer.togglePaused();
-                    break;
-
-                case "y":
-                    this.handleAnswer(true);
-                    break;
-
-                case "n":
-                    this.handleAnswer(false);
-                    break;
-
-                case " ": //space
-                    this.handleDoneReadingClueQuestion();
-                    break;
-            }
-        });
-        window.addEventListener("keyup", event => {
-            switch (event.key) {
-                case "1":
-                case "2":
-                case "3":
-                case "4":
-                    const teamIdx = Number(event.key) - 1; //team zero buzzes by pressing key for digit one
-                    this.handleBuzzerRelease(teamIdx);
-                    break;
-            }
-        });
-    }
-
     handleAnswerRight() {
-        return new Promise((resolve, reject) => {
-            const teamObj = this.answeringTeam;
-            const clueObj = this.currentClueObj;
-            teamObj.setIsAnswering(false);
-            teamObj.moneyAdd(clueObj.value);
-            resolve();
-        });
+        this.answeringTeam.handleAnswerRight(this.currentClueObj);
     }
 
     handleAnswerWrong() {
-        return new Promise((resolve, reject) => {
-            var teamObj = this.answeringTeam;
-            var clueObj = this.currentClueObj;
-            teamObj.setIsAnswering(false);
-            teamObj.moneySubtract(clueObj.value * SETTINGS.incorrectAnswerPenaltyMultiplier);
-            teamObj.setBuzzerOpen(SETTINGS.isAllowedMultipleTries);
-            resolve();
-        });
-    }
-
-    handleAnswer(isCorrect) {
-
-        if (!this.isClueQuestionAnswerable || this.isPaused || !this.isATeamAnswering) {
-            return;
-        }
-
-        var teamObj = this.answeringTeam;
-        var clueObj = this.currentClueObj;
-
-        if (isCorrect) {
-            teamObj.moneyAdd(clueObj.value);
-
-            this.audioAnswerCorrect.play();
-
-            teamObj.setIsAnswering(false);
-            this.isATeamAnswering = false;
-
-            this.currentCountdownTimer.reset(); //countdown for that team's answer
-            this.countdownQuestionTimeout.reset();
-
-            this.divInstructions.html("Let people read question now that they know the answer");
-            window.setTimeout(() => {
-                this.divInstructions.html("Let people read answer");
-                this.presentationInstance.showSlide("clue-answer");
-                window.setTimeout(() => {
-                    this.getClue();
-                }, 2000);
-            }, 1000);
-
-
-
-        } else {
-            teamObj.moneySubtract(clueObj.value * SETTINGS.incorrectAnswerPenaltyMultiplier);
-            this.audioAnswerIncorrect.play();
-
-            teamObj.setIsAnswering(false);
-            this.isATeamAnswering = false;
-            teamObj.setBuzzerOpen(SETTINGS.isAllowedMultipleTries);
-
-            if (this.teamArray.every(teamObj => teamObj.hasAnswered)) {
-                this.divInstructions.html("Everyone answered wrong.");
-                this.setAllBuzzersIsOpen(false);
-                this.isClueQuestionAnswerable = false;
-                this.currentCountdownTimer.reset(); //stop counting down team's answer
-                this.currentCountdownTimer = null;
-
-                this.presentationInstance.showSlide("clue-answer");
-
-                var countdownNextClue = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationAnswer);
-                countdownNextClue.progressElement = this.progressPrimary;
-                countdownNextClue.onFinished = () => this.getClue();
-                countdownNextClue.onPause = () => this.pause();
-                countdownNextClue.onResume = () => this.resume();
-                countdownNextClue.start();
-            } else {
-                this.currentCountdownTimer.reset(); //countdown for that team's answer
-                this.divInstructions.html("Wait for people to answer.");
-                this.countdownQuestionTimeout.resume();
-                this.currentCountdownTimer = this.countdownQuestionTimeout;
-            }
-
-
-        }
-
+        this.answeringTeam.handleAnswerWrong(this.currentClueObj);
     }
 
     initMouseListeners() {
@@ -177,20 +57,21 @@ class Operator {
          */
     }
 
-    buzzerTestStart() {
-        this.buzzerTest = true;
-        $("span#buzzer-test-message").show();
-        this.presentationInstance.showSlide("buzzer-test");
-    }
-
-    buzzerTestStop() {
-        this.buzzerTest = false;
-        $("span#buzzer-test-message").hide();
-        this.presentationInstance.showSlide("jeopardy-logo"); //i guess
-    }
+    /*
+     buzzerTestStart() {
+     this.buzzerTest = true;
+     $("span#buzzer-test-message").show();
+     this.presentationInstance.showSlide("buzzer-test");
+     }
+     
+     buzzerTestStop() {
+     this.buzzerTest = false;
+     $("span#buzzer-test-message").hide();
+     this.presentationInstance.showSlide("jeopardy-logo"); //i guess
+     }
+     */
 
     skipClue() {
-        // TODO probably need more rigorous checks here
         if (this.isATeamAnswering) {
             return;
         }
@@ -201,7 +82,7 @@ class Operator {
 
     }
 
-    saveTeamNames() {
+    applyTeamNames() {
         var inputTeamNames = new Array(NUM_TEAMS);
         for (var i = 0; i < NUM_TEAMS; i++) {
             inputTeamNames[i] = $("input#team-name-" + i);
@@ -231,11 +112,9 @@ class Operator {
         }
 
         for (var i = 0; i < NUM_TEAMS; i++) {
-            var newTeam = this.teamArray[i] = new Team(i);
-            newTeam.setDivOperator($('div[data-team-number="' + i + '"]'));
-            newTeam.setDivPresentation(this.presentationInstance.getTeamDiv(i));
+            this.teamArray[i] = new Team(i, this.presentationInstance);
         }
-        this.saveTeamNames();
+        this.applyTeamNames();
     }
 
     handleBuzzerPressNew(keyboardEvent) {
@@ -245,97 +124,20 @@ class Operator {
 
         this.answeringTeam = teamObj;
 
-        teamObj.setIsAnswering(true);
+        teamObj.startAnswer();
 
         this.divInstructions.html("Did they answer correctly? y / n");
     }
 
-    handleBuzzerPress(teamIdx) {
-        const teamObj = this.teamArray[teamIdx];
-        if (this.buzzerTest) {
-            teamObj.buzzerTestShow();
-        } else {
-
-            if (this.isPaused) {
-                return;
-            }
-
-            if (this.isClueQuestionBeingRead || (this.isATeamAnswering && this.answeringTeam !== teamObj)) {
-
-                if (!teamObj.isLockedOut) {
-
-                    // do lockout
-                    teamObj.setLockout(true);
-
-                    teamObj.operatorProgress.addClass("lockout");
-
-                    var countdownLockout = new CountdownTimer(SETTINGS.lockoutDuration);
-                    countdownLockout.progressElement = teamObj.operatorProgress;
-                    countdownLockout.onFinished = endLockout;
-//                countdownLockout.onPause = () => this.pause();
-//                countdownLockout.onResume = () => this.resume();
-                    countdownLockout.start();
-
-                    return;
-
-                    function endLockout() {
-                        teamObj.setLockout(false);
-                        teamObj.operatorProgress.removeClass("lockout");
-                    }
-
-                }
-            }
-
-
-            if (!teamObj.hasAnswered || (teamObj.hasAnswered && SETTINGS.isAllowedMultipleTries)) {
-
-                if (teamObj.isBuzzerOpen) {
-
-                    this.audioTeamBuzz.play();
-
-                    this.answeringTeam = teamObj;
-
-                    this.isATeamAnswering = true;
-                    teamObj.setIsAnswering(true);
-
-                    this.countdownQuestionTimeout.pause();
-
-                    this.divInstructions.html("Did they answer correctly? y / n");
-
-
-                    var countdownAnswer = this.currentCountdownTimer = new CountdownTimer(SETTINGS.answerTimeout);
-                    countdownAnswer.progressElement = teamObj.operatorProgress;
-                    countdownAnswer.dotsElement = teamObj.presentationCountdownDots;
-                    countdownAnswer.onFinished = () => this.handleAnswerTimeout(teamObj);
-                    countdownAnswer.onPause = () => this.pause();
-                    countdownAnswer.onResume = () => this.resume();
-                    countdownAnswer.start();
-
-                }
-            }
-        }
-
+    shouldGameEnd() {
+        console.log("returning false for shouldGameEnd");
+        return false;
     }
 
-    handleBuzzerRelease(teamIdx) {
-        if (this.buzzerTest) {
-            const teamObj = this.teamArray[teamIdx];
-            teamObj.buzzerTestHide();
-        }
-    }
-
-    handleAnswerTimeout(teamObj) {
-        teamObj.moneySubtract(this.currentClueObj.value);
-        teamObj.setIsAnswering(false);
-        this.audioAnswerIncorrect.play();
-
-        this.currentCountdownTimer.reset(); //countdown for that team's answer
-        this.isATeamAnswering = false;
-        this.divInstructions.html("Wait for people to answer");
-        this.countdownQuestionTimeout.resume();
-        this.currentCountdownTimer = this.countdownQuestionTimeout;
-
-        teamObj.setBuzzerOpen(SETTINGS.isAllowedMultipleTries);
+    handleLockout(keyboardEvent) {
+        const teamIndex = Number(keyboardEvent.key) - 1;
+        const teamObj = this.teamArray[teamIndex];
+        teamObj.canBeLockedOut() && teamObj.startLockout();
     }
 
     getClue() {
@@ -371,6 +173,14 @@ class Operator {
 
 
                 resolve(response[0]);
+
+                function isClueValid(clueObj) {
+                    return clueObj.value !== null &&
+                            clueObj.question.length > 0 &&
+                            clueObj.answer.length > 0 &&
+                            clueObj.category !== null &&
+                            clueObj.category.title.length > 0;
+                }
             });
 
         });
@@ -403,15 +213,7 @@ class Operator {
     showClueQuestion() {
         this.presentationInstance.fitQuestionToScreen();
 
-        this.teamArray.forEach(team => {
-            /*
-             if (!team.isLockedOut) {
-             team.setBuzzerOpen(isOpen);
-             }
-             */
-            team.hasAnswered = false;
-
-        });
+        this.setAllTeamsState(Team.stateEnum.READING_QUESTION);
 
         this.divInstructions.html("Read aloud the question. Buzzers open when you press space");
 
@@ -445,72 +247,38 @@ class Operator {
         this.trAnswer.show();
         this.divClueAnswer.html(this.currentClueObj.answer);
         this.divInstructions.html("Wait for people to answer");
+        this.setAllTeamsState(Team.stateEnum.CAN_ANSWER);
+    }
+
+    handleShowAnswer() {
+        this.setAllTeamsState(Team.stateEnum.BUZZERS_OFF);
+    }
+
+    setAllTeamsState(targetState) {
+        this.teamArray.forEach(teamObj => teamObj.setState(targetState));
     }
 
     canTeamBuzz(keyboardEvent) {
         const teamIndex = Number(keyboardEvent.key) - 1;
-        const teamObj = this.teamArray[teamIndex];
-        return !teamObj.hasAnswered;
+        return this.teamArray[teamIndex].canBuzz();
     }
 
     haveAllTeamsAnswered() {
         return this.teamArray.every(teamObj => teamObj.hasAnswered);
     }
 
-    handleDoneReadingClueQuestion() {
-        //called from keydown on spacebar
-        if (!this.isClueQuestionBeingRead) {
-            return;
-        }
-        this.isClueQuestionBeingRead = false;
-        this.isClueQuestionAnswerable = true;
-        this.setAllBuzzersIsOpen(true);
-
-        this.trAnswer.show();
-        this.divClueAnswer.html(this.currentClueObj.answer);
-        this.divInstructions.html("Wait for people to answer");
-
-        var countdownQuestionTimeout = this.currentCountdownTimer = new CountdownTimer(SETTINGS.questionTimeout);
-        countdownQuestionTimeout.progressElement = this.progressPrimary;
-        countdownQuestionTimeout.onFinished = () => this.handleQuestionTimeout();
-        countdownQuestionTimeout.onPause = () => !this.isATeamAnswering && this.pause();
-        countdownQuestionTimeout.onResume = () => !this.isATeamAnswering && this.resume();
-        countdownQuestionTimeout.start();
-
-        this.countdownQuestionTimeout = countdownQuestionTimeout;
-
-    }
-
-    handleQuestionTimeout() {
-        this.divInstructions.html("Question timed out.");
-        this.audioQuestionTimeout.play();
-        this.setAllBuzzersIsOpen(false);
-        this.isClueQuestionAnswerable = false;
-        this.currentCountdownTimer = null;
-
-
-        // wait for timeout sound to play
-        window.setTimeout(() => {
-            this.presentationInstance.showSlide("clue-answer");
-
-            var countdownNextClue = this.currentCountdownTimer = new CountdownTimer(SETTINGS.displayDurationAnswer);
-            countdownNextClue.progressElement = this.progressPrimary;
-            countdownNextClue.onFinished = () => this.getClue();
-            countdownNextClue.onPause = () => this.pause();
-            countdownNextClue.onResume = () => this.resume();
-            countdownNextClue.start();
-        }, 1000);
-    }
-
-    setAllBuzzersIsOpen(isOpen) {
-        this.teamArray.forEach(team => {
-            if (!team.isLockedOut) {
-                team.setBuzzerOpen(isOpen);
-            }
-            team.hasAnswered = false;
-
-        });
-    }
+    /*
+     setAllBuzzersIsOpen(isOpen) {
+     this.teamArray.forEach(team => {
+     if (!team.isLockedOut) {
+     team.setBuzzerOpen(isOpen);
+     }
+     team.hasAnswered = false;
+     
+     });
+     }
+     * 
+     */
 
     pause() {
         this.setPaused(true);

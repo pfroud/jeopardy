@@ -1,0 +1,92 @@
+progress {
+    // https://css-tricks.com/html5-progress-element/
+
+    // first, turn off the built-in default style
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    border: none;
+    
+    $color-normal-backgroud: lightgray;
+    $color-normal-foreground: limegreen;
+    
+    $color-paused-foreground: darkgreen;
+    
+    $color-lockout-foreground: red;
+    
+    $color-lockout-paused-foreground: darkred;
+
+    &[value] {
+        &::-webkit-progress-bar{
+            // background of bar in Chrome
+            background-color: $color-normal-backgroud;
+        }
+
+        &::-moz-progress-bar {
+            // foreground of bar in Firefox
+            background-color: $color-normal-foreground;
+        }
+
+        &::-webkit-progress-value {
+            // foreground of bar in Chrome
+            background-color: $color-normal-foreground;
+        }
+
+        &.paused {
+            &::-webkit-progress-value {
+                // foreground of bar in Chrome
+                background-color: $color-paused-foreground;
+            }
+
+            &::-moz-progress-bar {
+                // foreground of bar in Firefox
+                background-color: $color-paused-foreground;
+            }
+        }
+
+        &.lockout {
+            &::-moz-progress-bar {
+                // foreground of bar in Firefox
+                background-color: $color-lockout-foreground;
+            }
+
+            &::-webkit-progress-value {
+                // foreground of bar in Chrome
+                background-color: $color-lockout-foreground;
+            }
+
+            &.paused {
+                &::-webkit-progress-value {
+                    // foreground of bar in Chrome
+                    background-color: $color-lockout-paused-foreground;
+                }
+
+                &::-moz-progress-bar {
+                    // foreground of bar in Firefox
+                    background-color: $color-lockout-paused-foreground;
+                }
+            }
+        }
+    }
+
+    &:not([value]) {
+        &::-webkit-progress-bar{
+
+            // try colors here https://codepen.io/chriscoyier/pen/lAkyo
+            $color1: #ddd;
+            $color2: #eee;
+            $size: 10px;
+
+            // https://www.pexels.com/blog/css-only-loaders/
+            // https://codepen.io/brunjo/pen/azdWjY
+            background-image: 
+                repeating-linear-gradient(
+                -45deg,
+                $color1,
+                $color1 $size,
+                $color2 $size,
+                $color2 2*$size /* determines size */
+                );
+        }
+    }
+}

@@ -7,7 +7,7 @@ class Settings {
         this.questionTimeout = 10 * 1000;
         this.answerTimeout = 5 * 1000;
         
-        this.lockoutDuration = 2 * 1000;
+        this.lockoutDuration = 250;
         
         this.incorrectAnswerPenaltyMultiplier = 0.5; // 1 for the TV show, 0 for no guessing penalty
 

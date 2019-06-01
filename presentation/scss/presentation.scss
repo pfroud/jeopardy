@@ -1,5 +1,5 @@
 $height-header: 70px;
-$height-footer: 100px;
+$height-footer: 120px;
 
 @function big-shadow($count) {
     $result: "";
@@ -13,67 +13,28 @@ $height-footer: 100px;
     @return unquote($result);
 }
 
-// todo use sass for loop?
+@function repeat($value, $count) {
+    $result: "";
+    @for $i from 0 to $count {
+        $result: $result + $value +" ";
+    }
+    @return unquote($result);
+}
+
 $big-shadow: big-shadow(5);
-
 $slightly-smaller-shadow: big-shadow(4);
-
 $color-dollars: #e3a147;
 
-
 body {
+    height: 100vh;
+    width: 100vw;
     font-family: sans-serif;
     background-color: #0b2191;
     background-image: url("../img/background.jpg");
     background-repeat: no-repeat;
     background-size: cover;
     color: white;
-
     overflow: hidden;
-}
-
-
-div#slide-jeopardy-logo{
-    // need special treatment to get the logo and shadow to center
-    width: 100%;
-    height: 100%;   
-
-    img {
-        position: absolute;
-
-        // https://stackoverflow.com/a/17624161
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        margin: auto;
-    }
-}
-
-div#slide-game-rules {
-    font-size: 30px;
-    font-weight: bold;
-    line-height: 150%;
-    text-shadow: $slightly-smaller-shadow;
-
-    li {
-        margin-bottom: 25px;
-    }
-}
-
-div#slide-buzzer-test {
-    font-size: 90px;
-    font-family: Korinna;
-    text-shadow: $big-shadow;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    text-align: center;
-}
-
-img#logo-jeopardy-shadow {
-    z-index: -1;
-    filter: brightness(0) blur(2px) opacity(0.6);
-    transform: translateY(35px) scale(0.9);
 }
 
 div#spinner {
@@ -137,31 +98,82 @@ main {
     align-items: center;
     padding: 0px 100px;
 
-    div#pre-question {
-        font-family: swiss911;
-        text-shadow: $big-shadow;
-        font-size: 80px;
-        text-align: center;
-        text-transform: uppercase;
+    div.slide {
+        display: none;
 
-        div#dollars-big {
-            color: $color-dollars;
+        &#slide-event-cost img#cost-chart {
+            filter: repeat(drop-shadow(1px 1px 0px black), 12);
         }
 
-    }
+        &#slide-jeopardy-logo {
+            // need special treatment to get the logo and shadow to center
+            width: 100%;
+            height: 100%;   
 
-    div#clue-question {
-        text-align: center;
-        font-family: korinna;
-        font-size: 80px;
-        text-transform: uppercase;
-        text-shadow: $big-shadow;
-        word-spacing: 10px;
-    }
+            img {
+                position: absolute;
 
-    div#clue-answer {
-        text-shadow: $slightly-smaller-shadow;
-        font-size: 60px;
+                // https://stackoverflow.com/a/17624161
+                left: 0;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                margin: auto;
+            }
+        }
+
+        &#slide-game-rules {
+            font-size: 30px;
+            font-weight: bold;
+            line-height: 150%;
+            text-shadow: $slightly-smaller-shadow;
+
+            li {
+                margin-bottom: 25px;
+            }
+        }
+
+        &#slide-buzzer-test {
+            font-size: 90px;
+            font-family: Korinna;
+            text-shadow: $big-shadow;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-align: center;
+        }
+
+        &#slide-jeopardy-logo img#logo-jeopardy-shadow {
+            z-index: -1;
+            filter: brightness(0) blur(2px) opacity(0.6);
+            transform: translateY(35px) scale(0.9);
+        }
+
+        &#slide-pre-question {
+            font-family: swiss911;
+            text-shadow: $big-shadow;
+            font-size: 80px;
+            text-align: center;
+            text-transform: uppercase;
+
+            div#dollars-big {
+                color: $color-dollars;
+            }
+
+        }
+
+        &#slide-clue-question {
+            text-align: center;
+            font-family: korinna;
+            font-size: 80px;
+            text-transform: uppercase;
+            text-shadow: $big-shadow;
+            word-spacing: 10px;
+        }
+
+        &#slide-clue-answer {
+            text-shadow: $slightly-smaller-shadow;
+            font-size: 60px;
+        }
     }
 
 }
@@ -171,33 +183,47 @@ footer {
     flex-wrap: nowrap;
     align-items: stretch;
     width: 100%;
-    /*position: absolute; // this makes the backgound image on <body> not go to the bottom of the page*/
+    position: absolute;
     bottom: 0px;
     left: 0px;
     height: $height-footer;
-
+    
     div.team {
         padding: 10px;
         text-align: center;
         flex: 1;
 
-        &.buzzer-closed {
+        &[data-team-state="buzzers-off"],
+        &[data-team-state="reading-question"],
+        &[data-team-state="already-answered"],
+        &[data-team-state="lockout"]
+        {
             opacity: 0.4;
         }
 
-        &.answering {
-            background-color: rgba(255, 255, 255, 0.3);
+        &[data-team-state="buzzers-off"] table.countdown-dots {
+            visibility: hidden;
+        }
+
+        &[data-team-state="answering"] {
             font-weight: bold;
+            background-color: white;
+            font-weight: bold;
+            color: black;
         }
 
         div.team-dollars {
             font-family: swiss911;
-            font-size: 30px;
+            font-size: 40px;
             text-shadow: 3px 3px 0px black;
         }
 
+        &[data-team-state="answering"] div.team-dollars {
+            text-shadow: 2px 2px 0px lightgray;
+        }
+        
         div.team-name {
-            /*! supress netbeans warning */
+            font-size: 20px;
         }
 
         table.countdown-dots {
@@ -207,8 +233,8 @@ footer {
             margin-bottom: 10px;
             td {
                 border: 2px solid gray;
-                width: 14px;
-                height: 8px;
+                width: 30px;
+                height: 13px;
 
                 &.active {
                     background-color: red;
@@ -221,24 +247,12 @@ footer {
             }
 
         }
+        
+        progress {
+            display: none;
+        }
 
     }   
 
 
-}
-
-@function repeat($value, $count) {
-    $result: "";
-    @for $i from 0 to $count {
-        $result: $result + $value +" ";
-    }
-    @return unquote($result);
-}
-
-img#cost-chart {
-    filter: repeat(drop-shadow(1px 1px 0px black), 12);
-}
-
-div.slide {
-    display: none;
 }

@@ -22,26 +22,27 @@ class StateMachine {
         this._initStates();
         this._validateStates();
 
-        this._goToState("idle");
     }
 
     _handleKeyboardEvent(keyboardEvent) {
-        const transitionArray = this.currentState.transitions;
-        for (var i = 0; i < transitionArray.length; i++) {
-            const transitionObj = transitionArray[i];
-            if (transitionObj.type === "keyboard" && transitionObj.keys.includes(keyboardEvent.key)) {
+        if (this.currentState) {
+            const transitionArray = this.currentState.transitions;
+            for (var i = 0; i < transitionArray.length; i++) {
+                const transitionObj = transitionArray[i];
+                if (transitionObj.type === "keyboard" && transitionObj.keys.includes(keyboardEvent.key)) {
 
-                const hasCondition = Boolean(transitionObj.condition);
-                if (hasCondition) {
-                    if (transitionObj.condition.call(operatorInstance, keyboardEvent)) {
+                    const hasCondition = Boolean(transitionObj.condition);
+                    if (hasCondition) {
+                        if (transitionObj.condition.call(operatorInstance, keyboardEvent)) {
+                            this._goToState(transitionObj.dest, keyboardEvent);
+                        }
+
+                    } else {
                         this._goToState(transitionObj.dest, keyboardEvent);
                     }
 
-                } else {
-                    this._goToState(transitionObj.dest, keyboardEvent);
+                    break;
                 }
-
-                break;
             }
         }
     }
@@ -58,9 +59,12 @@ class StateMachine {
     }
 
     _initStates() {
+        // todo make names of states less confusing
+        //todo consider adding a way to call function on a transition, instead of having init and continuing states
         this.states = [
             {
                 name: "idle",
+                showSlide: "jeopardy-logo",
                 transitions: [{
                         type: "manual",
                         name: "startGame",
@@ -80,29 +84,60 @@ class StateMachine {
                 transitions: [{
                         type: "timeout",
                         duration: SETTINGS.displayDurationCategory,
+                        dest: "showQuestionInit"
+                    }]
+            }, {
+                name: "showQuestionInit",
+                showSlide: "clue-question",
+                onEnter: operatorInstance.showClueQuestion,
+                transitions: [{
+                        type: "immediate",
                         dest: "showQuestion"
                     }]
             }, {
                 name: "showQuestion",
-                showSlide: "clue-question",
-                onEnter: operatorInstance.showClueQuestion,
                 transitions: [{
                         type: "keyboard",
                         keys: " ", //space
-                        dest: "waitForBuzzes"
+                        dest: "waitForBuzzesInit"
+                    }, {
+                        type: "keyboard",
+                        keys: "1234",
+                        dest: "lockout"
                     }]
             }, {
-                name: "waitForBuzzes",
+                name: "lockout",
+                onEnter: operatorInstance.handleLockout,
+                transitions: [{
+                        type: "immediate",
+                        dest: "showQuestion"
+                    }]
+            }, {
+                name: "waitForBuzzesInit",
                 onEnter: operatorInstance.handleDoneReadingClueQuestionNew,
+                transitions: [{
+                        type: "immediate",
+                        dest: "waitForBuzzes"
+                }]
+            }, {
+                name: "waitForBuzzes",
                 transitions: [{
                         type: "timeout",
                         duration: SETTINGS.questionTimeout,
                         dest: "showAnswer"
                     }, {
                         type: "keyboard",
-                        condition: operatorInstance.canTeamBuzz,
                         keys: "1234",
-                        dest: "waitForTeamAnswer"
+                        dest: "tryTeamAnswer"
+                    }
+                ]
+            }, {
+                name: "tryTeamAnswer",
+                transitions: [{
+                        type: "if",
+                        condition: operatorInstance.canTeamBuzz,
+                        then: "waitForTeamAnswer",
+                        else: "waitForBuzzes"
                     }]
             }, {
                 name: "waitForTeamAnswer",
@@ -125,7 +160,7 @@ class StateMachine {
                 name: "addMoney",
                 onEnter: operatorInstance.handleAnswerRight,
                 transitions: [{
-                        type: "promise",
+                        type: "immediate",
                         dest: "showAnswer"
                     }]
             }, {
@@ -139,11 +174,28 @@ class StateMachine {
                     }]
             }, {
                 name: "showAnswer",
+                onEnter: operatorInstance.handleShowAnswer,
                 showSlide: "clue-answer",
                 transitions: [{
                         type: "timeout",
                         duration: 2000,
-                        dest: "fetchClue"
+                        dest: "checkGameEnd"
+                    }]
+            }, {
+                name: "checkGameEnd",
+                transitions: [{
+                        type: "if",
+                        condition: operatorInstance.shouldGameEnd,
+                        then: "gameEnd",
+                        else: "fetchClue"
+                    }]
+            }, {
+                name: "gameEnd",
+                showSlide: "game-end",
+                transitions: [{
+                        type: "manual",
+                        name: "reset",
+                        dest: "idle"
                     }]
             }
         ];
@@ -176,20 +228,25 @@ class StateMachine {
         this.currentState = this.stateMap[stateName];
         this.divStateName.html(stateName);
 
-        handleSlide.call(this);
+        handleShowSlide.call(this);
         handleOnEnter.call(this);
-        handleTimeoutTransition.call(this);
+        handleTransitionTimeout.call(this);
+        handleTransitionImmedaite.call(this);
+        handleTransitionIf.call(this);
 
-        const transitionZero = this.currentState.transitions[0];
-        if (transitionZero.type === "if") {
-            if (transitionZero.condition.call(operatorInstance, paramsToPassToFunctionToCall)) {
-                this._goToState(transitionZero.then);
-            } else {
-                this._goToState(transitionZero.else);
+        function handleTransitionIf() {
+            //TODO search for transition with type if instead of using position zero
+            const transitionZero = this.currentState.transitions[0];
+            if (transitionZero.type === "if") {
+                if (transitionZero.condition.call(operatorInstance, paramsToPassToFunctionToCall)) {
+                    this._goToState(transitionZero.then, paramsToPassToFunctionToCall);
+                } else {
+                    this._goToState(transitionZero.else, paramsToPassToFunctionToCall);
+                }
             }
         }
 
-        function handleSlide() {
+        function handleShowSlide() {
             if (this.currentState.showSlide) {
                 if (pres.slideNames.includes(this.currentState.showSlide)) {
                     pres.showSlide(this.currentState.showSlide);
@@ -237,13 +294,24 @@ class StateMachine {
             }
         }
 
-        function handleTimeoutTransition() {
+        function handleTransitionTimeout() {
             const transitionArray = this.currentState.transitions;
             for (var i = 0; i < transitionArray.length; i++) {
                 const transitionObj = transitionArray[i];
                 if (transitionObj.type === "timeout") {
                     this._startCountdown(transitionObj);
                     this.divStateName.html(stateName + " &rarr; " + transitionObj.dest);
+                    break;
+                }
+            }
+        }
+
+        function handleTransitionImmedaite() {
+            const transitionArray = this.currentState.transitions;
+            for (var i = 0; i < transitionArray.length; i++) {
+                const transitionObj = transitionArray[i];
+                if (transitionObj.type === "immediate") {
+                    this._goToState(transitionObj.dest);
                     break;
                 }
             }
@@ -257,6 +325,11 @@ class StateMachine {
             this.stateMap[stateObj.name] = stateObj;
             validatePropString("state", index, stateObj, "name");
             validatePropArray("state", index, stateObj, "transitions");
+
+            if (stateObj.showSlide) {
+                //todo add validation
+            }
+
         }, this);
 
         // pass two of two
@@ -318,6 +391,7 @@ class StateMachine {
                         break;
 
                     case "promise":
+                    case "immediate":
                         // no further validation needed
                         break;
 

@@ -1,16 +1,13 @@
+/* global SETTINGS */
+
 class Team {
 
-    constructor(teamIdx) {
+    constructor(teamIdx, presentationInstance) {
         this.teamIdx = teamIdx;
         this.dollars = 0;
         this.teamName = "team " + teamIdx;
-        this.isAnswering = false;
-        this.hasAnswered = false; // TODO probably rename this `hasAnsweredThisRound`
-        this.isBuzzerOpen = false;
-        this.isLockedOut = false;
 
-        this.operatorProgress = null; //TODO give this a better name
-        this.presentationCountdownDots = null;
+        this.state = null;
 
         this.div = {
             operator: {
@@ -25,6 +22,24 @@ class Team {
                 teamName: null
             }
         };
+        this.presentationCountdownDots = null;
+        this.presentationProgressLockout = null;
+
+        this.setDivOperator($('div[data-team-number="' + teamIdx + '"]'));
+        this.setDivPresentation(presentationInstance.getTeamDiv(teamIdx));
+
+        this.setState(Team.stateEnum.BUZZERS_OFF);
+    }
+
+    handleAnswerRight(clueObj) {
+        // todo add sound
+        this.moneyAdd(clueObj.value);
+    }
+
+    handleAnswerWrong(clueObj) {
+        // todo add sound
+        this.moneySubtract(clueObj.value * SETTINGS.incorrectAnswerPenaltyMultiplier);
+        this.setState(SETTINGS.isAllowedMultipleTries ? Team.stateEnum.CAN_ANSWER : Team.stateEnum.ALREADY_ANSWERED);
     }
 
     moneyAdd(amount) {
@@ -37,6 +52,10 @@ class Team {
         this._updateDollarsDisplay();
     }
 
+    canBuzz() {
+        return this.state === Team.stateEnum.CAN_ANSWER;
+    }
+
     _updateDollarsDisplay() {
         this.div.presentation.dollars.html("$" + this.dollars);
         this.div.operator.dollars.html("$" + this.dollars);
@@ -47,14 +66,14 @@ class Team {
         this.div.presentation.dollars = divPresentationWrapper.find("div.team-dollars").html("$" + this.dollars);
         this.div.presentation.teamName = divPresentationWrapper.find("div.team-name").html(this.teamName);
         this.presentationCountdownDots = divPresentationWrapper.find("table.countdown-dots");
+        this.presentationProgressLockout = divPresentationWrapper.find("progress");
     }
 
     setDivOperator(divOperatorWrapper) {
         this.div.operator.wrapper = divOperatorWrapper;
         this.div.operator.teamName = divOperatorWrapper.find("div.team-name").html(this.teamName);
         this.div.operator.dollars = divOperatorWrapper.find("div.team-dollars").html("$" + this.dollars);
-        this.div.operator.state = divOperatorWrapper.find("div.team-state").html("Initialized.");
-        this.operatorProgress = divOperatorWrapper.find("progress.time-left");
+        this.div.operator.state = divOperatorWrapper.find("div.team-state").html(this.state);
     }
 
     setTeamName(teamName) {
@@ -63,45 +82,95 @@ class Team {
         this.div.presentation.teamName.html(teamName);
     }
 
-    setIsAnswering(isAnswering) {
-        this.hasAnswered = true;
-        this.div.operator.state.html(isAnswering ? "answering" : "not answering");
-        this.div.operator.wrapper.toggleClass("answering", isAnswering);
-        this.div.presentation.wrapper.toggleClass("answering", isAnswering);
+    setState(targetState) {
+        if (!(Team.stateValues.includes(targetState))) {
+            throw new RangeError(`team ${this.teamIdx}: can't go to state "${targetState}", not in the enum of avaliable states`);
+        }
+        this.state = targetState;
+        this.div.operator.wrapper.attr("data-team-state", targetState);
+        this.div.presentation.wrapper.attr("data-team-state", targetState);
+        this.div.operator.state.html(this.state);
     }
 
-    setBuzzerOpen(isOpen) {
-        this.isBuzzerOpen = isOpen;
-        this.div.presentation.wrapper.toggleClass("buzzer-closed", !isOpen);
-        this.div.operator.state.html("buzzer " + (isOpen ? "open" : "closed"));
-    }
-    
-    setLockout(isLocked) {
-        this.isLockedOut = isLocked;
-        this.isBuzzerOpen = !isLocked;
-        this.div.presentation.wrapper.toggleClass("buzzer-closed", isLocked);
-        this.div.operator.state.html(isLocked ? "lockout!" : "buzzer open");
+    canBeLockedOut() {
+        return this.state === Team.stateEnum.READING_QUESTION;
     }
 
-    buzzerTestShow() {
-        this.presentationCountdownDots.find("td").addClass("active");
-        this.div.operator.state.html("down");
+    startLockout() {
+        this.stateBeforeLockout = this.state;
+        this.setState(Team.stateEnum.LOCKOUT);
+
+        var countdownShowCategory = new CountdownTimer(SETTINGS.lockoutDuration);
+        // todo would be nice to show progress element on display and presentation. need to change CountdownTimer to allow that
+        countdownShowCategory.progressElement = this.presentationProgressLockout;
+        countdownShowCategory.intervalMs = 50; //high resolution mode!!
+        countdownShowCategory.onFinished = () => this.endLockout();
+        countdownShowCategory.start();
+
     }
 
-    buzzerTestHide() {
-        this.presentationCountdownDots.find("td").removeClass("active");
-        this.div.operator.state.html("up");
+    endLockout() {
+        this.setState(this.stateBeforeLockout);
+        this.stateBeforeLockout = null;
     }
-    
+
+    startAnswer() {
+        this.setState(Team.stateEnum.ANSWERING);
+    }
+
+    /*
+     
+     _setIsAnswering(isAnswering) {
+     this.div.operator.state.html(isAnswering ? "answering" : "not answering");
+     this.div.operator.wrapper.toggleClass("answering", isAnswering);
+     this.div.presentation.wrapper.toggleClass("answering", isAnswering);
+     }
+     
+     setBuzzerOpen(isOpen) {
+     this.isBuzzerOpen = isOpen;
+     this.div.presentation.wrapper.toggleClass("buzzer-closed", !isOpen);
+     this.div.operator.state.html("buzzer " + (isOpen ? "open" : "closed"));
+     }
+     
+     setLockout(isLocked) {
+     this.isLockedOut = isLocked;
+     this.isBuzzerOpen = !isLocked;
+     this.div.presentation.wrapper.toggleClass("buzzer-closed", isLocked);
+     this.div.operator.state.html(isLocked ? "lockout!" : "buzzer open");
+     }
+     
+     buzzerTestShow() {
+     this.presentationCountdownDots.find("td").addClass("active");
+     this.div.operator.state.html("down");
+     }
+     
+     buzzerTestHide() {
+     this.presentationCountdownDots.find("td").removeClass("active");
+     this.div.operator.state.html("up");
+     }
+     */
+
     /* 
-    dumpJson(){
-        return {};
-    }
-    
-    parseJson(jsonObj) {
-        
-    }
-    */
+     dumpJson(){
+     return {};
+     }
+     
+     parseJson(jsonObj) {
+     
+     }
+     */
 
 
 }
+
+Team.stateEnum = {
+    BUZZERS_OFF: "buzzers-off", // game has not started
+    READING_QUESTION: "reading-question", //operator is reading the question out loud
+    CAN_ANSWER: "can-answer", //operator is done reading the question
+    ANSWERING: "answering",
+    ALREADY_ANSWERED: "already-answered",
+    LOCKOUT: "lockout" //team buzzed while operator was reading the question
+};
+Object.freeze(Team.stateEnum);
+Team.stateValues = Object.values(Team.stateEnum);
+Object.freeze(Team.stateValues);

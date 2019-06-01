@@ -1,4 +1,6 @@
 body {
+  height: 100vh;
+  width: 100vw;
   font-family: sans-serif;
   background-color: #0b2191;
   background-image: url("../img/background.jpg");
@@ -6,38 +8,6 @@ body {
   background-size: cover;
   color: white;
   overflow: hidden; }
-
-div#slide-jeopardy-logo {
-  width: 100%;
-  height: 100%; }
-  div#slide-jeopardy-logo img {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    margin: auto; }
-
-div#slide-game-rules {
-  font-size: 30px;
-  font-weight: bold;
-  line-height: 150%;
-  text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black; }
-  div#slide-game-rules li {
-    margin-bottom: 25px; }
-
-div#slide-buzzer-test {
-  font-size: 90px;
-  font-family: Korinna;
-  text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  text-align: center; }
-
-img#logo-jeopardy-shadow {
-  z-index: -1;
-  filter: brightness(0) blur(2px) opacity(0.6);
-  transform: translateY(35px) scale(0.9); }
 
 div#spinner {
   border: 10px solid rgba(255, 255, 255, 0.2);
@@ -83,54 +53,92 @@ header {
     right: 8px; }
 
 main {
-  height: calc(100vh - 70px - 100px);
+  height: calc(100vh - 70px - 120px);
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 0px 100px; }
-  main div#pre-question {
-    font-family: swiss911;
-    text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black;
-    font-size: 80px;
-    text-align: center;
-    text-transform: uppercase; }
-    main div#pre-question div#dollars-big {
-      color: #e3a147; }
-  main div#clue-question {
-    text-align: center;
-    font-family: korinna;
-    font-size: 80px;
-    text-transform: uppercase;
-    text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black;
-    word-spacing: 10px; }
-  main div#clue-answer {
-    text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black;
-    font-size: 60px; }
+  main div.slide {
+    display: none; }
+    main div.slide#slide-event-cost img#cost-chart {
+      filter: drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) ; }
+    main div.slide#slide-jeopardy-logo {
+      width: 100%;
+      height: 100%; }
+      main div.slide#slide-jeopardy-logo img {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto; }
+    main div.slide#slide-game-rules {
+      font-size: 30px;
+      font-weight: bold;
+      line-height: 150%;
+      text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black; }
+      main div.slide#slide-game-rules li {
+        margin-bottom: 25px; }
+    main div.slide#slide-buzzer-test {
+      font-size: 90px;
+      font-family: Korinna;
+      text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-align: center; }
+    main div.slide#slide-jeopardy-logo img#logo-jeopardy-shadow {
+      z-index: -1;
+      filter: brightness(0) blur(2px) opacity(0.6);
+      transform: translateY(35px) scale(0.9); }
+    main div.slide#slide-pre-question {
+      font-family: swiss911;
+      text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black;
+      font-size: 80px;
+      text-align: center;
+      text-transform: uppercase; }
+      main div.slide#slide-pre-question div#dollars-big {
+        color: #e3a147; }
+    main div.slide#slide-clue-question {
+      text-align: center;
+      font-family: korinna;
+      font-size: 80px;
+      text-transform: uppercase;
+      text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black;
+      word-spacing: 10px; }
+    main div.slide#slide-clue-answer {
+      text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black;
+      font-size: 60px; }
 
 footer {
   display: flex;
   flex-wrap: nowrap;
   align-items: stretch;
   width: 100%;
-  /*position: absolute; // this makes the backgound image on <body> not go to the bottom of the page*/
+  position: absolute;
   bottom: 0px;
   left: 0px;
-  height: 100px; }
+  height: 120px; }
   footer div.team {
     padding: 10px;
     text-align: center;
     flex: 1; }
-    footer div.team.buzzer-closed {
+    footer div.team[data-team-state="buzzers-off"], footer div.team[data-team-state="reading-question"], footer div.team[data-team-state="already-answered"], footer div.team[data-team-state="lockout"] {
       opacity: 0.4; }
-    footer div.team.answering {
-      background-color: rgba(255, 255, 255, 0.3);
-      font-weight: bold; }
+    footer div.team[data-team-state="buzzers-off"] table.countdown-dots {
+      visibility: hidden; }
+    footer div.team[data-team-state="answering"] {
+      font-weight: bold;
+      background-color: white;
+      font-weight: bold;
+      color: black; }
     footer div.team div.team-dollars {
       font-family: swiss911;
-      font-size: 30px;
+      font-size: 40px;
       text-shadow: 3px 3px 0px black; }
+    footer div.team[data-team-state="answering"] div.team-dollars {
+      text-shadow: 2px 2px 0px lightgray; }
     footer div.team div.team-name {
-      /*! supress netbeans warning */ }
+      font-size: 20px; }
     footer div.team table.countdown-dots {
       margin-left: auto;
       margin-right: auto;
@@ -138,17 +146,13 @@ footer {
       margin-bottom: 10px; }
       footer div.team table.countdown-dots td {
         border: 2px solid gray;
-        width: 14px;
-        height: 8px; }
+        width: 30px;
+        height: 13px; }
         footer div.team table.countdown-dots td.active {
           background-color: red; }
       footer div.team table.countdown-dots.paused td.active {
         background-color: firebrick; }
-
-img#cost-chart {
-  filter: drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) ; }
-
-div.slide {
-  display: none; }
+    footer div.team progress {
+      display: none; }
 
 /*# sourceMappingURL=presentation.css.map */
