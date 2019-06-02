@@ -31,7 +31,7 @@ class Presentation {
         this.visibleSlide = null;
 
         var slideNames = this.slideNames = ["jeopardy-logo", "game-rules", "spinner",
-            "pre-question", "clue-question", "clue-answer", "event-cost", "buzzer-test"];
+            "pre-question", "clue-question", "clue-answer", "event-cost", "buzzer-test", "game-end"];
 
         slideNames.forEach(slideName => {
             this.slides[slideName] = $("div#slide-" + slideName);

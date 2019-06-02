@@ -52,6 +52,13 @@ header {
     position: absolute;
     right: 8px; }
 
+progress#game-timer {
+  width: 100vw;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 10px; }
+
 main {
   height: calc(100vh - 70px - 120px);
   display: flex;
@@ -108,6 +115,8 @@ main {
     main div.slide#slide-clue-answer {
       text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black;
       font-size: 60px; }
+    main div.slide#slide-game-end {
+      font-size: 100px; }
 
 footer {
   display: flex;

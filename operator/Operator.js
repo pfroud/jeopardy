@@ -27,6 +27,7 @@ class Operator {
         this.initKeyboardListener();
         this.initMouseListeners();
         window.open("../presentation/presentation.html", "windowPresentation");
+
     }
 
     initKeyboardListener() {
@@ -144,7 +145,11 @@ class Operator {
     }
 
     shouldGameEnd() {
-        console.log("returning false for shouldGameEnd");
+        for (var i = 0; i < NUM_TEAMS; i++) {
+            if (this.teamArray[i].dollars >= SETTINGS.dollarsWhenGameEnds) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -245,6 +250,7 @@ class Operator {
 
     handleShowAnswer() {
         this.setAllTeamsState(Team.stateEnum.BUZZERS_OFF);
+        this.divInstructions.html("Let people read the answer");
     }
 
     setAllTeamsState(targetState) {

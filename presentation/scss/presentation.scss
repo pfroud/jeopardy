@@ -91,6 +91,14 @@ header {
     }
 }
 
+progress#game-timer {
+    width: 100vw;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: 10px;
+}
+
 main {
     height: calc(100vh - #{$height-header} - #{$height-footer});
     display: flex;
@@ -174,6 +182,11 @@ main {
             text-shadow: $slightly-smaller-shadow;
             font-size: 60px;
         }
+        
+        
+        &#slide-game-end {
+            font-size: 100px;
+        }
     }
 
 }
@@ -187,7 +200,7 @@ footer {
     bottom: 0px;
     left: 0px;
     height: $height-footer;
-    
+
     div.team {
         padding: 10px;
         text-align: center;
@@ -221,7 +234,7 @@ footer {
         &[data-team-state="answering"] div.team-dollars {
             text-shadow: 2px 2px 0px lightgray;
         }
-        
+
         div.team-name {
             font-size: 20px;
         }
@@ -247,7 +260,7 @@ footer {
             }
 
         }
-        
+
         progress {
             display: none;
         }

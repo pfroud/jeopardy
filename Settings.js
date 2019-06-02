@@ -1,8 +1,8 @@
 class Settings {
 
     constructor() {
-        this.displayDurationCategory = 4 * 1000;
-        this.displayDurationAnswer = 3 * 1000;
+        this.displayDurationCategory = 5 * 1000;
+        this.displayDurationAnswer = 5 * 1000;
 
         this.questionTimeout = 10 * 1000;
         this.answerTimeout = 5 * 1000;
@@ -12,6 +12,8 @@ class Settings {
         this.incorrectAnswerPenaltyMultiplier = 0.5; // 1 for the TV show, 0 for no guessing penalty
 
         this.isAllowedMultipleTries = false;
+        
+        this.dollarsWhenGameEnds = 10000;
 
         this.inputDisplayDurationCategory = $("input#displayDurationCategory");
         this.inputDisplayDurationAnswer = $("input#displayDurationAnswer");

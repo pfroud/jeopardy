@@ -35,10 +35,12 @@ class Team {
     handleAnswerRight(clueObj) {
         // todo add sound
         this.moneyAdd(clueObj.value);
+        this.presentationCountdownDots.find("td").removeClass("active");
     }
 
     handleAnswerWrong(clueObj) {
         // todo add sound
+        this.presentationCountdownDots.find("td").removeClass("active");
         this.moneySubtract(clueObj.value * SETTINGS.incorrectAnswerPenaltyMultiplier);
         this.setState(SETTINGS.isAllowedMultipleTries ? Team.stateEnum.CAN_ANSWER : Team.stateEnum.ALREADY_ANSWERED);
     }
@@ -136,7 +138,6 @@ class Team {
         this.setState(Team.stateEnum.ANSWERING);
         this.presentationCountdownDots.find("td").addClass("active");
     }
-
 
     /* 
      dumpJson(){
