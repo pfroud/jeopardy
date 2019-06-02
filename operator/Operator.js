@@ -1,4 +1,4 @@
-/* global SETTINGS, fsm, stateMachine, Team */
+/* global SETTINGS, fsm, stateMachine, Team, audioManager */
 
 const NUM_TEAMS = 4;
 
@@ -28,41 +28,41 @@ class Operator {
         this.initMouseListeners();
         window.open("../presentation/presentation.html", "windowPresentation");
     }
-    
+
     initKeyboardListener() {
         window.addEventListener("keydown", keyboardEvent => {
-            if(keyboardEvent.key === "p"){
+            if (keyboardEvent.key === "p") {
                 this.togglePaused();
             }
         });
     }
 
     handleAnswerRight() {
+        audioManager.play("answerRight");
         this.answeringTeam.handleAnswerRight(this.currentClueObj);
     }
 
     handleAnswerWrong() {
+        audioManager.play("answerWrong");
         this.answeringTeam.handleAnswerWrong(this.currentClueObj);
     }
 
     initMouseListeners() {
-        /*
-         $("button#go-to-game-rules").click(() => this.presentationInstance.showSlide("game-rules"));
-         $("button#go-to-jeopardy-logo").click(() => this.presentationInstance.showSlide("jeopardy-logo"));
-         $("button#go-to-event-cost").click(() => this.presentationInstance.showSlide("event-cost"));
-         $("button#teams-hide").click(() => this.presentationInstance.setTeamsVisible(false));
-         $("button#teams-show").click(() => this.presentationInstance.setTeamsVisible(true));
-         */
+        $("button#go-to-game-rules").click(() => this.presentationInstance.showSlide("game-rules"));
+        $("button#go-to-jeopardy-logo").click(() => this.presentationInstance.showSlide("jeopardy-logo"));
+        $("button#go-to-event-cost").click(() => this.presentationInstance.showSlide("event-cost"));
+        $("button#teams-hide").click(() => this.presentationInstance.setTeamsVisible(false));
+        $("button#teams-show").click(() => this.presentationInstance.setTeamsVisible(true));
 
         this.buttonStartGame = $("button#start-game").click(() => stateMachine.manualTrigger("startGame"));
 
-        /*
-         $("button#buzzer-test-start").click(() => this.buzzerTestStart());
-         $("button#buzzer-test-stop").click(() => this.buzzerTestStop());
-         
-         $("button#save-team-names").click(() => this.saveTeamNames());
-         this.buttonSkipClue = $("button#skip-clue").click(() => this.skipClue());
-         */
+
+        $("button#buzzer-test-start").click(() => this.buzzerTestStart());
+        $("button#buzzer-test-stop").click(() => this.buzzerTestStop());
+
+        $("button#save-team-names").click(() => this.applyTeamNames());
+//         this.buttonSkipClue = $("button#skip-clue").click(() => this.skipClue());
+
     }
 
     /*
@@ -125,12 +125,18 @@ class Operator {
         this.applyTeamNames();
     }
 
-    handleBuzzerPressNew(keyboardEvent) {
+    playTimeoutSound() {
+        audioManager.play("questionTimeout");
+    }
+
+    handleBuzzerPress(keyboardEvent) {
         const teamIndex = Number(keyboardEvent.key) - 1;
         const teamObj = this.teamArray[teamIndex];
 //        this.audioTeamBuzz.play();
 
         this.answeringTeam = teamObj;
+
+        audioManager.play("teamBuzz");
 
         teamObj.startAnswer();
 
@@ -253,7 +259,7 @@ class Operator {
     haveAllTeamsAnswered() {
         return this.teamArray.every(teamObj => teamObj.hasAnswered);
     }
-    
+
     togglePaused() {
         this.setPaused(!this.isPaused);
     }

@@ -61,7 +61,7 @@ class StateMachine {
         }
     }
 
-    _startCountdown(transitionObj) {
+    _startCountdown(transitionObj, keyboardEvent) {
         var durationMs;
         var setMax = false;
         if (transitionObj.duration instanceof Function) {
@@ -80,6 +80,13 @@ class StateMachine {
         }
         countdownTimer.progressElement = this.countdownProgress;
         countdownTimer.textElement = this.countdownText;
+
+        if (transitionObj.useDots) {
+            const teamIndex = Number(keyboardEvent.key) - 1;
+            const teamObj = operatorInstance.teamArray[teamIndex];
+            countdownTimer.dotsElement = teamObj.presentationCountdownDots;
+        }
+
         countdownTimer.onFinished = () => this._goToState(destinationStateName);
         countdownTimer.start();
     }
@@ -145,7 +152,7 @@ class StateMachine {
                 transitions: [{
                         type: "timeout",
                         duration: SETTINGS.questionTimeout,
-                        dest: "showAnswer"
+                        dest: "playTimeoutSound"
                     }, {
                         type: "keyboard",
                         keys: "1234",
@@ -157,7 +164,7 @@ class StateMachine {
                 transitions: [{
                         type: "timeout",
                         duration: () => this.remainingQuestionTime,
-                        dest: "showAnswer"
+                        dest: "playTimeoutSound"
                     }, {
                         type: "keyboard",
                         keys: "1234",
@@ -174,7 +181,7 @@ class StateMachine {
                     }]
             }, {
                 name: "waitForTeamAnswer",
-                onEnter: operatorInstance.handleBuzzerPressNew,
+                onEnter: operatorInstance.handleBuzzerPress,
                 transitions: [{
                         type: "keyboard",
                         keys: "y",
@@ -186,6 +193,7 @@ class StateMachine {
                     }, {
                         type: "timeout",
                         duration: SETTINGS.answerTimeout,
+                        useDots: true,
                         dest: "subtractMoney"
                     }
                 ]
@@ -206,6 +214,14 @@ class StateMachine {
                         else: "waitForBuzzesResumeTimer"
                     }]
             }, {
+                name: "playTimeoutSound",
+                onEnter: operatorInstance.playTimeoutSound,
+                transitions: [{
+                        type: "immediate",
+                        dest: "showAnswer"
+                    }]
+            },
+            {
                 name: "showAnswer",
                 onEnter: operatorInstance.handleShowAnswer,
                 showSlide: "clue-answer",
@@ -272,7 +288,7 @@ class StateMachine {
 
         handleShowSlide.call(this);
         handleOnEnter.call(this);
-        handleTransitionTimeout.call(this);
+        handleTransitionTimeout.call(this, paramsToPassToFunctionToCall);
         handleTransitionImmedaite.call(this);
         handleTransitionIf.call(this);
 
@@ -352,12 +368,12 @@ class StateMachine {
             }
         }
 
-        function handleTransitionTimeout() {
+        function handleTransitionTimeout(paramsToPassToFunctionToCall) {
             const transitionArray = this.currentState.transitions;
             for (var i = 0; i < transitionArray.length; i++) {
                 const transitionObj = transitionArray[i];
                 if (transitionObj.type === "timeout") {
-                    this._startCountdown(transitionObj);
+                    this._startCountdown(transitionObj, paramsToPassToFunctionToCall);
                     this.divStateName.html(stateName + " &rarr; " + transitionObj.dest);
                     break;
                 }

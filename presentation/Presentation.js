@@ -41,10 +41,11 @@ class Presentation {
 
     showSlide(slideName) {
         if (slideName in this.slides) {
+            this.visibleSlide && this.visibleSlide.hide();
+            
             var targetSlide = this.slides[slideName];
             targetSlide.show();
 
-            this.visibleSlide && this.visibleSlide.hide();
             this.visibleSlide = targetSlide;
         } else {
             throw new RangeError('slide name "' + slideName + 'not in known slides: ' + slides);
@@ -65,10 +66,10 @@ class Presentation {
     }
 
     fitQuestionToScreen() {
-        
+
         //remove the style tag which may have been set by previus call to thsi function
         this.divQuestion.css("font-size", "");
-        
+
         const heightOfMain = $("main").height();
 
         while (this.divQuestion.height() > heightOfMain) {

@@ -1,3 +1,5 @@
+/* global audioManager */
+
 "use strict";
 
 class CountdownTimer {
@@ -17,6 +19,9 @@ class CountdownTimer {
         this.durationMs = durationMs;
         this.maxMs = durationMs;
         this.remainingMs = durationMs;
+
+        this.hideProgressOnFinish = false;
+        this.previousSecondThatPassed = -1;
 
         // timestamps in Unix epoch
         this.tsLastInterval = null;
@@ -172,25 +177,34 @@ class CountdownTimer {
         if (this.dotsElement) {
             const secondsThatJustPassed = Math.ceil(this.remainingMs / 1000) + 1;
 
-            // the countdown dots only count down from five
-            if (secondsThatJustPassed > 5) {
-                /*
-                 // but we want some visual feedback that one second passed
-                 
-                 const closestMultipleOf1000 = Math.round(this.remainingMs / 1000) * 1000;
-                 const distanceFromMultipleOf1000 = Math.abs(this.remainingMs - closestMultipleOf1000);
-                 
-                 // intervals rarley happen exactly on time, so flash the dots if it's pretty close
-                 if (distanceFromMultipleOf1000 < 8) {
-                 const allDots = this.dotsElement.find("td");
-                 allDots.removeClass("active");
-                 setTimeout(() => allDots.addClass("active"), 20); //change flash duration here
-                 }
-                 */
+            /*
+             // the countdown dots only count down from five
+             if (secondsThatJustPassed > 5) {
+             // but we want some visual feedback that one second passed
+             
+             const closestMultipleOf1000 = Math.round(this.remainingMs / 1000) * 1000;
+             const distanceFromMultipleOf1000 = Math.abs(this.remainingMs - closestMultipleOf1000);
+             
+             // intervals rarley happen exactly on time, so flash the dots if it's pretty close
+             if (distanceFromMultipleOf1000 < 8) {
+             const allDots = this.dotsElement.find("td");
+             allDots.removeClass("active");
+             setTimeout(() => allDots.addClass("active"), 20); //change flash duration here
+             }
+             
+             } else {
+             */
 
-            } else {
+            if (this.previousSecondThatPassed !== secondsThatJustPassed) {
                 this.dotsElement.find('[data-countdown="' + secondsThatJustPassed + '"]').removeClass("active");
+                if (secondsThatJustPassed !== 6
+                        && secondsThatJustPassed !== 1) {
+                    audioManager.play("tick");
+                }
             }
+
+            this.previousSecondThatPassed = secondsThatJustPassed;
+//            }
         }
     }
 
@@ -199,7 +213,9 @@ class CountdownTimer {
         this.textElement && this.textElement.html("done");
         clearInterval(this.intervalID);
 
-//        this.progressElement && this.progressElement.hide();
+        if (this.hideProgressOnFinish && this.progressElement) {
+            this.progressElement.hide();
+        }
         this.onFinished && this.onFinished();
     }
 

@@ -120,6 +120,7 @@ class Team {
         // todo would be nice to show progress element on display and presentation. need to change CountdownTimer to allow that
         countdownShowCategory.progressElement = this.presentationProgressLockout;
         countdownShowCategory.intervalMs = 50; //high resolution mode!!
+        countdownShowCategory.hideProgressOnFinish = true;
         countdownShowCategory.onFinished = () => this.endLockout();
         countdownShowCategory.start();
 
@@ -133,39 +134,9 @@ class Team {
 
     startAnswer() {
         this.setState(Team.stateEnum.ANSWERING);
+        this.presentationCountdownDots.find("td").addClass("active");
     }
 
-    /*
-     
-     _setIsAnswering(isAnswering) {
-     this.div.operator.state.html(isAnswering ? "answering" : "not answering");
-     this.div.operator.wrapper.toggleClass("answering", isAnswering);
-     this.div.presentation.wrapper.toggleClass("answering", isAnswering);
-     }
-     
-     setBuzzerOpen(isOpen) {
-     this.isBuzzerOpen = isOpen;
-     this.div.presentation.wrapper.toggleClass("buzzer-closed", !isOpen);
-     this.div.operator.state.html("buzzer " + (isOpen ? "open" : "closed"));
-     }
-     
-     setLockout(isLocked) {
-     this.isLockedOut = isLocked;
-     this.isBuzzerOpen = !isLocked;
-     this.div.presentation.wrapper.toggleClass("buzzer-closed", isLocked);
-     this.div.operator.state.html(isLocked ? "lockout!" : "buzzer open");
-     }
-     
-     buzzerTestShow() {
-     this.presentationCountdownDots.find("td").addClass("active");
-     this.div.operator.state.html("down");
-     }
-     
-     buzzerTestHide() {
-     this.presentationCountdownDots.find("td").removeClass("active");
-     this.div.operator.state.html("up");
-     }
-     */
 
     /* 
      dumpJson(){

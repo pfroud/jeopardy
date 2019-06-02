@@ -61,7 +61,7 @@ main {
   main div.slide {
     display: none; }
     main div.slide#slide-event-cost img#cost-chart {
-      filter: drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) drop-shadow(1px 1px 0px black) ; }
+      filter: drop-shadow(2px 2px 0px black) drop-shadow(2px 2px 0px black) drop-shadow(2px 2px 0px black) drop-shadow(2px 2px 0px black) drop-shadow(2px 2px 0px black) drop-shadow(2px 2px 0px black) drop-shadow(2px 2px 0px black) drop-shadow(2px 2px 0px black) drop-shadow(2px 2px 0px black) drop-shadow(2px 2px 0px black) drop-shadow(2px 2px 0px black) drop-shadow(2px 2px 0px black) ; }
     main div.slide#slide-jeopardy-logo {
       width: 100%;
       height: 100%; }
