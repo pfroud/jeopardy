@@ -1,4 +1,4 @@
-/* global pres, operatorInstance, Function, SETTINGS */
+/* global pres, operatorInstance, Function, SETTINGS, presentationInstance */
 
 class StateMachine {
 
@@ -94,6 +94,7 @@ class StateMachine {
     _initStates() {
         // todo make names of states less confusing
         //todo consider adding a way to call function on a transition, instead of having init and continuing states
+        // todo simplify onEnter and onExit
         /*
          * where to replace two states with one state and onTransition:
          * definitley: showQuestion(Init)
@@ -119,7 +120,7 @@ class StateMachine {
                     }]
             }, {
                 name: "showCategoryAndDollars",
-                showSlide: "pre-question",
+                showSlide: "clue-category-and-dollars",
                 transitions: [{
                         type: "timeout",
                         duration: SETTINGS.durationDisplayCategory,
@@ -300,16 +301,12 @@ class StateMachine {
 
         function handleOnExit() {
             if (this.currentState.onExit) {
-
                 const functionToCall = this.currentState.onExit;
-
                 if (!(functionToCall instanceof Function)) {
                     console.info(`state "${this.currentState.name}": cannot call onExit function "${functionToCall}", not a function`);
                     return;
                 }
-
                 functionToCall.call(this); //todo fix this, because onEnter always is an operatorInstance call
-
             }
         }
 
@@ -409,8 +406,9 @@ class StateMachine {
             validatePropString("state", index, stateObj, "name");
             validatePropArray("state", index, stateObj, "transitions");
 
-            if (stateObj.showSlide) {
-                //todo add validation
+            if (stateObj.showSlide &&
+                    !presentationInstance.slideNames.includes(stateObj.showSlide)) {
+                console.warn(`state "${stateObj.name}": showSlide: unknown slide "${stateObj.showSlide}"`);
             }
 
         }, this);
@@ -418,18 +416,16 @@ class StateMachine {
         // pass two of two
         this.states.forEach(function (stateObj, stateIndex) {
 
-            var keysUsed = {};
+            var keyboardKeysUsed = {};
 
             stateObj.transitions.forEach(function (transitionObj, transitionIndex) {
 
                 if (transitionObj.type !== "if") {
-
                     if (!transitionObj.dest) {
                         printWarning(stateObj.name, transitionIndex,
                                 "no destination state");
                         return;
                     }
-
                     if (!(transitionObj.dest in this.stateMap)) {
                         printWarning(stateObj.name, transitionIndex,
                                 `unknown destination state "${transitionObj.dest}"`);
@@ -439,6 +435,10 @@ class StateMachine {
                 switch (transitionObj.type) {
                     case "timeout":
                         const duration = transitionObj.duration;
+                        if (!transitionObj.duration) {
+                            printWarning(stateObj.name, transitionIndex,
+                                    "timeout has no duration property");
+                        }
                         if (!Number.isInteger(duration)) {
                             printWarning(stateObj.name, transitionIndex,
                                     `duration for timeout transition is not an integer: ${duration}`);
@@ -446,24 +446,25 @@ class StateMachine {
                         break;
 
                     case "keyboard":
-                        const keys = transitionObj.keys;
-                        if (!keys) {
+                        const keyboardKeys = transitionObj.keys;
+                        if (!keyboardKeys) {
                             printWarning(stateObj.name, transitionIndex,
                                     `no keys for keyboard transition`);
                         }
 
-                        if (keys.constructor.name !== "String") {
+                        if (keyboardKeys.constructor.name !== "String") {
                             printWarning(stateObj.name, transitionIndex,
-                                    `property keys has type ${keys.constructor.name}, expected String`);
+                                    `property keys has type ${keyboardKeys.constructor.name}, expected String`);
                         }
 
-                        for (var i = 0; i < keys.length; i++) {
-                            const key = keys.charAt(i);
-                            if (key in keysUsed) {
+                        // make sure each keyboard key is not used in multiple transitions
+                        for (var i = 0; i < keyboardKeys.length; i++) {
+                            const key = keyboardKeys.charAt(i);
+                            if (key in keyboardKeysUsed) {
                                 printWarning(stateObj.name, transitionIndex,
-                                        `keyboard key "${key}" already used in transition ${keysUsed[key]}`);
+                                        `keyboard key "${key}" already used in transition ${keyboardKeysUsed[key]}`);
                             } else {
-                                keysUsed[key] = transitionIndex;
+                                keyboardKeysUsed[key] = transitionIndex;
                             }
                         }
 
@@ -497,9 +498,7 @@ class StateMachine {
                         printWarning(stateObj.name, transitionIndex,
                                 `unknown transition type "${transitionObj.type}"`);
                         break;
-
                 }
-
 
                 function printWarning(stateName, transitionIndex, message) {
                     console.warn(`state "${stateName}": transition ${transitionIndex}: ${message}`);

@@ -14,7 +14,7 @@ class Settings {
          */
         this.durationLockout = 250;
 
-        this.incorrectAnswerPenaltyMultiplier = 0.5; // 1 for the TV show, 0 for no guessing penalty
+        this.wrongAnswerPenaltyMultiplier = 0.5; // 1 for the TV show, 0 for no guessing penalty
 
         this.isAllowedMultipleTries = false;
 

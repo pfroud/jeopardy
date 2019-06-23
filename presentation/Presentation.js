@@ -31,7 +31,7 @@ class Presentation {
         this.visibleSlide = null;
 
         var slideNames = this.slideNames = ["jeopardy-logo", "game-rules", "spinner",
-            "pre-question", "clue-question", "clue-answer", "event-cost", "buzzer-test", "game-end"];
+            "clue-category-and-dollars", "clue-question", "clue-answer", "event-cost", "buzzer-test", "game-end"];
 
         slideNames.forEach(slideName => {
             this.slides[slideName] = $("div#slide-" + slideName);
@@ -67,7 +67,7 @@ class Presentation {
 
     fitQuestionToScreen() {
 
-        //remove the style tag which may have been set by previus call to thsi function
+        //remove the style tag which may have been set by previous call to this function
         this.divQuestion.css("font-size", "");
 
         const heightOfMain = $("main").height();

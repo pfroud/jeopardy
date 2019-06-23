@@ -41,7 +41,7 @@ class Team {
     handleAnswerWrong(clueObj) {
         audioManager.play("answerWrong");
         this.presentationCountdownDots.find("td").removeClass("active");
-        this.moneySubtract(clueObj.value * SETTINGS.incorrectAnswerPenaltyMultiplier);
+        this.moneySubtract(clueObj.value * SETTINGS.wrongAnswerPenaltyMultiplier);
         this.setState(SETTINGS.isAllowedMultipleTries ? Team.stateEnum.CAN_ANSWER : Team.stateEnum.ALREADY_ANSWERED);
     }
 
