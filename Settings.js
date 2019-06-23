@@ -1,19 +1,24 @@
 class Settings {
 
     constructor() {
-        this.displayDurationCategory = 5 * 1000;
-        this.displayDurationAnswer = 5 * 1000;
+        this.durationDisplayCategory = 5 * 1000;
+        this.durationDisplayAnswer = 5 * 1000;
 
-        this.questionTimeout = 10 * 1000;
-        this.answerTimeout = 5 * 1000;
-        
-        this.lockoutDuration = 250;
-        
+        this.timeoutWaitForBuzzes = 10 * 1000;
+        this.timeoutTeamAnswer = 5 * 1000;
+
+        /*
+         * Two sources on the quarter-second lockout:
+         * https://www.jeopardy.com/jbuzz/behind-scenes/how-does-jeopardy-buzzer-work
+         * https://www.facebook.com/Jeopardy/photos/a.187939387923652/710960202288232/
+         */
+        this.durationLockout = 250;
+
         this.incorrectAnswerPenaltyMultiplier = 0.5; // 1 for the TV show, 0 for no guessing penalty
 
         this.isAllowedMultipleTries = false;
-        
-        this.dollarsWhenGameEnds = 10000;
+
+        this.teamDollarsWhenGameShouldEnd = 10000;
 
         this.inputDisplayDurationCategory = $("input#displayDurationCategory");
         this.inputDisplayDurationAnswer = $("input#displayDurationAnswer");

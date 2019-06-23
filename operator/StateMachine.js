@@ -76,7 +76,7 @@ class StateMachine {
 
         var countdownTimer = this.countdownTimer = new CountdownTimer(durationMs);
         if (setMax) {
-            countdownTimer.maxMs = SETTINGS.questionTimeout;
+            countdownTimer.maxMs = SETTINGS.timeoutWaitForTeamBuzz;
         }
         countdownTimer.progressElement = this.countdownProgress;
         countdownTimer.textElement = this.countdownText;
@@ -94,6 +94,12 @@ class StateMachine {
     _initStates() {
         // todo make names of states less confusing
         //todo consider adding a way to call function on a transition, instead of having init and continuing states
+        /*
+         * where to replace two states with one state and onTransition:
+         * definitley: showQuestion(Init)
+         * maybe: waitForBuzzes{restartTime,resumeTimer}
+         *      yeah just have resumeTime be default, then call restartTime when coming from showQuestion press space
+         */
         this.states = [
             {
                 name: "idle",
@@ -116,7 +122,7 @@ class StateMachine {
                 showSlide: "pre-question",
                 transitions: [{
                         type: "timeout",
-                        duration: SETTINGS.displayDurationCategory,
+                        duration: SETTINGS.durationDisplayCategory,
                         dest: "showQuestionInit"
                     }]
             }, {
@@ -151,7 +157,7 @@ class StateMachine {
                 onExit: this.saveRemainingTime,
                 transitions: [{
                         type: "timeout",
-                        duration: SETTINGS.questionTimeout,
+                        duration: SETTINGS.timeoutWaitForBuzzes,
                         dest: "playTimeoutSound"
                     }, {
                         type: "keyboard",
@@ -163,7 +169,7 @@ class StateMachine {
                 onExit: this.saveRemainingTime,
                 transitions: [{
                         type: "timeout",
-                        duration: () => this.remainingQuestionTime,
+                        duration: () => this.remainingQuestionTime, //todo look at code implementing this
                         dest: "playTimeoutSound"
                     }, {
                         type: "keyboard",
@@ -192,8 +198,8 @@ class StateMachine {
                         dest: "subtractMoney"
                     }, {
                         type: "timeout",
-                        duration: SETTINGS.answerTimeout,
-                        useDots: true,
+                        duration: SETTINGS.timeoutTeamAnswer,
+                        useDots: true, //todo see whether this is really needed. or give better name
                         dest: "subtractMoney"
                     }
                 ]
@@ -227,7 +233,7 @@ class StateMachine {
                 showSlide: "clue-answer",
                 transitions: [{
                         type: "timeout",
-                        duration: 2000,
+                        duration: SETTINGS.durationDisplayAnswer,
                         dest: "checkGameEnd"
                     }]
             }, {
@@ -308,14 +314,17 @@ class StateMachine {
         }
 
         function handleTransitionIf() {
-            //TODO search for transition with type if instead of using position zero
-            const transitionZero = this.currentState.transitions[0];
-            if (transitionZero.type === "if") {
-                if (transitionZero.condition.call(operatorInstance, paramsToPassToFunctionToCall)) {
-                    this._goToState(transitionZero.then, paramsToPassToFunctionToCall);
-                } else {
-                    this._goToState(transitionZero.else, paramsToPassToFunctionToCall);
+            const transitionArray = this.currentState.transitions;
+            for (var i = 0; i < transitionArray.length; i++) {
+                const transitionObj = transitionArray[i];
+                if (transitionObj.type === "if") {
+                    if (transitionObj.condition.call(operatorInstance, paramsToPassToFunctionToCall)) {
+                        this._goToState(transitionObj.then, paramsToPassToFunctionToCall);
+                    } else {
+                        this._goToState(transitionObj.else, paramsToPassToFunctionToCall);
+                    }
                 }
+                break;
             }
         }
 

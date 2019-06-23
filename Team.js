@@ -1,4 +1,4 @@
-/* global SETTINGS */
+/* global SETTINGS, audioManager */
 
 class Team {
 
@@ -33,13 +33,13 @@ class Team {
     }
 
     handleAnswerRight(clueObj) {
-        // todo add sound
+        audioManager.play("answerRight");
         this.moneyAdd(clueObj.value);
         this.presentationCountdownDots.find("td").removeClass("active");
     }
 
     handleAnswerWrong(clueObj) {
-        // todo add sound
+        audioManager.play("answerWrong");
         this.presentationCountdownDots.find("td").removeClass("active");
         this.moneySubtract(clueObj.value * SETTINGS.incorrectAnswerPenaltyMultiplier);
         this.setState(SETTINGS.isAllowedMultipleTries ? Team.stateEnum.CAN_ANSWER : Team.stateEnum.ALREADY_ANSWERED);
@@ -118,7 +118,7 @@ class Team {
         this.stateBeforeLockout = this.state;
         this.setState(Team.stateEnum.LOCKOUT);
 
-        var countdownShowCategory = this.countdownTimer = new CountdownTimer(SETTINGS.lockoutDuration);
+        var countdownShowCategory = this.countdownTimer = new CountdownTimer(SETTINGS.durationLockout);
         // todo would be nice to show progress element on display and presentation. need to change CountdownTimer to allow that
         countdownShowCategory.progressElement = this.presentationProgressLockout;
         countdownShowCategory.intervalMs = 50; //high resolution mode!!

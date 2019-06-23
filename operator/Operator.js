@@ -39,12 +39,10 @@ class Operator {
     }
 
     handleAnswerRight() {
-        audioManager.play("answerRight");
         this.answeringTeam.handleAnswerRight(this.currentClueObj);
     }
 
     handleAnswerWrong() {
-        audioManager.play("answerWrong");
         this.answeringTeam.handleAnswerWrong(this.currentClueObj);
     }
 
@@ -146,7 +144,7 @@ class Operator {
 
     shouldGameEnd() {
         for (var i = 0; i < NUM_TEAMS; i++) {
-            if (this.teamArray[i].dollars >= SETTINGS.dollarsWhenGameEnds) {
+            if (this.teamArray[i].dollars >= SETTINGS.teamDollarsWhenGameShouldEnd) {
                 return true;
             }
         }
