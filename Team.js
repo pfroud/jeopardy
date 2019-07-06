@@ -1,8 +1,8 @@
-/* global SETTINGS, audioManager */
-
 class Team {
 
-    constructor(teamIdx, presentationInstance) {
+    constructor(teamIdx, presentationInstance, settings, audioManager) {
+        this.settings = settings;
+        this.audioManager = audioManager;
         this.teamIdx = teamIdx;
         this.dollars = 0;
         this.teamName = "team " + teamIdx;
@@ -33,16 +33,16 @@ class Team {
     }
 
     handleAnswerRight(clueObj) {
-        audioManager.play("answerRight");
+        this.audioManager.play("answerRight");
         this.moneyAdd(clueObj.value);
         this.presentationCountdownDots.find("td").removeClass("active");
     }
 
     handleAnswerWrong(clueObj) {
-        audioManager.play("answerWrong");
+        this.audioManager.play("answerWrong");
         this.presentationCountdownDots.find("td").removeClass("active");
-        this.moneySubtract(clueObj.value * SETTINGS.wrongAnswerPenaltyMultiplier);
-        this.setState(SETTINGS.isAllowedMultipleTries ? Team.stateEnum.CAN_ANSWER : Team.stateEnum.ALREADY_ANSWERED);
+        this.moneySubtract(clueObj.value * this.settings.wrongAnswerPenaltyMultiplier);
+        this.setState(this.settings.isAllowedMultipleTries ? Team.stateEnum.CAN_ANSWER : Team.stateEnum.ALREADY_ANSWERED);
     }
 
     moneyAdd(amount) {
@@ -118,7 +118,7 @@ class Team {
         this.stateBeforeLockout = this.state;
         this.setState(Team.stateEnum.LOCKOUT);
 
-        var countdownShowCategory = this.countdownTimer = new CountdownTimer(SETTINGS.durationLockout);
+        var countdownShowCategory = this.countdownTimer = new CountdownTimer(this.settings.durationLockout);
         // todo would be nice to show progress element on display and presentation. need to change CountdownTimer to allow that
         countdownShowCategory.progressElement = this.presentationProgressLockout;
         countdownShowCategory.intervalMs = 50; //high resolution mode!!

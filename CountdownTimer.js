@@ -1,10 +1,8 @@
-/* global audioManager */
-
 "use strict";
 
 class CountdownTimer {
 
-    constructor(durationMs) {
+    constructor(durationMs, audioManager) {
         if (!Number.isInteger(durationMs) || !isFinite(durationMs) || isNaN(durationMs)) {
             throw new TypeError("duration is required, and must be an integer number");
         }
@@ -12,6 +10,8 @@ class CountdownTimer {
         if (durationMs < 1) {
             throw new RangeError("duration cannot be less than one");
         }
+        
+        this.audioManager = audioManager;
 
         // TODO rename this displayUpdateInterval or something
         this.intervalMs = 100;
@@ -180,7 +180,7 @@ class CountdownTimer {
             if (this.previousSecondThatPassed !== secondsThatJustPassed) {
                 this.dotsElement.find('[data-countdown="' + secondsThatJustPassed + '"]').removeClass("active");
                 if (secondsThatJustPassed !== 6 && secondsThatJustPassed !== 1) {
-                    audioManager.play("tick");
+                    this.audioManager.play("tick");
                 }
             }
 

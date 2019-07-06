@@ -14,6 +14,7 @@ $height-footer: 120px;
 }
 
 @function repeat($value, $count) {
+    // used to repeat drop-shadow filter
     $result: "";
     @for $i from 0 to $count {
         $result: $result + $value +" ";
@@ -156,7 +157,7 @@ main {
             transform: translateY(35px) scale(0.9);
         }
 
-        &#slide-pre-question {
+        &#slide-clue-category-and-dollars {
             font-family: swiss911;
             text-shadow: $big-shadow;
             font-size: 80px;

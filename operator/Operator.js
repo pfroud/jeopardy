@@ -1,13 +1,16 @@
-/* global SETTINGS, fsm, stateMachine, Team, audioManager */
+/* global Team */
 
 const NUM_TEAMS = 4;
 
-var pres;
-
 class Operator {
 
-    constructor() {
+    constructor(audioManager, settings) {
+        this.audioManager = audioManager;
+        this.settings = settings;
+
+
         this.presentationInstance = null;
+
         this.divClueWrapper = $("div#clue");
         this.divClueQuestion = $("div#clue-question");
         this.divClueDollars = $("div#clue-dollars");
@@ -26,7 +29,19 @@ class Operator {
 
         this.initKeyboardListener();
         this.initMouseListeners();
+        
         window.open("../presentation/presentation.html", "windowPresentation");
+    }
+
+    handlePresentationReady(presentationInstance) {
+        // called from Presentation instance in other window
+        this.presentationInstance = presentationInstance;
+        this.initTeams();
+
+        this.stateMachine = new StateMachine(this.settings, this, presentationInstance, this.audioManager);
+
+        this.buttonStartGame.prop("disabled", false);
+        this.divInstructions.html("Click button to start game");
 
     }
 
@@ -53,7 +68,7 @@ class Operator {
         $("button#teams-hide").click(() => this.presentationInstance.setTeamsVisible(false));
         $("button#teams-show").click(() => this.presentationInstance.setTeamsVisible(true));
 
-        this.buttonStartGame = $("button#start-game").click(() => stateMachine.manualTrigger("startGame"));
+        this.buttonStartGame = $("button#start-game").click(() => this.stateMachine.manualTrigger("startGame"));
 
 
         $("button#buzzer-test-start").click(() => this.buzzerTestStart());
@@ -101,17 +116,6 @@ class Operator {
         this.presentationInstance.setTeamsVisible(true);
     }
 
-    handlePresentationReady(presentationInstance) {
-        // called from Presentation instance in other window
-        this.presentationInstance = presentationInstance;
-        pres = presentationInstance;
-        this.initTeams();
-
-        this.buttonStartGame.prop("disabled", false);
-        this.divInstructions.html("Click button to start game");
-
-    }
-
     initTeams() {
         if (!this.presentationInstance) {
             console.log("can't init teams because no Presentation instance");
@@ -119,13 +123,13 @@ class Operator {
         }
 
         for (var i = 0; i < NUM_TEAMS; i++) {
-            this.teamArray[i] = new Team(i, this.presentationInstance);
+            this.teamArray[i] = new Team(i, this.presentationInstance, this.settings, this.audioManager);
         }
         this.applyTeamNames();
     }
 
     playTimeoutSound() {
-        audioManager.play("questionTimeout");
+        this.audioManager.play("questionTimeout");
     }
 
     handleBuzzerPress(keyboardEvent) {
@@ -135,7 +139,7 @@ class Operator {
 
         this.answeringTeam = teamObj;
 
-        audioManager.play("teamBuzz");
+        this.audioManager.play("teamBuzz");
 
         teamObj.startAnswer();
 
@@ -144,7 +148,7 @@ class Operator {
 
     shouldGameEnd() {
         for (var i = 0; i < NUM_TEAMS; i++) {
-            if (this.teamArray[i].dollars >= SETTINGS.teamDollarsWhenGameShouldEnd) {
+            if (this.teamArray[i].dollars >= this.settings.teamDollarsWhenGameShouldEnd) {
                 return true;
             }
         }
@@ -271,7 +275,7 @@ class Operator {
     setPaused(isPaused) {
         this.isPaused = isPaused;
         this.divPaused.toggle(isPaused);
-        stateMachine.setPaused(isPaused);
+        this.stateMachine.setPaused(isPaused);
         this.teamArray.forEach(teamObj => teamObj.setPaused(isPaused));
         this.presentationInstance.setPaused(isPaused);
     }

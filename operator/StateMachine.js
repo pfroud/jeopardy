@@ -1,10 +1,16 @@
-/* global pres, operatorInstance, Function, SETTINGS, presentationInstance */
+
+/* global Function */
 
 class StateMachine {
 
-    constructor() {
+    constructor(settings, operator, presentation, audioManager) {
 
         this.DEBUG = false;
+        
+        this.operator = operator;
+        this.presentation = presentation;
+        this.settings = settings;
+        this.audioManager = audioManager;
 
         this.countdownProgress = $("div#state-machine-viz progress#countdown");
         this.countdownText = $("div#state-machine-viz div#remaining");
@@ -29,7 +35,7 @@ class StateMachine {
     }
 
     _handleKeyboardEvent(keyboardEvent) {
-        if (this.currentState && !operatorInstance.isPaused) {
+        if (this.currentState && !this.operator.isPaused) {
             const transitionArray = this.currentState.transitions;
             for (var i = 0; i < transitionArray.length; i++) {
                 const transitionObj = transitionArray[i];
@@ -37,7 +43,7 @@ class StateMachine {
 
                     const hasCondition = Boolean(transitionObj.condition);
                     if (hasCondition) {
-                        if (transitionObj.condition.call(operatorInstance, keyboardEvent)) {
+                        if (transitionObj.condition.call(this.operator, keyboardEvent)) {
                             this._goToState(transitionObj.dest, keyboardEvent);
                         }
 
@@ -74,16 +80,16 @@ class StateMachine {
 
         const destinationStateName = transitionObj.dest;
 
-        var countdownTimer = this.countdownTimer = new CountdownTimer(durationMs);
+        var countdownTimer = this.countdownTimer = new CountdownTimer(durationMs, this.audioManager);
         if (setMax) {
-            countdownTimer.maxMs = SETTINGS.timeoutWaitForTeamBuzz;
+            countdownTimer.maxMs = this.settings.timeoutWaitForTeamBuzz;
         }
         countdownTimer.progressElement = this.countdownProgress;
         countdownTimer.textElement = this.countdownText;
 
         if (transitionObj.countdownTimerShowDots) {
             const teamIndex = Number(keyboardEvent.key) - 1;
-            const teamObj = operatorInstance.teamArray[teamIndex];
+            const teamObj = this.operator.teamArray[teamIndex];
             countdownTimer.dotsElement = teamObj.presentationCountdownDots;
         }
 
@@ -113,7 +119,7 @@ class StateMachine {
             }, {
                 name: "fetchClue",
                 showSlide: "spinner",
-                onEnter: operatorInstance.getClue,
+                onEnter: this.operator.getClue,
                 transitions: [{
                         type: "promise",
                         dest: "showCategoryAndDollars"
@@ -123,13 +129,13 @@ class StateMachine {
                 showSlide: "clue-category-and-dollars",
                 transitions: [{
                         type: "timeout",
-                        duration: SETTINGS.durationDisplayCategory,
+                        duration: this.settings.durationDisplayCategory,
                         dest: "showQuestionInit"
                     }]
             }, {
                 name: "showQuestionInit",
                 showSlide: "clue-question",
-                onEnter: operatorInstance.showClueQuestion,
+                onEnter: this.operator.showClueQuestion,
                 transitions: [{
                         type: "immediate",
                         dest: "showQuestion"
@@ -147,18 +153,18 @@ class StateMachine {
                     }]
             }, {
                 name: "lockout",
-                onEnter: operatorInstance.handleLockout,
+                onEnter: this.operator.handleLockout,
                 transitions: [{
                         type: "immediate",
                         dest: "showQuestion"
                     }]
             }, {
                 name: "waitForBuzzesRestartTimer",
-                onEnter: operatorInstance.handleDoneReadingClueQuestionNew,
+                onEnter: this.operator.handleDoneReadingClueQuestionNew,
                 onExit: this.saveRemainingTime,
                 transitions: [{
                         type: "timeout",
-                        duration: SETTINGS.timeoutWaitForBuzzes,
+                        duration: this.settings.timeoutWaitForBuzzes,
                         dest: "playTimeoutSound"
                     }, {
                         type: "keyboard",
@@ -182,13 +188,13 @@ class StateMachine {
                 name: "tryTeamAnswer",
                 transitions: [{
                         type: "if",
-                        condition: operatorInstance.canTeamBuzz,
+                        condition: this.operator.canTeamBuzz,
                         then: "waitForTeamAnswer",
                         else: "waitForBuzzesResumeTimer"
                     }]
             }, {
                 name: "waitForTeamAnswer",
-                onEnter: operatorInstance.handleBuzzerPress,
+                onEnter: this.operator.handleBuzzerPress,
                 transitions: [{
                         type: "keyboard",
                         keys: "y",
@@ -199,30 +205,30 @@ class StateMachine {
                         dest: "subtractMoney"
                     }, {
                         type: "timeout",
-                        duration: SETTINGS.timeoutTeamAnswer,
+                        duration: this.settings.timeoutTeamAnswer,
                         countdownTimerShowDots: true,
                         dest: "subtractMoney"
                     }
                 ]
             }, {
                 name: "addMoney",
-                onEnter: operatorInstance.handleAnswerRight,
+                onEnter: this.operator.handleAnswerRight,
                 transitions: [{
                         type: "immediate",
                         dest: "showAnswer"
                     }]
             }, {
                 name: "subtractMoney",
-                onEnter: operatorInstance.handleAnswerWrong,
+                onEnter: this.operator.handleAnswerWrong,
                 transitions: [{
                         type: "if",
-                        condition: operatorInstance.haveAllTeamsAnswered,
+                        condition: this.operator.haveAllTeamsAnswered,
                         then: "showAnswer",
                         else: "waitForBuzzesResumeTimer"
                     }]
             }, {
                 name: "playTimeoutSound",
-                onEnter: operatorInstance.playTimeoutSound,
+                onEnter: this.operator.playTimeoutSound,
                 transitions: [{
                         type: "immediate",
                         dest: "showAnswer"
@@ -230,18 +236,18 @@ class StateMachine {
             },
             {
                 name: "showAnswer",
-                onEnter: operatorInstance.handleShowAnswer,
+                onEnter: this.operator.handleShowAnswer,
                 showSlide: "clue-answer",
                 transitions: [{
                         type: "timeout",
-                        duration: SETTINGS.durationDisplayAnswer,
+                        duration: this.settings.durationDisplayAnswer,
                         dest: "checkGameEnd"
                     }]
             }, {
                 name: "checkGameEnd",
                 transitions: [{
                         type: "if",
-                        condition: operatorInstance.shouldGameEnd,
+                        condition: this.operator.shouldGameEnd,
                         then: "gameEnd",
                         else: "fetchClue"
                     }]
@@ -315,7 +321,7 @@ class StateMachine {
             for (var i = 0; i < transitionArray.length; i++) {
                 const transitionObj = transitionArray[i];
                 if (transitionObj.type === "if") {
-                    if (transitionObj.condition.call(operatorInstance, paramsToPassToFunctionToCall)) {
+                    if (transitionObj.condition.call(this.operator, paramsToPassToFunctionToCall)) {
                         this._goToState(transitionObj.then, paramsToPassToFunctionToCall);
                     } else {
                         this._goToState(transitionObj.else, paramsToPassToFunctionToCall);
@@ -327,8 +333,8 @@ class StateMachine {
 
         function handleShowSlide() {
             if (this.currentState.showSlide) {
-                if (pres.slideNames.includes(this.currentState.showSlide)) {
-                    pres.showSlide(this.currentState.showSlide);
+                if (this.presentation.slideNames.includes(this.currentState.showSlide)) {
+                    this.presentation.showSlide(this.currentState.showSlide);
                 } else {
                     console.warn(`entering state "${this.currentState.name}": can't show slide "${this.currentState.showSlide}", slide not found`);
                 }
@@ -347,7 +353,7 @@ class StateMachine {
 
                 //todo don't use global reference to operator instnace!
                 //todo make this not suck, because onExit call is not an operatorInstance call
-                const rv = functionToCall.call(operatorInstance, paramsToPassToFunctionToCall);
+                const rv = functionToCall.call(this.operator, paramsToPassToFunctionToCall);
 
                 if (rv && rv.constructor.name === "Promise") {
 
@@ -407,7 +413,7 @@ class StateMachine {
             validatePropArray("state", index, stateObj, "transitions");
 
             if (stateObj.showSlide &&
-                    !presentationInstance.slideNames.includes(stateObj.showSlide)) {
+                    !this.presentation.slideNames.includes(stateObj.showSlide)) {
                 console.warn(`state "${stateObj.name}": showSlide: unknown slide "${stateObj.showSlide}"`);
             }
 
@@ -439,10 +445,10 @@ class StateMachine {
                             printWarning(stateObj.name, transitionIndex,
                                     "timeout has no duration property");
                         }
-                        if (!Number.isInteger(duration)) {
-                            printWarning(stateObj.name, transitionIndex,
-                                    `duration for timeout transition is not an integer: ${duration}`);
-                        }
+//                        if (!Number.isInteger(duration)) {
+//                            printWarning(stateObj.name, transitionIndex,
+//                                    `duration for timeout transition is not an integer: ${duration}`);
+//                        }
                         break;
 
                     case "keyboard":

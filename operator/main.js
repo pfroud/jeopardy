@@ -1,20 +1,17 @@
-var SETTINGS;
-var operatorInstance;
-
-var stateMachine;
-var audioManager;
+// must be global because the presentation window can only access global scope
+var operator;
 
 $(document).ready(function () {
     if (window.location.search.length > 1) {
         return;
     }
 
-    SETTINGS = new Settings();
-    audioManager = new AudioManager();
-
-    operatorInstance = new Operator();
     initKeyboardShortcuts();
-    stateMachine = new StateMachine();
+    
+    const settings = new Settings();
+    const audioManager = new AudioManager();
+
+    operator = new Operator(audioManager, settings);
 });
 
 function initKeyboardShortcuts() {

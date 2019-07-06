@@ -97,13 +97,13 @@ main {
       z-index: -1;
       filter: brightness(0) blur(2px) opacity(0.6);
       transform: translateY(35px) scale(0.9); }
-    main div.slide#slide-pre-question {
+    main div.slide#slide-clue-category-and-dollars {
       font-family: swiss911;
       text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black;
       font-size: 80px;
       text-align: center;
       text-transform: uppercase; }
-      main div.slide#slide-pre-question div#dollars-big {
+      main div.slide#slide-clue-category-and-dollars div#dollars-big {
         color: #e3a147; }
     main div.slide#slide-clue-question {
       text-align: center;

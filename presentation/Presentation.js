@@ -17,12 +17,18 @@ class Presentation {
 
         this._initSlides();
 
-        this.showSlide("jeopardy-logo");
 
         if (window.opener) {
-            window.opener.operatorInstance.handlePresentationReady(this);
+            this.showSlide("jeopardy-logo");
+            window.opener.operator.handlePresentationReady(this);
         } else {
-            console.warn("no window.opener");
+            $("<div>window.opener is null</div>")
+                    .css("background-color", "red")
+                    .css("position", "absolute")
+                    .css("font-size", "60px")
+                    .css("top", "20px")
+                    .css("padding", "5px 10px")
+                    .appendTo("body");
         }
     }
 
@@ -42,7 +48,7 @@ class Presentation {
     showSlide(slideName) {
         if (slideName in this.slides) {
             this.visibleSlide && this.visibleSlide.hide();
-            
+
             var targetSlide = this.slides[slideName];
             targetSlide.show();
 
