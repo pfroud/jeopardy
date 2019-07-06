@@ -81,7 +81,7 @@ class StateMachine {
         countdownTimer.progressElement = this.countdownProgress;
         countdownTimer.textElement = this.countdownText;
 
-        if (transitionObj.useDots) {
+        if (transitionObj.countdownTimerShowDots) {
             const teamIndex = Number(keyboardEvent.key) - 1;
             const teamObj = operatorInstance.teamArray[teamIndex];
             countdownTimer.dotsElement = teamObj.presentationCountdownDots;
@@ -200,7 +200,7 @@ class StateMachine {
                     }, {
                         type: "timeout",
                         duration: SETTINGS.timeoutTeamAnswer,
-                        useDots: true, //todo see whether this is really needed. or give better name
+                        countdownTimerShowDots: true,
                         dest: "subtractMoney"
                     }
                 ]

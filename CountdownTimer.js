@@ -59,7 +59,7 @@ class CountdownTimer {
             this.isPaused = true;
             this._guiSetPaused(true);
 
-            const presentTs = CountdownTimer.getTS();
+            const presentTs = CountdownTimer.getNowTimestamp();
             const elapsedSinceLastInterval = presentTs - this.tsLastInterval;
             this.remainingMs -= elapsedSinceLastInterval;
             this._guiIntervalUpdate();
@@ -72,13 +72,12 @@ class CountdownTimer {
     resume() {
         if (this.hasStarted && !this.hasFinished && this.isPaused) {
 
-            this.tsLastInterval = CountdownTimer.getTS();
+            this.tsLastInterval = CountdownTimer.getNowTimestamp();
 
             if (this.remainingMs < this.intervalMs) {
-                console.log('resume(): clearning interval and setting timeout instead');
+                // the interval would only run once more. can use timeout instead.
                 clearInterval(this.intervalID);
                 this.timeoutID = setTimeout(this._handleInterval, this.remainingMs, this);
-
             } else {
                 this.intervalID = setInterval(this._handleInterval, this.intervalMs, this);
             }
@@ -122,7 +121,7 @@ class CountdownTimer {
         if (!this.hasStarted && !this.hasFinished) {
             this._guiStart();
             this.hasStarted = true;
-            this.tsLastInterval = CountdownTimer.getTS();
+            this.tsLastInterval = CountdownTimer.getNowTimestamp();
 
             this.intervalID = setInterval(this._handleInterval, this.intervalMs, this);
             this.onStart && this.onStart();
@@ -150,7 +149,7 @@ class CountdownTimer {
     }
 
     _handleInterval(instance) {
-        const presentTS = CountdownTimer.getTS();
+        const presentTS = CountdownTimer.getNowTimestamp();
         const elapsedSinceLastInterval = presentTS - instance.tsLastInterval;
         instance.remainingMs -= elapsedSinceLastInterval;
         instance.tsLastInterval = presentTS;
@@ -161,6 +160,7 @@ class CountdownTimer {
         if (instance.remainingMs <= 0) {
             instance._finish();
         } else if (instance.remainingMs < instance.intervalMs) {
+            // interval would only run one more time. can use timeout instead.
             clearInterval(instance.intervalID);
             this.timeoutID = setTimeout(instance._handleInterval, instance.remainingMs, instance);
         }
@@ -175,30 +175,11 @@ class CountdownTimer {
         this.progressElement && this.progressElement.attr("value", this.remainingMs);
 
         if (this.dotsElement) {
-            const secondsThatJustPassed = Math.ceil(this.remainingMs / 1000) + 1;
-
-            /*
-             // the countdown dots only count down from five
-             if (secondsThatJustPassed > 5) {
-             // but we want some visual feedback that one second passed
-             
-             const closestMultipleOf1000 = Math.round(this.remainingMs / 1000) * 1000;
-             const distanceFromMultipleOf1000 = Math.abs(this.remainingMs - closestMultipleOf1000);
-             
-             // intervals rarley happen exactly on time, so flash the dots if it's pretty close
-             if (distanceFromMultipleOf1000 < 8) {
-             const allDots = this.dotsElement.find("td");
-             allDots.removeClass("active");
-             setTimeout(() => allDots.addClass("active"), 20); //change flash duration here
-             }
-             
-             } else {
-             */
+            const secondsThatJustPassed = Math.ceil(this.remainingMs / 1000) + 1; //todo pretty sure theh plus one is wrong
 
             if (this.previousSecondThatPassed !== secondsThatJustPassed) {
                 this.dotsElement.find('[data-countdown="' + secondsThatJustPassed + '"]').removeClass("active");
-                if (secondsThatJustPassed !== 6
-                        && secondsThatJustPassed !== 1) {
+                if (secondsThatJustPassed !== 6 && secondsThatJustPassed !== 1) {
                     audioManager.play("tick");
                 }
             }
@@ -219,7 +200,7 @@ class CountdownTimer {
         this.onFinished && this.onFinished();
     }
 
-    static getTS() {
+    static getNowTimestamp() {
         return (new Date).getTime();
     }
 
