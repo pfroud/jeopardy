@@ -19,7 +19,8 @@ class Team {
             presentation: {
                 wrapper: null,
                 dollars: null,
-                teamName: null
+                teamName: null,
+                buzzerShow: null
             }
         };
         this.presentationCountdownDots = null;
@@ -80,6 +81,7 @@ class Team {
         this.div.presentation.teamName = divPresentationWrapper.find("div.team-name").html(this.teamName);
         this.presentationCountdownDots = divPresentationWrapper.find("table.countdown-dots");
         this.presentationProgressLockout = divPresentationWrapper.find("progress");
+        this.divBuzzerShow = divPresentationWrapper.find("div.buzzer-show");
     }
 
     setDivOperator(divOperatorWrapper) {
@@ -137,6 +139,14 @@ class Team {
     startAnswer() {
         this.setState(Team.stateEnum.ANSWERING);
         this.presentationCountdownDots.find("td").addClass("active");
+    }
+    
+    showKeyDown() {
+        this.divBuzzerShow.addClass("pressed").removeClass("not-pressed");
+    }
+    
+    showKeyUp(){
+        this.divBuzzerShow.addClass("not-pressed").removeClass("pressed");
     }
 
     /* 

@@ -29,7 +29,7 @@ class Operator {
 
         this.initKeyboardListener();
         this.initMouseListeners();
-        
+
         window.open("../presentation/presentation.html", "windowPresentation");
     }
 
@@ -38,10 +38,34 @@ class Operator {
         this.presentationInstance = presentationInstance;
         this.initTeams();
 
+        this.initTeamKeyboardShow();
+
         this.stateMachine = new StateMachine(this.settings, this, presentationInstance, this.audioManager);
 
         this.buttonStartGame.prop("disabled", false);
         this.divInstructions.html("Click button to start game");
+
+    }
+
+    initTeamKeyboardShow() {
+        const numbers = ["1", "2", "3", "4"];
+
+        window.addEventListener("keydown", keyboardEvent => {
+            const key = keyboardEvent.key;
+            if (numbers.includes(keyboardEvent.key)) {
+                const teamIndex = Number(keyboardEvent.key) - 1;
+                const teamObj = this.teamArray[teamIndex];
+                teamObj.showKeyDown();
+            }
+        });
+        window.addEventListener("keyup", keyboardEvent => {
+            const key = keyboardEvent.key;
+            if (numbers.includes(keyboardEvent.key)) {
+                const teamIndex = Number(keyboardEvent.key) - 1;
+                const teamObj = this.teamArray[teamIndex];
+                teamObj.showKeyUp();
+            }
+        });
 
     }
 
@@ -68,7 +92,10 @@ class Operator {
         $("button#teams-hide").click(() => this.presentationInstance.setTeamsVisible(false));
         $("button#teams-show").click(() => this.presentationInstance.setTeamsVisible(true));
 
-        this.buttonStartGame = $("button#start-game").click(() => this.stateMachine.manualTrigger("startGame"));
+        this.buttonStartGame = $("button#start-game").click(() => {
+            this.stateMachine.manualTrigger("startGame");
+            this.buttonStartGame.prop("disabled", true);
+        });
 
 
         $("button#buzzer-test-start").click(() => this.buzzerTestStart());

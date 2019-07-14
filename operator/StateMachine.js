@@ -35,6 +35,10 @@ class StateMachine {
     }
 
     _handleKeyboardEvent(keyboardEvent) {
+        if (document.activeElement.tagName === "INPUT") {
+            return;
+        }
+
         if (this.currentState && !this.operator.isPaused) {
             const transitionArray = this.currentState.transitions;
             for (var i = 0; i < transitionArray.length; i++) {

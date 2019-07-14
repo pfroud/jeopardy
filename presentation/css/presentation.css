@@ -60,7 +60,7 @@ progress#game-timer {
   height: 10px; }
 
 main {
-  height: calc(100vh - 70px - 120px);
+  height: calc(100vh - 70px - 180px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -126,13 +126,20 @@ footer {
   position: absolute;
   bottom: 0px;
   left: 0px;
-  height: 120px; }
+  height: 180px; }
   footer div.team {
     padding: 10px;
     text-align: center;
-    flex: 1; }
-    footer div.team[data-team-state="buzzers-off"], footer div.team[data-team-state="reading-question"], footer div.team[data-team-state="already-answered"], footer div.team[data-team-state="lockout"] {
-      opacity: 0.4; }
+    flex: 1;
+    /*
+    &[data-team-state="buzzers-off"],
+    &[data-team-state="reading-question"],
+    &[data-team-state="already-answered"],
+    &[data-team-state="lockout"]
+    {
+        opacity: 0.4;
+    }
+    */ }
     footer div.team[data-team-state="buzzers-off"] table.countdown-dots {
       visibility: hidden; }
     footer div.team[data-team-state="answering"] {
@@ -162,6 +169,13 @@ footer {
       footer div.team table.countdown-dots.paused td.active {
         background-color: firebrick; }
     footer div.team progress {
+      display: none; }
+    footer div.team div.buzzer-show img {
+      width: 100px;
+      margin-bottom: 5px; }
+    footer div.team div.buzzer-show.not-pressed img.buzzer-pressed {
+      display: none; }
+    footer div.team div.buzzer-show.pressed img.buzzer-not-pressed {
       display: none; }
 
 /*# sourceMappingURL=presentation.css.map */

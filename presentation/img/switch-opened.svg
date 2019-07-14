@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="50.269199mm"
+   height="21mm"
+   viewBox="0 0 50.269199 21"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="switch-opened.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="3.959798"
+     inkscape:cx="75.248783"
+     inkscape:cy="-27.373456"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1658"
+     inkscape:window-height="1051"
+     inkscape:window-x="2391"
+     inkscape:window-y="396"
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-23.409783,-99.735749)">
+    <rect
+       id="rect3713"
+       width="46.209568"
+       height="4.557683"
+       x="25.353119"
+       y="114.53423"
+       style="stroke-width:0.12476113" />
+    <rect
+       id="rect3719"
+       width="4.3071723"
+       height="2.5889838"
+       x="27.76301"
+       y="118.14677"
+       style="stroke-width:0.20902355" />
+    <rect
+       id="rect3719-6"
+       width="4.3071723"
+       height="2.5889838"
+       x="64.819542"
+       y="118.14677"
+       style="stroke-width:0.20902355" />
+    <rect
+       id="rect3713-0"
+       width="50.269199"
+       height="4.8249531"
+       x="-5.3673382"
+       y="115.39663"
+       style="stroke-width:0.13388713"
+       inkscape:transform-center-x="-16.364464"
+       inkscape:transform-center-y="-4.1487631"
+       transform="rotate(-14.354677)" />
+  </g>
+</svg>
