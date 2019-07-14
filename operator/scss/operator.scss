@@ -79,7 +79,7 @@ footer {
         text-align: center;
         flex: 1;
 
-        &.answering {
+        &[data-team-state="answering"] {
             background-color: orange;
             font-weight: bold;
         }            

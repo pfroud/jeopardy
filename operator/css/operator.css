@@ -58,7 +58,7 @@ footer {
   footer div.team {
     text-align: center;
     flex: 1; }
-    footer div.team.answering {
+    footer div.team[data-team-state="answering"] {
       background-color: orange;
       font-weight: bold; }
   footer div.team-name, footer div.team-dollars, footer div.team-state, footer progress.time-left {
