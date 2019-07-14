@@ -7,7 +7,6 @@ class Presentation {
         this.divQuestion = $("div#clue-question");
         this.divCategoryBig = $("div#category-big");
         this.divDollarsBig = $("div#dollars-big");
-        this.divPreQuestion = $("div#pre-question");
         this.divClueAnswer = $("div#clue-answer");
 
         this.divPaused = $("div#paused");

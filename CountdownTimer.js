@@ -10,7 +10,7 @@ class CountdownTimer {
         if (durationMs < 1) {
             throw new RangeError("duration cannot be less than one");
         }
-        
+
         this.audioManager = audioManager;
 
         // TODO rename this displayUpdateInterval or something
@@ -44,14 +44,14 @@ class CountdownTimer {
 
         // display elements
         this.textElement = null;
-        this.progressElement = null;
+        this.progressElements = [];
         this.dotsElement = null;
     }
 
     togglePaused() {
         this.isPaused ? this.resume() : this.pause();
     }
-
+    
     pause() {
         if (this.hasStarted && !this.hasFinished && !this.isPaused) {
             clearInterval(this.intervalID);
@@ -90,7 +90,7 @@ class CountdownTimer {
     }
 
     _guiSetPaused(isPaused) {
-        this.progressElement && this.progressElement.toggleClass("paused", isPaused);
+        this.progressElements.forEach(elem => elem.toggleClass("paused", isPaused));
         this.dotsElement && this.dotsElement.toggleClass("paused", isPaused);
         this.textElement && this.textElement.toggleClass("paused", isPaused);
     }
@@ -112,7 +112,7 @@ class CountdownTimer {
 
         this.dotsElement && this.dotsElement.find("td").removeClass("active");
 
-        this.progressElement && this.progressElement.attr("value", this.durationMs).hide();
+        this.progressElements.forEach(elem => elem.attr("value", this.durationMs).hide());
         this.textElement && this.textElement.html((this.durationMs / 1000).toFixed(1));
 
     }
@@ -131,11 +131,12 @@ class CountdownTimer {
     _guiStart() {
         this._guiSetPaused(false);
 
-        this.progressElement &&
-                this.progressElement
-                .attr("max", this.maxMs)
-                .attr("value", this.durationMs)
-                .show();
+        this.progressElements.forEach(elem => elem
+                    .attr("max", this.maxMs)
+                    .attr("value", this.durationMs)
+                    .show()
+        );
+
 
         if (this.dotsElement) {
             var tds = this.dotsElement.find("td");
@@ -172,7 +173,9 @@ class CountdownTimer {
     _guiIntervalUpdate() {
         this.textElement && this.textElement.html((this.remainingMs / 1000).toFixed(1));
 
-        this.progressElement && this.progressElement.attr("value", this.remainingMs);
+
+        this.progressElements.forEach(elem => elem.attr("value", this.remainingMs));
+
 
         if (this.dotsElement) {
             const secondsThatJustPassed = Math.ceil(this.remainingMs / 1000) + 1; //todo pretty sure theh plus one is wrong
@@ -194,8 +197,9 @@ class CountdownTimer {
         this.textElement && this.textElement.html("done");
         clearInterval(this.intervalID);
 
-        if (this.hideProgressOnFinish && this.progressElement) {
-            this.progressElement.hide();
+        if (this.hideProgressOnFinish) {
+            
+            this.progressElements.forEach(elem => elem.hide());
         }
         this.onFinished && this.onFinished();
     }

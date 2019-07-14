@@ -120,7 +120,7 @@ class Team {
 
         var countdownShowCategory = this.countdownTimer = new CountdownTimer(this.settings.durationLockout);
         // todo would be nice to show progress element on display and presentation. need to change CountdownTimer to allow that
-        countdownShowCategory.progressElement = this.presentationProgressLockout;
+        countdownShowCategory.progressElements.push(this.presentationProgressLockout);
         countdownShowCategory.intervalMs = 50; //high resolution mode!!
         countdownShowCategory.hideProgressOnFinish = true;
         countdownShowCategory.onFinished = () => this.endLockout();

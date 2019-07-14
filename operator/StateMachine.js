@@ -6,7 +6,7 @@ class StateMachine {
     constructor(settings, operator, presentation, audioManager) {
 
         this.DEBUG = false;
-        
+
         this.operator = operator;
         this.presentation = presentation;
         this.settings = settings;
@@ -81,11 +81,16 @@ class StateMachine {
         const destinationStateName = transitionObj.dest;
 
         var countdownTimer = this.countdownTimer = new CountdownTimer(durationMs, this.audioManager);
-        if (setMax) {
-            countdownTimer.maxMs = this.settings.timeoutWaitForTeamBuzz;
-        }
-        countdownTimer.progressElement = this.countdownProgress;
+        countdownTimer.progressElements.push(this.countdownProgress);
         countdownTimer.textElement = this.countdownText;
+
+        if (setMax) {
+            const newMax = this.settings.timeoutWaitForBuzzes;
+            countdownTimer.maxMs = newMax;
+
+            countdownTimer.progressElements.forEach(elem => elem.attr("max", newMax));
+
+        }
 
         if (transitionObj.countdownTimerShowDots) {
             const teamIndex = Number(keyboardEvent.key) - 1;
@@ -380,6 +385,7 @@ class StateMachine {
             }
         }
 
+//todo rename this startCountdownTimer
         function handleTransitionTimeout(paramsToPassToFunctionToCall) {
             const transitionArray = this.currentState.transitions;
             for (var i = 0; i < transitionArray.length; i++) {
