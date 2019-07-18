@@ -102,33 +102,16 @@ class Operator {
         $("button#buzzer-test-stop").click(() => this.buzzerTestStop());
 
         $("button#save-team-names").click(() => this.applyTeamNames());
-//         this.buttonSkipClue = $("button#skip-clue").click(() => this.skipClue());
+
+        this.buttonSkipClue = $("button#skip-clue").click(() => this.skipClue());
 
     }
 
-    /*
-     buzzerTestStart() {
-     this.buzzerTest = true;
-     $("span#buzzer-test-message").show();
-     this.presentationInstance.showSlide("buzzer-test");
-     }
-     
-     buzzerTestStop() {
-     this.buzzerTest = false;
-     $("span#buzzer-test-message").hide();
-     this.presentationInstance.showSlide("jeopardy-logo"); //i guess
-     }
-     */
-
     skipClue() {
-        if (this.isATeamAnswering) {
-            return;
-        }
-
+        this.setAllTeamsState(Team.stateEnum.BUZZERS_OFF, true);
+        this.stateMachine._goToState("fetchClue");
+        this.buttonSkipClue.attr("disabled", true);
         this.buttonSkipClue.blur();
-        this.currentCountdownTimer && this.currentCountdownTimer.reset();
-        this.getClue();
-
     }
 
     applyTeamNames() {
@@ -201,7 +184,7 @@ class Operator {
                     var clueObj = response[0];
                     this.currentClueObj = clueObj;
 
-                    if (isClueValid.call(this, clueObj)) {
+                    if (isClueValid(clueObj) && !doesQuestionHaveMultimedia(clueObj)) {
                         showClue.call(this, clueObj);
                         resolve(clueObj);
 
@@ -229,6 +212,17 @@ class Operator {
                     clueObj.category.title.length > 0;
         }
 
+        function doesQuestionHaveMultimedia(clueObj) {
+            const questionStr = clueObj.question.toLowerCase();
+            const terms = ["seen here", "heard here"];
+            for (var i = 0; i < terms.length; i++) {
+                if (questionStr.includes(terms[i])) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         function showClue(clueObj) {
             this.divClueWrapper.show();
             this.divClueCategory.html(clueObj.category.title);
@@ -250,6 +244,8 @@ class Operator {
         this.divClueQuestion.html(getClueQuestionHtml(this.currentClueObj));
         this.trQuestion.show();
         this.trAnswer.hide();
+        
+        this.buttonSkipClue.attr("disabled", false);
 
         function getClueQuestionHtml(clueObj) {
             var clueStr = clueObj.question;
@@ -270,11 +266,12 @@ class Operator {
 
     }
 
-    handleDoneReadingClueQuestionNew() {
+    handleDoneReadingClueQuestion() {
         this.trAnswer.show();
         this.divClueAnswer.html(this.currentClueObj.answer);
         this.divInstructions.html("Wait for people to answer");
         this.setAllTeamsState(Team.stateEnum.CAN_ANSWER);
+        this.buttonSkipClue.attr("disabled", true);
     }
 
     handleShowAnswer() {
@@ -282,8 +279,8 @@ class Operator {
         this.divInstructions.html("Let people read the answer");
     }
 
-    setAllTeamsState(targetState) {
-        this.teamArray.forEach(teamObj => teamObj.setState(targetState));
+    setAllTeamsState(targetState, endLockout) {
+        this.teamArray.forEach(teamObj => teamObj.setState(targetState, endLockout));
     }
 
     canTeamBuzz(keyboardEvent) {

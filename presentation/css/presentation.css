@@ -130,16 +130,9 @@ footer {
   footer div.team {
     padding: 10px;
     text-align: center;
-    flex: 1;
-    /*
-    &[data-team-state="buzzers-off"],
-    &[data-team-state="reading-question"],
-    &[data-team-state="already-answered"],
-    &[data-team-state="lockout"]
-    {
-        opacity: 0.4;
-    }
-    */ }
+    flex: 1; }
+    footer div.team[data-team-state="buzzers-off"], footer div.team[data-team-state="reading-question"], footer div.team[data-team-state="already-answered"], footer div.team[data-team-state="lockout"] {
+      opacity: 0.4; }
     footer div.team[data-team-state="buzzers-off"] table.countdown-dots {
       visibility: hidden; }
     footer div.team[data-team-state="answering"] {

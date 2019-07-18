@@ -109,6 +109,11 @@ class Team {
             this.div.operator.wrapper.attr("data-team-state", targetState);
             this.div.presentation.wrapper.attr("data-team-state", targetState);
             this.div.operator.state.html(this.state);
+
+            if (this.countdownTimer) {
+                this.countdownTimer.pause();
+                this.countdowmTimer = null;
+            }
         }
     }
 
@@ -140,12 +145,12 @@ class Team {
         this.setState(Team.stateEnum.ANSWERING);
         this.presentationCountdownDots.find("td").addClass("active");
     }
-    
+
     showKeyDown() {
         this.divBuzzerShow.addClass("pressed").removeClass("not-pressed");
     }
-    
-    showKeyUp(){
+
+    showKeyUp() {
         this.divBuzzerShow.addClass("not-pressed").removeClass("pressed");
     }
 

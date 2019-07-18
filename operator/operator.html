@@ -13,6 +13,7 @@
         <script src="../CountdownTimer.js"></script>
         <script src="../Team.js"></script>
         <script src="../Settings.js"></script>
+        <script src="states.js"></script>
         <script src="StateMachine.js"></script>
         <script src="AudioManager.js"></script>
         <script src="Operator.js"></script>
@@ -43,12 +44,16 @@
                 Team 4 name: <input type="text" id="team-name-3" value="team four"><br>
                 <button id="save-team-names">Save team names</button>
 
+                <p><button id="go-to-game-rules">Go to game rules</button></p>
+
+                <button id="go-to-jeopardy-logo">Go to Jeopardy logo</button>
+
                 <p>
-                
-                Opening music:<br>
-                <audio preload="auto" src="../sound/music-opening.mp3" controls style="width:100%"></audio>
-                
-                
+
+                    Opening music:<br>
+                    <audio preload="auto" src="../sound/music-opening.mp3" controls style="width:100%"></audio>
+
+
             </div>
 
 
@@ -80,17 +85,10 @@
                             <td><div id="clue-answer"></div></td>
                         </tr>
                     </table>
-
-
-
-
                 </div>
-                
-                 <!--<p><button id="skip-clue">Skip clue</button></p>-->
 
-                 
-                 
-                 
+                <button id="skip-clue" disabled>skip clue</button>
+
                 <div id="state-machine-viz">
                     <hr>
                     Current state:<br>
@@ -99,25 +97,13 @@
                     <div id="remaining">0.0</div>
                 </div>
 
-               
-                <!--<p><button>save game to localstorage - not impl.</button></p>-->
 
             </div>
 
             <!-- ====================================================================== -->
             <div class="tab-content" id="content-admin">
 
-                <p>Buzzer test: <button id="buzzer-test-start">start</button> <button id="buzzer-test-stop">stop</button> <span id="buzzer-test-message" style="display:none">buzzer test is underway</span></p>
-
-                <p><button id="go-to-game-rules">Go to game rules</button></p>
-
-                <button id="go-to-jeopardy-logo">Go to Jeopardy logo</button>
-
-                <p><button id="go-to-event-cost">Go to event cost</button></p>
-
-                <p>Display teams: <button id="teams-hide">hide</button> <button id="teams-show">show</button></p>
-
-                <!--<p><a href="#">Override...  - not impl.</a></p>-->
+                <!--<p><a href="#">Override money...</a></p>-->
             </div>
 
             <!-- ====================================================================== -->

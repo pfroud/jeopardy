@@ -207,7 +207,7 @@ footer {
         text-align: center;
         flex: 1;
 
-        /*
+        
         &[data-team-state="buzzers-off"],
         &[data-team-state="reading-question"],
         &[data-team-state="already-answered"],
@@ -215,7 +215,7 @@ footer {
         {
             opacity: 0.4;
         }
-        */
+        
 
         &[data-team-state="buzzers-off"] table.countdown-dots {
             visibility: hidden;
