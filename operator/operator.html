@@ -38,11 +38,23 @@
             <!-- ====================================================================== -->
             <div class="tab-content" id="content-setup">
 
-                Team 1 name: <input type="text" id="team-name-0" value="team one"><br>
-                Team 2 name: <input type="text" id="team-name-1" value="team two"><br>
-                Team 3 name: <input type="text" id="team-name-2" value="team three"><br>
-                Team 4 name: <input type="text" id="team-name-3" value="team four"><br>
-                <button id="save-team-names">Save team names</button>
+                <div id="saved-game-prompt">
+                    Found a saved game:
+
+                    <table id="saved-game-details"><tbody></tbody></table>
+
+                    <button id="saved-game-load">load</button>
+                    <button id="saved-game-delete">delete</button>
+                    <button id="saved-game-dismiss">dismiss</button>
+                </div>
+
+                <p>
+
+                    Team 1 name: <input type="text" id="team-name-0" value="team one"><br>
+                    Team 2 name: <input type="text" id="team-name-1" value="team two"><br>
+                    Team 3 name: <input type="text" id="team-name-2" value="team three"><br>
+                    Team 4 name: <input type="text" id="team-name-3" value="team four"><br>
+                    <button id="save-team-names">Save team names</button>
 
                 <p><button id="go-to-game-rules">Go to game rules</button></p>
 

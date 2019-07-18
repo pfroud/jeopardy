@@ -154,16 +154,23 @@ class Team {
         this.divBuzzerShow.addClass("not-pressed").removeClass("pressed");
     }
 
-    /* 
-     dumpJson(){
-     return {};
-     }
-     
-     parseJson(jsonObj) {
-     
-     }
-     */
+    jsonDump() {
+        return {
+            name: this.teamName,
+            dollars: this.dollars
+        };
+    }
 
+    jsonLoad(jsonObj) {
+        this.teamName = jsonObj.name;
+        this.dollars = jsonObj.dollars;
+        
+        this.div.presentation.dollars.html("$" + this.dollars);
+        this.div.presentation.teamName.html(this.teamName);
+        
+        this.div.operator.teamName.html(this.teamName);
+        this.div.operator.dollars.html("$" + this.dollars);
+    }
 
 }
 

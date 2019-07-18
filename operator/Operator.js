@@ -30,7 +30,9 @@ class Operator {
         this.initKeyboardListener();
         this.initMouseListeners();
 
-//            window.open("../presentation/presentation.html", "windowPresentation");
+        window.open("../presentation/presentation.html", "windowPresentation");
+
+        this.lookForSavedGame();
     }
 
     handlePresentationReady(presentationInstance) {
@@ -71,7 +73,8 @@ class Operator {
 
     initKeyboardListener() {
         window.addEventListener("keydown", keyboardEvent => {
-            if (keyboardEvent.key === "p") {
+            if (keyboardEvent.key === "p" &&
+                    document.activeElement.tagName !== "INPUT") {
                 this.togglePaused();
             }
         });
@@ -307,6 +310,56 @@ class Operator {
         this.stateMachine.setPaused(isPaused);
         this.teamArray.forEach(teamObj => teamObj.setPaused(isPaused));
         this.presentationInstance.setPaused(isPaused);
+    }
+
+    lookForSavedGame() {
+        const divSavedGame = $("div#saved-game-prompt");
+
+        const raw = window.localStorage.getItem("jeopardy-teams");
+        if (raw === null) {
+            divSavedGame.hide();
+            return;
+        }
+
+        const tableDetails = $("table#saved-game-details tbody");
+
+        const parsed = JSON.parse(raw);
+
+        parsed.forEach(function (savedTeam) {
+            const tr = $("<tr>").appendTo(tableDetails);
+            $("<td>").html(savedTeam.name).addClass("teamName").appendTo(tr);
+            $("<td>").html("$" + savedTeam.dollars).appendTo(tr);
+        });
+
+        $("button#saved-game-load").click(() => {
+            this.loadGame();
+            divSavedGame.hide();
+        });
+        $("button#saved-game-delete").click(function () {
+            if (window.confirm("delete saved game?")) {
+                window.localStorage.removeItem("jeopardy-teams");
+            }
+        });
+        $("button#saved-game-dismiss").click(() => divSavedGame.hide());
+
+
+    }
+
+    saveGame() {
+        window.localStorage.setItem("jeopardy-teams",
+                JSON.stringify(
+                        this.teamArray.map(teamObj => teamObj.jsonDump())
+                        )
+                );
+    }
+
+    loadGame() {
+        const parsed = JSON.parse(window.localStorage.getItem("jeopardy-teams"));
+
+        for (var i = 0; i < parsed.length; i++) {
+            this.teamArray[i].jsonLoad(parsed[i]);
+        }
+
     }
 
 }
