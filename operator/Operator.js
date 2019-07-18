@@ -106,7 +106,7 @@ class Operator {
         this.buttonSkipClue = $("button#skip-clue").click(() => this.skipClue());
 
         $("a#aMoneyOverride").click(() =>
-            window.open("../moneyOverride/", "windowOverrideMoney",
+            window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney",
                     "menubar=0,toolbar=0,location=0,personalbar=0status=0"));
 
     }
