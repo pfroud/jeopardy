@@ -64,7 +64,7 @@ class Presentation {
         this.divCategoryBig.html(clueObj.category.title);
         this.divDollarsBig.html("$" + clueObj.value);
 
-        this.divQuestion.html(clueObj.question);
+        this.divQuestion.html(clueObj.question.replace(/\\/g, ""));
 
         this.divClueAnswer.html("Answer:<p><div style=\"font-weight:bold\">"
                 + clueObj.answer + "</div>");

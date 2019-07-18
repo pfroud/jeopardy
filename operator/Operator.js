@@ -16,7 +16,7 @@ class Operator {
         this.divClueDollars = $("div#clue-dollars");
         this.divClueCategory = $("div#clue-category");
         this.divClueAnswer = $("div#clue-answer");
-//        this.divClueAirdate = $("div#clue-airdate");
+        this.divClueAirdate = $("div#clue-airdate");
         this.trQuestion = $("tr#question");
         this.trAnswer = $("tr#answer");
         this.divPaused = $("div#paused");
@@ -30,7 +30,7 @@ class Operator {
         this.initKeyboardListener();
         this.initMouseListeners();
 
-        window.open("../presentation/presentation.html", "windowPresentation");
+//            window.open("../presentation/presentation.html", "windowPresentation");
     }
 
     handlePresentationReady(presentationInstance) {
@@ -104,6 +104,10 @@ class Operator {
         $("button#save-team-names").click(() => this.applyTeamNames());
 
         this.buttonSkipClue = $("button#skip-clue").click(() => this.skipClue());
+
+        $("a#aMoneyOverride").click(() =>
+            window.open("../moneyOverride/", "windowOverrideMoney",
+                    "menubar=0,toolbar=0,location=0,personalbar=0status=0"));
 
     }
 
@@ -227,6 +231,7 @@ class Operator {
             this.divClueWrapper.show();
             this.divClueCategory.html(clueObj.category.title);
             this.divClueDollars.html("$" + clueObj.value);
+            this.divClueAirdate.html((new Date(clueObj.airdate)).toDateString());
             this.trAnswer.hide();
             this.presentationInstance.setClueObj(clueObj);
             this.divInstructions.html("Read aloud the category and dollar value.");
@@ -244,11 +249,11 @@ class Operator {
         this.divClueQuestion.html(getClueQuestionHtml(this.currentClueObj));
         this.trQuestion.show();
         this.trAnswer.hide();
-        
+
         this.buttonSkipClue.attr("disabled", false);
 
         function getClueQuestionHtml(clueObj) {
-            var clueStr = clueObj.question;
+            var clueStr = clueObj.question.replace(/\\/g, "");
 
             var regex = /\b(?:(?:this)|(?:these)|(?:her)|(?:his)|(?:she)|(?:he))\b/i;
             var result = regex.exec(clueStr);
