@@ -1,3 +1,13 @@
 body {
     font-family: sans-serif;
 }
+
+input[type="text"] {
+    text-align: right;
+    width: 60px;
+}
+
+button.money-change {
+    /*margin-left: 5px;*/
+    /*margin-right: 5px;*/
+}

@@ -1,38 +1,48 @@
 $(document).ready(function () {
 
-    const table = $("table tbody");
+    if (!window.opener) {
+        console.error("no window.opener, we're fucked");
+    }
+
+    const teamArray = window.opener.operator.teamArray;
 
     makeTable();
 
     function makeTable() {
-        for (var i = 0; i < 4; i++) {
-
-
-            const tr = $("<tr>").appendTo(table);
-            $("<td>").html("team name").appendTo(tr);
-
-
-            var values = [1000, 800, 600, 400, 200];
-
-            values.forEach(function (value) {
-                const td = $("<td>").appendTo(tr);
-                const button = $("<button>").html("-$" + value).appendTo(td);
-            });
-
-            const td = $("<td>").appendTo(tr);
-            $("<input>").attr("type", "text").prop("value", "1234").appendTo(td);
-
-            values.reverse();
-
-
-            values.forEach(function (value) {
-                const td = $("<td>").appendTo(tr);
-                const button = $("<button>").html("+$" + value).appendTo(td);
-            });
-
-
+        const table = $("table tbody");
+        for (let teamIndex = 0; teamIndex < 4; teamIndex++) {
+            makeTableRow(teamIndex);
         }
 
+        function makeTableRow(teamIndex) {
+            const teamObj = teamArray[teamIndex];
+            var dollarValues = [1000, 800, 600, 400, 200];
+            
+            const tr = $("<tr>").appendTo(table);
+            $("<td>").html(teamObj.teamName).appendTo(tr);
+
+            // buttons to subtract money
+            dollarValues.forEach(function (dollarValue) {
+                const td = $("<td>").appendTo(tr);
+                const button = $("<button>").addClass("money-change").html("-$" + dollarValue).appendTo(td).on("click", () => {
+                    console.log("team " + teamIndex + " clicked on -$" + dollarValue);
+                });
+            });
+
+            // present value
+            const td = $("<td>").appendTo(tr);
+            td.append(document.createTextNode("$"));
+            $("<input>").attr("type", "text").prop("value", teamObj.dollars).appendTo(td);
+
+            // buttons to add money
+            dollarValues.reverse();
+            dollarValues.forEach(function (value) {
+                const td = $("<td>").appendTo(tr);
+                const button = $("<button>").addClass("money-change").html("+$" + value).appendTo(td);
+            });
+
+        }
+        
     }
 
 
