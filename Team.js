@@ -71,8 +71,8 @@ class Team {
     }
 
     _updateDollarsDisplay() {
-        this.div.presentation.dollars.html("$" + this.dollars);
-        this.div.operator.dollars.html("$" + this.dollars);
+        this.div.presentation.dollars.html("$" + this.dollars.toLocaleString());
+        this.div.operator.dollars.html("$" + this.dollars.toLocaleString());
     }
 
     setDivPresentation(divPresentationWrapper) {

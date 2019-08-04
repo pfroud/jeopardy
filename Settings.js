@@ -1,7 +1,7 @@
 class Settings {
 
     constructor() {
-        this.durationDisplayCategory = 3 * 1000;
+        this.durationDisplayCategory = 5 * 1000;
         this.durationDisplayAnswer = 3 * 1000;
 
         this.timeoutWaitForBuzzes = 10 * 1000;
