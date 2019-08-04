@@ -164,6 +164,7 @@ class Operator {
     }
 
     shouldGameEnd() {
+        return true;
         for (var i = 0; i < NUM_TEAMS; i++) {
             if (this.teamArray[i].dollars >= this.settings.teamDollarsWhenGameShouldEnd) {
                 return true;
@@ -338,6 +339,7 @@ class Operator {
         $("button#saved-game-delete").click(function () {
             if (window.confirm("delete saved game?")) {
                 window.localStorage.removeItem("jeopardy-teams");
+                divSavedGame.hide();
             }
         });
         $("button#saved-game-dismiss").click(() => divSavedGame.hide());
@@ -360,6 +362,27 @@ class Operator {
             this.teamArray[i].jsonLoad(parsed[i]);
         }
 
+    }
+
+    handleGameEnd() {
+        var shallowCopy = this.teamArray.slice();
+
+        function comparator(team1, team2) {
+            //sort descending
+            return team2.dollars - team1.dollars;
+        }
+
+        shallowCopy.sort(comparator);
+
+        var html = "<table><tbody>";
+        shallowCopy.forEach(teamObj => {
+            html += ("<tr><td>" + teamObj.teamName + "</td><td>$" +
+                    teamObj.dollars.toLocaleString() + "</td></tr>");
+        });
+        html += "</tbody></table>";
+
+        this.presentationInstance.setGameEndMessage(html);
+        this.presentationInstance.headerHide();
     }
 
 }

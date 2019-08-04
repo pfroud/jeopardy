@@ -79,6 +79,10 @@ main {
         top: 0;
         bottom: 0;
         margin: auto; }
+      main div.slide#slide-jeopardy-logo img#logo-jeopardy-shadow {
+        z-index: -1;
+        filter: brightness(0) blur(2px) opacity(0.6);
+        transform: translateY(35px) scale(0.9); }
     main div.slide#slide-game-rules {
       font-size: 30px;
       font-weight: bold;
@@ -93,10 +97,6 @@ main {
       text-transform: uppercase;
       letter-spacing: 3px;
       text-align: center; }
-    main div.slide#slide-jeopardy-logo img#logo-jeopardy-shadow {
-      z-index: -1;
-      filter: brightness(0) blur(2px) opacity(0.6);
-      transform: translateY(35px) scale(0.9); }
     main div.slide#slide-clue-category-and-dollars {
       font-family: swiss911;
       text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black;
@@ -116,7 +116,14 @@ main {
       text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black;
       font-size: 60px; }
     main div.slide#slide-game-end {
-      font-size: 100px; }
+      font-size: 80px;
+      text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black; }
+      main div.slide#slide-game-end p {
+        text-align: center; }
+      main div.slide#slide-game-end table td {
+        padding-right: 60px; }
+        main div.slide#slide-game-end table td:nth-of-type(2) {
+          text-align: right; }
 
 footer {
   display: flex;

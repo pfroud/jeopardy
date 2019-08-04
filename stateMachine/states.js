@@ -157,6 +157,7 @@ function getStates(stateMachineInstance) {
         }, {
             name: "gameEnd",
             showSlide: "game-end",
+            onEnter: stateMachineInstance.operator.handleGameEnd,
             transitions: [{
                     type: "manual",
                     name: "reset",

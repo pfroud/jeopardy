@@ -3,6 +3,7 @@ class Presentation {
     constructor() {
         this.divCategoryInHeader = $("header div#category");
         this.divDollarsInHeader = $("header div#dollars");
+        this.header = $("header");
 
         this.divQuestion = $("div#clue-question");
         this.divCategoryBig = $("div#category-big");
@@ -98,6 +99,18 @@ class Presentation {
     getTeamDiv(teamIdx) {
         // Only used to initialize the Teams. After that, get the reference from Team object.
         return $('div[data-team-index="' + teamIdx + '"]');
+    }
+
+    setGameEndMessage(message) {
+        $("div#slide-game-end div#team-ranking").html(message);
+    }
+
+    headerShow() {
+        this.header.show();
+    }
+
+    headerHide() {
+        this.header.hide();
     }
 
 }

@@ -129,6 +129,13 @@ main {
                 bottom: 0;
                 margin: auto;
             }
+
+            img#logo-jeopardy-shadow {
+                z-index: -1;
+                filter: brightness(0) blur(2px) opacity(0.6);
+                transform: translateY(35px) scale(0.9);
+            }
+
         }
 
         &#slide-game-rules {
@@ -149,12 +156,6 @@ main {
             text-transform: uppercase;
             letter-spacing: 3px;
             text-align: center;
-        }
-
-        &#slide-jeopardy-logo img#logo-jeopardy-shadow {
-            z-index: -1;
-            filter: brightness(0) blur(2px) opacity(0.6);
-            transform: translateY(35px) scale(0.9);
         }
 
         &#slide-clue-category-and-dollars {
@@ -186,7 +187,19 @@ main {
 
 
         &#slide-game-end {
-            font-size: 100px;
+            font-size: 80px;
+            text-shadow: $big-shadow;
+            p {
+                text-align: center;
+            }
+            table td {
+                padding-right: 60px;
+
+                &:nth-of-type(2) {
+                    text-align: right;
+                }
+
+            }
         }
     }
 
@@ -207,7 +220,7 @@ footer {
         text-align: center;
         flex: 1;
 
-        
+
         &[data-team-state="buzzers-off"],
         &[data-team-state="reading-question"],
         &[data-team-state="already-answered"],
@@ -215,7 +228,7 @@ footer {
         {
             opacity: 0.4;
         }
-        
+
 
         &[data-team-state="buzzers-off"] table.countdown-dots {
             visibility: hidden;
