@@ -3,3 +3,4 @@ jquery-3.3.1.min.js
 *.wav
 presentation/img/reference
 todo.txt
+nbproject/private
