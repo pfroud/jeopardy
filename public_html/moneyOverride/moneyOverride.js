@@ -26,6 +26,7 @@ $(document).ready(function () {
                 const td = $("<td>").appendTo(tr);
                 const button = $("<button>").addClass("money-change").html("-$" + dollarValue).appendTo(td).on("click", () => {
                     console.log("team " + teamIndex + " clicked on -$" + dollarValue);
+                    
                 });
             });
 
