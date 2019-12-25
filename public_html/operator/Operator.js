@@ -40,7 +40,6 @@ class Operator {
         this.presentationInstance = presentationInstance;
         this.initTeams();
 
-        this.applyTeamNames();
         this.presentationInstance.setTeamsVisible(true);
 
         this.initTeamKeyboardShow();
@@ -359,9 +358,9 @@ class Operator {
     }
 
     handleGameEnd() {
-        
+
         this.audioManager.play("music-closing");
-        
+
         var shallowCopy = this.teamArray.slice();
 
         function comparator(team1, team2) {

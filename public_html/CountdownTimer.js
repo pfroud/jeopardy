@@ -43,7 +43,7 @@ class CountdownTimer {
         this.onTick = null;
 
         // display elements
-        this.textElement = null;
+        this.textElements = [];
         this.progressElements = [];
         this.dotsElement = null;
     }
@@ -51,7 +51,7 @@ class CountdownTimer {
     togglePaused() {
         this.isPaused ? this.resume() : this.pause();
     }
-    
+
     pause() {
         if (this.hasStarted && !this.hasFinished && !this.isPaused) {
             clearInterval(this.intervalID);
@@ -91,8 +91,8 @@ class CountdownTimer {
 
     _guiSetPaused(isPaused) {
         this.progressElements.forEach(elem => elem.toggleClass("paused", isPaused));
+        this.textElements.forEach(elem => elem.toggleClass("paused", isPaused));
         this.dotsElement && this.dotsElement.toggleClass("paused", isPaused);
-        this.textElement && this.textElement.toggleClass("paused", isPaused);
     }
 
     reset() {
@@ -113,7 +113,7 @@ class CountdownTimer {
         this.dotsElement && this.dotsElement.find("td").removeClass("active");
 
         this.progressElements.forEach(elem => elem.attr("value", this.durationMs).hide());
-        this.textElement && this.textElement.html((this.durationMs / 1000).toFixed(1));
+        this.textElements.forEach(elem => elem.html((this.durationMs / 1000).toFixed(1)));
 
     }
 
@@ -146,7 +146,7 @@ class CountdownTimer {
             tds.addClass("active");
         }
 
-        this.textElement && this.textElement.html((this.durationMs / 1000).toFixed(1));
+        this.textElements.forEach(elem => elem.html((this.durationMs / 1000).toFixed(1)));
     }
 
     _handleInterval(instance) {
@@ -171,8 +171,7 @@ class CountdownTimer {
     }
 
     _guiIntervalUpdate() {
-        this.textElement && this.textElement.html((this.remainingMs / 1000).toFixed(1));
-
+        this.textElements.forEach(elem => elem.html((this.remainingMs / 1000).toFixed(1)));
 
         this.progressElements.forEach(elem => elem.attr("value", this.remainingMs));
 
@@ -194,11 +193,11 @@ class CountdownTimer {
 
     _finish() {
         this.hasFinished = true;
-        this.textElement && this.textElement.html("done");
+        this.textElements.forEach(elem => elem.html("done"));
         clearInterval(this.intervalID);
 
         if (this.hideProgressOnFinish) {
-            
+
             this.progressElements.forEach(elem => elem.hide());
         }
         this.onFinished && this.onFinished();
