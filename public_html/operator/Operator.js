@@ -40,6 +40,9 @@ class Operator {
         this.presentationInstance = presentationInstance;
         this.initTeams();
 
+        this.applyTeamNames();
+        this.presentationInstance.setTeamsVisible(true);
+
         this.initTeamKeyboardShow();
 
         this.stateMachine = new StateMachine(this.settings, this, presentationInstance, this.audioManager);
@@ -104,8 +107,6 @@ class Operator {
         $("button#buzzer-test-start").click(() => this.buzzerTestStart());
         $("button#buzzer-test-stop").click(() => this.buzzerTestStop());
 
-        $("button#save-team-names").click(() => this.applyTeamNames());
-
         this.buttonSkipClue = $("button#skip-clue").click(() => this.skipClue());
 
         $("a#aMoneyOverride").click(() =>
@@ -121,18 +122,6 @@ class Operator {
         this.buttonSkipClue.blur();
     }
 
-    applyTeamNames() {
-        var inputTeamNames = new Array(NUM_TEAMS);
-        for (var i = 0; i < NUM_TEAMS; i++) {
-            inputTeamNames[i] = $("input#team-name-" + i);
-        }
-        for (var i = 0; i < NUM_TEAMS; i++) {
-            this.teamArray[i].setTeamName(inputTeamNames[i].prop("value"));
-        }
-
-        this.presentationInstance.setTeamsVisible(true);
-    }
-
     initTeams() {
         if (!this.presentationInstance) {
             console.log("can't init teams because no Presentation instance");
@@ -140,9 +129,12 @@ class Operator {
         }
 
         for (var i = 0; i < NUM_TEAMS; i++) {
-            this.teamArray[i] = new Team(i, this.presentationInstance, this.settings, this.audioManager);
+            const theTeam = this.teamArray[i] = new Team(i, this.presentationInstance, this.settings, this.audioManager);
+            $("input#team-name-" + i).on("input", function () {
+                theTeam.setTeamName(this.value);
+            });
         }
-        this.applyTeamNames();
+        this.presentationInstance.setTeamsVisible(true);
     }
 
     playTimeoutSound() {
