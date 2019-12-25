@@ -13,6 +13,13 @@
         <script src="../lib/jquery-3.4.1.min.js"></script>
         <script src="Presentation.js"></script>
         <script>
+
+            const opener = window.opener;
+            window.addEventListener("error", function (errorObj) {
+                opener.console.error("ERROR FROM PRESENTATION WINDOW:");
+                opener.console.error(errorObj.error);
+            });
+
             var presentation;
             $(document).ready(() => presentation = new Presentation());
         </script>
@@ -86,7 +93,7 @@
 
             <div class="slide" id="slide-game-end">
                 <p>Game over!</p>
-                
+
                 <div id="team-ranking"></div>
             </div>
 
