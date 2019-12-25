@@ -7,7 +7,8 @@ class AudioManager {
             questionTimeout: $("audio#question-timeout")[0],
             roundEnd: $("audio#round-end")[0],
             teamBuzz: $("audio#team-buzz")[0],
-            tick: $("audio#tick")[0]
+            tick: $("audio#tick")[0],
+            musicClosing: $("audio#music-closing")[0]
         };
     }
 

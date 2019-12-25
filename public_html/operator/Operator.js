@@ -172,6 +172,7 @@ class Operator {
     }
 
     getClue() {
+        this.saveGame();
         return new Promise((resolve, reject) => {
             this.buttonStartGame.blur();
             this.trQuestion.hide();
@@ -345,6 +346,7 @@ class Operator {
                         this.teamArray.map(teamObj => teamObj.jsonDump())
                         )
                 );
+        //TODO save the settings
     }
 
     loadGame() {
@@ -357,6 +359,9 @@ class Operator {
     }
 
     handleGameEnd() {
+        
+        this.audioManager.play("music-closing");
+        
         var shallowCopy = this.teamArray.slice();
 
         function comparator(team1, team2) {

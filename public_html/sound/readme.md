@@ -11,3 +11,5 @@
 **"Breaker-1.wav"** by Deathscyp on Freesound, https://freesound.org/people/Deathscyp/sounds/404049/, published October 8 2017, CC0 licence.
 
 **"tick"** by waveplay_old, https://freesound.org/people/waveplay_old/sounds/201766/, published September 28 2013, CC0 licence.
+
+**"Jeopardy Ending Credits"** by The Greats Channel on YouTube, https://www.youtube.com/watch?v=9Fnhis8ed_U, published September 15, 2017.
