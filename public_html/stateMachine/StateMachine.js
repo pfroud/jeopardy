@@ -86,7 +86,7 @@ class StateMachine {
 
         var countdownTimer = this.countdownTimer = new CountdownTimer(durationMs, this.audioManager);
         countdownTimer.progressElements.push(this.countdownProgress);
-        countdownTimer.textElement.push(this.countdownText);
+        countdownTimer.textElements.push(this.countdownText);
 
         if (setMax) {
             const newMax = this.settings.timeoutWaitForBuzzes;
