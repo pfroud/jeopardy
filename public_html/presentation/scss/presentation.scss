@@ -90,6 +90,13 @@ header {
         position: absolute;
         right: 8px;
     }
+    
+    progress {
+        width: 100%;
+        height: 4px;
+        vertical-align: top;
+    }
+    
 }
 
 progress#game-timer {

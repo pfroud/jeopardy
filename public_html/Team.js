@@ -5,7 +5,7 @@ class Team {
         this.audioManager = audioManager;
         this.teamIdx = teamIdx;
         this.dollars = 0;
-        this.teamName = "team " + teamIdx;
+        this.teamName = "team " + (teamIdx + 1);
 
         this.state = null;
 
@@ -164,10 +164,10 @@ class Team {
     jsonLoad(jsonObj) {
         this.teamName = jsonObj.name;
         this.dollars = jsonObj.dollars;
-        
+
         this.div.presentation.dollars.html("$" + this.dollars);
         this.div.presentation.teamName.html(this.teamName);
-        
+
         this.div.operator.teamName.html(this.teamName);
         this.div.operator.dollars.html("$" + this.dollars);
     }

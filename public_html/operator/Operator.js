@@ -155,7 +155,6 @@ class Operator {
     }
 
     shouldGameEnd() {
-        return true;
         for (var i = 0; i < NUM_TEAMS; i++) {
             if (this.teamArray[i].dollars >= this.settings.teamDollarsWhenGameShouldEnd) {
                 return true;
@@ -359,7 +358,7 @@ class Operator {
 
     handleGameEnd() {
 
-        this.audioManager.play("music-closing");
+        this.audioManager.play("musicClosing");
 
         var shallowCopy = this.teamArray.slice();
 

@@ -88,24 +88,24 @@ class StateMachine {
         countdownTimer.progressElements.push(this.countdownProgress);
         countdownTimer.textElements.push(this.countdownText);
 
-        if (setMax) {
-            const newMax = this.settings.timeoutWaitForBuzzes;
-            countdownTimer.maxMs = newMax;
-
-            countdownTimer.progressElements.forEach(elem => elem.attr("max", newMax));
-
-        }
-
         if (transitionObj.countdownTimerShowDots) {
             const teamIndex = Number(keyboardEvent.key) - 1;
             const teamObj = this.operator.teamArray[teamIndex];
             countdownTimer.dotsElement = teamObj.presentationCountdownDots;
+        } else {
+            countdownTimer.progressElements.push(this.presentation.getProgressElement());
+        }
+
+        if (setMax) {
+            const newMax = this.settings.timeoutWaitForBuzzes;
+            countdownTimer.maxMs = newMax;
+            countdownTimer.progressElements.forEach(elem => elem.attr("max", newMax));
         }
 
         countdownTimer.onFinished = () => this._goToState(destinationStateName);
         countdownTimer.start();
     }
-    
+
     saveRemainingTime() {
         if (this.countdownTimer) {
             this.remainingQuestionTime = this.countdownTimer.remainingMs;

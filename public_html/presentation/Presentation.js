@@ -13,6 +13,8 @@ class Presentation {
         this.divPaused = $("div#paused");
 
         this.footerTeams = $("footer");
+        
+        this.progress = $("progress#countdown");
 
 
         this._initSlides();
@@ -43,6 +45,10 @@ class Presentation {
             this.slides[slideName] = $("div#slide-" + slideName);
         });
 
+    }
+
+    getProgressElement(){
+        return this.progress;
     }
 
     showSlide(slideName) {
