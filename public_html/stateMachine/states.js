@@ -32,7 +32,7 @@ function getStates(stateMachineInstance) {
             showSlide: "clue-category-and-dollars",
             transitions: [{
                     type: "timeout",
-                    duration: stateMachineInstance.settings.durationDisplayCategory,
+                    duration: stateMachineInstance.settings.displayDurationCategoryMs,
                     dest: "showQuestionInit"
                 }]
         }, {
@@ -67,7 +67,7 @@ function getStates(stateMachineInstance) {
             onExit: stateMachineInstance.saveRemainingTime,
             transitions: [{
                     type: "timeout",
-                    duration: stateMachineInstance.settings.timeoutWaitForBuzzes,
+                    duration: stateMachineInstance.settings.timeoutWaitForBuzzesMs,
                     dest: "playTimeoutSound"
                 }, {
                     type: "keyboard",
@@ -108,7 +108,7 @@ function getStates(stateMachineInstance) {
                     dest: "subtractMoney"
                 }, {
                     type: "timeout",
-                    duration: stateMachineInstance.settings.timeoutTeamAnswer,
+                    duration: stateMachineInstance.settings.timeoutAnswerMs,
                     countdownTimerShowDots: true,
                     dest: "subtractMoney"
                 }
@@ -143,7 +143,7 @@ function getStates(stateMachineInstance) {
             showSlide: "clue-answer",
             transitions: [{
                     type: "timeout",
-                    duration: stateMachineInstance.settings.durationDisplayAnswer,
+                    duration: stateMachineInstance.settings.displayDurationAnswerMs,
                     dest: "checkGameEnd"
                 }]
         }, {
