@@ -170,7 +170,10 @@ class Operator {
     }
 
     getClue() {
-        this.saveGame();
+        if (this.teamArray.some(teamObj => teamObj.dollars > 0)) {
+            // only same the game if somebody has more than $0
+            this.saveGame();
+        }
         return new Promise((resolve, reject) => {
             this.buttonStartGame.blur();
             this.trQuestion.hide();
@@ -319,7 +322,7 @@ class Operator {
 
         parsed.forEach(function (savedTeam) {
             const tr = $("<tr>").appendTo(tableDetails);
-            $("<td>").html(savedTeam.name).addClass("teamName").appendTo(tr);
+            $("<td>").html(savedTeam.name).addClass("team-name").appendTo(tr);
             $("<td>").html("$" + savedTeam.dollars).appendTo(tr);
         });
 
@@ -328,7 +331,7 @@ class Operator {
             divSavedGame.hide();
         });
         $("button#saved-game-delete").click(function () {
-            if (window.confirm("delete saved game?")) {
+            if (window.confirm("Delete the saved game?")) {
                 window.localStorage.removeItem("jeopardy-teams");
                 divSavedGame.hide();
             }

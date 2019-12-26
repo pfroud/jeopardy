@@ -23,6 +23,16 @@ class Team {
                 buzzerShow: null
             }
         };
+
+        /*
+         this.statistics = {
+         answerRight: 0,
+         answerWrong:0,
+         answerTimeout: 0,
+         buzzTooEarly: 0
+         };
+         */
+
         this.presentationCountdownDots = null;
         this.presentationProgressLockout = null;
         this.countdownTimer = null;

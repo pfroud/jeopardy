@@ -4,7 +4,11 @@ body {
   font-size: 26px; }
 
 input, button {
-  font-size: 26px; }
+  font-size: inherit; }
+
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px; }
 
 main {
   line-height: 150%; }
@@ -25,11 +29,10 @@ div#clue {
   padding: 20px; }
 
 div#state-machine-viz progress#countdown {
-  width: 100%; }
+  width: 100%;
+  height: 35px; }
 div#state-machine-viz div {
-  line-height: 100%;
-  margin-top: -40px;
-  font-size: 26px; }
+  margin-top: -42px; }
   div#state-machine-viz div#remaining {
     text-align: right; }
 
@@ -67,7 +70,19 @@ footer {
 span.key-shortcut-letter {
   text-decoration: underline; }
 
+table#table-settings td {
+  padding-bottom: 20px; }
 table#table-settings input[type="number"] {
-  width: 60px; }
+  width: 100px;
+  text-align: right; }
+
+div#saved-game-prompt {
+  border: 1px solid black;
+  display: inline-block;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: lightyellow; }
+  div#saved-game-prompt table#saved-game-details td.team-name {
+    padding-right: 10px; }
 
 /*# sourceMappingURL=operator.css.map */
