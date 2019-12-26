@@ -56,6 +56,11 @@ class Team {
         this._updateDollarsDisplay();
     }
 
+    moneySet(amount) {
+        this.dollars = amount;
+        this._updateDollarsDisplay();
+    }
+
     canBuzz() {
         return this.state === Team.stateEnum.CAN_ANSWER;
     }
