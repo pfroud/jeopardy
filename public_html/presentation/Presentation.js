@@ -13,7 +13,7 @@ class Presentation {
         this.divPaused = $("div#paused");
 
         this.footerTeams = $("footer");
-        
+
         this.progress = $("progress#countdown");
 
 
@@ -38,7 +38,7 @@ class Presentation {
         this.slides = {};
         this.visibleSlide = null;
 
-        var slideNames = this.slideNames = ["jeopardy-logo", "game-rules", "spinner",
+        const slideNames = this.slideNames = ["jeopardy-logo", "game-rules", "spinner",
             "clue-category-and-dollars", "clue-question", "clue-answer", "event-cost", "buzzer-test", "game-end"];
 
         slideNames.forEach(slideName => {
@@ -47,7 +47,7 @@ class Presentation {
 
     }
 
-    getProgressElement(){
+    getProgressElement() {
         return this.progress;
     }
 
@@ -55,7 +55,7 @@ class Presentation {
         if (slideName in this.slides) {
             this.visibleSlide && this.visibleSlide.hide();
 
-            var targetSlide = this.slides[slideName];
+            const targetSlide = this.slides[slideName];
             targetSlide.show();
 
             this.visibleSlide = targetSlide;

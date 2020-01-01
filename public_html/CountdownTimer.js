@@ -139,7 +139,7 @@ class CountdownTimer {
 
 
         if (this.dotsElement) {
-            var tds = this.dotsElement.find("td");
+            const tds = this.dotsElement.find("td");
             if (tds.length !== 9) {
                 console.warn("found " + tds.length + "dot(s) element(s), expected exactly 9");
             }

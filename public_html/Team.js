@@ -140,7 +140,7 @@ class Team {
         this.stateBeforeLockout = this.state;
         this.setState(Team.stateEnum.LOCKOUT);
 
-        var countdownShowCategory = this.countdownTimer = new CountdownTimer(this.settings.durationLockout);
+        const countdownShowCategory = this.countdownTimer = new CountdownTimer(this.settings.durationLockout);
         // todo would be nice to show progress element on display and presentation. need to change CountdownTimer to allow that
         countdownShowCategory.progressElements.push(this.presentationProgressLockout);
         countdownShowCategory.intervalMs = 50; //high resolution mode!!

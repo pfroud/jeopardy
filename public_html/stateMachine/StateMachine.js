@@ -84,7 +84,7 @@ class StateMachine {
 
         const destinationStateName = transitionObj.dest;
 
-        var countdownTimer = this.countdownTimer = new CountdownTimer(durationMs, this.audioManager);
+        const countdownTimer = this.countdownTimer = new CountdownTimer(durationMs, this.audioManager);
         countdownTimer.progressElements.push(this.countdownProgress);
         countdownTimer.textElements.push(this.countdownText);
 

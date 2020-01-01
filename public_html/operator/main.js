@@ -1,4 +1,5 @@
 // must be global because the presentation window can only access global scope
+// TODO see if the above sentence is correct...
 var operator;
 
 $(document).ready(function () {
@@ -7,7 +8,7 @@ $(document).ready(function () {
     }
 
     initKeyboardShortcuts();
-    
+
     const settings = new Settings();
     const audioManager = new AudioManager();
 

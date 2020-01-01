@@ -253,16 +253,16 @@ class Operator {
         this.buttonSkipClue.attr("disabled", false);
 
         function getClueQuestionHtml(clueObj) {
-            var clueStr = clueObj.question.replace(/\\/g, "");
+            const clueStr = clueObj.question.replace(/\\/g, "");
 
-            var regex = /\b(?:(?:this)|(?:these)|(?:her)|(?:his)|(?:she)|(?:he))\b/i;
-            var result = regex.exec(clueStr);
+            const regex = /\b(?:(?:this)|(?:these)|(?:her)|(?:his)|(?:she)|(?:he))\b/i;
+            const result = regex.exec(clueStr);
 
             if (result === null) {
                 return clueStr;
             } else {
-                var startIndex = result.index;
-                var foundWord = result[0];
+                const startIndex = result.index;
+                const foundWord = result[0];
 
                 return clueStr.substring(0, startIndex) + '<span class="clue-keyword">' +
                         foundWord + '</span>' + clueStr.substring(startIndex + foundWord.length);
