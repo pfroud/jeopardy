@@ -174,37 +174,6 @@ class Operator {
             // only same the game if somebody has more than $0
             this.saveGame();
         }
-        return new Promise((resolve, reject) => {
-            this.buttonStartGame.blur();
-            this.trQuestion.hide();
-            this.divInstructions.html("Loading clue...");
-
-            fetchClueHelper.call(this, 1, 5);
-
-            function fetchClueHelper(tryNum, maxTries) {
-                $.getJSON("http://jservice.io/api/random", response => {
-                    var clueObj = response[0];
-                    this.currentClueObj = clueObj;
-
-                    if (isClueValid(clueObj) && !doesQuestionHaveMultimedia(clueObj)) {
-                        showClue.call(this, clueObj);
-                        resolve(clueObj);
-
-                    } else {
-                        if (tryNum < maxTries) {
-                            fetchClueHelper.call(this, tryNum + 1, maxTries);
-                        } else {
-                            resolve({
-                                answer: `couldn't fetch clue after ${maxTries} tries`,
-                                question: `couldn't fetch clue after ${maxTries} tries`,
-                                value: 0,
-                                category: {title: "error"}
-                            });
-                        }
-                    }
-                });
-            }
-        });
 
         function isClueValid(clueObj) {
             return clueObj.value !== null &&
@@ -234,6 +203,39 @@ class Operator {
             this.presentationInstance.setClueObj(clueObj);
             this.divInstructions.html("Read aloud the category and dollar value.");
         }
+
+        function fetchClueHelper(promiseResolveFunc, tryNum, maxTries) {
+            $.getJSON("http://jservice.io/api/random", response => {
+                const clueObj = response[0];
+                this.currentClueObj = clueObj;
+
+                if (isClueValid(clueObj) && !doesQuestionHaveMultimedia(clueObj)) {
+                    showClue.call(this, clueObj);
+                    promiseResolveFunc(clueObj);
+                } else {
+                    if (tryNum < maxTries) {
+                        fetchClueHelper.call(this, tryNum + 1, maxTries);
+                    } else {
+                        // Would make sense to call the promise reject function,
+                        // but then a function somewhere down the line has to generate
+                        // this error message
+                        promiseResolveFunc({
+                            answer: `couldn't fetch clue after ${maxTries} tries`,
+                            question: `couldn't fetch clue after ${maxTries} tries`,
+                            value: 0,
+                            category: {title: "error"}
+                        });
+                    }
+                }
+            });
+        }
+
+        return new Promise((resolve, reject) => {
+            this.buttonStartGame.blur();
+            this.trQuestion.hide();
+            this.divInstructions.html("Loading clue...");
+            fetchClueHelper.call(this, resolve, 1, 5);
+        });
 
     }
 
