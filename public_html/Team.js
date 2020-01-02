@@ -1,3 +1,4 @@
+const ANIMATE_DOLLARS_CHANGE = true;
 class Team {
 
     constructor(teamIdx, presentationInstance, settings, audioManager) {
@@ -56,19 +57,53 @@ class Team {
         this.setState(this.settings.isAllowedMultipleTries ? Team.stateEnum.CAN_ANSWER : Team.stateEnum.ALREADY_ANSWERED);
     }
 
-    moneyAdd(amount) {
-        this.dollars += amount;
-        this._updateDollarsDisplay();
+    moneyAdd(amountAdd) {
+        if (ANIMATE_DOLLARS_CHANGE) {
+            this._animateDollarsChange(this.dollars + amountAdd);
+        } else {
+            this.dollars += amountAdd;
+            this._updateDollarsDisplay();
+        }
     }
 
-    moneySubtract(amount) {
-        this.dollars -= amount;
-        this._updateDollarsDisplay();
+    moneySubtract(amountSubtract) {
+        if (ANIMATE_DOLLARS_CHANGE) {
+            this._animateDollarsChange(this.dollars - amountSubtract);
+        } else {
+            this.dollars -= amountSubtract;
+            this._updateDollarsDisplay();
+        }
     }
 
-    moneySet(amount) {
-        this.dollars = amount;
-        this._updateDollarsDisplay();
+    moneySet(newDollars) {
+        if (ANIMATE_DOLLARS_CHANGE) {
+            this._animateDollarsChange(newDollars);
+        } else {
+            this.dollars = newDollars;
+            this._updateDollarsDisplay();
+        }
+    }
+
+    _animateDollarsChange(targetDollars) {
+
+        if (this.dollars === targetDollars) {
+            return;
+        }
+
+        const DOLLAR_CHANGE_PER_STEP = 50;
+        const DELAY_BETWEEN_STEPS_MS = 50;
+        const DIRECTION_MULTIPLIER = targetDollars > this.dollars ? 1 : -1;
+
+        setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MS, this);
+
+        function handleTimeout(instance) {
+            instance.dollars += DIRECTION_MULTIPLIER * DOLLAR_CHANGE_PER_STEP;
+            instance._updateDollarsDisplay();
+            if (instance.dollars !== targetDollars) {
+                setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MS, instance);
+            }
+
+        }
     }
 
     canBuzz() {
