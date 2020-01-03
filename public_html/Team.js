@@ -21,8 +21,8 @@ class Team {
                 wrapper: null,
                 dollars: null,
                 teamName: null,
-                buzzerShow: null,
-                dollarChangeAnimation: null
+                buzzerShow: null
+//                dollarChangeAnimation: null
             }
         };
 
@@ -60,7 +60,7 @@ class Team {
 
     moneyAdd(amountAdd) {
         if (ANIMATE_DOLLARS_CHANGE) {
-            this._showFallingMoneyAnimation(amountAdd);
+//            this._showFallingMoneyAnimation(amountAdd);
             this._animateDollarsChange(this.dollars + amountAdd);
         } else {
             this.dollars += amountAdd;
@@ -86,19 +86,18 @@ class Team {
         }
     }
 
-    _showFallingMoneyAnimation(amountAdd) {
+    /*
+     _showFallingMoneyAnimation(amountAdd) {
+     //absolutley insane way to reset CSS animation https://stackoverflow.com/a/45036752
+     this.div.presentation.dollarChangeAnimation.css("animation", "none");
+     void(this.div.presentation.dollarChangeAnimation.get(0).offsetHeight); // trigger CSS reflow
+     this.div.presentation.dollarChangeAnimation.css("animation", null);
 
-        //absolutley insane way to reset CSS animation https://stackoverflow.com/a/45036752
-        this.div.presentation.dollarChangeAnimation.css("animation", "none");
-        void(this.div.presentation.dollarChangeAnimation.get(0).offsetHeight); // trigger CSS reflow
-        this.div.presentation.dollarChangeAnimation.css("animation", null);
-
-        this.div.presentation.dollarChangeAnimation
-                .html("+$" + amountAdd)
-                .css("animation", "0.5s cubic-bezier(0.5, 0.5, 0.1, 1) 1 dollar-change-animation")
-                ;
-
-    }
+     this.div.presentation.dollarChangeAnimation
+     .html("+$" + amountAdd.toLocaleString() + "&ensp;")
+     .css("animation", "0.5s cubic-bezier(0.5, 0.5, 0.1, 1) 1 dollar-change-animation");
+     }
+     */
 
     _animateDollarsChange(targetDollars) {
 

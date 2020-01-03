@@ -94,13 +94,6 @@ main {
       text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black; }
       main div.slide#slide-game-rules li {
         margin-bottom: 25px; }
-    main div.slide#slide-buzzer-test {
-      font-size: 90px;
-      font-family: Korinna;
-      text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      text-align: center; }
     main div.slide#slide-clue-category-and-dollars {
       font-family: swiss911;
       text-shadow: 3px 3px 0px black, 5px 5px 0px black, 7px 7px 0px black, 9px 9px 0px black, 11px 11px 0px black;
@@ -176,6 +169,7 @@ footer {
     footer div.team progress {
       display: none; }
     footer div.team div.buzzer-show img {
+      z-index: -2;
       width: 100px;
       margin-bottom: 5px; }
     footer div.team div.buzzer-show.not-pressed img.buzzer-pressed {
@@ -183,22 +177,42 @@ footer {
     footer div.team div.buzzer-show.pressed img.buzzer-not-pressed {
       display: none; }
 
+/*
 div.dollar-change-animation {
-  position: absolute;
-  left: 0;
-  right: 0;
-  margin: auto;
-  top: 50px;
-  font-family: swiss911;
-  font-size: 40px;
-  text-shadow: 3px 3px 0px black; }
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: auto;
+    //top: 50px;
+    //opacity: 0%;
+
+    z-index: -1;
+
+    //animation: 0.5s cubic-bezier(0.5, 0.5, 0.1, 1) infinite dollar-change-animation;
+
+    font-family: swiss911;
+    font-size: 40px;
+    text-shadow: 3px 3px 0px black;
+
+}
 
 @keyframes dollar-change-animation {
-  from {
-    top: -40px;
-    opacity: 0%; }
-  to {
-    top: 70px;
-    opacity: 100%; } }
+    0% {
+        top: -60px;
+        opacity: 0%;
+        transform: scaleX(1.2);
+    }
+
+    80% {
+        opacity: 100%;
+    }
+
+    100% {
+        top: 85px;
+        opacity: 0%;
+        transform: scale(0.5);
+    }
+}
+*/
 
 /*# sourceMappingURL=presentation.css.map */
