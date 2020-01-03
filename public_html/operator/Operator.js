@@ -49,6 +49,8 @@ class Operator {
         this.buttonStartGame.prop("disabled", false);
         this.divInstructions.html("Click button to start game");
 
+        focus();
+
     }
 
     initTeamKeyboardShow() {

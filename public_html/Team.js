@@ -21,7 +21,8 @@ class Team {
                 wrapper: null,
                 dollars: null,
                 teamName: null,
-                buzzerShow: null
+                buzzerShow: null,
+                dollarChangeAnimation: null
             }
         };
 
@@ -59,6 +60,7 @@ class Team {
 
     moneyAdd(amountAdd) {
         if (ANIMATE_DOLLARS_CHANGE) {
+            this._showFallingMoneyAnimation(amountAdd);
             this._animateDollarsChange(this.dollars + amountAdd);
         } else {
             this.dollars += amountAdd;
@@ -84,13 +86,27 @@ class Team {
         }
     }
 
+    _showFallingMoneyAnimation(amountAdd) {
+
+        //absolutley insane way to reset CSS animation https://stackoverflow.com/a/45036752
+        this.div.presentation.dollarChangeAnimation.css("animation", "none");
+        void(this.div.presentation.dollarChangeAnimation.get(0).offsetHeight); // trigger CSS reflow
+        this.div.presentation.dollarChangeAnimation.css("animation", null);
+
+        this.div.presentation.dollarChangeAnimation
+                .html("+$" + amountAdd)
+                .css("animation", "0.5s cubic-bezier(0.5, 0.5, 0.1, 1) 1 dollar-change-animation")
+                ;
+
+    }
+
     _animateDollarsChange(targetDollars) {
 
         if (this.dollars === targetDollars) {
             return;
         }
 
-        const DOLLAR_CHANGE_PER_STEP = 50;
+        const DOLLAR_CHANGE_PER_STEP = 100;
         const DELAY_BETWEEN_STEPS_MS = 50;
         const DIRECTION_MULTIPLIER = targetDollars > this.dollars ? 1 : -1;
 
@@ -129,9 +145,11 @@ class Team {
         this.div.presentation.wrapper = divPresentationWrapper;
         this.div.presentation.dollars = divPresentationWrapper.find("div.team-dollars").html("$" + this.dollars);
         this.div.presentation.teamName = divPresentationWrapper.find("div.team-name").html(this.teamName);
+        this.div.presentation.buzzerShow = divPresentationWrapper.find("div.buzzer-show");
+        this.div.presentation.dollarChangeAnimation = divPresentationWrapper.find("div.dollar-change-animation");
+
         this.presentationCountdownDots = divPresentationWrapper.find("table.countdown-dots");
         this.presentationProgressLockout = divPresentationWrapper.find("progress");
-        this.divBuzzerShow = divPresentationWrapper.find("div.buzzer-show");
     }
 
     setDivOperator(divOperatorWrapper) {
@@ -197,11 +215,11 @@ class Team {
     }
 
     showKeyDown() {
-        this.divBuzzerShow.addClass("pressed").removeClass("not-pressed");
+        this.div.presentation.buzzerShow.addClass("pressed").removeClass("not-pressed");
     }
 
     showKeyUp() {
-        this.divBuzzerShow.addClass("not-pressed").removeClass("pressed");
+        this.div.presentation.buzzerShow.addClass("not-pressed").removeClass("pressed");
     }
 
     jsonDump() {

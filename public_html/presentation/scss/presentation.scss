@@ -90,13 +90,13 @@ header {
         position: absolute;
         right: 8px;
     }
-    
+
     progress {
         width: 100%;
         height: 4px;
         vertical-align: top;
     }
-    
+
 }
 
 progress#game-timer {
@@ -124,7 +124,7 @@ main {
         &#slide-jeopardy-logo {
             // need special treatment to get the logo and shadow to center
             width: 100%;
-            height: 100%;   
+            height: 100%;
 
             img {
                 position: absolute;
@@ -227,13 +227,15 @@ footer {
         text-align: center;
         flex: 1;
 
+        position: relative; //need this to center the dollar animations
+
 
         &[data-team-state="buzzers-off"],
         &[data-team-state="reading-question"],
         &[data-team-state="already-answered"],
         &[data-team-state="lockout"]
         {
-            opacity: 0.4;
+            /*opacity: 0.4;*/
         }
 
 
@@ -301,7 +303,33 @@ footer {
             }
         }
 
-    }   
+    }
 
 
+}
+
+
+div.dollar-change-animation {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: auto;
+    top: 50px;
+
+    font-family: swiss911;
+    font-size: 40px;
+    text-shadow: 3px 3px 0px black;
+
+}
+
+@keyframes dollar-change-animation {
+    from {
+        top: -40px;
+        opacity: 0%;
+    }
+
+    to {
+        top: 70px;
+        opacity: 100%;
+    }
 }

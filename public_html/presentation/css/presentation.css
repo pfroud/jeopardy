@@ -141,9 +141,10 @@ footer {
   footer div.team {
     padding: 10px;
     text-align: center;
-    flex: 1; }
+    flex: 1;
+    position: relative; }
     footer div.team[data-team-state="buzzers-off"], footer div.team[data-team-state="reading-question"], footer div.team[data-team-state="already-answered"], footer div.team[data-team-state="lockout"] {
-      opacity: 0.4; }
+      /*opacity: 0.4;*/ }
     footer div.team[data-team-state="buzzers-off"] table.countdown-dots {
       visibility: hidden; }
     footer div.team[data-team-state="answering"] {
@@ -181,5 +182,23 @@ footer {
       display: none; }
     footer div.team div.buzzer-show.pressed img.buzzer-not-pressed {
       display: none; }
+
+div.dollar-change-animation {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: auto;
+  top: 50px;
+  font-family: swiss911;
+  font-size: 40px;
+  text-shadow: 3px 3px 0px black; }
+
+@keyframes dollar-change-animation {
+  from {
+    top: -40px;
+    opacity: 0%; }
+  to {
+    top: 70px;
+    opacity: 100%; } }
 
 /*# sourceMappingURL=presentation.css.map */
