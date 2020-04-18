@@ -39,7 +39,7 @@ class Team {
         this.presentationProgressLockout = null;
         this.countdownTimer = null;
 
-        this.setDivOperator($('div[data-team-number="' + teamIdx + '"]'));
+        this.setDivOperator($('div[data-team-index="' + teamIdx + '"]'));
         this.setDivPresentation(presentationInstance.getTeamDiv(teamIdx));
 
         this.setState(Team.stateEnum.BUZZERS_OFF);

@@ -1,6 +1,6 @@
 /* global Team */
 
-const NUM_TEAMS = 4;
+const TEAM_COUNT = 9;
 
 class Operator {
 
@@ -23,7 +23,7 @@ class Operator {
         this.divInstructions = $("div#instructions");
 
         this.currentClueObj = null;
-        this.teamArray = new Array(NUM_TEAMS);
+        this.teamArray = new Array(TEAM_COUNT);
 
         this.isPaused = false;
 
@@ -129,13 +129,83 @@ class Operator {
             return;
         }
 
-        for (var i = 0; i < NUM_TEAMS; i++) {
-            const theTeam = this.teamArray[i] = new Team(i, this.presentationInstance, this.settings, this.audioManager);
+        for (var i = 0; i < TEAM_COUNT; i++) {
+
+            const teamDivOperator = this._createTeamDivOperator(i);
+
+            this._createTeamDivPresentation(i);
+
+
+            const theTeam = this.teamArray[i] =
+                    new Team(i, this.presentationInstance, this.settings, this.audioManager);
+
             $("input#team-name-" + i).on("input", function () {
                 theTeam.setTeamName(this.value);
             });
         }
         this.presentationInstance.setTeamsVisible(true);
+    }
+
+    _createTeamDivOperator(teamIdx) {
+
+        // create a new div element
+        const divTeam = $("<div>")
+                .addClass("team")
+                .attr("data-team-index", teamIdx)
+                .attr("data-team-state", "");
+
+
+        divTeam.append($("<div>").addClass("team-name"));
+        divTeam.append($("<div>").addClass("team-dollars"));
+        divTeam.append($("<div>").addClass("team-state"));
+
+        divTeam.append($("<progress>").addClass("time-left").css("display:none"));
+
+        //select the existing footer, then add the teamDiv
+        $("footer").append(divTeam);
+    }
+
+    _createTeamDivPresentation(teamIdx) {
+        const divTeam = $("<div>")
+                .addClass("team")
+                .attr("data-team-index", teamIdx)
+                .attr("data-team-state", "");
+
+        const divBuzzerDisplay = $("<div>")
+                .addClass("buzzer-show").addClass("not-pressed");
+
+        const imgSwitchClosed = $("<img>")
+                .attr("src", "img/switch-closed.svg")
+                .attr("attr", "switch closed")
+                .addClass("buzzer-pressed");
+
+        const imgSwitchOpened = $("<img>")
+                .attr("src", "img/switch-opened.svg")
+                .attr("attr", "switch opened")
+                .addClass("buzzer-not-pressed");
+
+        divBuzzerDisplay.append(imgSwitchClosed);
+        divBuzzerDisplay.append(imgSwitchOpened);
+        divTeam.append(divBuzzerDisplay);
+
+        const tableCountdownDots = $("<table>")
+                .addClass("countdown-dots");
+
+        for (var i = 5; i > 1; i--) {
+            tableCountdownDots.append($("<td>").attr("data-countdown", i));
+        }
+        tableCountdownDots.append($("<td>").attr("data-countdown", 1));
+        for (var i = 2; i <= 5; i++) {
+            tableCountdownDots.append($("<td>").attr("data-countdown", i));
+        }
+
+        divTeam.append(tableCountdownDots);
+
+        divTeam.append($("<div>").addClass("team-dollars"));
+        divTeam.append($("<div>").addClass("team-name"));
+        divTeam.append($("<progress>"));
+
+        this.presentationInstance.footerTeams.append(divTeam);
     }
 
     playTimeoutSound() {
@@ -157,7 +227,7 @@ class Operator {
     }
 
     shouldGameEnd() {
-        for (var i = 0; i < NUM_TEAMS; i++) {
+        for (var i = 0; i < TEAM_COUNT; i++) {
             if (this.teamArray[i].dollars >= this.settings.teamDollarsWhenGameShouldEnd) {
                 return true;
             }

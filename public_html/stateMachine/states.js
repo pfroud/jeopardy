@@ -51,7 +51,7 @@ function getStates(stateMachineInstance) {
                     dest: "waitForBuzzesRestartTimer"
                 }, {
                     type: "keyboard",
-                    keys: "1234",
+                    keys: "123456789",
                     dest: "lockout"
                 }]
         }, {
@@ -71,7 +71,7 @@ function getStates(stateMachineInstance) {
                     dest: "playTimeoutSound"
                 }, {
                     type: "keyboard",
-                    keys: "1234",
+                    keys: "123456789",
                     dest: "tryTeamAnswer"
                 }]
         }, {
@@ -83,7 +83,7 @@ function getStates(stateMachineInstance) {
                     dest: "playTimeoutSound"
                 }, {
                     type: "keyboard",
-                    keys: "1234",
+                    keys: "123456789",
                     dest: "tryTeamAnswer"
                 }
             ]
