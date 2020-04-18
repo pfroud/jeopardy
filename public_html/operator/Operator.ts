@@ -1,10 +1,34 @@
-/* global Team */
+import { Team } from "../Team";
+import { StateMachine } from "../stateMachine/StateMachine";
+import { AudioManager } from "./AudioManager";
+import { Settings } from "../Settings";
+import { Presentation } from "../presentation/Presentation";
 
 const TEAM_COUNT = 9;
 
-class Operator {
+export class Operator {
+    audioManager: AudioManager;
+    settings: Settings;
+    presentationInstance: Presentation;
+    divClueWrapper: JQuery<HTMLDivElement>;
+    divClueQuestion: JQuery<HTMLDivElement>;
+    divClueDollars: JQuery<HTMLDivElement>;
+    divClueCategory: JQuery<HTMLDivElement>;
+    divClueAnswer: JQuery<HTMLDivElement>;
+    divClueAirdate: JQuery<HTMLDivElement>;
+    trQuestion: JQuery<HTMLTableRowElement>;
+    trAnswer: JQuery<HTMLTableRowElement>;
+    divPaused: JQuery<HTMLDivElement>;
+    divInstructions: JQuery<HTMLDivElement>;
+    currentClueObj: any;
+    teamArray: Team[];
+    isPaused: boolean;
+    stateMachine: StateMachine;
+    buttonStartGame: JQuery<HTMLButtonElement>;
+    answeringTeam: Team;
+    buttonSkipClue: JQuery<HTMLButtonElement>;
 
-    constructor(audioManager, settings) {
+    constructor(audioManager: AudioManager, settings: Settings) {
         this.audioManager = audioManager;
         this.settings = settings;
 
@@ -35,7 +59,7 @@ class Operator {
         this.lookForSavedGame();
     }
 
-    handlePresentationReady(presentationInstance) {
+    handlePresentationReady(presentationInstance: Presentation) {
         // called from Presentation instance in other window
         this.presentationInstance = presentationInstance;
         this.initTeams();
@@ -78,7 +102,7 @@ class Operator {
     initKeyboardListener() {
         window.addEventListener("keydown", keyboardEvent => {
             if (keyboardEvent.key === "p" &&
-                    document.activeElement.tagName !== "INPUT") {
+                document.activeElement.tagName !== "INPUT") {
                 this.togglePaused();
             }
         });
@@ -112,8 +136,14 @@ class Operator {
 
         $("a#aMoneyOverride").click(() =>
             window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney",
-                    "menubar=0,toolbar=0,location=0,personalbar=0status=0"));
+                "menubar=0,toolbar=0,location=0,personalbar=0status=0"));
 
+    }
+    buzzerTestStart() {
+        throw new Error("Method not implemented.");
+    }
+    buzzerTestStop() {
+        throw new Error("Method not implemented.");
     }
 
     skipClue() {
@@ -137,7 +167,7 @@ class Operator {
 
 
             const theTeam = this.teamArray[i] =
-                    new Team(i, this.presentationInstance, this.settings, this.audioManager);
+                new Team(i, this.presentationInstance, this.settings, this.audioManager);
 
             $("input#team-name-" + i).on("input", function () {
                 theTeam.setTeamName(this.value);
@@ -146,13 +176,13 @@ class Operator {
         this.presentationInstance.setTeamsVisible(true);
     }
 
-    _createTeamDivOperator(teamIdx) {
+    _createTeamDivOperator(teamIdx: number) {
 
         // create a new div element
         const divTeam = $("<div>")
-                .addClass("team")
-                .attr("data-team-index", teamIdx)
-                .attr("data-team-state", "");
+            .addClass("team")
+            .attr("data-team-index", teamIdx)
+            .attr("data-team-state", "");
 
 
         divTeam.append($("<div>").addClass("team-name"));
@@ -165,31 +195,31 @@ class Operator {
         $("footer").append(divTeam);
     }
 
-    _createTeamDivPresentation(teamIdx) {
+    _createTeamDivPresentation(teamIdx: number) {
         const divTeam = $("<div>")
-                .addClass("team")
-                .attr("data-team-index", teamIdx)
-                .attr("data-team-state", "");
+            .addClass("team")
+            .attr("data-team-index", teamIdx)
+            .attr("data-team-state", "");
 
         const divBuzzerDisplay = $("<div>")
-                .addClass("buzzer-show").addClass("not-pressed");
+            .addClass("buzzer-show").addClass("not-pressed");
 
         const imgSwitchClosed = $("<img>")
-                .attr("src", "img/switch-closed.svg")
-                .attr("attr", "switch closed")
-                .addClass("buzzer-pressed");
+            .attr("src", "img/switch-closed.svg")
+            .attr("attr", "switch closed")
+            .addClass("buzzer-pressed");
 
         const imgSwitchOpened = $("<img>")
-                .attr("src", "img/switch-opened.svg")
-                .attr("attr", "switch opened")
-                .addClass("buzzer-not-pressed");
+            .attr("src", "img/switch-opened.svg")
+            .attr("attr", "switch opened")
+            .addClass("buzzer-not-pressed");
 
         divBuzzerDisplay.append(imgSwitchClosed);
         divBuzzerDisplay.append(imgSwitchOpened);
         divTeam.append(divBuzzerDisplay);
 
         const tableCountdownDots = $("<table>")
-                .addClass("countdown-dots");
+            .addClass("countdown-dots");
 
         for (var i = 5; i > 1; i--) {
             tableCountdownDots.append($("<td>").attr("data-countdown", i));
@@ -212,10 +242,10 @@ class Operator {
         this.audioManager.play("questionTimeout");
     }
 
-    handleBuzzerPress(keyboardEvent) {
+    handleBuzzerPress(keyboardEvent: KeyboardEvent) {
         const teamIndex = Number(keyboardEvent.key) - 1;
         const teamObj = this.teamArray[teamIndex];
-//        this.audioTeamBuzz.play();
+        //        this.audioTeamBuzz.play();
 
         this.answeringTeam = teamObj;
 
@@ -235,7 +265,7 @@ class Operator {
         return false;
     }
 
-    handleLockout(keyboardEvent) {
+    handleLockout(keyboardEvent: KeyboardEvent) {
         const teamIndex = Number(keyboardEvent.key) - 1;
         const teamObj = this.teamArray[teamIndex];
         teamObj.canBeLockedOut() && teamObj.startLockout();
@@ -249,10 +279,10 @@ class Operator {
 
         function isClueValid(clueObj) {
             return clueObj.value !== null &&
-                    clueObj.question.length > 0 &&
-                    clueObj.answer.length > 0 &&
-                    clueObj.category !== null &&
-                    clueObj.category.title.length > 0;
+                clueObj.question.length > 0 &&
+                clueObj.answer.length > 0 &&
+                clueObj.category !== null &&
+                clueObj.category.title.length > 0;
         }
 
         function doesQuestionHaveMultimedia(clueObj) {
@@ -295,7 +325,7 @@ class Operator {
                             answer: `couldn't fetch clue after ${maxTries} tries`,
                             question: `couldn't fetch clue after ${maxTries} tries`,
                             value: 0,
-                            category: {title: "error"}
+                            category: { title: "error" }
                         });
                     }
                 }
@@ -337,7 +367,7 @@ class Operator {
                 const foundWord = result[0];
 
                 return clueStr.substring(0, startIndex) + '<span class="clue-keyword">' +
-                        foundWord + '</span>' + clueStr.substring(startIndex + foundWord.length);
+                    foundWord + '</span>' + clueStr.substring(startIndex + foundWord.length);
             }
         }
 
@@ -356,11 +386,11 @@ class Operator {
         this.divInstructions.html("Let people read the answer");
     }
 
-    setAllTeamsState(targetState, endLockout) {
+    setAllTeamsState(targetState, endLockout: boolean) {
         this.teamArray.forEach(teamObj => teamObj.setState(targetState, endLockout));
     }
 
-    canTeamBuzz(keyboardEvent) {
+    canTeamBuzz(keyboardEvent: KeyboardEvent) {
         const teamIndex = Number(keyboardEvent.key) - 1;
         return this.teamArray[teamIndex].canBuzz();
     }
@@ -373,7 +403,7 @@ class Operator {
         this.setPaused(!this.isPaused);
     }
 
-    setPaused(isPaused) {
+    setPaused(isPaused: boolean) {
         this.isPaused = isPaused;
         this.divPaused.toggle(isPaused);
         this.stateMachine.setPaused(isPaused);
@@ -417,10 +447,10 @@ class Operator {
 
     saveGame() {
         window.localStorage.setItem("jeopardy-teams",
-                JSON.stringify(
-                        this.teamArray.map(teamObj => teamObj.jsonDump())
-                        )
-                );
+            JSON.stringify(
+                this.teamArray.map(teamObj => teamObj.jsonDump())
+            )
+        );
         //TODO save the settings
     }
 
@@ -449,7 +479,7 @@ class Operator {
         var html = "<table><tbody>";
         shallowCopy.forEach(teamObj => {
             html += ("<tr><td>" + teamObj.teamName + "</td><td>$" +
-                    teamObj.dollars.toLocaleString() + "</td></tr>");
+                teamObj.dollars.toLocaleString() + "</td></tr>");
         });
         html += "</tbody></table>";
 

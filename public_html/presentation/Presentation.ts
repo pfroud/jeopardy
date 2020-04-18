@@ -1,4 +1,17 @@
-class Presentation {
+export class Presentation {
+    divCategoryInHeader: JQuery<HTMLElement>;
+    divDollarsInHeader: JQuery<HTMLElement>;
+    header: JQuery<HTMLElement>;
+    divQuestion: JQuery<HTMLElement>;
+    divCategoryBig: JQuery<HTMLElement>;
+    divDollarsBig: JQuery<HTMLElement>;
+    divClueAnswer: JQuery<HTMLElement>;
+    divPaused: JQuery<HTMLElement>;
+    footerTeams: JQuery<HTMLElement>;
+    progress: JQuery<HTMLElement>;
+    slides: {};
+    visibleSlide: null;
+    slideNames: string[];
 
     constructor() {
         this.divCategoryInHeader = $("header div#category");
@@ -25,12 +38,12 @@ class Presentation {
             window.opener.operator.handlePresentationReady(this);
         } else {
             $("<div>window.opener is null</div>")
-                    .css("background-color", "red")
-                    .css("position", "absolute")
-                    .css("font-size", "60px")
-                    .css("top", "20px")
-                    .css("padding", "5px 10px")
-                    .appendTo("body");
+                .css("background-color", "red")
+                .css("position", "absolute")
+                .css("font-size", "60px")
+                .css("top", "20px")
+                .css("padding", "5px 10px")
+                .appendTo("body");
         }
     }
 
@@ -51,7 +64,7 @@ class Presentation {
         return this.progress;
     }
 
-    showSlide(slideName) {
+    showSlide(slideName: string) {
         if (slideName in this.slides) {
             this.visibleSlide && this.visibleSlide.hide();
 
@@ -74,7 +87,7 @@ class Presentation {
         this.divQuestion.html(clueObj.question.replace(/\\/g, ""));
 
         this.divClueAnswer.html("Answer:<p><div style=\"font-weight:bold\">"
-                + clueObj.answer + "</div>");
+            + clueObj.answer + "</div>");
     }
 
     fitQuestionToScreen() {
@@ -94,20 +107,20 @@ class Presentation {
         }
     }
 
-    setTeamsVisible(isVisible) {
+    setTeamsVisible(isVisible: boolean) {
         this.footerTeams.toggle(isVisible);
     }
 
-    setPaused(isPaused) {
+    setPaused(isPaused: boolean) {
         this.divPaused.toggle(isPaused);
     }
 
-    getTeamDiv(teamIdx) {
+    getTeamDiv(teamIdx: number) {
         // Only used to initialize the Teams. After that, get the reference from Team object.
         return $('div[data-team-index="' + teamIdx + '"]');
     }
 
-    setGameEndMessage(message) {
+    setGameEndMessage(message: string) {
         $("div#slide-game-end div#team-ranking").html(message);
     }
 

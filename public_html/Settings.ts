@@ -1,4 +1,4 @@
-class Settings {
+export class Settings {
 
     constructor() {
         // how long to show stuff on the presentation window

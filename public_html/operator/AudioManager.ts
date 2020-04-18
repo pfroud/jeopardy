@@ -1,4 +1,5 @@
-class AudioManager {
+export class AudioManager {
+    audio: { answerRight: HTMLElement; answerWrong: HTMLElement; questionTimeout: HTMLElement; roundEnd: HTMLElement; teamBuzz: HTMLElement; tick: HTMLElement; musicClosing: HTMLElement; };
     constructor() {
         this.audio = {
 
@@ -12,7 +13,7 @@ class AudioManager {
         };
     }
 
-    play(audioName) {
+    play(audioName: string) {
         const audio = this.audio[audioName];
         if (!audio) {
             console.warn(`can't play audio "${audioName}", not found`);

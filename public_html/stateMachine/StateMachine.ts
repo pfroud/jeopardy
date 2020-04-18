@@ -1,9 +1,26 @@
 
-/* global Function */
+import { Operator } from "../operator/Operator";
+import { Settings } from "../Settings";
+import { AudioManager } from "../operator/AudioManager";
+import { Presentation } from "../presentation/Presentation";
 
-class StateMachine {
+export class StateMachine {
+    DEBUG: boolean;
+    operator: Operator;
+    settings: Settings;
+    audioManager: AudioManager;
+    presentation: Presentation;
+    countdownProgress: JQuery<HTMLProgressElement>;
+    countdownText: JQuery<HTMLDivElement>;
+    divStateName: JQuery<HTMLDivElement>;
+    stateMap: {};
+    manualTriggerMap: {};
+    remainingQuestionTime: number;
+    countdownTimer: null;
+    currentState: null;
+    states: State[];
 
-    constructor(settings, operator, presentation, audioManager) {
+    constructor(settings: Settings, operator: Operator, presentation: Presentation, audioManager: AudioManager) {
 
         this.DEBUG = false;
 
@@ -34,7 +51,7 @@ class StateMachine {
 
     }
 
-    _handleKeyboardEvent(keyboardEvent) {
+    _handleKeyboardEvent(keyboardEvent: KeyboardEvent) {
         if (document.activeElement.tagName === "INPUT") {
             return;
         }
@@ -61,7 +78,7 @@ class StateMachine {
         }
     }
 
-    setPaused(isPaused) {
+    setPaused(isPaused: boolean) {
         if (this.countdownTimer) {
             if (isPaused) {
                 this.countdownTimer.pause();
@@ -71,7 +88,7 @@ class StateMachine {
         }
     }
 
-    _startCountdown(transitionObj, keyboardEvent) {
+    _startCountdown(transitionObj, keyboardEvent: KeyboardEvent) {
         var durationMs;
         var setMax = false;
         if (transitionObj.duration instanceof Function) {
@@ -112,7 +129,7 @@ class StateMachine {
         }
     }
 
-    manualTrigger(triggerName) {
+    manualTrigger(triggerName: string) {
         if (triggerName in this.manualTriggerMap) {
             const transitionObj = this.manualTriggerMap[triggerName];
             this._goToState(transitionObj.dest);
@@ -122,7 +139,7 @@ class StateMachine {
 
     }
 
-    _goToState(stateName, paramsToPassToFunctionToCall) {
+    _goToState(stateName: string, paramsToPassToFunctionToCall: object) {
 
         if (!(stateName in this.stateMap)) {
             throw new RangeError(`can't go to state named "${stateName}", state not found`);
@@ -130,7 +147,7 @@ class StateMachine {
 
         if (this.countdownTimer) {
             this.countdownTimer.pause();
-//            this.countdownTimer = null;
+            //            this.countdownTimer = null;
         }
 
         if (this.DEBUG) {
@@ -205,12 +222,12 @@ class StateMachine {
                         const transitionObj = transitionArray[i];
                         if (transitionObj.type === "promise") {
                             rv.then(
-                                    () => this._goToState(transitionObj.dest)
+                                () => this._goToState(transitionObj.dest)
                             ).catch(
-                                    returnedByPromise => {
-                                        console.warn("promise rejected:");
-                                        throw returnedByPromise;
-                                    }
+                                returnedByPromise => {
+                                    console.warn("promise rejected:");
+                                    throw returnedByPromise;
+                                }
                             );
                             break;
                         }
@@ -257,7 +274,7 @@ class StateMachine {
             validatePropArray("state", index, stateObj, "transitions");
 
             if (stateObj.showSlide &&
-                    !this.presentation.slideNames.includes(stateObj.showSlide)) {
+                !this.presentation.slideNames.includes(stateObj.showSlide)) {
                 console.warn(`state "${stateObj.name}": showSlide: unknown slide "${stateObj.showSlide}"`);
             }
 
@@ -273,12 +290,12 @@ class StateMachine {
                 if (transitionObj.type !== "if") {
                     if (!transitionObj.dest) {
                         printWarning(stateObj.name, transitionIndex,
-                                "no destination state");
+                            "no destination state");
                         return;
                     }
                     if (!(transitionObj.dest in this.stateMap)) {
                         printWarning(stateObj.name, transitionIndex,
-                                `unknown destination state "${transitionObj.dest}"`);
+                            `unknown destination state "${transitionObj.dest}"`);
                     }
                 }
 
@@ -287,24 +304,24 @@ class StateMachine {
                         const duration = transitionObj.duration;
                         if (!transitionObj.duration) {
                             printWarning(stateObj.name, transitionIndex,
-                                    "timeout has no duration property");
+                                "timeout has no duration property");
                         }
-//                        if (!Number.isInteger(duration)) {
-//                            printWarning(stateObj.name, transitionIndex,
-//                                    `duration for timeout transition is not an integer: ${duration}`);
-//                        }
+                        //                        if (!Number.isInteger(duration)) {
+                        //                            printWarning(stateObj.name, transitionIndex,
+                        //                                    `duration for timeout transition is not an integer: ${duration}`);
+                        //                        }
                         break;
 
                     case "keyboard":
                         const keyboardKeys = transitionObj.keys;
                         if (!keyboardKeys) {
                             printWarning(stateObj.name, transitionIndex,
-                                    `no keys for keyboard transition`);
+                                `no keys for keyboard transition`);
                         }
 
                         if (keyboardKeys.constructor.name !== "String") {
                             printWarning(stateObj.name, transitionIndex,
-                                    `property keys has type ${keyboardKeys.constructor.name}, expected String`);
+                                `property keys has type ${keyboardKeys.constructor.name}, expected String`);
                         }
 
                         // make sure each keyboard key is not used in multiple transitions
@@ -312,7 +329,7 @@ class StateMachine {
                             const key = keyboardKeys.charAt(i);
                             if (key in keyboardKeysUsed) {
                                 printWarning(stateObj.name, transitionIndex,
-                                        `keyboard key "${key}" already used in transition ${keyboardKeysUsed[key]}`);
+                                    `keyboard key "${key}" already used in transition ${keyboardKeysUsed[key]}`);
                             } else {
                                 keyboardKeysUsed[key] = transitionIndex;
                             }
@@ -332,21 +349,21 @@ class StateMachine {
                     case "if":
                         if (!(transitionObj.condition instanceof Function)) {
                             printWarning(stateObj.name, transitionIndex,
-                                    "condition is not a function: " + transitionObj.condition);
+                                "condition is not a function: " + transitionObj.condition);
                         }
                         if (!(transitionObj.then in this.stateMap)) {
                             printWarning(stateObj.name, transitionIndex,
-                                    `unknown 'then' state "${transitionObj.then}"`);
+                                `unknown 'then' state "${transitionObj.then}"`);
                         }
                         if (!(transitionObj.else in this.stateMap)) {
                             printWarning(stateObj.name, transitionIndex,
-                                    `unknown 'else' state "${transitionObj.else}"`);
+                                `unknown 'else' state "${transitionObj.else}"`);
                         }
                         break;
 
                     default:
                         printWarning(stateObj.name, transitionIndex,
-                                `unknown transition type "${transitionObj.type}"`);
+                            `unknown transition type "${transitionObj.type}"`);
                         break;
                 }
 

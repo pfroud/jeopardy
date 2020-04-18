@@ -1,7 +1,25 @@
-const ANIMATE_DOLLARS_CHANGE = true;
-class Team {
+import { Presentation } from "./presentation/Presentation";
+import { Settings } from "./Settings";
+import { AudioManager } from "./operator/AudioManager";
 
-    constructor(teamIdx, presentationInstance, settings, audioManager) {
+const ANIMATE_DOLLARS_CHANGE = true;
+export class Team {
+    settings: any;
+    audioManager: any;
+    teamIdx: any;
+    dollars: number;
+    teamName: string;
+    state: null;
+    div: { operator: { wrapper: null; dollars: null; teamName: null; state: null; }; presentation: { wrapper: null; dollars: null; teamName: null; buzzerShow: null; }; };
+    presentationCountdownDots: null;
+    presentationProgressLockout: null;
+    countdownTimer: null;
+    static stateEnum: any;
+    static stateValues: any;
+    stateBeforeLockout: any;
+    countdowmTimer: null;
+
+    constructor(teamIdx: number, presentationInstance: Presentation, settings: Settings, audioManager: AudioManager) {
         this.settings = settings;
         this.audioManager = audioManager;
         this.teamIdx = teamIdx;
@@ -99,7 +117,7 @@ class Team {
      }
      */
 
-    _animateDollarsChange(targetDollars) {
+    _animateDollarsChange(targetDollars: number) {
 
         if (this.dollars === targetDollars) {
             return;
@@ -125,7 +143,7 @@ class Team {
         return this.state === Team.stateEnum.CAN_ANSWER;
     }
 
-    setPaused(isPaused) {
+    setPaused(isPaused: boolean) {
         if (this.countdownTimer) {
             if (isPaused) {
                 this.countdownTimer.pause();
@@ -140,7 +158,7 @@ class Team {
         this.div.operator.dollars.html("$" + this.dollars.toLocaleString());
     }
 
-    setDivPresentation(divPresentationWrapper) {
+    setDivPresentation(divPresentationWrapper: JQuery<HTMLDivElement>) {
         this.div.presentation.wrapper = divPresentationWrapper;
         this.div.presentation.dollars = divPresentationWrapper.find("div.team-dollars").html("$" + this.dollars);
         this.div.presentation.teamName = divPresentationWrapper.find("div.team-name").html(this.teamName);
@@ -151,20 +169,20 @@ class Team {
         this.presentationProgressLockout = divPresentationWrapper.find("progress");
     }
 
-    setDivOperator(divOperatorWrapper) {
+    setDivOperator(divOperatorWrapper: JQuery<HTMLDivElement>) {
         this.div.operator.wrapper = divOperatorWrapper;
         this.div.operator.teamName = divOperatorWrapper.find("div.team-name").html(this.teamName);
         this.div.operator.dollars = divOperatorWrapper.find("div.team-dollars").html("$" + this.dollars);
         this.div.operator.state = divOperatorWrapper.find("div.team-state").html(this.state);
     }
 
-    setTeamName(teamName) {
+    setTeamName(teamName: string) {
         this.teamName = teamName;
         this.div.operator.teamName.html(teamName);
         this.div.presentation.teamName.html(teamName);
     }
 
-    setState(targetState, endLockout) {
+    setState(targetState: string, endLockout=false) {
         if (!(Team.stateValues.includes(targetState))) {
             throw new RangeError(`team ${this.teamIdx}: can't go to state "${targetState}", not in the enum of avaliable states`);
         }
@@ -228,7 +246,7 @@ class Team {
         };
     }
 
-    jsonLoad(jsonObj) {
+    jsonLoad(jsonObj: object) {
         this.teamName = jsonObj.name;
         this.dollars = jsonObj.dollars;
 
