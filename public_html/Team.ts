@@ -1,6 +1,9 @@
 import { Presentation } from "./presentation/Presentation";
 import { Settings } from "./Settings";
 import { AudioManager } from "./operator/AudioManager";
+import { getStates } from "./stateMachine/states";
+import { Clue } from "./interfaces";
+import { CountdownTimer } from "./CountdownTimer";
 
 const ANIMATE_DOLLARS_CHANGE = true;
 export class Team {
@@ -14,8 +17,6 @@ export class Team {
     presentationCountdownDots: null;
     presentationProgressLockout: null;
     countdownTimer: null;
-    static stateEnum: any;
-    static stateValues: any;
     stateBeforeLockout: any;
     countdowmTimer: null;
 
@@ -40,7 +41,7 @@ export class Team {
                 dollars: null,
                 teamName: null,
                 buzzerShow: null
-//                dollarChangeAnimation: null
+                //                dollarChangeAnimation: null
             }
         };
 
@@ -60,25 +61,25 @@ export class Team {
         this.setDivOperator($('div[data-team-index="' + teamIdx + '"]'));
         this.setDivPresentation(presentationInstance.getTeamDiv(teamIdx));
 
-        this.setState(Team.stateEnum.BUZZERS_OFF);
+        this.setState(PossibleStates.BUZZERS_OFF);
     }
 
-    handleAnswerRight(clueObj) {
+    handleAnswerRight(clueObj: Clue): void {
         this.audioManager.play("answerRight");
         this.moneyAdd(clueObj.value);
         this.presentationCountdownDots.find("td").removeClass("active");
     }
 
-    handleAnswerWrong(clueObj) {
+    handleAnswerWrong(clueObj: Clue): void {
         this.audioManager.play("answerWrong");
         this.presentationCountdownDots.find("td").removeClass("active");
         this.moneySubtract(clueObj.value * this.settings.wrongAnswerPenaltyMultiplier);
-        this.setState(this.settings.isAllowedMultipleTries ? Team.stateEnum.CAN_ANSWER : Team.stateEnum.ALREADY_ANSWERED);
+        this.setState(this.settings.isAllowedMultipleTries ? PossibleStates.CAN_ANSWER : PossibleStates.ALREADY_ANSWERED);
     }
 
-    moneyAdd(amountAdd) {
+    moneyAdd(amountAdd: number): void {
         if (ANIMATE_DOLLARS_CHANGE) {
-//            this._showFallingMoneyAnimation(amountAdd);
+            //            this._showFallingMoneyAnimation(amountAdd);
             this._animateDollarsChange(this.dollars + amountAdd);
         } else {
             this.dollars += amountAdd;
@@ -86,7 +87,7 @@ export class Team {
         }
     }
 
-    moneySubtract(amountSubtract) {
+    moneySubtract(amountSubtract: number): void {
         if (ANIMATE_DOLLARS_CHANGE) {
             this._animateDollarsChange(this.dollars - amountSubtract);
         } else {
@@ -95,7 +96,7 @@ export class Team {
         }
     }
 
-    moneySet(newDollars) {
+    moneySet(newDollars: number): void {
         if (ANIMATE_DOLLARS_CHANGE) {
             this._animateDollarsChange(newDollars);
         } else {
@@ -117,7 +118,7 @@ export class Team {
      }
      */
 
-    _animateDollarsChange(targetDollars: number) {
+    _animateDollarsChange(targetDollars: number): void {
 
         if (this.dollars === targetDollars) {
             return;
@@ -129,7 +130,7 @@ export class Team {
 
         setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MS, this);
 
-        function handleTimeout(instance) {
+        function handleTimeout(instance: Team) {
             instance.dollars += DIRECTION_MULTIPLIER * DOLLAR_CHANGE_PER_STEP;
             instance._updateDollarsDisplay();
             if (instance.dollars !== targetDollars) {
@@ -139,11 +140,11 @@ export class Team {
         }
     }
 
-    canBuzz() {
-        return this.state === Team.stateEnum.CAN_ANSWER;
+    canBuzz(): boolean {
+        return this.state === PossibleStates.CAN_ANSWER;
     }
 
-    setPaused(isPaused: boolean) {
+    setPaused(isPaused: boolean): void {
         if (this.countdownTimer) {
             if (isPaused) {
                 this.countdownTimer.pause();
@@ -153,12 +154,12 @@ export class Team {
         }
     }
 
-    _updateDollarsDisplay() {
+    _updateDollarsDisplay(): void {
         this.div.presentation.dollars.html("$" + this.dollars.toLocaleString());
         this.div.operator.dollars.html("$" + this.dollars.toLocaleString());
     }
 
-    setDivPresentation(divPresentationWrapper: JQuery<HTMLDivElement>) {
+    setDivPresentation(divPresentationWrapper: JQuery<HTMLDivElement>): void {
         this.div.presentation.wrapper = divPresentationWrapper;
         this.div.presentation.dollars = divPresentationWrapper.find("div.team-dollars").html("$" + this.dollars);
         this.div.presentation.teamName = divPresentationWrapper.find("div.team-name").html(this.teamName);
@@ -169,25 +170,25 @@ export class Team {
         this.presentationProgressLockout = divPresentationWrapper.find("progress");
     }
 
-    setDivOperator(divOperatorWrapper: JQuery<HTMLDivElement>) {
+    setDivOperator(divOperatorWrapper: JQuery<HTMLDivElement>): void {
         this.div.operator.wrapper = divOperatorWrapper;
         this.div.operator.teamName = divOperatorWrapper.find("div.team-name").html(this.teamName);
         this.div.operator.dollars = divOperatorWrapper.find("div.team-dollars").html("$" + this.dollars);
         this.div.operator.state = divOperatorWrapper.find("div.team-state").html(this.state);
     }
 
-    setTeamName(teamName: string) {
+    setTeamName(teamName: string): void {
         this.teamName = teamName;
         this.div.operator.teamName.html(teamName);
         this.div.presentation.teamName.html(teamName);
     }
 
-    setState(targetState: string, endLockout=false) {
+    setState(targetState: string, endLockout = false): void {
         if (!(Team.stateValues.includes(targetState))) {
             throw new RangeError(`team ${this.teamIdx}: can't go to state "${targetState}", not in the enum of avaliable states`);
         }
 
-        if (this.state === Team.stateEnum.LOCKOUT && !endLockout) {
+        if (this.state === PossibleStates.LOCKOUT && !endLockout) {
             this.stateBeforeLockout = targetState;
         } else {
             this.state = targetState;
@@ -202,13 +203,13 @@ export class Team {
         }
     }
 
-    canBeLockedOut() {
-        return this.state === Team.stateEnum.READING_QUESTION;
+    canBeLockedOut(): boolean {
+        return this.state === PossibleStates.READING_QUESTION;
     }
 
-    startLockout() {
+    startLockout(): void {
         this.stateBeforeLockout = this.state;
-        this.setState(Team.stateEnum.LOCKOUT);
+        this.setState(PossibleStates.LOCKOUT);
 
         const countdownShowCategory = this.countdownTimer = new CountdownTimer(this.settings.durationLockout);
         // todo would be nice to show progress element on display and presentation. need to change CountdownTimer to allow that
@@ -220,33 +221,33 @@ export class Team {
 
     }
 
-    endLockout() {
+    endLockout(): void {
         this.setState(this.stateBeforeLockout, true);
         this.stateBeforeLockout = null;
         this.countdownTimer = null;
     }
 
-    startAnswer() {
-        this.setState(Team.stateEnum.ANSWERING);
+    startAnswer(): void {
+        this.setState(PossibleStates.ANSWERING);
         this.presentationCountdownDots.find("td").addClass("active");
     }
 
-    showKeyDown() {
+    showKeyDown(): void {
         this.div.presentation.buzzerShow.addClass("pressed").removeClass("not-pressed");
     }
 
-    showKeyUp() {
+    showKeyUp(): void {
         this.div.presentation.buzzerShow.addClass("not-pressed").removeClass("pressed");
     }
 
-    jsonDump() {
+    jsonDump(): TeamDumpToJson {
         return {
             name: this.teamName,
             dollars: this.dollars
         };
     }
 
-    jsonLoad(jsonObj: object) {
+    jsonLoad(jsonObj: TeamDumpToJson): void {
         this.teamName = jsonObj.name;
         this.dollars = jsonObj.dollars;
 
@@ -259,14 +260,20 @@ export class Team {
 
 }
 
-Team.stateEnum = {
-    BUZZERS_OFF: "buzzers-off", // game has not started
-    READING_QUESTION: "reading-question", //operator is reading the question out loud
-    CAN_ANSWER: "can-answer", //operator is done reading the question
-    ANSWERING: "answering",
-    ALREADY_ANSWERED: "already-answered",
-    LOCKOUT: "lockout" //team buzzed while operator was reading the question
+export interface TeamDumpToJson {
+    name: string;
+    dollars: number;
+}
+
+export enum PossibleStates {
+    BUZZERS_OFF = "buzzers-off", // game has not started
+    READING_QUESTION = "reading-question", //operator is reading the question out loud
+    CAN_ANSWER = "can-answer", //operator is done reading the question
+    ANSWERING = "answering",
+    ALREADY_ANSWERED = "already-answered",
+    LOCKOUT = "lockout" //team buzzed while operator was reading the question
 };
-Object.freeze(Team.stateEnum);
-Team.stateValues = Object.values(Team.stateEnum);
-Object.freeze(Team.stateValues);
+
+// Object.freeze(Team.stateEnum);
+// Team.stateValues = Object.values(Team.stateEnum);
+// Object.freeze(Team.stateValues);

@@ -1,15 +1,16 @@
-import { Team } from "../Team";
+import { Team, PossibleStates, TeamDumpToJson } from "../Team";
 import { StateMachine } from "../stateMachine/StateMachine";
 import { AudioManager } from "./AudioManager";
 import { Settings } from "../Settings";
 import { Presentation } from "../presentation/Presentation";
+import { Clue } from "../interfaces";
 
 const TEAM_COUNT = 9;
 
 export class Operator {
     audioManager: AudioManager;
     settings: Settings;
-    presentationInstance: Presentation;
+    presentationInstance: Presentation | null;
     divClueWrapper: JQuery<HTMLDivElement>;
     divClueQuestion: JQuery<HTMLDivElement>;
     divClueDollars: JQuery<HTMLDivElement>;
@@ -20,12 +21,12 @@ export class Operator {
     trAnswer: JQuery<HTMLTableRowElement>;
     divPaused: JQuery<HTMLDivElement>;
     divInstructions: JQuery<HTMLDivElement>;
-    currentClueObj: any;
+    currentClueObj: Clue;
     teamArray: Team[];
     isPaused: boolean;
     stateMachine: StateMachine;
     buttonStartGame: JQuery<HTMLButtonElement>;
-    answeringTeam: Team;
+    answeringTeam: Team | null;
     buttonSkipClue: JQuery<HTMLButtonElement>;
 
     constructor(audioManager: AudioManager, settings: Settings) {
@@ -45,8 +46,12 @@ export class Operator {
         this.trAnswer = $("tr#answer");
         this.divPaused = $("div#paused");
         this.divInstructions = $("div#instructions");
+        this.buttonStartGame = $("button#start-game");
+        this.buttonSkipClue = $("button#skip-clue");
 
         this.currentClueObj = null;
+        this.answeringTeam = null;
+
         this.teamArray = new Array(TEAM_COUNT);
 
         this.isPaused = false;
@@ -59,7 +64,7 @@ export class Operator {
         this.lookForSavedGame();
     }
 
-    handlePresentationReady(presentationInstance: Presentation) {
+    handlePresentationReady(presentationInstance: Presentation): void {
         // called from Presentation instance in other window
         this.presentationInstance = presentationInstance;
         this.initTeams();
@@ -77,7 +82,7 @@ export class Operator {
 
     }
 
-    initTeamKeyboardShow() {
+    initTeamKeyboardShow(): void {
         const numbers = ["1", "2", "3", "4"];
 
         window.addEventListener("keydown", keyboardEvent => {
@@ -99,31 +104,38 @@ export class Operator {
 
     }
 
-    initKeyboardListener() {
+    initKeyboardListener(): void {
         window.addEventListener("keydown", keyboardEvent => {
-            if (keyboardEvent.key === "p" &&
-                document.activeElement.tagName !== "INPUT") {
+            if (keyboardEvent.key === "p") {
                 this.togglePaused();
             }
         });
     }
 
-    handleAnswerRight() {
+    handleAnswerRight(): void {
+        if (!this.answeringTeam) {
+            console.error("cannot handleAnswerRight because answeringTeam is undefined");
+            return;
+        }
         this.answeringTeam.handleAnswerRight(this.currentClueObj);
     }
 
-    handleAnswerWrong() {
+    handleAnswerWrong(): void {
+        if (!this.answeringTeam) {
+            console.error("cannot handleAnswerWrong because answeringTeam is undefined");
+            return;
+        }
         this.answeringTeam.handleAnswerWrong(this.currentClueObj);
     }
 
-    initMouseListeners() {
+    initMouseListeners(): void {
         $("button#go-to-game-rules").click(() => this.presentationInstance.showSlide("game-rules"));
         $("button#go-to-jeopardy-logo").click(() => this.presentationInstance.showSlide("jeopardy-logo"));
         $("button#go-to-event-cost").click(() => this.presentationInstance.showSlide("event-cost"));
         $("button#teams-hide").click(() => this.presentationInstance.setTeamsVisible(false));
         $("button#teams-show").click(() => this.presentationInstance.setTeamsVisible(true));
 
-        this.buttonStartGame = $("button#start-game").click(() => {
+        this.buttonStartGame.click(() => {
             this.stateMachine.manualTrigger("startGame");
             this.buttonStartGame.prop("disabled", true);
         });
@@ -132,28 +144,28 @@ export class Operator {
         $("button#buzzer-test-start").click(() => this.buzzerTestStart());
         $("button#buzzer-test-stop").click(() => this.buzzerTestStop());
 
-        this.buttonSkipClue = $("button#skip-clue").click(() => this.skipClue());
+        this.buttonSkipClue.click(() => this.skipClue());
 
         $("a#aMoneyOverride").click(() =>
             window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney",
                 "menubar=0,toolbar=0,location=0,personalbar=0status=0"));
 
     }
-    buzzerTestStart() {
+    buzzerTestStart(): void {
         throw new Error("Method not implemented.");
     }
-    buzzerTestStop() {
+    buzzerTestStop(): void {
         throw new Error("Method not implemented.");
     }
 
-    skipClue() {
+    skipClue(): void {
         this.setAllTeamsState(Team.stateEnum.BUZZERS_OFF, true);
         this.stateMachine._goToState("fetchClue");
-        this.buttonSkipClue.attr("disabled", true);
+        this.buttonSkipClue.attr("disabled", "true");
         this.buttonSkipClue.blur();
     }
 
-    initTeams() {
+    initTeams(): void {
         if (!this.presentationInstance) {
             console.log("can't init teams because no Presentation instance");
             return;
@@ -169,14 +181,15 @@ export class Operator {
             const theTeam = this.teamArray[i] =
                 new Team(i, this.presentationInstance, this.settings, this.audioManager);
 
-            $("input#team-name-" + i).on("input", function () {
+            const teamNameInput: JQuery<HTMLInputElement> = $("input#team-name-" + i);
+            teamNameInput.on("input", function () {
                 theTeam.setTeamName(this.value);
             });
         }
         this.presentationInstance.setTeamsVisible(true);
     }
 
-    _createTeamDivOperator(teamIdx: number) {
+    _createTeamDivOperator(teamIdx: number): void {
 
         // create a new div element
         const divTeam = $("<div>")
@@ -195,7 +208,7 @@ export class Operator {
         $("footer").append(divTeam);
     }
 
-    _createTeamDivPresentation(teamIdx: number) {
+    _createTeamDivPresentation(teamIdx: number): void {
         const divTeam = $("<div>")
             .addClass("team")
             .attr("data-team-index", teamIdx)
@@ -238,11 +251,11 @@ export class Operator {
         this.presentationInstance.footerTeams.append(divTeam);
     }
 
-    playTimeoutSound() {
+    playTimeoutSound(): void {
         this.audioManager.play("questionTimeout");
     }
 
-    handleBuzzerPress(keyboardEvent: KeyboardEvent) {
+    handleBuzzerPress(keyboardEvent: KeyboardEvent): void {
         const teamIndex = Number(keyboardEvent.key) - 1;
         const teamObj = this.teamArray[teamIndex];
         //        this.audioTeamBuzz.play();
@@ -256,7 +269,7 @@ export class Operator {
         this.divInstructions.html("Did they answer correctly? y / n");
     }
 
-    shouldGameEnd() {
+    shouldGameEnd(): boolean {
         for (var i = 0; i < TEAM_COUNT; i++) {
             if (this.teamArray[i].dollars >= this.settings.teamDollarsWhenGameShouldEnd) {
                 return true;
@@ -265,7 +278,7 @@ export class Operator {
         return false;
     }
 
-    handleLockout(keyboardEvent: KeyboardEvent) {
+    handleLockout(keyboardEvent: KeyboardEvent): void {
         const teamIndex = Number(keyboardEvent.key) - 1;
         const teamObj = this.teamArray[teamIndex];
         teamObj.canBeLockedOut() && teamObj.startLockout();
@@ -277,7 +290,7 @@ export class Operator {
             this.saveGame();
         }
 
-        function isClueValid(clueObj) {
+        function isClueValid(clueObj: Clue) {
             return clueObj.value !== null &&
                 clueObj.question.length > 0 &&
                 clueObj.answer.length > 0 &&
@@ -285,7 +298,7 @@ export class Operator {
                 clueObj.category.title.length > 0;
         }
 
-        function doesQuestionHaveMultimedia(clueObj) {
+        function doesQuestionHaveMultimedia(clueObj: Clue) {
             const questionStr = clueObj.question.toLowerCase();
             const terms = ["seen here", "heard here"];
             for (var i = 0; i < terms.length; i++) {
@@ -296,7 +309,7 @@ export class Operator {
             return false;
         }
 
-        function showClue(clueObj) {
+        const showClue = (clueObj: Clue) => {
             this.divClueWrapper.show();
             this.divClueCategory.html(clueObj.category.title);
             this.divClueDollars.html("$" + clueObj.value);
@@ -306,7 +319,7 @@ export class Operator {
             this.divInstructions.html("Read aloud the category and dollar value.");
         }
 
-        function fetchClueHelper(promiseResolveFunc, tryNum, maxTries) {
+        const fetchClueHelper = (promiseResolveFunc, tryNum: number, maxTries: number) => {
             $.getJSON("http://jservice.io/api/random", response => {
                 const clueObj = response[0];
                 this.currentClueObj = clueObj;
@@ -316,7 +329,7 @@ export class Operator {
                     promiseResolveFunc(clueObj);
                 } else {
                     if (tryNum < maxTries) {
-                        fetchClueHelper.call(this, tryNum + 1, maxTries);
+                        fetchClueHelper.call(this, promiseResolveFunc, tryNum + 1, maxTries);
                     } else {
                         // Would make sense to call the promise reject function,
                         // but then a function somewhere down the line has to generate
@@ -341,7 +354,7 @@ export class Operator {
 
     }
 
-    showClueQuestion() {
+    showClueQuestion(): void {
         this.presentationInstance.fitQuestionToScreen();
 
         this.setAllTeamsState(Team.stateEnum.READING_QUESTION);
@@ -352,9 +365,9 @@ export class Operator {
         this.trQuestion.show();
         this.trAnswer.hide();
 
-        this.buttonSkipClue.attr("disabled", false);
+        this.buttonSkipClue.attr("disabled", "false");
 
-        function getClueQuestionHtml(clueObj) {
+        function getClueQuestionHtml(clueObj: Clue): string {
             const clueStr = clueObj.question.replace(/\\/g, "");
 
             const regex = /\b(?:(?:this)|(?:these)|(?:her)|(?:his)|(?:she)|(?:he))\b/i;
@@ -373,37 +386,37 @@ export class Operator {
 
     }
 
-    handleDoneReadingClueQuestion() {
+    handleDoneReadingClueQuestion(): void {
         this.trAnswer.show();
         this.divClueAnswer.html(this.currentClueObj.answer);
         this.divInstructions.html("Wait for people to answer");
         this.setAllTeamsState(Team.stateEnum.CAN_ANSWER);
-        this.buttonSkipClue.attr("disabled", true);
+        this.buttonSkipClue.attr("disabled", "true");
     }
 
-    handleShowAnswer() {
+    handleShowAnswer(): void {
         this.setAllTeamsState(Team.stateEnum.BUZZERS_OFF);
         this.divInstructions.html("Let people read the answer");
     }
 
-    setAllTeamsState(targetState, endLockout: boolean) {
+    setAllTeamsState(targetState, endLockout: boolean = false): void {
         this.teamArray.forEach(teamObj => teamObj.setState(targetState, endLockout));
     }
 
-    canTeamBuzz(keyboardEvent: KeyboardEvent) {
+    canTeamBuzz(keyboardEvent: KeyboardEvent): boolean {
         const teamIndex = Number(keyboardEvent.key) - 1;
         return this.teamArray[teamIndex].canBuzz();
     }
 
-    haveAllTeamsAnswered() {
+    haveAllTeamsAnswered(): boolean {
         return this.teamArray.every(teamObj => teamObj.hasAnswered);
     }
 
-    togglePaused() {
+    togglePaused(): void {
         this.setPaused(!this.isPaused);
     }
 
-    setPaused(isPaused: boolean) {
+    setPaused(isPaused: boolean): void {
         this.isPaused = isPaused;
         this.divPaused.toggle(isPaused);
         this.stateMachine.setPaused(isPaused);
@@ -411,7 +424,7 @@ export class Operator {
         this.presentationInstance.setPaused(isPaused);
     }
 
-    lookForSavedGame() {
+    lookForSavedGame(): void {
         const divSavedGame = $("div#saved-game-prompt");
 
         const raw = window.localStorage.getItem("jeopardy-teams");
@@ -424,7 +437,7 @@ export class Operator {
 
         const parsed = JSON.parse(raw);
 
-        parsed.forEach(function (savedTeam) {
+        parsed.forEach(function (savedTeam: TeamDumpToJson) {
             const tr = $("<tr>").appendTo(tableDetails);
             $("<td>").html(savedTeam.name).addClass("team-name").appendTo(tr);
             $("<td>").html("$" + savedTeam.dollars).appendTo(tr);
@@ -445,7 +458,7 @@ export class Operator {
 
     }
 
-    saveGame() {
+    saveGame(): void {
         window.localStorage.setItem("jeopardy-teams",
             JSON.stringify(
                 this.teamArray.map(teamObj => teamObj.jsonDump())
@@ -454,8 +467,13 @@ export class Operator {
         //TODO save the settings
     }
 
-    loadGame() {
-        const parsed = JSON.parse(window.localStorage.getItem("jeopardy-teams"));
+    loadGame(): void {
+        const storageContents = window.localStorage.getItem("jeopardy-teams");
+        if (!storageContents) {
+            console.warn("The saved game JSON is null");
+            return;
+        }
+        const parsed = JSON.parse(storageContents);
 
         for (var i = 0; i < parsed.length; i++) {
             this.teamArray[i].jsonLoad(parsed[i]);
@@ -463,13 +481,13 @@ export class Operator {
 
     }
 
-    handleGameEnd() {
+    handleGameEnd(): void {
 
         this.audioManager.play("musicClosing");
 
         var shallowCopy = this.teamArray.slice();
 
-        function comparator(team1, team2) {
+        function comparator(team1: Team, team2:Team) {
             //sort descending
             return team2.dollars - team1.dollars;
         }

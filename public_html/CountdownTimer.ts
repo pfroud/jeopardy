@@ -1,8 +1,32 @@
 "use strict";
 
-class CountdownTimer {
+import { AudioManager } from "./operator/AudioManager";
 
-    constructor(durationMs, audioManager) {
+export class CountdownTimer {
+    audioManager: AudioManager;
+    intervalMs: number;
+    durationMs: number;
+    maxMs: number;
+    remainingMs: number;
+    hideProgressOnFinish: boolean;
+    previousSecondThatPassed: number;
+    tsLastInterval: number | null;
+    intervalID: number | undefined;
+    timeoutID: number | undefined;
+    hasStarted: boolean;
+    hasFinished: boolean;
+    isPaused: boolean;
+    onStart: Function | null;
+    onPause: Function | null;
+    onResume: Function | null;
+    onReset: Function | null;
+    onFinished: Function | null;
+    onTick: Function | null;
+    textElements: JQuery<HTMLDivElement>;
+    progressElements: JQuery<HTMLProgressElement>;
+    dotsElement: JQuery<HTMLTableCellElement>;
+
+    constructor(durationMs: number, audioManager: AudioManager) {
         if (!Number.isInteger(durationMs) || !isFinite(durationMs) || isNaN(durationMs)) {
             throw new TypeError("duration is required, and must be an integer number");
         }
@@ -27,8 +51,8 @@ class CountdownTimer {
         this.tsLastInterval = null;
 
         // value returned by window.setInterval and window.setTimeout, used to cancel them later
-        this.intervalID = null;
-        this.timeoutID = null;
+        this.intervalID = undefined;
+        this.timeoutID = undefined;
 
         this.hasStarted = false;
         this.hasFinished = false;
@@ -45,7 +69,7 @@ class CountdownTimer {
         // display elements
         this.textElements = [];
         this.progressElements = [];
-        this.dotsElement = null;
+        this.dotsElement = [];
     }
 
     togglePaused() {
@@ -89,7 +113,7 @@ class CountdownTimer {
         }
     }
 
-    _guiSetPaused(isPaused) {
+    _guiSetPaused(isPaused: boolean) {
         this.progressElements.forEach(elem => elem.toggleClass("paused", isPaused));
         this.textElements.forEach(elem => elem.toggleClass("paused", isPaused));
         this.dotsElement && this.dotsElement.toggleClass("paused", isPaused);
@@ -132,9 +156,9 @@ class CountdownTimer {
         this._guiSetPaused(false);
 
         this.progressElements.forEach(elem => elem
-                    .attr("max", this.maxMs)
-                    .attr("value", this.durationMs)
-                    .show()
+            .attr("max", this.maxMs)
+            .attr("value", this.durationMs)
+            .show()
         );
 
 
@@ -155,7 +179,7 @@ class CountdownTimer {
         instance.remainingMs -= elapsedSinceLastInterval;
         instance.tsLastInterval = presentTS;
 
-//        console.log(`difference=${elapsedSinceLastInterval}; remaningMS=${instance.remainingMs}`);
+        //        console.log(`difference=${elapsedSinceLastInterval}; remaningMS=${instance.remainingMs}`);
         instance._guiIntervalUpdate();
 
         if (instance.remainingMs <= 0) {
@@ -187,7 +211,7 @@ class CountdownTimer {
             }
 
             this.previousSecondThatPassed = secondsThatJustPassed;
-//            }
+            //            }
         }
     }
 

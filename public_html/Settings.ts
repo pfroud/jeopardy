@@ -1,4 +1,19 @@
 export class Settings {
+    displayDurationCategoryMs: number;
+    displayDurationAnswerMs: number;
+    timeoutWaitForBuzzesMs: number;
+    timeoutAnswerMs: number;
+    durationLockout: number;
+    wrongAnswerPenaltyMultiplier: number;
+    allowMultipleAnswersToSameQuestion: boolean;
+    teamDollarsWhenGameShouldEnd: number;
+    guiInput: {
+        displayDurationCategory: JQuery<HTMLElement>;
+        displayDurationAnswer: JQuery<HTMLElement>;
+        timeoutWaitForBuzzes: JQuery<HTMLElement>;
+        timeoutAnswer: JQuery<HTMLInputElement>;
+        allowMultipleTries: JQuery<HTMLInputElement>;
+    };
 
     constructor() {
         // how long to show stuff on the presentation window

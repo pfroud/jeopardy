@@ -1,5 +1,13 @@
 export class AudioManager {
-    audio: { answerRight: HTMLElement; answerWrong: HTMLElement; questionTimeout: HTMLElement; roundEnd: HTMLElement; teamBuzz: HTMLElement; tick: HTMLElement; musicClosing: HTMLElement; };
+    audio: {
+        answerRight: HTMLElement;
+        answerWrong: HTMLElement;
+        questionTimeout: HTMLElement;
+        roundEnd: HTMLElement;
+        teamBuzz: HTMLElement;
+        tick: HTMLElement;
+        musicClosing: HTMLElement;
+    };
     constructor() {
         this.audio = {
 

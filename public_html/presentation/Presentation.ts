@@ -1,16 +1,16 @@
 export class Presentation {
-    divCategoryInHeader: JQuery<HTMLElement>;
-    divDollarsInHeader: JQuery<HTMLElement>;
+    divCategoryInHeader: JQuery<HTMLDivElement>;
+    divDollarsInHeader: JQuery<HTMLDivElement>;
     header: JQuery<HTMLElement>;
-    divQuestion: JQuery<HTMLElement>;
-    divCategoryBig: JQuery<HTMLElement>;
-    divDollarsBig: JQuery<HTMLElement>;
-    divClueAnswer: JQuery<HTMLElement>;
-    divPaused: JQuery<HTMLElement>;
+    divQuestion: JQuery<HTMLDivElement>;
+    divCategoryBig: JQuery<HTMLDivElement>;
+    divDollarsBig: JQuery<HTMLDivElement>;
+    divClueAnswer: JQuery<HTMLDivElement>;
+    divPaused: JQuery<HTMLDivElement>;
     footerTeams: JQuery<HTMLElement>;
-    progress: JQuery<HTMLElement>;
-    slides: {};
-    visibleSlide: null;
+    progress: JQuery<HTMLProgressElement>;
+    slides: Slides;
+    visibleSlide?: JQuery<HTMLDivElement>;
     slideNames: string[];
 
     constructor() {
@@ -47,9 +47,9 @@ export class Presentation {
         }
     }
 
-    _initSlides() {
+    _initSlides(): void {
         this.slides = {};
-        this.visibleSlide = null;
+        this.visibleSlide = undefined;
 
         const slideNames = this.slideNames = ["jeopardy-logo", "game-rules", "spinner",
             "clue-category-and-dollars", "clue-question", "clue-answer", "event-cost", "buzzer-test", "game-end"];
@@ -60,11 +60,11 @@ export class Presentation {
 
     }
 
-    getProgressElement() {
+    getProgressElement(): JQuery<HTMLProgressElement> {
         return this.progress;
     }
 
-    showSlide(slideName: string) {
+    showSlide(slideName: string): void {
         if (slideName in this.slides) {
             this.visibleSlide && this.visibleSlide.hide();
 
@@ -73,11 +73,11 @@ export class Presentation {
 
             this.visibleSlide = targetSlide;
         } else {
-            throw new RangeError('slide name "' + slideName + 'not in known slides: ' + slides);
+            throw new RangeError('slide name "' + slideName + 'not in known slides: ' + this.slides);
         }
     }
 
-    setClueObj(clueObj) {
+    setClueObj(clueObj: ClueObj): void {
         this.divCategoryInHeader.html(clueObj.category.title);
         this.divDollarsInHeader.html("$" + clueObj.value);
 
@@ -90,45 +90,51 @@ export class Presentation {
             + clueObj.answer + "</div>");
     }
 
-    fitQuestionToScreen() {
+    fitQuestionToScreen(): void {
 
         //remove the style tag which may have been set by previous call to this function
         this.divQuestion.css("font-size", "");
 
+        const heightOfQuestionDiv = this.divQuestion.height();
         const heightOfMain = $("main").height();
 
-        while (this.divQuestion.height() > heightOfMain) {
+        if (!heightOfMain || !heightOfQuestionDiv) {
+            console.error("Couldn't get height of <main>");
+            return;
+        }
+
+        while (heightOfQuestionDiv > heightOfMain) {
             const newFontSize = getFontSize(this.divQuestion) - 10;
             this.divQuestion.css("font-size", newFontSize + "px");
         }
 
-        function getFontSize(elem) {
+        function getFontSize(elem: JQuery<HTMLElement>) {
             return Number(elem.css("font-size").replace("px", ""));
         }
     }
 
-    setTeamsVisible(isVisible: boolean) {
+    setTeamsVisible(isVisible: boolean): void {
         this.footerTeams.toggle(isVisible);
     }
 
-    setPaused(isPaused: boolean) {
+    setPaused(isPaused: boolean): void {
         this.divPaused.toggle(isPaused);
     }
 
-    getTeamDiv(teamIdx: number) {
+    getTeamDiv(teamIdx: number): JQuery<HTMLDivElement> {
         // Only used to initialize the Teams. After that, get the reference from Team object.
         return $('div[data-team-index="' + teamIdx + '"]');
     }
 
-    setGameEndMessage(message: string) {
+    setGameEndMessage(message: string): void {
         $("div#slide-game-end div#team-ranking").html(message);
     }
 
-    headerShow() {
+    headerShow(): void {
         this.header.show();
     }
 
-    headerHide() {
+    headerHide(): void {
         this.header.hide();
     }
 

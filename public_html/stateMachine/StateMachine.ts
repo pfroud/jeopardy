@@ -3,6 +3,9 @@ import { Operator } from "../operator/Operator";
 import { Settings } from "../Settings";
 import { AudioManager } from "../operator/AudioManager";
 import { Presentation } from "../presentation/Presentation";
+import { CountdownTimer } from "../CountdownTimer";
+import { getStates } from "./states";
+import { State } from "./stateInterfaces";
 
 export class StateMachine {
     DEBUG: boolean;
@@ -13,11 +16,11 @@ export class StateMachine {
     countdownProgress: JQuery<HTMLProgressElement>;
     countdownText: JQuery<HTMLDivElement>;
     divStateName: JQuery<HTMLDivElement>;
-    stateMap: {};
-    manualTriggerMap: {};
+    stateMap: object;
+    manualTriggerMap: object;
     remainingQuestionTime: number;
-    countdownTimer: null;
-    currentState: null;
+    countdownTimer: CountdownTimer;
+    currentState: string;
     states: State[];
 
     constructor(settings: Settings, operator: Operator, presentation: Presentation, audioManager: AudioManager) {
@@ -42,7 +45,7 @@ export class StateMachine {
 
         this.countdownTimer = null;
 
-        this.currentState = null;
+        this.currentState = undefined;
 
         this.states = getStates(this);
         this._validateStates();
@@ -114,7 +117,7 @@ export class StateMachine {
         }
 
         if (setMax) {
-            const newMax = this.settings.timeoutWaitForBuzzes;
+            const newMax = this.settings.timeoutWaitForBuzzesMs;
             countdownTimer.maxMs = newMax;
             countdownTimer.progressElements.forEach(elem => elem.attr("max", newMax));
         }
@@ -139,7 +142,7 @@ export class StateMachine {
 
     }
 
-    _goToState(stateName: string, paramsToPassToFunctionToCall: object) {
+    _goToState(stateName: string, paramsToPassToFunctionToCall: object = {}) {
 
         if (!(stateName in this.stateMap)) {
             throw new RangeError(`can't go to state named "${stateName}", state not found`);

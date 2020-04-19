@@ -1,6 +1,7 @@
 import { StateMachine } from "./StateMachine";
+import {State} from "./stateInterfaces";
 
-function getStates(stateMachineInstance: StateMachine) {
+export function getStates(stateMachineInstance: StateMachine): State[] {
 
     // todo make names of states less confusing
     //todo consider adding a way to call function on a transition, instead of having init and continuing states
