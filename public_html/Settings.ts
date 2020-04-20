@@ -8,9 +8,9 @@ export class Settings {
     allowMultipleAnswersToSameQuestion: boolean;
     teamDollarsWhenGameShouldEnd: number;
     guiInput: {
-        displayDurationCategory: JQuery<HTMLElement>;
-        displayDurationAnswer: JQuery<HTMLElement>;
-        timeoutWaitForBuzzes: JQuery<HTMLElement>;
+        displayDurationCategory: JQuery<HTMLInputElement>;
+        displayDurationAnswer: JQuery<HTMLInputElement>;
+        timeoutWaitForBuzzes: JQuery<HTMLInputElement>;
         timeoutAnswer: JQuery<HTMLInputElement>;
         allowMultipleTries: JQuery<HTMLInputElement>;
     };
@@ -52,7 +52,7 @@ export class Settings {
 
     }
 
-    populateGui() {
+    public populateGui(): void {
         this.guiInput.displayDurationCategory.val(this.displayDurationCategoryMs);
         this.guiInput.displayDurationAnswer.val(this.displayDurationAnswerMs);
         this.guiInput.timeoutWaitForBuzzes.val(this.timeoutWaitForBuzzesMs);
@@ -60,7 +60,7 @@ export class Settings {
         this.guiInput.allowMultipleTries.prop("checked", this.allowMultipleAnswersToSameQuestion);
     }
 
-    parseGui() {
+    public parseGui(): void {
         this.displayDurationCategoryMs = Number(this.guiInput.displayDurationCategory.val());
         this.displayDurationAnswerMs = Number(this.guiInput.displayDurationAnswer.val());
         this.timeoutWaitForBuzzesMs = Number(this.guiInput.timeoutWaitForBuzzes.val());

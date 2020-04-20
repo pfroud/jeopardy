@@ -1,4 +1,4 @@
-import { Team, PossibleStates, TeamDumpToJson } from "../Team";
+import { Team, TeamState, TeamDumpToJson } from "../Team";
 import { StateMachine } from "../stateMachine/StateMachine";
 import { AudioManager } from "./AudioManager";
 import { Settings } from "../Settings";
@@ -64,7 +64,7 @@ export class Operator {
         this.lookForSavedGame();
     }
 
-    handlePresentationReady(presentationInstance: Presentation): void {
+    public handlePresentationReady(presentationInstance: Presentation): void {
         // called from Presentation instance in other window
         this.presentationInstance = presentationInstance;
         this.initTeams();
@@ -82,8 +82,11 @@ export class Operator {
 
     }
 
-    initTeamKeyboardShow(): void {
-        const numbers = ["1", "2", "3", "4"];
+    private initTeamKeyboardShow(): void {
+        const numbers: string[] =
+            new Array(9).fill(1).map(
+                (elem, index) => String(index + 1)
+            );
 
         window.addEventListener("keydown", keyboardEvent => {
             const key = keyboardEvent.key;
@@ -104,7 +107,7 @@ export class Operator {
 
     }
 
-    initKeyboardListener(): void {
+    private initKeyboardListener(): void {
         window.addEventListener("keydown", keyboardEvent => {
             if (keyboardEvent.key === "p") {
                 this.togglePaused();
@@ -112,7 +115,7 @@ export class Operator {
         });
     }
 
-    handleAnswerRight(): void {
+    public handleAnswerRight(): void {
         if (!this.answeringTeam) {
             console.error("cannot handleAnswerRight because answeringTeam is undefined");
             return;
@@ -120,7 +123,7 @@ export class Operator {
         this.answeringTeam.handleAnswerRight(this.currentClueObj);
     }
 
-    handleAnswerWrong(): void {
+    public handleAnswerWrong(): void {
         if (!this.answeringTeam) {
             console.error("cannot handleAnswerWrong because answeringTeam is undefined");
             return;
@@ -128,7 +131,7 @@ export class Operator {
         this.answeringTeam.handleAnswerWrong(this.currentClueObj);
     }
 
-    initMouseListeners(): void {
+    private initMouseListeners(): void {
         $("button#go-to-game-rules").click(() => this.presentationInstance.showSlide("game-rules"));
         $("button#go-to-jeopardy-logo").click(() => this.presentationInstance.showSlide("jeopardy-logo"));
         $("button#go-to-event-cost").click(() => this.presentationInstance.showSlide("event-cost"));
@@ -141,9 +144,6 @@ export class Operator {
         });
 
 
-        $("button#buzzer-test-start").click(() => this.buzzerTestStart());
-        $("button#buzzer-test-stop").click(() => this.buzzerTestStop());
-
         this.buttonSkipClue.click(() => this.skipClue());
 
         $("a#aMoneyOverride").click(() =>
@@ -151,27 +151,22 @@ export class Operator {
                 "menubar=0,toolbar=0,location=0,personalbar=0status=0"));
 
     }
-    buzzerTestStart(): void {
-        throw new Error("Method not implemented.");
-    }
-    buzzerTestStop(): void {
-        throw new Error("Method not implemented.");
-    }
 
-    skipClue(): void {
-        this.setAllTeamsState(Team.stateEnum.BUZZERS_OFF, true);
+
+    public skipClue(): void {
+        this.setAllTeamsState(TeamState.BUZZERS_OFF, true);
         this.stateMachine._goToState("fetchClue");
         this.buttonSkipClue.attr("disabled", "true");
         this.buttonSkipClue.blur();
     }
 
-    initTeams(): void {
+    private initTeams(): void {
         if (!this.presentationInstance) {
             console.log("can't init teams because no Presentation instance");
             return;
         }
 
-        for (var i = 0; i < TEAM_COUNT; i++) {
+        for (let i = 0; i < TEAM_COUNT; i++) {
 
             const teamDivOperator = this._createTeamDivOperator(i);
 
@@ -189,7 +184,7 @@ export class Operator {
         this.presentationInstance.setTeamsVisible(true);
     }
 
-    _createTeamDivOperator(teamIdx: number): void {
+    private _createTeamDivOperator(teamIdx: number): void {
 
         // create a new div element
         const divTeam = $("<div>")
@@ -208,7 +203,7 @@ export class Operator {
         $("footer").append(divTeam);
     }
 
-    _createTeamDivPresentation(teamIdx: number): void {
+    private _createTeamDivPresentation(teamIdx: number): void {
         const divTeam = $("<div>")
             .addClass("team")
             .attr("data-team-index", teamIdx)
@@ -234,11 +229,11 @@ export class Operator {
         const tableCountdownDots = $("<table>")
             .addClass("countdown-dots");
 
-        for (var i = 5; i > 1; i--) {
+        for (let i = 5; i > 1; i--) {
             tableCountdownDots.append($("<td>").attr("data-countdown", i));
         }
         tableCountdownDots.append($("<td>").attr("data-countdown", 1));
-        for (var i = 2; i <= 5; i++) {
+        for (let i = 2; i <= 5; i++) {
             tableCountdownDots.append($("<td>").attr("data-countdown", i));
         }
 
@@ -251,11 +246,11 @@ export class Operator {
         this.presentationInstance.footerTeams.append(divTeam);
     }
 
-    playTimeoutSound(): void {
+    public playTimeoutSound(): void {
         this.audioManager.play("questionTimeout");
     }
 
-    handleBuzzerPress(keyboardEvent: KeyboardEvent): void {
+    public handleBuzzerPress(keyboardEvent: KeyboardEvent): void {
         const teamIndex = Number(keyboardEvent.key) - 1;
         const teamObj = this.teamArray[teamIndex];
         //        this.audioTeamBuzz.play();
@@ -269,8 +264,8 @@ export class Operator {
         this.divInstructions.html("Did they answer correctly? y / n");
     }
 
-    shouldGameEnd(): boolean {
-        for (var i = 0; i < TEAM_COUNT; i++) {
+    public shouldGameEnd(): boolean {
+        for (let i = 0; i < TEAM_COUNT; i++) {
             if (this.teamArray[i].dollars >= this.settings.teamDollarsWhenGameShouldEnd) {
                 return true;
             }
@@ -278,13 +273,13 @@ export class Operator {
         return false;
     }
 
-    handleLockout(keyboardEvent: KeyboardEvent): void {
+    public handleLockout(keyboardEvent: KeyboardEvent): void {
         const teamIndex = Number(keyboardEvent.key) - 1;
         const teamObj = this.teamArray[teamIndex];
         teamObj.canBeLockedOut() && teamObj.startLockout();
     }
 
-    getClue() {
+    public getClue() {
         if (this.teamArray.some(teamObj => teamObj.dollars > 0)) {
             // only same the game if somebody has more than $0
             this.saveGame();
@@ -301,7 +296,7 @@ export class Operator {
         function doesQuestionHaveMultimedia(clueObj: Clue) {
             const questionStr = clueObj.question.toLowerCase();
             const terms = ["seen here", "heard here"];
-            for (var i = 0; i < terms.length; i++) {
+            for (let i = 0; i < terms.length; i++) {
                 if (questionStr.includes(terms[i])) {
                     return true;
                 }
@@ -354,10 +349,10 @@ export class Operator {
 
     }
 
-    showClueQuestion(): void {
+    public showClueQuestion(): void {
         this.presentationInstance.fitQuestionToScreen();
 
-        this.setAllTeamsState(Team.stateEnum.READING_QUESTION);
+        this.setAllTeamsState(TeamState.READING_QUESTION);
 
         this.divInstructions.html("Read aloud the question. Buzzers open when you press space");
 
@@ -386,37 +381,37 @@ export class Operator {
 
     }
 
-    handleDoneReadingClueQuestion(): void {
+    public handleDoneReadingClueQuestion(): void {
         this.trAnswer.show();
         this.divClueAnswer.html(this.currentClueObj.answer);
         this.divInstructions.html("Wait for people to answer");
-        this.setAllTeamsState(Team.stateEnum.CAN_ANSWER);
+        this.setAllTeamsState(TeamState.CAN_ANSWER);
         this.buttonSkipClue.attr("disabled", "true");
     }
 
-    handleShowAnswer(): void {
-        this.setAllTeamsState(Team.stateEnum.BUZZERS_OFF);
+    public handleShowAnswer(): void {
+        this.setAllTeamsState(TeamState.BUZZERS_OFF);
         this.divInstructions.html("Let people read the answer");
     }
 
-    setAllTeamsState(targetState, endLockout: boolean = false): void {
+    public setAllTeamsState(targetState: TeamState, endLockout: boolean = false): void {
         this.teamArray.forEach(teamObj => teamObj.setState(targetState, endLockout));
     }
 
-    canTeamBuzz(keyboardEvent: KeyboardEvent): boolean {
+    public canTeamBuzz(keyboardEvent: KeyboardEvent): boolean {
         const teamIndex = Number(keyboardEvent.key) - 1;
         return this.teamArray[teamIndex].canBuzz();
     }
 
-    haveAllTeamsAnswered(): boolean {
+    public haveAllTeamsAnswered(): boolean {
         return this.teamArray.every(teamObj => teamObj.hasAnswered);
     }
 
-    togglePaused(): void {
+    public togglePaused(): void {
         this.setPaused(!this.isPaused);
     }
 
-    setPaused(isPaused: boolean): void {
+    public setPaused(isPaused: boolean): void {
         this.isPaused = isPaused;
         this.divPaused.toggle(isPaused);
         this.stateMachine.setPaused(isPaused);
@@ -424,7 +419,7 @@ export class Operator {
         this.presentationInstance.setPaused(isPaused);
     }
 
-    lookForSavedGame(): void {
+    private lookForSavedGame(): void {
         const divSavedGame = $("div#saved-game-prompt");
 
         const raw = window.localStorage.getItem("jeopardy-teams");
@@ -458,7 +453,7 @@ export class Operator {
 
     }
 
-    saveGame(): void {
+    private saveGame(): void {
         window.localStorage.setItem("jeopardy-teams",
             JSON.stringify(
                 this.teamArray.map(teamObj => teamObj.jsonDump())
@@ -467,7 +462,7 @@ export class Operator {
         //TODO save the settings
     }
 
-    loadGame(): void {
+    private loadGame(): void {
         const storageContents = window.localStorage.getItem("jeopardy-teams");
         if (!storageContents) {
             console.warn("The saved game JSON is null");
@@ -475,26 +470,26 @@ export class Operator {
         }
         const parsed = JSON.parse(storageContents);
 
-        for (var i = 0; i < parsed.length; i++) {
+        for (let i = 0; i < parsed.length; i++) {
             this.teamArray[i].jsonLoad(parsed[i]);
         }
 
     }
 
-    handleGameEnd(): void {
+    public handleGameEnd(): void {
 
         this.audioManager.play("musicClosing");
 
-        var shallowCopy = this.teamArray.slice();
+        let shallowCopy = this.teamArray.slice();
 
-        function comparator(team1: Team, team2:Team) {
+        function comparator(team1: Team, team2: Team) {
             //sort descending
             return team2.dollars - team1.dollars;
         }
 
         shallowCopy.sort(comparator);
 
-        var html = "<table><tbody>";
+        let html = "<table><tbody>";
         shallowCopy.forEach(teamObj => {
             html += ("<tr><td>" + teamObj.teamName + "</td><td>$" +
                 teamObj.dollars.toLocaleString() + "</td></tr>");

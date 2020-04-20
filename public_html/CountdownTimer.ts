@@ -3,30 +3,30 @@
 import { AudioManager } from "./operator/AudioManager";
 
 export class CountdownTimer {
-    audioManager: AudioManager;
-    intervalMs: number;
-    durationMs: number;
-    maxMs: number;
-    remainingMs: number;
+    private readonly audioManager: AudioManager;
+    private readonly updateIntervalMs: number;
+    private readonly durationMs: number;
+    private readonly maxMs: number;
+    private remainingMs: number;
     hideProgressOnFinish: boolean;
     previousSecondThatPassed: number;
     tsLastInterval: number | null;
-    intervalID: number | undefined;
-    timeoutID: number | undefined;
-    hasStarted: boolean;
-    hasFinished: boolean;
-    isPaused: boolean;
-    onStart: Function | null;
-    onPause: Function | null;
-    onResume: Function | null;
-    onReset: Function | null;
-    onFinished: Function | null;
-    onTick: Function | null;
-    textElements: JQuery<HTMLDivElement>;
-    progressElements: JQuery<HTMLProgressElement>;
+    private intervalID: number | undefined;
+    private timeoutID: number | undefined;
+    private hasStarted: boolean;
+    private hasFinished: boolean;
+    private isPaused: boolean;
+    private onStart: () => void;
+    private onPause: () => void;
+    private onResume: () => void;
+    private onReset: () => void;
+    private onFinished: () => void;
+    private onTick: () => void;
+    textElements: Array<JQuery<HTMLDivElement>>;
+    progressElements: Array<JQuery<HTMLProgressElement>>;
     dotsElement: JQuery<HTMLTableCellElement>;
 
-    constructor(durationMs: number, audioManager: AudioManager) {
+    constructor(durationMs: number, audioManager?: AudioManager) {
         if (!Number.isInteger(durationMs) || !isFinite(durationMs) || isNaN(durationMs)) {
             throw new TypeError("duration is required, and must be an integer number");
         }
@@ -37,8 +37,7 @@ export class CountdownTimer {
 
         this.audioManager = audioManager;
 
-        // TODO rename this displayUpdateInterval or something
-        this.intervalMs = 100;
+        this.updateIntervalMs = 100;
 
         this.durationMs = durationMs;
         this.maxMs = durationMs;
@@ -69,14 +68,14 @@ export class CountdownTimer {
         // display elements
         this.textElements = [];
         this.progressElements = [];
-        this.dotsElement = [];
+        this.dotsElement = undefined;
     }
 
-    togglePaused() {
+    public togglePaused(): void {
         this.isPaused ? this.resume() : this.pause();
     }
 
-    pause() {
+    public pause(): void {
         if (this.hasStarted && !this.hasFinished && !this.isPaused) {
             clearInterval(this.intervalID);
             clearTimeout(this.timeoutID);
@@ -93,17 +92,17 @@ export class CountdownTimer {
         }
     }
 
-    resume() {
+    public resume(): void {
         if (this.hasStarted && !this.hasFinished && this.isPaused) {
 
             this.tsLastInterval = CountdownTimer.getNowTimestamp();
 
-            if (this.remainingMs < this.intervalMs) {
+            if (this.remainingMs < this.updateIntervalMs) {
                 // the interval would only run once more. can use timeout instead.
                 clearInterval(this.intervalID);
                 this.timeoutID = setTimeout(this._handleInterval, this.remainingMs, this);
             } else {
-                this.intervalID = setInterval(this._handleInterval, this.intervalMs, this);
+                this.intervalID = setInterval(this._handleInterval, this.updateIntervalMs, this);
             }
 
             this.isPaused = false;
@@ -113,13 +112,13 @@ export class CountdownTimer {
         }
     }
 
-    _guiSetPaused(isPaused: boolean) {
+    private _guiSetPaused(isPaused: boolean): void {
         this.progressElements.forEach(elem => elem.toggleClass("paused", isPaused));
         this.textElements.forEach(elem => elem.toggleClass("paused", isPaused));
         this.dotsElement && this.dotsElement.toggleClass("paused", isPaused);
     }
 
-    reset() {
+    public reset(): void {
         this.hasStarted = false;
         this.hasFinished = false;
         this.isPaused = false;
@@ -131,7 +130,7 @@ export class CountdownTimer {
         this.onReset && this.onReset();
     }
 
-    _guiReset() {
+    private _guiReset(): void {
         this._guiSetPaused(false);
 
         this.dotsElement && this.dotsElement.find("td").removeClass("active");
@@ -141,18 +140,18 @@ export class CountdownTimer {
 
     }
 
-    start() {
+    public start(): void {
         if (!this.hasStarted && !this.hasFinished) {
             this._guiStart();
             this.hasStarted = true;
             this.tsLastInterval = CountdownTimer.getNowTimestamp();
 
-            this.intervalID = setInterval(this._handleInterval, this.intervalMs, this);
+            this.intervalID = setInterval(this._handleInterval, this.updateIntervalMs, this);
             this.onStart && this.onStart();
         }
     }
 
-    _guiStart() {
+    private _guiStart(): void {
         this._guiSetPaused(false);
 
         this.progressElements.forEach(elem => elem
@@ -173,7 +172,7 @@ export class CountdownTimer {
         this.textElements.forEach(elem => elem.html((this.durationMs / 1000).toFixed(1)));
     }
 
-    _handleInterval(instance) {
+    private _handleInterval(instance: CountdownTimer): void {
         const presentTS = CountdownTimer.getNowTimestamp();
         const elapsedSinceLastInterval = presentTS - instance.tsLastInterval;
         instance.remainingMs -= elapsedSinceLastInterval;
@@ -184,7 +183,7 @@ export class CountdownTimer {
 
         if (instance.remainingMs <= 0) {
             instance._finish();
-        } else if (instance.remainingMs < instance.intervalMs) {
+        } else if (instance.remainingMs < instance.updateIntervalMs) {
             // interval would only run one more time. can use timeout instead.
             clearInterval(instance.intervalID);
             this.timeoutID = setTimeout(instance._handleInterval, instance.remainingMs, instance);
@@ -194,14 +193,14 @@ export class CountdownTimer {
 
     }
 
-    _guiIntervalUpdate() {
+    private _guiIntervalUpdate(): void {
         this.textElements.forEach(elem => elem.html((this.remainingMs / 1000).toFixed(1)));
 
         this.progressElements.forEach(elem => elem.attr("value", this.remainingMs));
 
 
         if (this.dotsElement) {
-            const secondsThatJustPassed = Math.ceil(this.remainingMs / 1000) + 1; //todo pretty sure theh plus one is wrong
+            const secondsThatJustPassed = Math.ceil(this.remainingMs / 1000) + 1; //todo pretty sure the plus one is wrong
 
             if (this.previousSecondThatPassed !== secondsThatJustPassed) {
                 this.dotsElement.find('[data-countdown="' + secondsThatJustPassed + '"]').removeClass("active");
@@ -211,11 +210,10 @@ export class CountdownTimer {
             }
 
             this.previousSecondThatPassed = secondsThatJustPassed;
-            //            }
         }
     }
 
-    _finish() {
+    private _finish(): void {
         this.hasFinished = true;
         this.textElements.forEach(elem => elem.html("done"));
         clearInterval(this.intervalID);
@@ -227,7 +225,7 @@ export class CountdownTimer {
         this.onFinished && this.onFinished();
     }
 
-    static getNowTimestamp() {
+    static getNowTimestamp(): number {
         return (new Date).getTime();
     }
 

@@ -1,27 +1,34 @@
-
 import { Operator } from "../operator/Operator";
 import { Settings } from "../Settings";
 import { AudioManager } from "../operator/AudioManager";
 import { Presentation } from "../presentation/Presentation";
 import { CountdownTimer } from "../CountdownTimer";
 import { getStates } from "./states";
-import { State } from "./stateInterfaces";
+import { StateMachineState, StateMachineTransition, KeyboardTransition } from "./stateInterfaces";
+
+interface StateMap {
+    [stateName: string]: StateMachineState;
+}
+
+interface ManualTriggerMap {
+    [transitionname: string]: StateMachineTransition;
+}
 
 export class StateMachine {
-    DEBUG: boolean;
-    operator: Operator;
-    settings: Settings;
-    audioManager: AudioManager;
-    presentation: Presentation;
-    countdownProgress: JQuery<HTMLProgressElement>;
-    countdownText: JQuery<HTMLDivElement>;
-    divStateName: JQuery<HTMLDivElement>;
-    stateMap: object;
-    manualTriggerMap: object;
-    remainingQuestionTime: number;
-    countdownTimer: CountdownTimer;
-    currentState: string;
-    states: State[];
+    private readonly DEBUG: boolean;
+    private readonly operator: Operator;
+    private readonly settings: Settings;
+    private readonly audioManager: AudioManager;
+    private readonly presentation: Presentation;
+    private readonly countdownProgress: JQuery<HTMLProgressElement>;
+    private readonly countdownText: JQuery<HTMLDivElement>;
+    private readonly divStateName: JQuery<HTMLDivElement>;
+    private readonly stateMap: StateMap;
+    private manualTriggerMap: ManualTriggerMap;
+    private remainingQuestionTimeMs: number;
+    private countdownTimer: CountdownTimer;
+    private currentState: StateMachineState;
+    private allStates: StateMachineState[];
 
     constructor(settings: Settings, operator: Operator, presentation: Presentation, audioManager: AudioManager) {
 
@@ -39,7 +46,7 @@ export class StateMachine {
         this.stateMap = {};
         this.manualTriggerMap = {};
 
-        this.remainingQuestionTime = -1;
+        this.remainingQuestionTimeMs = -1;
 
         window.addEventListener("keydown", keyboardEvent => this._handleKeyboardEvent(keyboardEvent));
 
@@ -47,22 +54,29 @@ export class StateMachine {
 
         this.currentState = undefined;
 
-        this.states = getStates(this);
+        this.allStates = getStates(this);
         this._validateStates();
 
-        this.currentState = this.states[0]; //idle state
+        this.currentState = this.allStates[0]; //idle state
 
     }
 
-    _handleKeyboardEvent(keyboardEvent: KeyboardEvent) {
+    private _handleKeyboardEvent(keyboardEvent: KeyboardEvent): void {
         if (document.activeElement.tagName === "INPUT") {
             return;
         }
 
         if (this.currentState && !this.operator.isPaused) {
-            const transitionArray = this.currentState.transitions;
-            for (var i = 0; i < transitionArray.length; i++) {
-                const transitionObj = transitionArray[i];
+            const transitionArray: StateMachineTransition[] = this.currentState.transitions;
+
+            for (let i = 0; i < transitionArray.length; i++) {
+
+                const transitionObj: StateMachineTransition = transitionArray[i];
+
+                if (transitionObj instanceof KeyboardTransition) {
+
+                }
+
                 if (transitionObj.type === "keyboard" && transitionObj.keys.includes(keyboardEvent.key)) {
 
                     const hasCondition = Boolean(transitionObj.condition);
@@ -81,7 +95,7 @@ export class StateMachine {
         }
     }
 
-    setPaused(isPaused: boolean) {
+    public setPaused(isPaused: boolean): void {
         if (this.countdownTimer) {
             if (isPaused) {
                 this.countdownTimer.pause();
@@ -91,9 +105,9 @@ export class StateMachine {
         }
     }
 
-    _startCountdown(transitionObj, keyboardEvent: KeyboardEvent) {
-        var durationMs;
-        var setMax = false;
+    private _startCountdown(transitionObj: StateMachineTransition, keyboardEvent: KeyboardEvent): void {
+        let durationMs;
+        let setMax = false;
         if (transitionObj.duration instanceof Function) {
             durationMs = transitionObj.duration();
             setMax = true;
@@ -126,13 +140,13 @@ export class StateMachine {
         countdownTimer.start();
     }
 
-    saveRemainingTime() {
+    public saveRemainingTime(): void {
         if (this.countdownTimer) {
-            this.remainingQuestionTime = this.countdownTimer.remainingMs;
+            this.remainingQuestionTimeMs = this.countdownTimer.remainingMs;
         }
     }
 
-    manualTrigger(triggerName: string) {
+    public manualTrigger(triggerName: string): void {
         if (triggerName in this.manualTriggerMap) {
             const transitionObj = this.manualTriggerMap[triggerName];
             this._goToState(transitionObj.dest);
@@ -142,7 +156,7 @@ export class StateMachine {
 
     }
 
-    _goToState(stateName: string, paramsToPassToFunctionToCall: object = {}) {
+    private _goToState(stateName: string, paramsToPassToFunctionToCall: object = {}): void {
 
         if (!(stateName in this.stateMap)) {
             throw new RangeError(`can't go to state named "${stateName}", state not found`);
@@ -168,7 +182,7 @@ export class StateMachine {
         handleTransitionImmedaite.call(this);
         handleTransitionIf.call(this);
 
-        function handleOnExit() {
+        const handleOnExit = () => {
             if (this.currentState.onExit) {
                 const functionToCall = this.currentState.onExit;
                 if (!(functionToCall instanceof Function)) {
@@ -179,9 +193,9 @@ export class StateMachine {
             }
         }
 
-        function handleTransitionIf() {
+        const handleTransitionIf = () => {
             const transitionArray = this.currentState.transitions;
-            for (var i = 0; i < transitionArray.length; i++) {
+            for (let i = 0; i < transitionArray.length; i++) {
                 const transitionObj = transitionArray[i];
                 if (transitionObj.type === "if") {
                     if (transitionObj.condition.call(this.operator, paramsToPassToFunctionToCall)) {
@@ -194,7 +208,7 @@ export class StateMachine {
             }
         }
 
-        function handleShowSlide() {
+        const handleShowSlide = () => {
             if (this.currentState.showSlide) {
                 if (this.presentation.slideNames.includes(this.currentState.showSlide)) {
                     this.presentation.showSlide(this.currentState.showSlide);
@@ -204,7 +218,7 @@ export class StateMachine {
             }
         }
 
-        function handleOnEnter() {
+        const handleOnEnter = () => {
             if (this.currentState.onEnter) {
 
                 const functionToCall = this.currentState.onEnter;
@@ -221,7 +235,7 @@ export class StateMachine {
                 if (rv && rv.constructor.name === "Promise") {
 
                     const transitionArray = this.currentState.transitions;
-                    for (var i = 0; i < transitionArray.length; i++) {
+                    for (let i = 0; i < transitionArray.length; i++) {
                         const transitionObj = transitionArray[i];
                         if (transitionObj.type === "promise") {
                             rv.then(
@@ -244,9 +258,9 @@ export class StateMachine {
         }
 
         //todo rename this startCountdownTimer
-        function handleTransitionTimeout(paramsToPassToFunctionToCall) {
+        const handleTransitionTimeout = (paramsToPassToFunctionToCall) => {
             const transitionArray = this.currentState.transitions;
-            for (var i = 0; i < transitionArray.length; i++) {
+            for (let i = 0; i < transitionArray.length; i++) {
                 const transitionObj = transitionArray[i];
                 if (transitionObj.type === "timeout") {
                     this._startCountdown(transitionObj, paramsToPassToFunctionToCall);
@@ -256,9 +270,9 @@ export class StateMachine {
             }
         }
 
-        function handleTransitionImmedaite() {
+        const handleTransitionImmedaite = () => {
             const transitionArray = this.currentState.transitions;
-            for (var i = 0; i < transitionArray.length; i++) {
+            for (let i = 0; i < transitionArray.length; i++) {
                 const transitionObj = transitionArray[i];
                 if (transitionObj.type === "immediate") {
                     this._goToState(transitionObj.dest);
@@ -268,10 +282,10 @@ export class StateMachine {
         }
     }
 
-    _validateStates() {
+    private _validateStates(): void {
 
         // pass one of two
-        this.states.forEach(function (stateObj, index) {
+        this.allStates.forEach((stateObj: StateMachineState, index: number) => {
             this.stateMap[stateObj.name] = stateObj;
             validatePropString("state", index, stateObj, "name");
             validatePropArray("state", index, stateObj, "transitions");
@@ -284,11 +298,11 @@ export class StateMachine {
         }, this);
 
         // pass two of two
-        this.states.forEach(function (stateObj, stateIndex) {
+        this.allStates.forEach((stateObj: StateMachineState, stateIndex: number) => {
 
-            var keyboardKeysUsed = {};
+            let keyboardKeysUsed = {};
 
-            stateObj.transitions.forEach(function (transitionObj, transitionIndex) {
+            stateObj.transitions.forEach(function (transitionObj: StateMachineTransition, transitionIndex: number) {
 
                 if (transitionObj.type !== "if") {
                     if (!transitionObj.dest) {
@@ -328,7 +342,7 @@ export class StateMachine {
                         }
 
                         // make sure each keyboard key is not used in multiple transitions
-                        for (var i = 0; i < keyboardKeys.length; i++) {
+                        for (let i = 0; i < keyboardKeys.length; i++) {
                             const key = keyboardKeys.charAt(i);
                             if (key in keyboardKeysUsed) {
                                 printWarning(stateObj.name, transitionIndex,
@@ -370,7 +384,7 @@ export class StateMachine {
                         break;
                 }
 
-                function printWarning(stateName, transitionIndex, message) {
+                function printWarning(stateName: string, transitionIndex: number, message: string) {
                     console.warn(`state "${stateName}": transition ${transitionIndex}: ${message}`);
                 }
 
@@ -378,7 +392,7 @@ export class StateMachine {
 
         }, this);
 
-        function validateProp(name, index, obj, prop, expectedType) {
+        function validateProp(name: string, index: number, obj, prop, expectedType) {
             if (!prop in obj) {
                 console.warn(`${name} at index ${index} does not have property "${prop}"`);
             }

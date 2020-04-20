@@ -1,6 +1,11 @@
+
+import { Settings } from "../Settings";
+import { AudioManager } from "./AudioManager";
+import { Operator } from "./Operator";
+
 // must be global because the presentation window can only access global scope
 // TODO see if the above sentence is correct...
-var operator;
+let operator;
 
 $(document).ready(function () {
     if (window.location.search.length > 1) {
@@ -15,16 +20,16 @@ $(document).ready(function () {
     operator = new Operator(audioManager, settings);
 });
 
-function initKeyboardShortcuts() {
+function initKeyboardShortcuts(): void {
     const inputSetup = $("input#tab-setup");
     const inputGame = $("input#tab-game");
     const inputAdmin = $("input#tab-admin");
     const inputSettings = $("input#tab-settings");
 
     document.addEventListener("keydown", function (keyboardEvent) {
-//        if (!keyboardEvent.altKey) {
-//            return;
-//        }
+        //        if (!keyboardEvent.altKey) {
+        //            return;
+        //        }
 
         if (document.activeElement.tagName === "INPUT") {
             return;
@@ -42,7 +47,7 @@ function initKeyboardShortcuts() {
                 break;
             case "e":
                 inputSettings.prop("checked", true);
-//                keyboardEvent.preventDefault(); //chrome opens its menu if holding Alt
+                //                keyboardEvent.preventDefault(); //chrome opens its menu if holding Alt
                 break;
 
         }

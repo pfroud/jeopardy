@@ -4,21 +4,38 @@ import { AudioManager } from "./operator/AudioManager";
 import { getStates } from "./stateMachine/states";
 import { Clue } from "./interfaces";
 import { CountdownTimer } from "./CountdownTimer";
+import { StateMachineState } from "./stateMachine/stateInterfaces";
+
+
+interface TeamDivs {
+    operator: {
+        wrapper: JQuery<HTMLDivElement>;
+        dollars: JQuery<HTMLDivElement>;
+        teamName: JQuery<HTMLDivElement>;
+        state: JQuery<HTMLDivElement>;
+    };
+    presentation: {
+        wrapper: JQuery<HTMLDivElement>;
+        dollars: JQuery<HTMLDivElement>;
+        teamName: JQuery<HTMLDivElement>;
+        buzzerShow: JQuery<HTMLDivElement>;
+    };
+}
 
 const ANIMATE_DOLLARS_CHANGE = true;
 export class Team {
-    settings: any;
-    audioManager: any;
-    teamIdx: any;
+    settings: Settings;
+    audioManager: AudioManager;
+    teamIdx: number;
     dollars: number;
     teamName: string;
-    state: null;
-    div: { operator: { wrapper: null; dollars: null; teamName: null; state: null; }; presentation: { wrapper: null; dollars: null; teamName: null; buzzerShow: null; }; };
-    presentationCountdownDots: null;
-    presentationProgressLockout: null;
-    countdownTimer: null;
-    stateBeforeLockout: any;
-    countdowmTimer: null;
+    state: TeamState;
+    div: TeamDivs;
+    presentationCountdownDots: JQuery<HTMLTableElement>;
+    presentationProgressLockout: JQuery<HTMLProgressElement>;
+    countdownTimer: CountdownTimer;
+    stateBeforeLockout: TeamState;
+    hasAnswered: boolean;
 
     constructor(teamIdx: number, presentationInstance: Presentation, settings: Settings, audioManager: AudioManager) {
         this.settings = settings;
@@ -61,23 +78,23 @@ export class Team {
         this.setDivOperator($('div[data-team-index="' + teamIdx + '"]'));
         this.setDivPresentation(presentationInstance.getTeamDiv(teamIdx));
 
-        this.setState(PossibleStates.BUZZERS_OFF);
+        this.setState(TeamState.BUZZERS_OFF);
     }
 
-    handleAnswerRight(clueObj: Clue): void {
+    public handleAnswerRight(clueObj: Clue): void {
         this.audioManager.play("answerRight");
         this.moneyAdd(clueObj.value);
         this.presentationCountdownDots.find("td").removeClass("active");
     }
 
-    handleAnswerWrong(clueObj: Clue): void {
+    public handleAnswerWrong(clueObj: Clue): void {
         this.audioManager.play("answerWrong");
         this.presentationCountdownDots.find("td").removeClass("active");
         this.moneySubtract(clueObj.value * this.settings.wrongAnswerPenaltyMultiplier);
-        this.setState(this.settings.isAllowedMultipleTries ? PossibleStates.CAN_ANSWER : PossibleStates.ALREADY_ANSWERED);
+        this.setState(this.settings.allowMultipleAnswersToSameQuestion ? TeamState.CAN_ANSWER : TeamState.ALREADY_ANSWERED);
     }
 
-    moneyAdd(amountAdd: number): void {
+    public moneyAdd(amountAdd: number): void {
         if (ANIMATE_DOLLARS_CHANGE) {
             //            this._showFallingMoneyAnimation(amountAdd);
             this._animateDollarsChange(this.dollars + amountAdd);
@@ -87,7 +104,7 @@ export class Team {
         }
     }
 
-    moneySubtract(amountSubtract: number): void {
+    public moneySubtract(amountSubtract: number): void {
         if (ANIMATE_DOLLARS_CHANGE) {
             this._animateDollarsChange(this.dollars - amountSubtract);
         } else {
@@ -96,7 +113,7 @@ export class Team {
         }
     }
 
-    moneySet(newDollars: number): void {
+    public moneySet(newDollars: number): void {
         if (ANIMATE_DOLLARS_CHANGE) {
             this._animateDollarsChange(newDollars);
         } else {
@@ -118,7 +135,7 @@ export class Team {
      }
      */
 
-    _animateDollarsChange(targetDollars: number): void {
+    private _animateDollarsChange(targetDollars: number): void {
 
         if (this.dollars === targetDollars) {
             return;
@@ -140,11 +157,11 @@ export class Team {
         }
     }
 
-    canBuzz(): boolean {
-        return this.state === PossibleStates.CAN_ANSWER;
+    public canBuzz(): boolean {
+        return this.state === TeamState.CAN_ANSWER;
     }
 
-    setPaused(isPaused: boolean): void {
+    public setPaused(isPaused: boolean): void {
         if (this.countdownTimer) {
             if (isPaused) {
                 this.countdownTimer.pause();
@@ -154,41 +171,43 @@ export class Team {
         }
     }
 
-    _updateDollarsDisplay(): void {
+    private _updateDollarsDisplay(): void {
         this.div.presentation.dollars.html("$" + this.dollars.toLocaleString());
         this.div.operator.dollars.html("$" + this.dollars.toLocaleString());
     }
 
-    setDivPresentation(divPresentationWrapper: JQuery<HTMLDivElement>): void {
+    private setDivPresentation(divPresentationWrapper: JQuery<HTMLDivElement>): void {
         this.div.presentation.wrapper = divPresentationWrapper;
-        this.div.presentation.dollars = divPresentationWrapper.find("div.team-dollars").html("$" + this.dollars);
-        this.div.presentation.teamName = divPresentationWrapper.find("div.team-name").html(this.teamName);
-        this.div.presentation.buzzerShow = divPresentationWrapper.find("div.buzzer-show");
-        this.div.presentation.dollarChangeAnimation = divPresentationWrapper.find("div.dollar-change-animation");
+        this.div.presentation.dollars = divPresentationWrapper.find<HTMLDivElement>("div.team-dollars").html("$" + this.dollars);
+        this.div.presentation.teamName = divPresentationWrapper.find<HTMLDivElement>("div.team-name").html(this.teamName);
+        this.div.presentation.buzzerShow = divPresentationWrapper.find<HTMLDivElement>("div.buzzer-show");
+        // this.div.presentation.dollarChangeAnimation = divPresentationWrapper.find<HTMLDivElement>("div.dollar-change-animation");
 
-        this.presentationCountdownDots = divPresentationWrapper.find("table.countdown-dots");
+        this.presentationCountdownDots = divPresentationWrapper.find<HTMLTableElement>("table.countdown-dots");
         this.presentationProgressLockout = divPresentationWrapper.find("progress");
     }
 
-    setDivOperator(divOperatorWrapper: JQuery<HTMLDivElement>): void {
+    private setDivOperator(divOperatorWrapper: JQuery<HTMLDivElement>): void {
         this.div.operator.wrapper = divOperatorWrapper;
-        this.div.operator.teamName = divOperatorWrapper.find("div.team-name").html(this.teamName);
-        this.div.operator.dollars = divOperatorWrapper.find("div.team-dollars").html("$" + this.dollars);
-        this.div.operator.state = divOperatorWrapper.find("div.team-state").html(this.state);
+        this.div.operator.teamName = divOperatorWrapper.find<HTMLDivElement>("div.team-name").html(this.teamName);
+        this.div.operator.dollars = divOperatorWrapper.find<HTMLDivElement>("div.team-dollars").html("$" + this.dollars);
+        this.div.operator.state = divOperatorWrapper.find<HTMLDivElement>("div.team-state").html(this.state);
     }
 
-    setTeamName(teamName: string): void {
+    publicsetTeamName(teamName: string): void {
         this.teamName = teamName;
         this.div.operator.teamName.html(teamName);
         this.div.presentation.teamName.html(teamName);
     }
 
-    setState(targetState: string, endLockout = false): void {
+    public setState(targetState: TeamState, endLockout = false): void {
+        /*
         if (!(Team.stateValues.includes(targetState))) {
             throw new RangeError(`team ${this.teamIdx}: can't go to state "${targetState}", not in the enum of avaliable states`);
         }
+        */
 
-        if (this.state === PossibleStates.LOCKOUT && !endLockout) {
+        if (this.state === TeamState.LOCKOUT && !endLockout) {
             this.stateBeforeLockout = targetState;
         } else {
             this.state = targetState;
@@ -198,18 +217,18 @@ export class Team {
 
             if (this.countdownTimer) {
                 this.countdownTimer.pause();
-                this.countdowmTimer = null;
+                this.countdownTimer = null;
             }
         }
     }
 
-    canBeLockedOut(): boolean {
-        return this.state === PossibleStates.READING_QUESTION;
+    public canBeLockedOut(): boolean {
+        return this.state === TeamState.READING_QUESTION;
     }
 
-    startLockout(): void {
+    public startLockout(): void {
         this.stateBeforeLockout = this.state;
-        this.setState(PossibleStates.LOCKOUT);
+        this.setState(TeamState.LOCKOUT);
 
         const countdownShowCategory = this.countdownTimer = new CountdownTimer(this.settings.durationLockout);
         // todo would be nice to show progress element on display and presentation. need to change CountdownTimer to allow that
@@ -221,33 +240,33 @@ export class Team {
 
     }
 
-    endLockout(): void {
+    public endLockout(): void {
         this.setState(this.stateBeforeLockout, true);
         this.stateBeforeLockout = null;
         this.countdownTimer = null;
     }
 
-    startAnswer(): void {
-        this.setState(PossibleStates.ANSWERING);
+    public startAnswer(): void {
+        this.setState(TeamState.ANSWERING);
         this.presentationCountdownDots.find("td").addClass("active");
     }
 
-    showKeyDown(): void {
+    public showKeyDown(): void {
         this.div.presentation.buzzerShow.addClass("pressed").removeClass("not-pressed");
     }
 
-    showKeyUp(): void {
+    public showKeyUp(): void {
         this.div.presentation.buzzerShow.addClass("not-pressed").removeClass("pressed");
     }
 
-    jsonDump(): TeamDumpToJson {
+    public jsonDump(): TeamDumpToJson {
         return {
             name: this.teamName,
             dollars: this.dollars
         };
     }
 
-    jsonLoad(jsonObj: TeamDumpToJson): void {
+    public jsonLoad(jsonObj: TeamDumpToJson): void {
         this.teamName = jsonObj.name;
         this.dollars = jsonObj.dollars;
 
@@ -265,7 +284,7 @@ export interface TeamDumpToJson {
     dollars: number;
 }
 
-export enum PossibleStates {
+export enum TeamState {
     BUZZERS_OFF = "buzzers-off", // game has not started
     READING_QUESTION = "reading-question", //operator is reading the question out loud
     CAN_ANSWER = "can-answer", //operator is done reading the question
@@ -274,6 +293,6 @@ export enum PossibleStates {
     LOCKOUT = "lockout" //team buzzed while operator was reading the question
 };
 
-// Object.freeze(Team.stateEnum);
-// Team.stateValues = Object.values(Team.stateEnum);
+// Object.freeze(TeamState);
+// Team.stateValues = Object.values(TeamState);
 // Object.freeze(Team.stateValues);

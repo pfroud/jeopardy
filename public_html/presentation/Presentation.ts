@@ -1,3 +1,9 @@
+import { Clue } from "../interfaces";
+
+interface Slides {
+    [slideName: string]: JQuery<HTMLDivElement>;
+}
+
 export class Presentation {
     divCategoryInHeader: JQuery<HTMLDivElement>;
     divDollarsInHeader: JQuery<HTMLDivElement>;
@@ -9,7 +15,7 @@ export class Presentation {
     divPaused: JQuery<HTMLDivElement>;
     footerTeams: JQuery<HTMLElement>;
     progress: JQuery<HTMLProgressElement>;
-    slides: Slides;
+    slideDivs: Slides;
     visibleSlide?: JQuery<HTMLDivElement>;
     slideNames: string[];
 
@@ -47,37 +53,37 @@ export class Presentation {
         }
     }
 
-    _initSlides(): void {
-        this.slides = {};
+    private _initSlides(): void {
+        this.slideDivs = {};
         this.visibleSlide = undefined;
 
         const slideNames = this.slideNames = ["jeopardy-logo", "game-rules", "spinner",
             "clue-category-and-dollars", "clue-question", "clue-answer", "event-cost", "buzzer-test", "game-end"];
 
         slideNames.forEach(slideName => {
-            this.slides[slideName] = $("div#slide-" + slideName);
+            this.slideDivs[slideName] = $("div#slide-" + slideName);
         });
 
     }
 
-    getProgressElement(): JQuery<HTMLProgressElement> {
+    public getProgressElement(): JQuery<HTMLProgressElement> {
         return this.progress;
     }
 
-    showSlide(slideName: string): void {
-        if (slideName in this.slides) {
+    public showSlide(slideName: string): void {
+        if (slideName in this.slideNames) {
             this.visibleSlide && this.visibleSlide.hide();
 
-            const targetSlide = this.slides[slideName];
+            const targetSlide = this.slideDivs[slideName];
             targetSlide.show();
 
             this.visibleSlide = targetSlide;
         } else {
-            throw new RangeError('slide name "' + slideName + 'not in known slides: ' + this.slides);
+            throw new RangeError('slide name "' + slideName + 'not in known slides: ' + this.slideDivs);
         }
     }
 
-    setClueObj(clueObj: ClueObj): void {
+    public setClueObj(clueObj: Clue): void {
         this.divCategoryInHeader.html(clueObj.category.title);
         this.divDollarsInHeader.html("$" + clueObj.value);
 
@@ -90,20 +96,14 @@ export class Presentation {
             + clueObj.answer + "</div>");
     }
 
-    fitQuestionToScreen(): void {
+    public fitQuestionToScreen(): void {
 
         //remove the style tag which may have been set by previous call to this function
         this.divQuestion.css("font-size", "");
 
-        const heightOfQuestionDiv = this.divQuestion.height();
         const heightOfMain = $("main").height();
 
-        if (!heightOfMain || !heightOfQuestionDiv) {
-            console.error("Couldn't get height of <main>");
-            return;
-        }
-
-        while (heightOfQuestionDiv > heightOfMain) {
+        while (this.divQuestion.height() > heightOfMain) {
             const newFontSize = getFontSize(this.divQuestion) - 10;
             this.divQuestion.css("font-size", newFontSize + "px");
         }
@@ -113,28 +113,28 @@ export class Presentation {
         }
     }
 
-    setTeamsVisible(isVisible: boolean): void {
+    public setTeamsVisible(isVisible: boolean): void {
         this.footerTeams.toggle(isVisible);
     }
 
-    setPaused(isPaused: boolean): void {
+    public setPaused(isPaused: boolean): void {
         this.divPaused.toggle(isPaused);
     }
 
-    getTeamDiv(teamIdx: number): JQuery<HTMLDivElement> {
+    public getTeamDiv(teamIdx: number): JQuery<HTMLDivElement> {
         // Only used to initialize the Teams. After that, get the reference from Team object.
         return $('div[data-team-index="' + teamIdx + '"]');
     }
 
-    setGameEndMessage(message: string): void {
+    public setGameEndMessage(message: string): void {
         $("div#slide-game-end div#team-ranking").html(message);
     }
 
-    headerShow(): void {
+    public headerShow(): void {
         this.header.show();
     }
 
-    headerHide(): void {
+    public headerHide(): void {
         this.header.hide();
     }
 

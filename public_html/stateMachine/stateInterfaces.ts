@@ -1,15 +1,13 @@
-export interface State {
+export interface StateMachineState {
     name: string;
     showSlide?: string;
     onEnter?: Function;
     onExit?: Function;
-    transitions: Transition[];
+    transitions: StateMachineTransition[];
 }
 
 //todo maybe change this to an enum?
-export type Transition = ManualTransition | IfTransition |
-    PromiseTransition | ImmediateTransition | TimeoutTransition
-    | KeyboardTransition;
+export type StateMachineTransition = ManualTransition | IfTransition | PromiseTransition | ImmediateTransition | TimeoutTransition | KeyboardTransition;
 
 export interface TransitionInterface {
     type: string;
@@ -44,4 +42,3 @@ export interface KeyboardTransition extends TransitionInterface {
     keys: string;
     dest: string;
 }
-

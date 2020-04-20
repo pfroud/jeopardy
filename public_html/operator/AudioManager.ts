@@ -1,30 +1,27 @@
+interface AudioElements {
+    [name: string]: HTMLAudioElement;
+}
+
 export class AudioManager {
-    audio: {
-        answerRight: HTMLElement;
-        answerWrong: HTMLElement;
-        questionTimeout: HTMLElement;
-        roundEnd: HTMLElement;
-        teamBuzz: HTMLElement;
-        tick: HTMLElement;
-        musicClosing: HTMLElement;
-    };
+    private audio: AudioElements;
+
     constructor() {
         this.audio = {
-
-            answerRight: $("audio#answer-correct")[0],
-            answerWrong: $("audio#answer-incorrect")[0],
-            questionTimeout: $("audio#question-timeout")[0],
-            roundEnd: $("audio#round-end")[0],
-            teamBuzz: $("audio#team-buzz")[0],
-            tick: $("audio#tick")[0],
-            musicClosing: $("audio#music-closing")[0]
+            answerRight: document.querySelector<HTMLAudioElement>("audio#answer-correct"),
+            answerWrong: document.querySelector<HTMLAudioElement>("audio#answer-incorrect"),
+            questionTimeout: document.querySelector<HTMLAudioElement>("audio#question-timeout"),
+            roundEnd: document.querySelector<HTMLAudioElement>("audio#round-end"),
+            teamBuzz: document.querySelector<HTMLAudioElement>("audio#team-buzz"),
+            tick: document.querySelector<HTMLAudioElement>("audio#tick"),
+            musicClosing: document.querySelector<HTMLAudioElement>("audio#music-closing")
         };
     }
 
-    play(audioName: string) {
+    public play(audioName: string): void {
         const audio = this.audio[audioName];
         if (!audio) {
-            console.warn(`can't play audio "${audioName}", not found`);
+            console.warn(`can't play audio with name "document.querySelector<HTMLAudioElement>({audioName}", not found`);
+            return;
         }
         audio.play();
     }

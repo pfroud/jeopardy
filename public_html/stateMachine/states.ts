@@ -1,7 +1,7 @@
 import { StateMachine } from "./StateMachine";
-import {State} from "./stateInterfaces";
+import {StateMachineState} from "./stateInterfaces";
 
-export function getStates(stateMachineInstance: StateMachine): State[] {
+export function getStates(stateMachineInstance: StateMachine): StateMachineState[] {
 
     // todo make names of states less confusing
     //todo consider adding a way to call function on a transition, instead of having init and continuing states
@@ -82,7 +82,7 @@ export function getStates(stateMachineInstance: StateMachine): State[] {
             onExit: stateMachineInstance.saveRemainingTime,
             transitions: [{
                     type: "timeout",
-                    duration: () => stateMachineInstance.remainingQuestionTime, //todo look at code implementing stateMachineInstance
+                    duration: () => stateMachineInstance.remainingQuestionTimeMs, //todo look at code implementing stateMachineInstance
                     dest: "playTimeoutSound"
                 }, {
                     type: "keyboard",
