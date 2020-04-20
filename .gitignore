@@ -2,3 +2,6 @@ nbproject/private
 private/
 public_html/presentation/img/reference
 node_modules/
+*.js
+*.js.map
+buzzers/
