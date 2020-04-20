@@ -1,30 +1,30 @@
 "use strict";
 
-import { AudioManager } from "./operator/AudioManager";
+import { AudioManager } from "./operator/AudioManager.js";
 
 export class CountdownTimer {
     private readonly audioManager: AudioManager;
-    private readonly updateIntervalMs: number;
-    private readonly durationMs: number;
-    private readonly maxMs: number;
-    private remainingMs: number;
+    public updateIntervalMs: number;
+    private readonly durationMs: number;/*  */
+    public maxMs: number;
+    public remainingMs: number;
     hideProgressOnFinish: boolean;
     previousSecondThatPassed: number;
-    tsLastInterval: number | null;
-    private intervalID: number | undefined;
-    private timeoutID: number | undefined;
+    tsLastInterval: number;
+    private intervalID: number;
+    private timeoutID: number;
     private hasStarted: boolean;
     private hasFinished: boolean;
     private isPaused: boolean;
-    private onStart: () => void;
-    private onPause: () => void;
-    private onResume: () => void;
-    private onReset: () => void;
-    private onFinished: () => void;
-    private onTick: () => void;
+    public onStart: () => void;
+    public onPause: () => void;
+    public onResume: () => void;
+    public onReset: () => void;
+    public onFinished: () => void;
+    public onTick: () => void;
     textElements: Array<JQuery<HTMLDivElement>>;
     progressElements: Array<JQuery<HTMLProgressElement>>;
-    dotsElement: JQuery<HTMLTableCellElement>;
+    dotsElement: JQuery<HTMLTableElement>;
 
     constructor(durationMs: number, audioManager?: AudioManager) {
         if (!Number.isInteger(durationMs) || !isFinite(durationMs) || isNaN(durationMs)) {

@@ -1,16 +1,16 @@
-import { Team, TeamState, TeamDumpToJson } from "../Team";
-import { StateMachine } from "../stateMachine/StateMachine";
-import { AudioManager } from "./AudioManager";
-import { Settings } from "../Settings";
-import { Presentation } from "../presentation/Presentation";
-import { Clue } from "../interfaces";
+import { Team, TeamState, TeamDumpToJson } from "../Team.js";
+import { StateMachine } from "../stateMachine/StateMachine.js";
+import { AudioManager } from "./AudioManager.js";
+import { Settings } from "../Settings.js";
+import { Presentation } from "../presentation/Presentation.js";
+import { Clue } from "../interfaces.js";
 
 const TEAM_COUNT = 9;
 
 export class Operator {
     audioManager: AudioManager;
     settings: Settings;
-    presentationInstance: Presentation | null;
+    presentationInstance: Presentation;
     divClueWrapper: JQuery<HTMLDivElement>;
     divClueQuestion: JQuery<HTMLDivElement>;
     divClueDollars: JQuery<HTMLDivElement>;
@@ -26,7 +26,7 @@ export class Operator {
     isPaused: boolean;
     stateMachine: StateMachine;
     buttonStartGame: JQuery<HTMLButtonElement>;
-    answeringTeam: Team | null;
+    answeringTeam: Team;
     buttonSkipClue: JQuery<HTMLButtonElement>;
 
     constructor(audioManager: AudioManager, settings: Settings) {
@@ -78,7 +78,7 @@ export class Operator {
         this.buttonStartGame.prop("disabled", false);
         this.divInstructions.html("Click button to start game");
 
-        focus();
+        window.focus();
 
     }
 
@@ -89,17 +89,17 @@ export class Operator {
             );
 
         window.addEventListener("keydown", keyboardEvent => {
-            const key = keyboardEvent.key;
-            if (numbers.includes(keyboardEvent.key)) {
-                const teamIndex = Number(keyboardEvent.key) - 1;
+            const theKey = keyboardEvent.key;
+            if (numbers.includes(theKey)) {
+                const teamIndex = Number(theKey) - 1;
                 const teamObj = this.teamArray[teamIndex];
                 teamObj.showKeyDown();
             }
         });
         window.addEventListener("keyup", keyboardEvent => {
-            const key = keyboardEvent.key;
-            if (numbers.includes(keyboardEvent.key)) {
-                const teamIndex = Number(keyboardEvent.key) - 1;
+            const theKey = keyboardEvent.key;
+            if (numbers.includes(theKey)) {
+                const teamIndex = Number(theKey) - 1;
                 const teamObj = this.teamArray[teamIndex];
                 teamObj.showKeyUp();
             }
@@ -116,18 +116,10 @@ export class Operator {
     }
 
     public handleAnswerRight(): void {
-        if (!this.answeringTeam) {
-            console.error("cannot handleAnswerRight because answeringTeam is undefined");
-            return;
-        }
         this.answeringTeam.handleAnswerRight(this.currentClueObj);
     }
 
     public handleAnswerWrong(): void {
-        if (!this.answeringTeam) {
-            console.error("cannot handleAnswerWrong because answeringTeam is undefined");
-            return;
-        }
         this.answeringTeam.handleAnswerWrong(this.currentClueObj);
     }
 
@@ -155,7 +147,7 @@ export class Operator {
 
     public skipClue(): void {
         this.setAllTeamsState(TeamState.BUZZERS_OFF, true);
-        this.stateMachine._goToState("fetchClue");
+        this.stateMachine.goToState("fetchClue");
         this.buttonSkipClue.attr("disabled", "true");
         this.buttonSkipClue.blur();
     }
@@ -185,8 +177,6 @@ export class Operator {
     }
 
     private _createTeamDivOperator(teamIdx: number): void {
-
-        // create a new div element
         const divTeam = $("<div>")
             .addClass("team")
             .attr("data-team-index", teamIdx)
@@ -199,7 +189,6 @@ export class Operator {
 
         divTeam.append($("<progress>").addClass("time-left").css("display:none"));
 
-        //select the existing footer, then add the teamDiv
         $("footer").append(divTeam);
     }
 
@@ -209,8 +198,7 @@ export class Operator {
             .attr("data-team-index", teamIdx)
             .attr("data-team-state", "");
 
-        const divBuzzerDisplay = $("<div>")
-            .addClass("buzzer-show").addClass("not-pressed");
+        const divBuzzerDisplay = $("<div>").addClass("buzzer-show").addClass("not-pressed");
 
         const imgSwitchClosed = $("<img>")
             .attr("src", "img/switch-closed.svg")
@@ -226,8 +214,7 @@ export class Operator {
         divBuzzerDisplay.append(imgSwitchOpened);
         divTeam.append(divBuzzerDisplay);
 
-        const tableCountdownDots = $("<table>")
-            .addClass("countdown-dots");
+        const tableCountdownDots = $("<table>").addClass("countdown-dots");
 
         for (let i = 5; i > 1; i--) {
             tableCountdownDots.append($("<td>").attr("data-countdown", i));
@@ -265,12 +252,8 @@ export class Operator {
     }
 
     public shouldGameEnd(): boolean {
-        for (let i = 0; i < TEAM_COUNT; i++) {
-            if (this.teamArray[i].dollars >= this.settings.teamDollarsWhenGameShouldEnd) {
-                return true;
-            }
-        }
-        return false;
+        const maxDollars = this.settings.teamDollarsWhenGameShouldEnd;
+        return this.teamArray.some(teamObj => teamObj.dollars >= maxDollars);
     }
 
     public handleLockout(keyboardEvent: KeyboardEvent): void {
@@ -285,7 +268,7 @@ export class Operator {
             this.saveGame();
         }
 
-        function isClueValid(clueObj: Clue) {
+        function isClueValid(clueObj: Clue): boolean {
             return clueObj.value !== null &&
                 clueObj.question.length > 0 &&
                 clueObj.answer.length > 0 &&
@@ -293,7 +276,7 @@ export class Operator {
                 clueObj.category.title.length > 0;
         }
 
-        function doesQuestionHaveMultimedia(clueObj: Clue) {
+        function doesQuestionHaveMultimedia(clueObj: Clue): boolean {
             const questionStr = clueObj.question.toLowerCase();
             const terms = ["seen here", "heard here"];
             for (let i = 0; i < terms.length; i++) {
@@ -314,7 +297,7 @@ export class Operator {
             this.divInstructions.html("Read aloud the category and dollar value.");
         }
 
-        const fetchClueHelper = (promiseResolveFunc, tryNum: number, maxTries: number) => {
+        const fetchClueHelper = (promiseResolveFunc: (arg0: Clue)=>void, tryNum: number, maxTries: number) => {
             $.getJSON("http://jservice.io/api/random", response => {
                 const clueObj = response[0];
                 this.currentClueObj = clueObj;
@@ -333,6 +316,7 @@ export class Operator {
                             answer: `couldn't fetch clue after ${maxTries} tries`,
                             question: `couldn't fetch clue after ${maxTries} tries`,
                             value: 0,
+                            airdate: null,
                             category: { title: "error" }
                         });
                     }

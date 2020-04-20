@@ -1,10 +1,10 @@
-import { Operator } from "../operator/Operator";
-import { Settings } from "../Settings";
-import { AudioManager } from "../operator/AudioManager";
-import { Presentation } from "../presentation/Presentation";
-import { CountdownTimer } from "../CountdownTimer";
-import { getStates } from "./states";
-import { StateMachineState, StateMachineTransition, KeyboardTransition } from "./stateInterfaces";
+import { Operator } from "../operator/Operator.js";
+import { Settings } from "../Settings.js";
+import { AudioManager } from "../operator/AudioManager.js";
+import { Presentation } from "../presentation/Presentation.js";
+import { CountdownTimer } from "../CountdownTimer.js";
+import { getStates } from "./states.js";
+import { StateMachineState, StateMachineTransition, KeyboardTransition, TimeoutTransition } from "./stateInterfaces";
 
 interface StateMap {
     [stateName: string]: StateMachineState;
@@ -14,10 +14,14 @@ interface ManualTriggerMap {
     [transitionname: string]: StateMachineTransition;
 }
 
+interface KeyboardKeysUsed {
+    [keyboardKey: string]: number;
+}
+
 export class StateMachine {
     private readonly DEBUG: boolean;
-    private readonly operator: Operator;
-    private readonly settings: Settings;
+    public readonly operator: Operator;
+    public readonly settings: Settings;
     private readonly audioManager: AudioManager;
     private readonly presentation: Presentation;
     private readonly countdownProgress: JQuery<HTMLProgressElement>;
@@ -25,7 +29,7 @@ export class StateMachine {
     private readonly divStateName: JQuery<HTMLDivElement>;
     private readonly stateMap: StateMap;
     private manualTriggerMap: ManualTriggerMap;
-    private remainingQuestionTimeMs: number;
+    public remainingQuestionTimeMs: number;
     private countdownTimer: CountdownTimer;
     private currentState: StateMachineState;
     private allStates: StateMachineState[];
@@ -73,21 +77,18 @@ export class StateMachine {
 
                 const transitionObj: StateMachineTransition = transitionArray[i];
 
-                if (transitionObj instanceof KeyboardTransition) {
-
-                }
-
                 if (transitionObj.type === "keyboard" && transitionObj.keys.includes(keyboardEvent.key)) {
-
+                    /*
                     const hasCondition = Boolean(transitionObj.condition);
                     if (hasCondition) {
                         if (transitionObj.condition.call(this.operator, keyboardEvent)) {
-                            this._goToState(transitionObj.dest, keyboardEvent);
+                            this.goToState(transitionObj.dest, keyboardEvent);
                         }
 
                     } else {
-                        this._goToState(transitionObj.dest, keyboardEvent);
-                    }
+                        */
+                    this.goToState(transitionObj.dest, keyboardEvent);
+                    // }
 
                     break;
                 }
@@ -105,7 +106,7 @@ export class StateMachine {
         }
     }
 
-    private _startCountdown(transitionObj: StateMachineTransition, keyboardEvent: KeyboardEvent): void {
+    private _startCountdown(transitionObj: TimeoutTransition, keyboardEvent: KeyboardEvent): void {
         let durationMs;
         let setMax = false;
         if (transitionObj.duration instanceof Function) {
@@ -136,7 +137,7 @@ export class StateMachine {
             countdownTimer.progressElements.forEach(elem => elem.attr("max", newMax));
         }
 
-        countdownTimer.onFinished = () => this._goToState(destinationStateName);
+        countdownTimer.onFinished = () => this.goToState(destinationStateName);
         countdownTimer.start();
     }
 
@@ -147,16 +148,23 @@ export class StateMachine {
     }
 
     public manualTrigger(triggerName: string): void {
+
+        // This is wrong, it will go to the destination state no matter what
+        // todo change this to:
+        // if the current state has a manual trigger matching the triggerName, then run the trigger
         if (triggerName in this.manualTriggerMap) {
             const transitionObj = this.manualTriggerMap[triggerName];
-            this._goToState(transitionObj.dest);
+            if (transitionObj.type !== "if") {
+                // TODO this is a hack - remove after re-writing manualTrigger method
+                this.goToState(transitionObj.dest);
+            }
         } else {
             console.warn(`manual trigger failed: trigger "${triggerName}" not in map of known triggers`);
         }
 
     }
 
-    private _goToState(stateName: string, paramsToPassToFunctionToCall: object = {}): void {
+    public goToState(stateName: string, triggereringkeyboardEvent?: KeyboardEvent): void {
 
         if (!(stateName in this.stateMap)) {
             throw new RangeError(`can't go to state named "${stateName}", state not found`);
@@ -170,18 +178,7 @@ export class StateMachine {
         if (this.DEBUG) {
             console.log(`going to state "${stateName}"`);
         }
-
-        handleOnExit.call(this);
-
-        this.currentState = this.stateMap[stateName];
-        this.divStateName.html(stateName);
-
-        handleShowSlide.call(this);
-        handleOnEnter.call(this);
-        handleTransitionTimeout.call(this, paramsToPassToFunctionToCall);
-        handleTransitionImmedaite.call(this);
-        handleTransitionIf.call(this);
-
+        ///////////////////////////////////////////////////////////////////////////////////////////
         const handleOnExit = () => {
             if (this.currentState.onExit) {
                 const functionToCall = this.currentState.onExit;
@@ -198,10 +195,10 @@ export class StateMachine {
             for (let i = 0; i < transitionArray.length; i++) {
                 const transitionObj = transitionArray[i];
                 if (transitionObj.type === "if") {
-                    if (transitionObj.condition.call(this.operator, paramsToPassToFunctionToCall)) {
-                        this._goToState(transitionObj.then, paramsToPassToFunctionToCall);
+                    if (transitionObj.condition.call(this.operator, triggereringkeyboardEvent)) {
+                        this.goToState(transitionObj.then, triggereringkeyboardEvent);
                     } else {
-                        this._goToState(transitionObj.else, paramsToPassToFunctionToCall);
+                        this.goToState(transitionObj.else, triggereringkeyboardEvent);
                     }
                 }
                 break;
@@ -223,27 +220,23 @@ export class StateMachine {
 
                 const functionToCall = this.currentState.onEnter;
 
-                if (!(functionToCall instanceof Function)) {
-                    console.info(`state "${this.currentState.name}": cannot call onEnter function "${functionToCall}", not a function`);
-                    return;
-                }
-
                 //todo don't use global reference to operator instnace!
                 //todo make this not suck, because onExit call is not an operatorInstance call
-                const rv = functionToCall.call(this.operator, paramsToPassToFunctionToCall);
+                const rv = functionToCall.call(this.operator, triggereringkeyboardEvent);
 
                 if (rv && rv.constructor.name === "Promise") {
 
                     const transitionArray = this.currentState.transitions;
                     for (let i = 0; i < transitionArray.length; i++) {
                         const transitionObj = transitionArray[i];
+
                         if (transitionObj.type === "promise") {
                             rv.then(
-                                () => this._goToState(transitionObj.dest)
+                                () => this.goToState(transitionObj.dest)
                             ).catch(
-                                returnedByPromise => {
+                                (rv:any) => {
                                     console.warn("promise rejected:");
-                                    throw returnedByPromise;
+                                    throw rv;
                                 }
                             );
                             break;
@@ -258,12 +251,12 @@ export class StateMachine {
         }
 
         //todo rename this startCountdownTimer
-        const handleTransitionTimeout = (paramsToPassToFunctionToCall) => {
+        const handleTransitionTimeout = (triggeringKeyboardEvent: KeyboardEvent) => {
             const transitionArray = this.currentState.transitions;
             for (let i = 0; i < transitionArray.length; i++) {
                 const transitionObj = transitionArray[i];
                 if (transitionObj.type === "timeout") {
-                    this._startCountdown(transitionObj, paramsToPassToFunctionToCall);
+                    this._startCountdown(transitionObj, triggeringKeyboardEvent);
                     this.divStateName.html(stateName + " &rarr; " + transitionObj.dest);
                     break;
                 }
@@ -275,11 +268,25 @@ export class StateMachine {
             for (let i = 0; i < transitionArray.length; i++) {
                 const transitionObj = transitionArray[i];
                 if (transitionObj.type === "immediate") {
-                    this._goToState(transitionObj.dest);
+                    this.goToState(transitionObj.dest);
                     break;
                 }
             }
         }
+        ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+        handleOnExit.call(this);
+
+        this.currentState = this.stateMap[stateName];
+        this.divStateName.html(stateName);
+
+        handleShowSlide.call(this);
+        handleOnEnter.call(this);
+        handleTransitionTimeout.call(this, triggereringkeyboardEvent);
+        handleTransitionImmedaite.call(this);
+        handleTransitionIf.call(this);
+
+       
     }
 
     private _validateStates(): void {
@@ -287,8 +294,6 @@ export class StateMachine {
         // pass one of two
         this.allStates.forEach((stateObj: StateMachineState, index: number) => {
             this.stateMap[stateObj.name] = stateObj;
-            validatePropString("state", index, stateObj, "name");
-            validatePropArray("state", index, stateObj, "transitions");
 
             if (stateObj.showSlide &&
                 !this.presentation.slideNames.includes(stateObj.showSlide)) {
@@ -300,9 +305,9 @@ export class StateMachine {
         // pass two of two
         this.allStates.forEach((stateObj: StateMachineState, stateIndex: number) => {
 
-            let keyboardKeysUsed = {};
+            let keyboardKeysUsed: KeyboardKeysUsed = {};
 
-            stateObj.transitions.forEach(function (transitionObj: StateMachineTransition, transitionIndex: number) {
+            stateObj.transitions.forEach((transitionObj: StateMachineTransition, transitionIndex: number) => {
 
                 if (transitionObj.type !== "if") {
                     if (!transitionObj.dest) {
@@ -380,7 +385,7 @@ export class StateMachine {
 
                     default:
                         printWarning(stateObj.name, transitionIndex,
-                            `unknown transition type "${transitionObj.type}"`);
+                            `unknown transition type!`);
                         break;
                 }
 
@@ -392,26 +397,7 @@ export class StateMachine {
 
         }, this);
 
-        function validateProp(name: string, index: number, obj, prop, expectedType) {
-            if (!prop in obj) {
-                console.warn(`${name} at index ${index} does not have property "${prop}"`);
-            }
-            const theProp = obj[prop];
-            const constructorName = theProp.constructor.name;
-            if (constructorName !== expectedType) {
-                console.warn(`${name} at index ${index}: property "${prop}": type is ${constructorName}, expected ${expectedType}`);
-            }
-            if (theProp.length < 1) {
-                console.warn(`${name} at index ${index} has empty ${prop}`);
-            }
-        }
 
-        function validatePropString(name, index, obj, prop) {
-            validateProp(name, index, obj, prop, "String");
-        }
-        function validatePropArray(name, index, obj, prop) {
-            validateProp(name, index, obj, prop, "Array");
-        }
 
 
     }

@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
-        "target": "ES6",
+        "target": "ES2017",
+        "strict": true,
         "sourceMap": true,
-        "strict": true
+        "strictNullChecks": false
     },
     "exclude": [
         "node_modules"

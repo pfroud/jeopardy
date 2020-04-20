@@ -9,36 +9,54 @@ export interface StateMachineState {
 //todo maybe change this to an enum?
 export type StateMachineTransition = ManualTransition | IfTransition | PromiseTransition | ImmediateTransition | TimeoutTransition | KeyboardTransition;
 
-export interface TransitionInterface {
-    type: string;
-}
-
-export interface ManualTransition extends TransitionInterface {
+export interface ManualTransition{
+    type: "manual";
     name: string;
     dest: string;
 }
 
-export interface IfTransition extends TransitionInterface {
+export interface IfTransition{
+    type: "if";
     condition: (arg0: KeyboardEvent) => boolean;
     then: string;
     else: string;
 }
 
-export interface PromiseTransition extends TransitionInterface {
+export interface PromiseTransition{
+    type: "promise";
     dest: string;
 }
 
-export interface ImmediateTransition extends TransitionInterface {
+export interface ImmediateTransition{
+    type: "immediate";
     dest: string;
 }
 
-export interface TimeoutTransition extends TransitionInterface {
+export interface TimeoutTransition{
+    type: "timeout";
     duration: (() => number) | number;
     dest: string;
     countdownTimerShowDots?: boolean;
 }
 
-export interface KeyboardTransition extends TransitionInterface {
+export interface KeyboardTransition{
+    type: "keyboard";
     keys: string;
     dest: string;
+}
+
+
+class MyClass {
+    something: string;
+}
+
+type something = MyClass | number;
+
+const myArray: something[] = [new MyClass()];
+
+const element:something = myArray[0];
+
+if(element instanceof MyClass){
+    console.log("yes");
+    
 }

@@ -1,10 +1,8 @@
-import { Presentation } from "./presentation/Presentation";
-import { Settings } from "./Settings";
-import { AudioManager } from "./operator/AudioManager";
-import { getStates } from "./stateMachine/states";
-import { Clue } from "./interfaces";
-import { CountdownTimer } from "./CountdownTimer";
-import { StateMachineState } from "./stateMachine/stateInterfaces";
+import { Presentation } from "./presentation/Presentation.js";
+import { Settings } from "./Settings.js";
+import { AudioManager } from "./operator/AudioManager.js";
+import { Clue } from "./interfaces.js";
+import { CountdownTimer } from "./CountdownTimer.js";
 
 
 interface TeamDivs {
@@ -194,7 +192,7 @@ export class Team {
         this.div.operator.state = divOperatorWrapper.find<HTMLDivElement>("div.team-state").html(this.state);
     }
 
-    publicsetTeamName(teamName: string): void {
+    public setTeamName(teamName: string): void {
         this.teamName = teamName;
         this.div.operator.teamName.html(teamName);
         this.div.presentation.teamName.html(teamName);
@@ -233,7 +231,7 @@ export class Team {
         const countdownShowCategory = this.countdownTimer = new CountdownTimer(this.settings.durationLockout);
         // todo would be nice to show progress element on display and presentation. need to change CountdownTimer to allow that
         countdownShowCategory.progressElements.push(this.presentationProgressLockout);
-        countdownShowCategory.intervalMs = 50; //high resolution mode!!
+        countdownShowCategory.updateIntervalMs = 50; //high resolution mode!!
         countdownShowCategory.hideProgressOnFinish = true;
         countdownShowCategory.onFinished = () => this.endLockout();
         countdownShowCategory.start();

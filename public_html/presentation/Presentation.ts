@@ -1,4 +1,4 @@
-import { Clue } from "../interfaces";
+import { Clue } from "../interfaces.js";
 
 interface Slides {
     [slideName: string]: JQuery<HTMLDivElement>;
@@ -71,7 +71,7 @@ export class Presentation {
     }
 
     public showSlide(slideName: string): void {
-        if (slideName in this.slideNames) {
+        if (this.slideNames.includes(slideName)) {
             this.visibleSlide && this.visibleSlide.hide();
 
             const targetSlide = this.slideDivs[slideName];
@@ -79,7 +79,7 @@ export class Presentation {
 
             this.visibleSlide = targetSlide;
         } else {
-            throw new RangeError('slide name "' + slideName + 'not in known slides: ' + this.slideDivs);
+            throw new RangeError('slide name "' + slideName + '" not in known slides: ' + Object.keys(this.slideDivs));
         }
     }
 

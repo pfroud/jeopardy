@@ -11,8 +11,8 @@
     </head>
     <body>
         <script src="../lib/jquery-3.4.1.min.js"></script>
-        <script src="Presentation.js"></script>
-        <script>
+        <script  type="module" src="Presentation.js"></script>
+        <script type="module">
 
             const opener = window.opener;
             window.addEventListener("error", function (errorObj) {
@@ -20,6 +20,7 @@
                 opener.console.error(errorObj.error);
             });
 
+            import { Presentation } from "./Presentation.js";
             var presentation;
             $(document).ready(() => presentation = new Presentation());
         </script>

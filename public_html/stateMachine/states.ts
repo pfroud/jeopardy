@@ -1,5 +1,5 @@
-import { StateMachine } from "./StateMachine";
-import {StateMachineState} from "./stateInterfaces";
+import { StateMachine } from "./StateMachine.js";
+import {StateMachineState} from "./stateInterfaces.js";
 
 export function getStates(stateMachineInstance: StateMachine): StateMachineState[] {
 

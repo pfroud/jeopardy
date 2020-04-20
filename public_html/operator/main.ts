@@ -1,11 +1,7 @@
 
-import { Settings } from "../Settings";
-import { AudioManager } from "./AudioManager";
-import { Operator } from "./Operator";
-
-// must be global because the presentation window can only access global scope
-// TODO see if the above sentence is correct...
-let operator;
+import { Settings } from "../Settings.js";
+import { AudioManager } from "./AudioManager.js";
+import { Operator } from "./Operator.js";
 
 $(document).ready(function () {
     if (window.location.search.length > 1) {
@@ -17,7 +13,8 @@ $(document).ready(function () {
     const settings = new Settings();
     const audioManager = new AudioManager();
 
-    operator = new Operator(audioManager, settings);
+    (window as any).operator = new Operator(audioManager, settings);
+    let i = 1;
 });
 
 function initKeyboardShortcuts(): void {
