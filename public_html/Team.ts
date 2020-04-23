@@ -34,12 +34,14 @@ export class Team {
     countdownTimer: CountdownTimer;
     stateBeforeLockout: TeamState;
     hasAnswered: boolean;
+    presentationInstance: Presentation;
 
     constructor(teamIdx: number, presentationInstance: Presentation, settings: Settings, audioManager: AudioManager) {
         this.settings = settings;
         this.audioManager = audioManager;
         this.teamIdx = teamIdx;
         this.dollars = 0;
+        this.presentationInstance = presentationInstance;
         this.teamName = "team " + (teamIdx + 1);
 
         this.state = null;
@@ -56,7 +58,6 @@ export class Team {
                 dollars: null,
                 teamName: null,
                 buzzerShow: null
-                //                dollarChangeAnimation: null
             }
         };
 
@@ -73,10 +74,18 @@ export class Team {
         this.presentationProgressLockout = null;
         this.countdownTimer = null;
 
-        this.setDivOperator($('div[data-team-index="' + teamIdx + '"]'));
-        this.setDivPresentation(presentationInstance.getTeamDiv(teamIdx));
+        this.createDivsOperator();
+        this.createDivsPresentation();
+        this.initTeamNameListener();
 
         this.setState(TeamState.BUZZERS_OFF);
+    }
+
+    private initTeamNameListener() {
+        const teamNameInput: JQuery<HTMLInputElement> = $("input#team-name-" + this.teamIdx);
+        teamNameInput.on("input", (elem) => {
+            this.setTeamName(elem.target.value);
+        });
     }
 
     public handleAnswerRight(clueObj: Clue): void {
@@ -94,7 +103,6 @@ export class Team {
 
     public moneyAdd(amountAdd: number): void {
         if (ANIMATE_DOLLARS_CHANGE) {
-            //            this._showFallingMoneyAnimation(amountAdd);
             this._animateDollarsChange(this.dollars + amountAdd);
         } else {
             this.dollars += amountAdd;
@@ -119,19 +127,6 @@ export class Team {
             this._updateDollarsDisplay();
         }
     }
-
-    /*
-     _showFallingMoneyAnimation(amountAdd) {
-     //absolutley insane way to reset CSS animation https://stackoverflow.com/a/45036752
-     this.div.presentation.dollarChangeAnimation.css("animation", "none");
-     void(this.div.presentation.dollarChangeAnimation.get(0).offsetHeight); // trigger CSS reflow
-     this.div.presentation.dollarChangeAnimation.css("animation", null);
-
-     this.div.presentation.dollarChangeAnimation
-     .html("+$" + amountAdd.toLocaleString() + "&ensp;")
-     .css("animation", "0.5s cubic-bezier(0.5, 0.5, 0.1, 1) 1 dollar-change-animation");
-     }
-     */
 
     private _animateDollarsChange(targetDollars: number): void {
 
@@ -180,22 +175,75 @@ export class Team {
         this.div.operator.dollars.html("$" + this.dollars.toLocaleString());
     }
 
-    private setDivPresentation(divPresentationWrapper: JQuery<HTMLDivElement>): void {
-        this.div.presentation.wrapper = divPresentationWrapper;
-        this.div.presentation.dollars = divPresentationWrapper.find<HTMLDivElement>("div.team-dollars").html("$" + this.dollars);
-        this.div.presentation.teamName = divPresentationWrapper.find<HTMLDivElement>("div.team-name").html(this.teamName);
-        this.div.presentation.buzzerShow = divPresentationWrapper.find<HTMLDivElement>("div.buzzer-show");
-        // this.div.presentation.dollarChangeAnimation = divPresentationWrapper.find<HTMLDivElement>("div.dollar-change-animation");
+    private createDivsPresentation(): void {
+        const divTeam = this.div.presentation.wrapper = $<HTMLDivElement>("<div>")
+            .addClass("team")
+            .attr("data-team-index", this.teamIdx)
+            .attr("data-team-state", "");
 
-        this.presentationCountdownDots = divPresentationWrapper.find<HTMLTableElement>("table.countdown-dots");
-        this.presentationProgressLockout = divPresentationWrapper.find("progress");
+        const divBuzzerDisplay = this.div.presentation.buzzerShow = $<HTMLDivElement>("<div>").addClass("buzzer-show").addClass("not-pressed");
+
+        const imgSwitchClosed = $("<img>")
+            .attr("src", "img/switch-closed.svg")
+            .attr("attr", "switch closed")
+            .addClass("buzzer-pressed");
+
+        const imgSwitchOpened = $("<img>")
+            .attr("src", "img/switch-opened.svg")
+            .attr("attr", "switch opened")
+            .addClass("buzzer-not-pressed");
+
+        divBuzzerDisplay.append(imgSwitchClosed);
+        divBuzzerDisplay.append(imgSwitchOpened);
+        divTeam.append(divBuzzerDisplay);
+
+        const tableCountdownDots = this.presentationCountdownDots = $<HTMLTableElement>("<table>").addClass("countdown-dots");
+
+        for (let i = 5; i > 1; i--) {
+            tableCountdownDots.append($("<td>").attr("data-countdown", i));
+        }
+        tableCountdownDots.append($("<td>").attr("data-countdown", 1));
+        for (let i = 2; i <= 5; i++) {
+            tableCountdownDots.append($("<td>").attr("data-countdown", i));
+        }
+
+        divTeam.append(tableCountdownDots);
+
+        const divDollars = this.div.presentation.dollars = $<HTMLDivElement>("<div>").addClass("team-dollars").html("$" + this.dollars);
+        divTeam.append(divDollars);
+
+        const divName = this.div.presentation.teamName = $<HTMLDivElement>("<div>").addClass("team-name").html(this.teamName);
+        divTeam.append(divName);
+
+        const progress = this.presentationProgressLockout = $<HTMLProgressElement>("<progress>");
+        divTeam.append(progress);
+
+        this.presentationInstance.footerTeams.append(divTeam);
+
+
+
+
     }
 
-    private setDivOperator(divOperatorWrapper: JQuery<HTMLDivElement>): void {
-        this.div.operator.wrapper = divOperatorWrapper;
-        this.div.operator.teamName = divOperatorWrapper.find<HTMLDivElement>("div.team-name").html(this.teamName);
-        this.div.operator.dollars = divOperatorWrapper.find<HTMLDivElement>("div.team-dollars").html("$" + this.dollars);
-        this.div.operator.state = divOperatorWrapper.find<HTMLDivElement>("div.team-state").html(this.state);
+    private createDivsOperator(): void {
+        const divTeam = this.div.operator.wrapper = $<HTMLDivElement>("<div>")
+            .addClass("team")
+            .attr("data-team-index", this.teamIdx)
+            .attr("data-team-state", "");
+
+        const divName = this.div.operator.teamName = $<HTMLDivElement>("<div>").addClass("team-name").html(this.teamName);
+        divTeam.append(divName);
+
+        const divDollars = this.div.operator.dollars = $<HTMLDivElement>("<div>").addClass("team-dollars").html("$" + this.dollars);
+        divTeam.append(divDollars);
+
+        const divState = this.div.operator.state = $<HTMLDivElement>("<div>").addClass("team-state").html(this.state);
+        divTeam.append(divState);
+
+        divTeam.append($("<progress>").addClass("time-left").css("display:none"));
+
+        $("footer").append(divTeam);
+
     }
 
     public setTeamName(teamName: string): void {
@@ -237,7 +285,6 @@ export class Team {
         const countdownShowCategory = this.countdownTimer = new CountdownTimer(this.settings.durationLockout);
         // todo would be nice to show progress element on display and presentation. need to change CountdownTimer to allow that
         countdownShowCategory.progressElements.push(this.presentationProgressLockout);
-        countdownShowCategory.updateIntervalMs = 50; //high resolution mode!!
         countdownShowCategory.hideProgressOnFinish = true;
         countdownShowCategory.onFinished = () => this.endLockout();
         countdownShowCategory.start();
@@ -297,6 +344,3 @@ export enum TeamState {
     LOCKOUT = "lockout" //team buzzed while operator was reading the question
 };
 
-// Object.freeze(TeamState);
-// Team.stateValues = Object.values(TeamState);
-// Object.freeze(Team.stateValues);

@@ -127,11 +127,6 @@ export class Presentation {
         this.divPaused.toggle(isPaused);
     }
 
-    public getTeamDiv(teamIdx: number): JQuery<HTMLDivElement> {
-        // Only used to initialize the Teams. After that, get the reference from Team object.
-        return $('div[data-team-index="' + teamIdx + '"]');
-    }
-
     public setGameEndMessage(message: string): void {
         $("div#slide-game-end div#team-ranking").html(message);
     }

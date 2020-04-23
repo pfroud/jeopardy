@@ -159,79 +159,12 @@ export class Operator {
         }
 
         for (let i = 0; i < TEAM_COUNT; i++) {
-
-            const teamDivOperator = this._createTeamDivOperator(i);
-
-            this._createTeamDivPresentation(i);
-
-
             const theTeam = this.teamArray[i] =
                 new Team(i, this.presentationInstance, this.settings, this.audioManager);
-
-            const teamNameInput: JQuery<HTMLInputElement> = $("input#team-name-" + i);
-            teamNameInput.on("input", function () {
-                theTeam.setTeamName(this.value);
-            });
         }
         this.presentationInstance.setTeamsVisible(true);
     }
 
-    private _createTeamDivOperator(teamIdx: number): void {
-        const divTeam = $("<div>")
-            .addClass("team")
-            .attr("data-team-index", teamIdx)
-            .attr("data-team-state", "");
-
-
-        divTeam.append($("<div>").addClass("team-name"));
-        divTeam.append($("<div>").addClass("team-dollars"));
-        divTeam.append($("<div>").addClass("team-state"));
-
-        divTeam.append($("<progress>").addClass("time-left").css("display:none"));
-
-        $("footer").append(divTeam);
-    }
-
-    private _createTeamDivPresentation(teamIdx: number): void {
-        const divTeam = $("<div>")
-            .addClass("team")
-            .attr("data-team-index", teamIdx)
-            .attr("data-team-state", "");
-
-        const divBuzzerDisplay = $("<div>").addClass("buzzer-show").addClass("not-pressed");
-
-        const imgSwitchClosed = $("<img>")
-            .attr("src", "img/switch-closed.svg")
-            .attr("attr", "switch closed")
-            .addClass("buzzer-pressed");
-
-        const imgSwitchOpened = $("<img>")
-            .attr("src", "img/switch-opened.svg")
-            .attr("attr", "switch opened")
-            .addClass("buzzer-not-pressed");
-
-        divBuzzerDisplay.append(imgSwitchClosed);
-        divBuzzerDisplay.append(imgSwitchOpened);
-        divTeam.append(divBuzzerDisplay);
-
-        const tableCountdownDots = $("<table>").addClass("countdown-dots");
-
-        for (let i = 5; i > 1; i--) {
-            tableCountdownDots.append($("<td>").attr("data-countdown", i));
-        }
-        tableCountdownDots.append($("<td>").attr("data-countdown", 1));
-        for (let i = 2; i <= 5; i++) {
-            tableCountdownDots.append($("<td>").attr("data-countdown", i));
-        }
-
-        divTeam.append(tableCountdownDots);
-
-        divTeam.append($("<div>").addClass("team-dollars"));
-        divTeam.append($("<div>").addClass("team-name"));
-        divTeam.append($("<progress>"));
-
-        this.presentationInstance.footerTeams.append(divTeam);
-    }
 
     public playTimeoutSound(): void {
         this.audioManager.play("questionTimeout");
