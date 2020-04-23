@@ -5,6 +5,7 @@ import { Presentation } from "../presentation/Presentation.js";
 import { CountdownTimer } from "../CountdownTimer.js";
 import { getStates } from "./states.js";
 import { StateMachineState, StateMachineTransition, KeyboardTransition, TimeoutTransition, TransitionType } from "./stateInterfaces.js";
+import { generateGraphvizImpl } from "./generateGraphviz.js";
 
 interface StateMap {
     [stateName: string]: StateMachineState;
@@ -59,7 +60,7 @@ export class StateMachine {
         this.currentState = undefined;
 
         this.allStates = getStates(this, operator, settings);
-        this._validateStates();
+        this._parseStates();
 
         this.currentState = this.allStates[0]; //idle state
 
@@ -234,7 +235,7 @@ export class StateMachine {
                             rv.then(
                                 () => this.goToState(transitionObj.dest)
                             ).catch(
-                                (rv:any) => {
+                                (rv: any) => {
                                     console.warn("promise rejected:");
                                     throw rv;
                                 }
@@ -286,10 +287,10 @@ export class StateMachine {
         handleTransitionImmedaite.call(this);
         handleTransitionIf.call(this);
 
-       
+
     }
 
-    private _validateStates(): void {
+    private _parseStates(): void {
 
         // pass one of two
         this.allStates.forEach((stateObj: StateMachineState, index: number) => {
@@ -309,7 +310,7 @@ export class StateMachine {
 
             stateObj.transitions.forEach((transitionObj: StateMachineTransition, transitionIndex: number) => {
 
-                if (transitionObj.type !==  TransitionType.If) {
+                if (transitionObj.type !== TransitionType.If) {
                     if (!transitionObj.dest) {
                         printWarning(stateObj.name, transitionIndex,
                             "no destination state");
@@ -397,9 +398,10 @@ export class StateMachine {
 
         }, this);
 
+    }
 
-
-
+    public graphviz(): void {
+        generateGraphvizImpl(this.allStates);
     }
 
 }
