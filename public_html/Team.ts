@@ -20,7 +20,6 @@ interface TeamDivs {
     };
 }
 
-const ANIMATE_DOLLARS_CHANGE = true;
 export class Team {
     settings: Settings;
     audioManager: AudioManager;
@@ -96,36 +95,22 @@ export class Team {
 
     public handleAnswerWrong(clueObj: Clue): void {
         this.audioManager.play("answerWrong");
+        // todo set class on the <table> instead of finding <td>s
         this.presentationCountdownDots.find("td").removeClass("active");
         this.moneySubtract(clueObj.value * this.settings.wrongAnswerPenaltyMultiplier);
         this.setState(this.settings.allowMultipleAnswersToSameQuestion ? TeamState.CAN_ANSWER : TeamState.ALREADY_ANSWERED);
     }
 
     public moneyAdd(amountAdd: number): void {
-        if (ANIMATE_DOLLARS_CHANGE) {
-            this._animateDollarsChange(this.dollars + amountAdd);
-        } else {
-            this.dollars += amountAdd;
-            this._updateDollarsDisplay();
-        }
+        this._animateDollarsChange(this.dollars + amountAdd);
     }
 
     public moneySubtract(amountSubtract: number): void {
-        if (ANIMATE_DOLLARS_CHANGE) {
-            this._animateDollarsChange(this.dollars - amountSubtract);
-        } else {
-            this.dollars -= amountSubtract;
-            this._updateDollarsDisplay();
-        }
+        this._animateDollarsChange(this.dollars - amountSubtract);
     }
 
     public moneySet(newDollars: number): void {
-        if (ANIMATE_DOLLARS_CHANGE) {
-            this._animateDollarsChange(newDollars);
-        } else {
-            this.dollars = newDollars;
-            this._updateDollarsDisplay();
-        }
+        this._animateDollarsChange(newDollars);
     }
 
     private _animateDollarsChange(targetDollars: number): void {
