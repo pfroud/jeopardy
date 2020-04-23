@@ -146,7 +146,13 @@ export class Team {
         setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MS, this);
 
         function handleTimeout(instance: Team) {
-            instance.dollars += DIRECTION_MULTIPLIER * DOLLAR_CHANGE_PER_STEP;
+            const difference = Math.abs(targetDollars - instance.dollars);
+            if (difference >= DOLLAR_CHANGE_PER_STEP) {
+                instance.dollars += DIRECTION_MULTIPLIER * DOLLAR_CHANGE_PER_STEP;
+            } else {
+                instance.dollars += DIRECTION_MULTIPLIER * difference;
+            }
+
             instance._updateDollarsDisplay();
             if (instance.dollars !== targetDollars) {
                 setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MS, instance);
