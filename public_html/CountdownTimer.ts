@@ -37,7 +37,7 @@ export class CountdownTimer {
 
         this.audioManager = audioManager;
 
-        this.updateIntervalMs = 100;
+        this.updateIntervalMs = 50;
 
         this.durationMs = durationMs;
         this.maxMs = durationMs;
