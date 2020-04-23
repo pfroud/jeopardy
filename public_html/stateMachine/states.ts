@@ -1,7 +1,9 @@
 import { StateMachine } from "./StateMachine.js";
-import {StateMachineState} from "./stateInterfaces.js";
+import {StateMachineState, TransitionType} from "./stateInterfaces.js";
+import { Operator } from "../operator/Operator.js";
+import { Settings } from "../Settings.js";
 
-export function getStates(stateMachineInstance: StateMachine): StateMachineState[] {
+export function getStates(stateMachine: StateMachine, operator: Operator, settings: Settings): StateMachineState[] {
 
     // todo make names of states less confusing
     //todo consider adding a way to call function on a transition, instead of having init and continuing states
@@ -15,156 +17,156 @@ export function getStates(stateMachineInstance: StateMachine): StateMachineState
 
     return [
         {
-            name: "idle",
-            showSlide: "jeopardy-logo",
+            name: "state_idle",
+            showSlide: "slide-jeopardy-logo",
             transitions: [{
-                    type: "manual",
-                    name: "startGame",
-                    dest: "fetchClue"
+                    type: TransitionType.Manual,
+                    name: "manualTrigger_startGame",
+                    dest: "state_fetchClue"
                 }]
         }, {
-            name: "fetchClue",
-            showSlide: "spinner",
-            onEnter: stateMachineInstance.operator.getClue,
+            name: "state_fetchClue",
+            showSlide: "slide-spinner",
+            onEnter: operator.getClue,
             transitions: [{
-                    type: "promise",
-                    dest: "showCategoryAndDollars"
+                    type: TransitionType.Promise,
+                    dest: "state_showCategoryAndDollars"
                 }]
         }, {
-            name: "showCategoryAndDollars",
-            showSlide: "clue-category-and-dollars",
+            name: "state_showCategoryAndDollars",
+            showSlide: "slide-clue-category-and-dollars",
             transitions: [{
-                    type: "timeout",
-                    duration: stateMachineInstance.settings.displayDurationCategoryMs,
-                    dest: "showQuestionInit"
+                    type: TransitionType.Timeout,
+                    duration: settings.displayDurationCategoryMs,
+                    dest: "state_showQuestionInit"
                 }]
         }, {
-            name: "showQuestionInit",
-            showSlide: "clue-question",
-            onEnter: stateMachineInstance.operator.showClueQuestion,
+            name: "state_showQuestionInit",
+            showSlide: "slide-clue-question",
+            onEnter: operator.showClueQuestion,
             transitions: [{
-                    type: "immediate",
-                    dest: "showQuestion"
+                    type: TransitionType.Immediate,
+                    dest: "state_showQuestion"
                 }]
         }, {
-            name: "showQuestion",
+            name: "state_showQuestion",
             transitions: [{
-                    type: "keyboard",
+                    type: TransitionType.Keyboard,
                     keys: " ", //space
-                    dest: "waitForBuzzesRestartTimer"
+                    dest: "state_waitForBuzzesRestartTimer"
                 }, {
-                    type: "keyboard",
+                    type: TransitionType.Keyboard,
                     keys: "123456789",
-                    dest: "lockout"
+                    dest: "state_lockout"
                 }]
         }, {
-            name: "lockout",
-            onEnter: stateMachineInstance.operator.handleLockout,
+            name: "state_lockout",
+            onEnter: operator.handleLockout,
             transitions: [{
-                    type: "immediate",
-                    dest: "showQuestion"
+                    type: TransitionType.Immediate,
+                    dest: "state_showQuestion"
                 }]
         }, {
-            name: "waitForBuzzesRestartTimer",
-            onEnter: stateMachineInstance.operator.handleDoneReadingClueQuestion,
-            onExit: stateMachineInstance.saveRemainingTime,
+            name: "state_waitForBuzzesRestartTimer",
+            onEnter: operator.handleDoneReadingClueQuestion,
+            onExit: stateMachine.saveRemainingTime,
             transitions: [{
-                    type: "timeout",
-                    duration: stateMachineInstance.settings.timeoutWaitForBuzzesMs,
-                    dest: "playTimeoutSound"
+                    type: TransitionType.Timeout,
+                    duration: settings.timeoutWaitForBuzzesMs,
+                    dest: "state_playTimeoutSound"
                 }, {
-                    type: "keyboard",
+                    type: TransitionType.Keyboard,
                     keys: "123456789",
-                    dest: "tryTeamAnswer"
+                    dest: "state_tryTeamAnswer"
                 }]
         }, {
-            name: "waitForBuzzesResumeTimer",
-            onExit: stateMachineInstance.saveRemainingTime,
+            name: "state_waitForBuzzesResumeTimer",
+            onExit: stateMachine.saveRemainingTime,
             transitions: [{
-                    type: "timeout",
-                    duration: () => stateMachineInstance.remainingQuestionTimeMs, //todo look at code implementing stateMachineInstance
-                    dest: "playTimeoutSound"
+                    type: TransitionType.Timeout,
+                    duration: () => stateMachine.remainingQuestionTimeMs, //todo look at code implementing stateMachineInstance
+                    dest: "state_playTimeoutSound"
                 }, {
-                    type: "keyboard",
+                    type: TransitionType.Keyboard,
                     keys: "123456789",
-                    dest: "tryTeamAnswer"
+                    dest: "state_tryTeamAnswer"
                 }
             ]
         }, {
-            name: "tryTeamAnswer",
+            name: "state_tryTeamAnswer",
             transitions: [{
-                    type: "if",
-                    condition: stateMachineInstance.operator.canTeamBuzz,
-                    then: "waitForTeamAnswer",
-                    else: "waitForBuzzesResumeTimer"
+                    type: TransitionType.If,
+                    condition: operator.canTeamBuzz,
+                    then: "state_waitForTeamAnswer",
+                    else: "state_waitForBuzzesResumeTimer"
                 }]
         }, {
-            name: "waitForTeamAnswer",
-            onEnter: stateMachineInstance.operator.handleBuzzerPress,
+            name: "state_waitForTeamAnswer",
+            onEnter: operator.handleBuzzerPress,
             transitions: [{
-                    type: "keyboard",
+                    type: TransitionType.Keyboard,
                     keys: "y",
-                    dest: "addMoney"
+                    dest: "state_addMoney"
                 }, {
-                    type: "keyboard",
+                    type: TransitionType.Keyboard,
                     keys: "n",
-                    dest: "subtractMoney"
+                    dest: "state_subtractMoney"
                 }, {
-                    type: "timeout",
-                    duration: stateMachineInstance.settings.timeoutAnswerMs,
+                    type: TransitionType.Timeout,
+                    duration: settings.timeoutAnswerMs,
                     countdownTimerShowDots: true,
-                    dest: "subtractMoney"
+                    dest: "state_subtractMoney"
                 }
             ]
         }, {
-            name: "addMoney",
-            onEnter: stateMachineInstance.operator.handleAnswerRight,
+            name: "state_addMoney",
+            onEnter: operator.handleAnswerRight,
             transitions: [{
-                    type: "immediate",
-                    dest: "showAnswer"
+                    type: TransitionType.Immediate,
+                    dest: "state_showAnswer"
                 }]
         }, {
-            name: "subtractMoney",
-            onEnter: stateMachineInstance.operator.handleAnswerWrong,
+            name: "state_subtractMoney",
+            onEnter: operator.handleAnswerWrong,
             transitions: [{
-                    type: "if",
-                    condition: stateMachineInstance.operator.haveAllTeamsAnswered,
-                    then: "showAnswer",
-                    else: "waitForBuzzesResumeTimer"
+                    type: TransitionType.If,
+                    condition: operator.haveAllTeamsAnswered,
+                    then: "state_showAnswer",
+                    else: "state_waitForBuzzesResumeTimer"
                 }]
         }, {
-            name: "playTimeoutSound",
-            onEnter: stateMachineInstance.operator.playTimeoutSound,
+            name: "state_playTimeoutSound",
+            onEnter: operator.playTimeoutSound,
             transitions: [{
-                    type: "immediate",
-                    dest: "showAnswer"
+                    type: TransitionType.Immediate,
+                    dest: "state_showAnswer"
                 }]
         },
         {
-            name: "showAnswer",
-            onEnter: stateMachineInstance.operator.handleShowAnswer,
-            showSlide: "clue-answer",
+            name: "state_showAnswer",
+            onEnter: operator.handleShowAnswer,
+            showSlide: "slide-clue-answer",
             transitions: [{
-                    type: "timeout",
-                    duration: stateMachineInstance.settings.displayDurationAnswerMs,
-                    dest: "checkGameEnd"
+                    type: TransitionType.Timeout,
+                    duration: settings.displayDurationAnswerMs,
+                    dest: "state_checkGameEnd"
                 }]
         }, {
-            name: "checkGameEnd",
+            name: "state_checkGameEnd",
             transitions: [{
-                    type: "if",
-                    condition: stateMachineInstance.operator.shouldGameEnd,
-                    then: "gameEnd",
-                    else: "fetchClue"
+                    type: TransitionType.If,
+                    condition: operator.shouldGameEnd,
+                    then: "state_gameEnd",
+                    else: "state_fetchClue"
                 }]
         }, {
-            name: "gameEnd",
-            showSlide: "game-end",
-            onEnter: stateMachineInstance.operator.handleGameEnd,
+            name: "state_gameEnd",
+            showSlide: "slide-game-end",
+            onEnter: operator.handleGameEnd,
             transitions: [{
-                    type: "manual",
-                    name: "reset",
-                    dest: "idle"
+                    type: TransitionType.Manual,
+                    name: "state_reset",
+                    dest: "state_idle"
                 }]
         }
     ];

@@ -4,7 +4,7 @@ import { AudioManager } from "../operator/AudioManager.js";
 import { Presentation } from "../presentation/Presentation.js";
 import { CountdownTimer } from "../CountdownTimer.js";
 import { getStates } from "./states.js";
-import { StateMachineState, StateMachineTransition, KeyboardTransition, TimeoutTransition } from "./stateInterfaces";
+import { StateMachineState, StateMachineTransition, KeyboardTransition, TimeoutTransition, TransitionType } from "./stateInterfaces.js";
 
 interface StateMap {
     [stateName: string]: StateMachineState;
@@ -58,7 +58,7 @@ export class StateMachine {
 
         this.currentState = undefined;
 
-        this.allStates = getStates(this);
+        this.allStates = getStates(this, operator, settings);
         this._validateStates();
 
         this.currentState = this.allStates[0]; //idle state
@@ -77,7 +77,7 @@ export class StateMachine {
 
                 const transitionObj: StateMachineTransition = transitionArray[i];
 
-                if (transitionObj.type === "keyboard" && transitionObj.keys.includes(keyboardEvent.key)) {
+                if (transitionObj.type === TransitionType.Keyboard && transitionObj.keys.includes(keyboardEvent.key)) {
                     /*
                     const hasCondition = Boolean(transitionObj.condition);
                     if (hasCondition) {
@@ -154,7 +154,7 @@ export class StateMachine {
         // if the current state has a manual trigger matching the triggerName, then run the trigger
         if (triggerName in this.manualTriggerMap) {
             const transitionObj = this.manualTriggerMap[triggerName];
-            if (transitionObj.type !== "if") {
+            if (transitionObj.type !== TransitionType.If) {
                 // TODO this is a hack - remove after re-writing manualTrigger method
                 this.goToState(transitionObj.dest);
             }
@@ -194,7 +194,7 @@ export class StateMachine {
             const transitionArray = this.currentState.transitions;
             for (let i = 0; i < transitionArray.length; i++) {
                 const transitionObj = transitionArray[i];
-                if (transitionObj.type === "if") {
+                if (transitionObj.type === TransitionType.If) {
                     if (transitionObj.condition.call(this.operator, triggereringkeyboardEvent)) {
                         this.goToState(transitionObj.then, triggereringkeyboardEvent);
                     } else {
@@ -230,7 +230,7 @@ export class StateMachine {
                     for (let i = 0; i < transitionArray.length; i++) {
                         const transitionObj = transitionArray[i];
 
-                        if (transitionObj.type === "promise") {
+                        if (transitionObj.type === TransitionType.Promise) {
                             rv.then(
                                 () => this.goToState(transitionObj.dest)
                             ).catch(
@@ -255,7 +255,7 @@ export class StateMachine {
             const transitionArray = this.currentState.transitions;
             for (let i = 0; i < transitionArray.length; i++) {
                 const transitionObj = transitionArray[i];
-                if (transitionObj.type === "timeout") {
+                if (transitionObj.type === TransitionType.Timeout) {
                     this._startCountdown(transitionObj, triggeringKeyboardEvent);
                     this.divStateName.html(stateName + " &rarr; " + transitionObj.dest);
                     break;
@@ -267,7 +267,7 @@ export class StateMachine {
             const transitionArray = this.currentState.transitions;
             for (let i = 0; i < transitionArray.length; i++) {
                 const transitionObj = transitionArray[i];
-                if (transitionObj.type === "immediate") {
+                if (transitionObj.type === TransitionType.Immediate) {
                     this.goToState(transitionObj.dest);
                     break;
                 }
@@ -309,7 +309,7 @@ export class StateMachine {
 
             stateObj.transitions.forEach((transitionObj: StateMachineTransition, transitionIndex: number) => {
 
-                if (transitionObj.type !== "if") {
+                if (transitionObj.type !==  TransitionType.If) {
                     if (!transitionObj.dest) {
                         printWarning(stateObj.name, transitionIndex,
                             "no destination state");
@@ -322,7 +322,7 @@ export class StateMachine {
                 }
 
                 switch (transitionObj.type) {
-                    case "timeout":
+                    case TransitionType.Timeout:
                         const duration = transitionObj.duration;
                         if (!transitionObj.duration) {
                             printWarning(stateObj.name, transitionIndex,
@@ -334,7 +334,7 @@ export class StateMachine {
                         //                        }
                         break;
 
-                    case "keyboard":
+                    case TransitionType.Keyboard:
                         const keyboardKeys = transitionObj.keys;
                         if (!keyboardKeys) {
                             printWarning(stateObj.name, transitionIndex,
@@ -359,16 +359,16 @@ export class StateMachine {
 
                         break;
 
-                    case "manual":
+                    case TransitionType.Manual:
                         this.manualTriggerMap[transitionObj.name] = transitionObj;
                         break;
 
-                    case "promise":
-                    case "immediate":
+                    case TransitionType.Promise:
+                    case TransitionType.Immediate:
                         // no further validation needed
                         break;
 
-                    case "if":
+                    case TransitionType.If:
                         if (!(transitionObj.condition instanceof Function)) {
                             printWarning(stateObj.name, transitionIndex,
                                 "condition is not a function: " + transitionObj.condition);

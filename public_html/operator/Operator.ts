@@ -131,7 +131,7 @@ export class Operator {
         $("button#teams-show").click(() => this.presentationInstance.setTeamsVisible(true));
 
         this.buttonStartGame.click(() => {
-            this.stateMachine.manualTrigger("startGame");
+            this.stateMachine.manualTrigger("manualTrigger_startGame");
             this.buttonStartGame.prop("disabled", true);
         });
 
@@ -147,7 +147,7 @@ export class Operator {
 
     public skipClue(): void {
         this.setAllTeamsState(TeamState.BUZZERS_OFF, true);
-        this.stateMachine.goToState("fetchClue");
+        this.stateMachine.goToState("state_fetchClue");
         this.buttonSkipClue.attr("disabled", "true");
         this.buttonSkipClue.blur();
     }

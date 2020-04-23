@@ -40,7 +40,7 @@ export class Presentation {
 
 
         if (window.opener) {
-            this.showSlide("jeopardy-logo");
+            this.showSlide("slide-jeopardy-logo");
             window.opener.operator.handlePresentationReady(this);
         } else {
             $("<div>window.opener is null</div>")
@@ -57,11 +57,17 @@ export class Presentation {
         this.slideDivs = {};
         this.visibleSlide = undefined;
 
+        /*
         const slideNames = this.slideNames = ["jeopardy-logo", "game-rules", "spinner",
             "clue-category-and-dollars", "clue-question", "clue-answer", "event-cost", "buzzer-test", "game-end"];
+            */
 
-        slideNames.forEach(slideName => {
-            this.slideDivs[slideName] = $("div#slide-" + slideName);
+        this.slideNames = [];
+
+        $<HTMLDivElement>('div[id ^= "slide-"').each((index: number, elem: HTMLDivElement) => {
+            const id = elem.id;
+            this.slideNames.push(id);
+            this.slideDivs[id] = $<HTMLDivElement>(elem);
         });
 
     }
