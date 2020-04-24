@@ -21,7 +21,7 @@ export function getStates(stateMachine: StateMachine, operator: Operator, settin
             showSlide: "slide-jeopardy-logo",
             transitions: [{
                     type: TransitionType.Manual,
-                    name: "manualTrigger_startGame",
+                    triggerName: "manualTrigger_startGame",
                     dest: "state_fetchClue"
                 }]
         }, {
@@ -38,17 +38,11 @@ export function getStates(stateMachine: StateMachine, operator: Operator, settin
             transitions: [{
                     type: TransitionType.Timeout,
                     duration: settings.displayDurationCategoryMs,
-                    dest: "state_showQuestionInit"
+                    dest: "state_showQuestion",
+                    fn: operator.showClueQuestion
                 }]
-        }, {
-            name: "state_showQuestionInit",
-            showSlide: "slide-clue-question",
-            onEnter: operator.showClueQuestion,
-            transitions: [{
-                    type: TransitionType.Immediate,
-                    dest: "state_showQuestion"
-                }]
-        }, {
+        },
+        {
             name: "state_showQuestion",
             transitions: [{
                     type: TransitionType.Keyboard,
@@ -57,23 +51,19 @@ export function getStates(stateMachine: StateMachine, operator: Operator, settin
                 }, {
                     type: TransitionType.Keyboard,
                     keys: "123456789",
-                    dest: "state_lockout"
+                    dest: "state_showQuestion",
+                    fn: operator.handleLockout
                 }]
-        }, {
-            name: "state_lockout",
-            onEnter: operator.handleLockout,
-            transitions: [{
-                    type: TransitionType.Immediate,
-                    dest: "state_showQuestion"
-                }]
-        }, {
+        }, 
+        {
             name: "state_waitForBuzzesRestartTimer",
             onEnter: operator.handleDoneReadingClueQuestion,
             onExit: stateMachine.saveRemainingTime,
             transitions: [{
                     type: TransitionType.Timeout,
                     duration: settings.timeoutWaitForBuzzesMs,
-                    dest: "state_playTimeoutSound"
+                    dest: "state_showAnswer",
+                    fn: operator.playTimeoutSound
                 }, {
                     type: TransitionType.Keyboard,
                     keys: "123456789",
@@ -85,7 +75,8 @@ export function getStates(stateMachine: StateMachine, operator: Operator, settin
             transitions: [{
                     type: TransitionType.Timeout,
                     duration: () => stateMachine.remainingQuestionTimeMs, //todo look at code implementing stateMachineInstance
-                    dest: "state_playTimeoutSound"
+                    dest: "state_showAnswer",
+                    fn: operator.playTimeoutSound
                 }, {
                     type: TransitionType.Keyboard,
                     keys: "123456789",
@@ -97,8 +88,8 @@ export function getStates(stateMachine: StateMachine, operator: Operator, settin
             transitions: [{
                     type: TransitionType.If,
                     condition: operator.canTeamBuzz,
-                    then: "state_waitForTeamAnswer",
-                    else: "state_waitForBuzzesResumeTimer"
+                    then: {dest: "state_waitForTeamAnswer"},
+                    else: {dest: "state_waitForBuzzesResumeTimer"}
                 }]
         }, {
             name: "state_waitForTeamAnswer",
@@ -106,7 +97,9 @@ export function getStates(stateMachine: StateMachine, operator: Operator, settin
             transitions: [{
                     type: TransitionType.Keyboard,
                     keys: "y",
-                    dest: "state_addMoney"
+                    dest: "state_showAnswer",
+                    fn: operator.handleAnswerRight
+
                 }, {
                     type: TransitionType.Keyboard,
                     keys: "n",
@@ -118,23 +111,19 @@ export function getStates(stateMachine: StateMachine, operator: Operator, settin
                     dest: "state_subtractMoney"
                 }
             ]
-        }, {
-            name: "state_addMoney",
-            onEnter: operator.handleAnswerRight,
-            transitions: [{
-                    type: TransitionType.Immediate,
-                    dest: "state_showAnswer"
-                }]
-        }, {
+        },
+        {
             name: "state_subtractMoney",
             onEnter: operator.handleAnswerWrong,
             transitions: [{
                     type: TransitionType.If,
                     condition: operator.haveAllTeamsAnswered,
-                    then: "state_showAnswer",
-                    else: "state_waitForBuzzesResumeTimer"
+                    then: {dest: "state_showAnswer"},
+                    else: {dest: "state_waitForBuzzesResumeTimer"}
                 }]
-        }, {
+        },
+        /*
+        {
             name: "state_playTimeoutSound",
             onEnter: operator.playTimeoutSound,
             transitions: [{
@@ -142,6 +131,7 @@ export function getStates(stateMachine: StateMachine, operator: Operator, settin
                     dest: "state_showAnswer"
                 }]
         },
+        */
         {
             name: "state_showAnswer",
             onEnter: operator.handleShowAnswer,
@@ -156,8 +146,8 @@ export function getStates(stateMachine: StateMachine, operator: Operator, settin
             transitions: [{
                     type: TransitionType.If,
                     condition: operator.shouldGameEnd,
-                    then: "state_gameEnd",
-                    else: "state_fetchClue"
+                    then: {dest: "state_gameEnd"},
+                    else: {dest: "state_fetchClue"}
                 }]
         }, {
             name: "state_gameEnd",
@@ -165,7 +155,7 @@ export function getStates(stateMachine: StateMachine, operator: Operator, settin
             onEnter: operator.handleGameEnd,
             transitions: [{
                     type: TransitionType.Manual,
-                    name: "state_reset",
+                    triggerName: "manualTrigger_reset",
                     dest: "state_idle"
                 }]
         }

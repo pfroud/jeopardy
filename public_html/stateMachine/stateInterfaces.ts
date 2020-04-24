@@ -9,41 +9,57 @@ export interface StateMachineState {
 export type StateMachineTransition = ManualTransition | IfTransition | PromiseTransition | ImmediateTransition | TimeoutTransition | KeyboardTransition;
 
 export enum TransitionType {
-    Manual, If, Promise, Immediate, Timeout, Keyboard
+    Manual = "manual",
+    If = "if",
+    Promise = "promise",
+    Immediate = "immediate",
+    Timeout = "timeout",
+    Keyboard = "keyboard"
 }
 
-export interface ManualTransition{
+export interface ManualTransition {
     type: TransitionType.Manual;
-    name: string;
+    triggerName: string;
     dest: string;
+    fn?: Function;
 }
 
-export interface IfTransition{
+export interface IfTransition {
     type: TransitionType.If;
     condition: (arg0: KeyboardEvent) => boolean;
-    then: string;
-    else: string;
+    then: {
+        dest: string;
+        fn?: Function;
+    };
+    else: {
+        dest: string;
+        fn?: Function;
+    };
 }
 
-export interface PromiseTransition{
+export interface PromiseTransition {
     type: TransitionType.Promise;
     dest: string;
+    fn?: Function;
 }
 
-export interface ImmediateTransition{
+export interface ImmediateTransition {
     type: TransitionType.Immediate;
     dest: string;
+    fn?: Function;
 }
 
-export interface TimeoutTransition{
+export interface TimeoutTransition {
     type: TransitionType.Timeout;
     duration: (() => number) | number;
     dest: string;
     countdownTimerShowDots?: boolean;
+    fn?: Function;
 }
 
-export interface KeyboardTransition{
+export interface KeyboardTransition {
     type: TransitionType.Keyboard;
     keys: string;
     dest: string;
+    fn?: Function;
 }

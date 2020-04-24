@@ -197,9 +197,9 @@ export class StateMachine {
                 const transitionObj = transitionArray[i];
                 if (transitionObj.type === TransitionType.If) {
                     if (transitionObj.condition.call(this.operator, triggereringkeyboardEvent)) {
-                        this.goToState(transitionObj.then, triggereringkeyboardEvent);
+                        this.goToState(transitionObj.then.dest, triggereringkeyboardEvent);
                     } else {
-                        this.goToState(transitionObj.else, triggereringkeyboardEvent);
+                        this.goToState(transitionObj.else.dest, triggereringkeyboardEvent);
                     }
                 }
                 break;
@@ -361,7 +361,7 @@ export class StateMachine {
                         break;
 
                     case TransitionType.Manual:
-                        this.manualTriggerMap[transitionObj.name] = transitionObj;
+                        this.manualTriggerMap[transitionObj.triggerName] = transitionObj;
                         break;
 
                     case TransitionType.Promise:
@@ -374,11 +374,11 @@ export class StateMachine {
                             printWarning(stateObj.name, transitionIndex,
                                 "condition is not a function: " + transitionObj.condition);
                         }
-                        if (!(transitionObj.then in this.stateMap)) {
+                        if (!(transitionObj.then.dest in this.stateMap)) {
                             printWarning(stateObj.name, transitionIndex,
                                 `unknown 'then' state "${transitionObj.then}"`);
                         }
-                        if (!(transitionObj.else in this.stateMap)) {
+                        if (!(transitionObj.else.dest in this.stateMap)) {
                             printWarning(stateObj.name, transitionIndex,
                                 `unknown 'else' state "${transitionObj.else}"`);
                         }
