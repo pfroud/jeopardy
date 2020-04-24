@@ -10,29 +10,73 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]) {
 
 
             switch (transition.type) {
-                case TransitionType.Timeout:
-                    lines.push(`${state.name} -> ${transition.dest} [label="timeout"];`);
-                    break;
-
                 case TransitionType.Keyboard:
-                    lines.push(`${state.name} -> ${transition.dest} [label="${transition.keys}"];`);
+                    const keys = transition.keys;
+                    var label = "keyboard: ";
+                    if (keys === " ") {
+                        label += "[space]"
+                    } else {
+                        label += '\\"' + keys + '\\"';
+                    }
+
+                    if (transition.fn) {
+                        label += ` / ${transition.fn.name}`;
+                    }
+
+                    lines.push(`${state.name} -> ${transition.dest} [label="${label}"];`);
                     break;
 
-                case TransitionType.Manual:
-                    lines.push(`${state.name} -> ${transition.dest} [label="manual"];`);
-                    break;
 
                 case TransitionType.Promise:
-                    lines.push(`${state.name} -> ${transition.dest} [label="promise"];`);
+                case TransitionType.Immediate:
+                    var label = transition.type.toString();
+                    if (transition.fn) {
+                        label += ` / ${transition.fn.name}`;
+                    }
+
+                    lines.push(`${state.name} -> ${transition.dest} [label="${label}"];`);
                     break;
 
-                case TransitionType.Immediate:
-                    lines.push(`${state.name} -> ${transition.dest} [label="immediate"];`);
+                case TransitionType.Timeout:
+                    var label: string;
+                    if (typeof transition.duration === "number") {
+                        label = transition.type.toString() + ": " + (transition.duration / 1000) + "sec";
+                    } else {
+                        label = transition.type.toString() + ": " + transition.duration;
+
+                    }
+                    if (transition.fn) {
+                        label += ` / ${transition.fn.name}`;
+                    }
+
+                    lines.push(`${state.name} -> ${transition.dest} [label="${label}"];`);
+                    break;
+
+
+                case TransitionType.Manual:
+                    var label = transition.type.toString() + ': \\"' + transition.triggerName.replace("manualTrigger_","") + '\\"';
+                    if (transition.fn) {
+                        label += ` / ${transition.fn.name}`;
+                    }
+
+                    lines.push(`${state.name} -> ${transition.dest} [label="${label}"];`);
                     break;
 
                 case TransitionType.If:
-                    lines.push(`${state.name} -> ${transition.then} [label="then"];`);
-                    lines.push(`${state.name} -> ${transition.else} [label="else"];`);
+                    const condition = transition.condition.name;
+
+                    var labelThen = "if(" + condition + ")";
+                    if (transition.then.fn) {
+                        labelThen += ` / ${transition.then.fn.name}`;
+                    }
+
+                    var labelElse = "if(!" + condition + ")";
+                    if (transition.else.fn) {
+                        labelThen += ` / ${transition.else.fn.name}`;
+                    }
+
+                    lines.push(`${state.name} -> ${transition.then.dest} [label="${labelThen}"];`);
+                    lines.push(`${state.name} -> ${transition.else.dest} [label="${labelElse}"];`);
                     break;
 
                 default:
