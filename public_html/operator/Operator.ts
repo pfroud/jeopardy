@@ -10,7 +10,7 @@ const TEAM_COUNT = 9;
 export class Operator {
     audioManager: AudioManager;
     settings: Settings;
-    presentationInstance: Presentation;
+    presentation: Presentation;
     divClueWrapper: JQuery<HTMLDivElement>;
     divClueQuestion: JQuery<HTMLDivElement>;
     divClueDollars: JQuery<HTMLDivElement>;
@@ -26,7 +26,7 @@ export class Operator {
     isPaused: boolean;
     stateMachine: StateMachine;
     buttonStartGame: JQuery<HTMLButtonElement>;
-    answeringTeam: Team;
+    teamPresentlyAnswering: Team;
     buttonSkipClue: JQuery<HTMLButtonElement>;
 
     constructor(audioManager: AudioManager, settings: Settings) {
@@ -34,7 +34,7 @@ export class Operator {
         this.settings = settings;
 
 
-        this.presentationInstance = null;
+        this.presentation = null;
 
         this.divClueWrapper = $("div#clue");
         this.divClueQuestion = $("div#clue-question");
@@ -50,56 +50,64 @@ export class Operator {
         this.buttonSkipClue = $("button#skip-clue");
 
         this.currentClueObj = null;
-        this.answeringTeam = null;
+        this.teamPresentlyAnswering = null;
 
         this.teamArray = new Array(TEAM_COUNT);
 
         this.isPaused = false;
 
-        this.initKeyboardListener();
+        this.initPauseKeyboardListener();
         this.initMouseListeners();
+        this.lookForSavedGame();
 
         window.open("../presentation/presentation.html", "windowPresentation");
 
-        this.lookForSavedGame();
+        /*
+        The rest of the initialization happens in this.handlePresentationReady(),
+        which gets called by the Presentation instance in the window we opened.
+        */
     }
 
-    public handlePresentationReady(presentationInstance: Presentation): void {
-        // called from Presentation instance in other window
-        this.presentationInstance = presentationInstance;
+    public handlePresentationReady(presentationInstanceFromOtherWindow: Presentation): void {
+        /* 
+        This method gets called from Presentation instance in the other window.
+        */
+        window.focus();
+        this.presentation = presentationInstanceFromOtherWindow;
         this.initTeams();
 
-        this.presentationInstance.setTeamsVisible(true);
+        this.presentation.setTeamsVisible(true);
 
-        this.initTeamKeyboardShow();
+        this.initBuzzerFootswitchIconDisplay();
 
-        this.stateMachine = new StateMachine(this.settings, this, presentationInstance, this.audioManager);
+        this.stateMachine = new StateMachine(this.settings, this, presentationInstanceFromOtherWindow, this.audioManager);
 
         this.buttonStartGame.prop("disabled", false);
-        this.divInstructions.html("Click button to start game");
-
-        window.focus();
-
+        this.divInstructions.html("Ready. Click the button to start the game.");
     }
 
-    private initTeamKeyboardShow(): void {
-        const numbers: string[] =
-            new Array(9).fill(1).map(
+    private initBuzzerFootswitchIconDisplay(): void {
+        /*
+        Show a small picture of the footswitch used for the buzzers
+        so people can verify their buzzers are working.
+        */
+        const teamNumbers: string[] =
+            new Array(TEAM_COUNT).fill(1).map(
                 (elem, index) => String(index + 1)
             );
 
         window.addEventListener("keydown", keyboardEvent => {
-            const theKey = keyboardEvent.key;
-            if (numbers.includes(theKey)) {
-                const teamIndex = Number(theKey) - 1;
+            const keyboardKey = keyboardEvent.key;
+            if (teamNumbers.includes(keyboardKey)) {
+                const teamIndex = Number(keyboardKey) - 1;
                 const teamObj = this.teamArray[teamIndex];
                 teamObj.showKeyDown();
             }
         });
         window.addEventListener("keyup", keyboardEvent => {
-            const theKey = keyboardEvent.key;
-            if (numbers.includes(theKey)) {
-                const teamIndex = Number(theKey) - 1;
+            const keyboardKey = keyboardEvent.key;
+            if (teamNumbers.includes(keyboardKey)) {
+                const teamIndex = Number(keyboardKey) - 1;
                 const teamObj = this.teamArray[teamIndex];
                 teamObj.showKeyUp();
             }
@@ -107,7 +115,7 @@ export class Operator {
 
     }
 
-    private initKeyboardListener(): void {
+    private initPauseKeyboardListener(): void {
         window.addEventListener("keydown", keyboardEvent => {
             if (keyboardEvent.key === "p") {
                 this.togglePaused();
@@ -115,67 +123,62 @@ export class Operator {
         });
     }
 
-    public handleAnswerRight(): void {
-        this.answeringTeam.handleAnswerRight(this.currentClueObj);
+    public handleAnswerCorrect(): void {
+        this.teamPresentlyAnswering.handleAnswerCorrect(this.currentClueObj);
     }
 
-    public handleAnswerWrong(): void {
-        this.answeringTeam.handleAnswerWrong(this.currentClueObj);
+    public handleAnswerIncorrectOrAnswerTimeout(): void {
+        this.teamPresentlyAnswering.handleAnswerIncorrectOrAnswerTimeout(this.currentClueObj);
     }
 
     private initMouseListeners(): void {
-        $("button#go-to-game-rules").click(() => this.presentationInstance.showSlide("game-rules"));
-        $("button#go-to-jeopardy-logo").click(() => this.presentationInstance.showSlide("jeopardy-logo"));
-        $("button#go-to-event-cost").click(() => this.presentationInstance.showSlide("event-cost"));
-        $("button#teams-hide").click(() => this.presentationInstance.setTeamsVisible(false));
-        $("button#teams-show").click(() => this.presentationInstance.setTeamsVisible(true));
+        $("button#go-to-game-rules").on("click", () => this.presentation.showSlide("game-rules"));
+        $("button#go-to-jeopardy-logo").on("click", () => this.presentation.showSlide("jeopardy-logo"));
+        $("button#go-to-event-cost").on("click", () => this.presentation.showSlide("event-cost"));
 
-        this.buttonStartGame.click(() => {
+        this.buttonStartGame.on("click", () => {
             this.stateMachine.manualTrigger("manualTrigger_startGame");
             this.buttonStartGame.prop("disabled", true);
         });
 
 
-        this.buttonSkipClue.click(() => this.skipClue());
+        this.buttonSkipClue.on("click", () => this.skipClue());
 
-        $("a#aMoneyOverride").click(() =>
-            window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney",
-                "menubar=0,toolbar=0,location=0,personalbar=0status=0"));
+        $("a#aMoneyOverride").on("click", () =>
+            window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney", "popup"));
 
     }
 
 
     public skipClue(): void {
-        this.setAllTeamsState(TeamState.BUZZERS_OFF, true);
-        this.stateMachine.goToState("state_fetchClue");
+        this.setAllTeamsState(TeamState.BUZZERS_OFF, true); // the second argument is endLockout
         this.buttonSkipClue.attr("disabled", "true");
-        this.buttonSkipClue.blur();
+        this.buttonSkipClue.trigger("blur");
+        this.stateMachine.goToState("state_fetchClue");
     }
 
     private initTeams(): void {
-        if (!this.presentationInstance) {
-            console.log("can't init teams because no Presentation instance");
+        if (!this.presentation) {
+            console.warn("can't init teams because no Presentation instance!");
             return;
         }
 
         for (let i = 0; i < TEAM_COUNT; i++) {
-            const theTeam = this.teamArray[i] =
-                new Team(i, this.presentationInstance, this.settings, this.audioManager);
+            this.teamArray[i] = new Team(i, this.presentation, this.settings, this.audioManager);
         }
-        this.presentationInstance.setTeamsVisible(true);
+        this.presentation.setTeamsVisible(true);
     }
 
 
-    public playTimeoutSound(): void {
+    public playSoundQuestionTimeout(): void {
         this.audioManager.play("questionTimeout");
     }
 
     public handleBuzzerPress(keyboardEvent: KeyboardEvent): void {
         const teamIndex = Number(keyboardEvent.key) - 1;
         const teamObj = this.teamArray[teamIndex];
-        //        this.audioTeamBuzz.play();
 
-        this.answeringTeam = teamObj;
+        this.teamPresentlyAnswering = teamObj;
 
         this.audioManager.play("teamBuzz");
 
@@ -195,9 +198,9 @@ export class Operator {
         teamObj.canBeLockedOut() && teamObj.startLockout();
     }
 
-    public getClue() {
+    public getClueFromJService() {
+        // only same the game if somebody has more than $0
         if (this.teamArray.some(teamObj => teamObj.dollars > 0)) {
-            // only same the game if somebody has more than $0
             this.saveGame();
         }
 
@@ -210,6 +213,11 @@ export class Operator {
         }
 
         function doesQuestionHaveMultimedia(clueObj: Clue): boolean {
+            /*
+            Some Jeopardy clues have audio or video, which are shown or played on the 
+            TV show. The J Archive does not have the audio or video, so we need to
+            skip those clues.
+            */
             const questionStr = clueObj.question.toLowerCase();
             const terms = ["seen here", "heard here"];
             for (let i = 0; i < terms.length; i++) {
@@ -220,31 +228,36 @@ export class Operator {
             return false;
         }
 
-        const showClue = (clueObj: Clue) => {
+        const showClueToOperator = (clueObj: Clue) => {
+            /*
+            This function only shows the category. 
+            The state machine will show the clue question after a timeout.
+            */
             this.divClueWrapper.show();
             this.divClueCategory.html(clueObj.category.title);
             this.divClueDollars.html("$" + clueObj.value);
+            // example of what format the airdate is in: "2013-01-25T12:00:00.000Z
             this.divClueAirdate.html((new Date(clueObj.airdate)).toDateString());
+            this.presentation.setClueObj(clueObj);
             this.trAnswer.hide();
-            this.presentationInstance.setClueObj(clueObj);
             this.divInstructions.html("Read aloud the category and dollar value.");
         }
 
-        const fetchClueHelper = (promiseResolveFunc: (arg0: Clue)=>void, tryNum: number, maxTries: number) => {
+        const fetchClueHelper = (promiseResolveFunc: (arg0: Clue) => void, tryNum: number, maxTries: number) => {
             $.getJSON("http://jservice.io/api/random", response => {
                 const clueObj = response[0];
                 this.currentClueObj = clueObj;
 
                 if (isClueValid(clueObj) && !doesQuestionHaveMultimedia(clueObj)) {
-                    showClue.call(this, clueObj);
+                    showClueToOperator.call(this, clueObj);
                     promiseResolveFunc(clueObj);
                 } else {
                     if (tryNum < maxTries) {
                         fetchClueHelper.call(this, promiseResolveFunc, tryNum + 1, maxTries);
                     } else {
-                        // Would make sense to call the promise reject function,
-                        // but then a function somewhere down the line has to generate
-                        // this error message
+                        // Would make sense to call the promise reject function?
+                        // But then a function somewhere down the line has to generate
+                        // this error message.
                         promiseResolveFunc({
                             answer: `couldn't fetch clue after ${maxTries} tries`,
                             question: `couldn't fetch clue after ${maxTries} tries`,
@@ -258,7 +271,7 @@ export class Operator {
         }
 
         return new Promise((resolve, reject) => {
-            this.buttonStartGame.blur();
+            this.buttonStartGame.trigger("blur");
             this.trQuestion.hide();
             this.divInstructions.html("Loading clue...");
             fetchClueHelper.call(this, resolve, 1, 5);
@@ -267,48 +280,57 @@ export class Operator {
     }
 
     public showClueQuestion(): void {
-        this.presentationInstance.fitQuestionToScreen();
+        /*
+        The presentation is already showing the clue question because of the
+        slide change in the state machine.
+        */
+        this.presentation.fitClueQuestionToScreen();
 
         this.setAllTeamsState(TeamState.READING_QUESTION);
 
-        this.divInstructions.html("Read aloud the question. Buzzers open when you press space");
+        this.divInstructions.html("Read the question out loud. Buzzers open when you press space.");
 
-        this.divClueQuestion.html(getClueQuestionHtml(this.currentClueObj));
+        this.divClueQuestion.html(getClueQuestionHtmlWithSubjectInBold(this.currentClueObj));
         this.trQuestion.show();
         this.trAnswer.hide();
 
         this.buttonSkipClue.attr("disabled", "false");
 
-        function getClueQuestionHtml(clueObj: Clue): string {
-            const clueStr = clueObj.question.replace(/\\/g, "");
+        function getClueQuestionHtmlWithSubjectInBold(clueObj: Clue): string {
+            /*
+            The person reading the question out loud should emphasize the subject
+            of the question. Look for words that are probably the subject and make them bold.
+            */
+            const clueQuestionString = clueObj.question.replace(/\\/g, ""); // sometime's there's a backslash
 
-            const regex = /\b(?:(?:this)|(?:these)|(?:her)|(?:his)|(?:she)|(?:he))\b/i;
-            const result = regex.exec(clueStr);
+            const regex = /\b((this)|(these)|(her)|(his)|(she)|(he)|(here))\b/i; // \b is a word boundary
+            const result = regex.exec(clueQuestionString);
 
             if (result === null) {
-                return clueStr;
+                return clueQuestionString;
             } else {
                 const startIndex = result.index;
                 const foundWord = result[0];
 
-                return clueStr.substring(0, startIndex) + '<span class="clue-keyword">' +
-                    foundWord + '</span>' + clueStr.substring(startIndex + foundWord.length);
+                return clueQuestionString.substring(0, startIndex)
+                    + '<span class="clue-keyword">' + foundWord + '</span>'
+                    + clueQuestionString.substring(startIndex + foundWord.length);
             }
         }
 
     }
 
     public handleDoneReadingClueQuestion(): void {
-        this.trAnswer.show();
+        this.trAnswer.show(); //show answer to operator
         this.divClueAnswer.html(this.currentClueObj.answer);
-        this.divInstructions.html("Wait for people to answer");
+        this.divInstructions.html("Wait for people to answer.");
         this.setAllTeamsState(TeamState.CAN_ANSWER);
         this.buttonSkipClue.attr("disabled", "true");
     }
 
     public handleShowAnswer(): void {
         this.setAllTeamsState(TeamState.BUZZERS_OFF);
-        this.divInstructions.html("Let people read the answer");
+        this.divInstructions.html("Let people read the answer.");
     }
 
     public setAllTeamsState(targetState: TeamState, endLockout: boolean = false): void {
@@ -316,6 +338,7 @@ export class Operator {
     }
 
     public canTeamBuzz(keyboardEvent: KeyboardEvent): boolean {
+        // press keyboard key one for team index zero
         const teamIndex = Number(keyboardEvent.key) - 1;
         return this.teamArray[teamIndex].canBuzz();
     }
@@ -333,21 +356,21 @@ export class Operator {
         this.divPaused.toggle(isPaused);
         this.stateMachine.setPaused(isPaused);
         this.teamArray.forEach(teamObj => teamObj.setPaused(isPaused));
-        this.presentationInstance.setPaused(isPaused);
+        this.presentation.setPaused(isPaused);
     }
 
     private lookForSavedGame(): void {
         const divSavedGame = $("div#saved-game-prompt");
 
-        const raw = window.localStorage.getItem("jeopardy-teams");
-        if (raw === null) {
+        const rawLocalStorageResult = window.localStorage.getItem("jeopardy-teams");
+        if (rawLocalStorageResult === null) {
             divSavedGame.hide();
             return;
         }
 
         const tableDetails = $("table#saved-game-details tbody");
 
-        const parsed = JSON.parse(raw);
+        const parsed = JSON.parse(rawLocalStorageResult);
 
         parsed.forEach(function (savedTeam: TeamDumpToJson) {
             const tr = $("<tr>").appendTo(tableDetails);
@@ -355,17 +378,17 @@ export class Operator {
             $("<td>").html("$" + savedTeam.dollars).appendTo(tr);
         });
 
-        $("button#saved-game-load").click(() => {
+        $("button#saved-game-load").on("click", () => {
             this.loadGame();
             divSavedGame.hide();
         });
-        $("button#saved-game-delete").click(function () {
+        $("button#saved-game-delete").on("click", function () {
             if (window.confirm("Delete the saved game?")) {
                 window.localStorage.removeItem("jeopardy-teams");
                 divSavedGame.hide();
             }
         });
-        $("button#saved-game-dismiss").click(() => divSavedGame.hide());
+        $("button#saved-game-dismiss").on("click", () => divSavedGame.hide());
 
 
     }
@@ -386,24 +409,21 @@ export class Operator {
             return;
         }
         const parsed = JSON.parse(storageContents);
-
         for (let i = 0; i < parsed.length; i++) {
             this.teamArray[i].jsonLoad(parsed[i]);
         }
-
     }
 
     public handleGameEnd(): void {
 
         this.audioManager.play("musicClosing");
 
+        // sort teams by how much money they have
         let shallowCopy = this.teamArray.slice();
-
         function comparator(team1: Team, team2: Team) {
             //sort descending
             return team2.dollars - team1.dollars;
         }
-
         shallowCopy.sort(comparator);
 
         let html = "<table><tbody>";
@@ -413,8 +433,10 @@ export class Operator {
         });
         html += "</tbody></table>";
 
-        this.presentationInstance.setGameEndMessage(html);
-        this.presentationInstance.headerHide();
+        this.presentation.setGameEndMessage(html);
+        this.presentation.headerHide();
     }
+
+
 
 }

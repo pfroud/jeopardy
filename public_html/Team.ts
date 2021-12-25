@@ -87,14 +87,14 @@ export class Team {
         });
     }
 
-    public handleAnswerRight(clueObj: Clue): void {
-        this.audioManager.play("answerRight");
+    public handleAnswerCorrect(clueObj: Clue): void {
+        this.audioManager.play("answerCorrect");
         this.moneyAdd(clueObj.value);
         this.presentationCountdownDots.find("td").removeClass("active");
     }
 
-    public handleAnswerWrong(clueObj: Clue): void {
-        this.audioManager.play("answerWrong");
+    public handleAnswerIncorrectOrAnswerTimeout(clueObj: Clue): void {
+        this.audioManager.play("answerIncorrectOrAnswerTimeout");
         // todo set class on the <table> instead of finding <td>s
         this.presentationCountdownDots.find("td").removeClass("active");
         this.moneySubtract(clueObj.value * this.settings.wrongAnswerPenaltyMultiplier);
@@ -127,6 +127,8 @@ export class Team {
 
         function handleTimeout(instance: Team) {
             const difference = Math.abs(targetDollars - instance.dollars);
+
+            // check why this is needed, some questions have $50 increments?
             if (difference >= DOLLAR_CHANGE_PER_STEP) {
                 instance.dollars += DIRECTION_MULTIPLIER * DOLLAR_CHANGE_PER_STEP;
             } else {
@@ -232,18 +234,14 @@ export class Team {
     }
 
     public setTeamName(teamName: string): void {
+        // todo delete the entire mechanism to rename teams
         this.teamName = teamName;
         this.div.operator.teamName.html(teamName);
         this.div.presentation.teamName.html(teamName);
     }
 
     public setState(targetState: TeamState, endLockout = false): void {
-        /*
-        if (!(Team.stateValues.includes(targetState))) {
-            throw new RangeError(`team ${this.teamIdx}: can't go to state "${targetState}", not in the enum of avaliable states`);
-        }
-        */
-
+        // TODO talk about why the endLockout boolean is needed
         if (this.state === TeamState.LOCKOUT && !endLockout) {
             this.stateBeforeLockout = targetState;
         } else {
@@ -325,7 +323,7 @@ export enum TeamState {
     READING_QUESTION = "reading-question", //operator is reading the question out loud
     CAN_ANSWER = "can-answer", //operator is done reading the question
     ANSWERING = "answering",
-    ALREADY_ANSWERED = "already-answered",
+    ALREADY_ANSWERED = "already-answered", // the team tried answering the question but got it wrong
     LOCKOUT = "lockout" //team buzzed while operator was reading the question
 };
 

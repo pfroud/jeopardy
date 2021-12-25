@@ -1,0 +1,37 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaVersion": 12,
+        "sourceType": "module"
+    },
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "rules": {
+        // https://eslint.org/docs/rules/
+        "no-unused-private-class-members": "warn",
+        "class-methods-use-this": "error",
+        "consistent-return": "warn",
+        "consistent-this": "warn",
+        "default-case": "warn",
+        "default-case-last": "warn",
+        "new-cap": "error",
+        "no-array-constructor": "warn",
+        "no-confusing-arrow": "warn",
+        "no-invalid-this":"error",
+        "no-loop-func":"error",
+        "no-param-reassign": "error",
+        "no-shadow": "error",
+        "no-throw-literal": "warn",
+        "prefer-promise-reject-errors": "warn",
+        "prefer-template": "warn"
+    }
+}

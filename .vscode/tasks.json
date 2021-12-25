@@ -1,0 +1,30 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+
+    // https://code.visualstudio.com/docs/editor/tasks
+    // https://graphviz.org/documentation/
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "generate graphviz",
+            "type": "shell",
+            "command": "C:\\Users\\pfrou\\Downloads\\stable_windows_10_msbuild_Release_Win32_graphviz-2.49.3-win32\\Graphviz\\bin\\dot.exe",
+            "args": [
+                "-Tsvg",
+                "-o",
+                "graphvizOutput.svg",
+                "graphviz-input.gv"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "echo": false,
+                "reveal": "never",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false
+            }
+        }
+    ]
+}

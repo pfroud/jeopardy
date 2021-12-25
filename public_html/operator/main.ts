@@ -5,6 +5,7 @@ import { Operator } from "./Operator.js";
 
 $(document).ready(function () {
     if (window.location.search.length > 1) {
+        console.log("not doing anything becasue window.location.search is set to something;")
         return;
     }
 
@@ -14,7 +15,7 @@ $(document).ready(function () {
     const audioManager = new AudioManager();
 
     (window as any).operator = new Operator(audioManager, settings);
-    let i = 1;
+
 });
 
 function initKeyboardShortcuts(): void {
@@ -24,10 +25,6 @@ function initKeyboardShortcuts(): void {
     const inputSettings = $("input#tab-settings");
 
     document.addEventListener("keydown", function (keyboardEvent) {
-        //        if (!keyboardEvent.altKey) {
-        //            return;
-        //        }
-
         if (document.activeElement.tagName === "INPUT") {
             return;
         }

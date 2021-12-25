@@ -6,24 +6,24 @@ $height-footer: 180px;
     @for $i from 0 to $count {
         $size: ($i + 1) * 2 + 1;
         $result: $result + $size + "px " + $size + "px 0px black";
-        @if $i+1 < $count{
+        @if $i + 1 < $count {
             $result: $result + ", ";
         }
     }
     @return unquote($result);
 }
+$big-shadow: big-shadow(5);
+$slightly-smaller-shadow: big-shadow(4);
 
 @function repeat($value, $count) {
     // used to repeat drop-shadow filter
     $result: "";
     @for $i from 0 to $count {
-        $result: $result + $value +" ";
+        $result: $result + $value + " ";
     }
     @return unquote($result);
 }
 
-$big-shadow: big-shadow(5);
-$slightly-smaller-shadow: big-shadow(4);
 $color-dollars: #e3a147;
 
 body {
@@ -39,6 +39,7 @@ body {
 }
 
 div#spinner {
+    // https://projects.lukehaas.me/css-loaders/
     border: 10px solid rgba(255, 255, 255, 0.2);
     border-left-color: white;
     animation: spin 0.5s infinite linear;
@@ -49,6 +50,7 @@ div#spinner {
     box-sizing: border-box;
 }
 @keyframes spin {
+    // https://projects.lukehaas.me/css-loaders/
     0% {
         transform: rotate(0deg);
     }
@@ -57,19 +59,22 @@ div#spinner {
     }
 }
 
-
 div#paused {
     background-color: #ffa900;
     color: black;
     font-weight: bold;
     position: absolute;
+    top: 100px;
     font-size: 30px;
     border-radius: 20px;
     padding: 20px;
     border: 1px solid darkorange;
-    text-shadow: 3px 3px rgba(0,0,0,0.2);
-    filter: drop-shadow(10px 13px rgba(0,0,0,0.4));
-    top: 100px;
+
+    // shadow on the text inside the div
+    text-shadow: 3px 3px rgba(0, 0, 0, 0.2);
+
+    // shadow on the entire div
+    filter: drop-shadow(10px 13px rgba(0, 0, 0, 0.4));
 }
 
 header {
@@ -96,7 +101,6 @@ header {
         height: 4px;
         vertical-align: top;
     }
-
 }
 
 progress#game-timer {
@@ -142,7 +146,6 @@ main {
                 filter: brightness(0) blur(2px) opacity(0.6);
                 transform: translateY(35px) scale(0.9);
             }
-
         }
 
         &#slide-game-rules {
@@ -166,7 +169,6 @@ main {
             div#dollars-big {
                 color: $color-dollars;
             }
-
         }
 
         &#slide-clue-question {
@@ -183,7 +185,6 @@ main {
             font-size: 60px;
         }
 
-
         &#slide-game-end {
             font-size: 80px;
             text-shadow: $big-shadow;
@@ -196,11 +197,9 @@ main {
                 &:nth-of-type(2) {
                     text-align: right;
                 }
-
             }
         }
     }
-
 }
 
 footer {
@@ -218,17 +217,18 @@ footer {
         text-align: center;
         flex: 1;
 
+        // since we're not using the dollar animation, probably can delete this
         position: relative; //need this to center the dollar animations
 
-
+        /*
         &[data-team-state="buzzers-off"],
         &[data-team-state="reading-question"],
         &[data-team-state="already-answered"],
         &[data-team-state="lockout"]
         {
-            /*opacity: 0.4;*/
+            opacity: 0.4;
         }
-
+        */
 
         &[data-team-state="buzzers-off"] table.countdown-dots {
             visibility: hidden;
@@ -239,16 +239,16 @@ footer {
             background-color: white;
             font-weight: bold;
             color: black;
+
+            div.team-dollars {
+                text-shadow: 2px 2px 0px lightgray;
+            }
         }
 
         div.team-dollars {
             font-family: swiss911;
             font-size: 40px;
             text-shadow: 3px 3px 0px black;
-        }
-
-        &[data-team-state="answering"] div.team-dollars {
-            text-shadow: 2px 2px 0px lightgray;
         }
 
         div.team-name {
@@ -268,21 +268,20 @@ footer {
                 &.active {
                     background-color: red;
                 }
-
             }
 
             &.paused td.active {
                 background-color: firebrick;
             }
-
         }
 
         progress {
             display: none;
         }
 
-        div.buzzer-show{
+        div.buzzer-show {
             img {
+                // TODO why do we need to set the z-index?
                 z-index: -2;
                 width: 100px;
                 margin-bottom: 5px;
@@ -294,46 +293,5 @@ footer {
                 display: none;
             }
         }
-
-    }
-
-
-}
-
-/*
-div.dollar-change-animation {
-    position: absolute;
-    left: 0;
-    right: 0;
-    margin: auto;
-    //top: 50px;
-    //opacity: 0%;
-
-    z-index: -1;
-
-    //animation: 0.5s cubic-bezier(0.5, 0.5, 0.1, 1) infinite dollar-change-animation;
-
-    font-family: swiss911;
-    font-size: 40px;
-    text-shadow: 3px 3px 0px black;
-
-}
-
-@keyframes dollar-change-animation {
-    0% {
-        top: -60px;
-        opacity: 0%;
-        transform: scaleX(1.2);
-    }
-
-    80% {
-        opacity: 100%;
-    }
-
-    100% {
-        top: 85px;
-        opacity: 0%;
-        transform: scale(0.5);
     }
 }
-*/

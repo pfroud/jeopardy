@@ -3,11 +3,8 @@ import {StateMachineState, TransitionType} from "./stateInterfaces.js";
 import { Operator } from "../operator/Operator.js";
 import { Settings } from "../Settings.js";
 
-export function getStates(stateMachine: StateMachine, operator: Operator, settings: Settings): StateMachineState[] {
+export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: Operator, settings: Settings): StateMachineState[] {
 
-    // todo make names of states less confusing
-    //todo consider adding a way to call function on a transition, instead of having init and continuing states
-    // todo simplify onEnter and onExit
     /*
      * where to replace two states with one state and onTransition:
      * definitley: showQuestion(Init)
@@ -18,32 +15,40 @@ export function getStates(stateMachine: StateMachine, operator: Operator, settin
     return [
         {
             name: "state_idle",
-            showSlide: "slide-jeopardy-logo",
+            showPresentationSlide: "slide-jeopardy-logo",
             transitions: [{
                     type: TransitionType.Manual,
                     triggerName: "manualTrigger_startGame",
-                    dest: "state_fetchClue"
+                    dest: "state_getClueFromJService"
                 }]
         }, {
-            name: "state_fetchClue",
-            showSlide: "slide-spinner",
-            onEnter: operator.getClue,
+            name: "state_getClueFromJService",
+            showPresentationSlide: "slide-spinner",
+            onEnter: operator.getClueFromJService,
             transitions: [{
                     type: TransitionType.Promise,
-                    dest: "state_showCategoryAndDollars"
+                    dest: "state_showClueCategoryAndDollars"
                 }]
         }, {
-            name: "state_showCategoryAndDollars",
-            showSlide: "slide-clue-category-and-dollars",
+            /*
+            The category and dollar value are shown on the center of the presentation window for a fixed amount of time.
+            */
+            name: "state_showClueCategoryAndDollars",
+            showPresentationSlide: "slide-clue-category-and-dollars",
             transitions: [{
                     type: TransitionType.Timeout,
                     duration: settings.displayDurationCategoryMs,
-                    dest: "state_showQuestion",
-                    fn: operator.showClueQuestion
+                    dest: "state_showClueQuestion"
                 }]
-        },
-        {
-            name: "state_showQuestion",
+        }, {
+            /*
+            The clue question is shown on center of the presentation window. The person operating the
+            game is supposed to read the question out loud and press space when done reading it.
+            Also the category and dollar value are shown on the presentation header.
+            */
+            name: "state_showClueQuestion",
+            showPresentationSlide: "slide-clue-question",
+            onEnter: operator.showClueQuestion,
             transitions: [{
                     type: TransitionType.Keyboard,
                     keys: " ", //space
@@ -51,40 +56,39 @@ export function getStates(stateMachine: StateMachine, operator: Operator, settin
                 }, {
                     type: TransitionType.Keyboard,
                     keys: "123456789",
-                    dest: "state_showQuestion",
+                    dest: "state_showClueQuestion",
                     fn: operator.handleLockout
                 }]
-        }, 
-        {
+        }, {
             name: "state_waitForBuzzesRestartTimer",
             onEnter: operator.handleDoneReadingClueQuestion,
-            onExit: stateMachine.saveRemainingTime,
+            onExit: stateMachine.saveRemainingCountdownTime,
             transitions: [{
                     type: TransitionType.Timeout,
                     duration: settings.timeoutWaitForBuzzesMs,
                     dest: "state_showAnswer",
-                    fn: operator.playTimeoutSound
+                    fn: operator.playSoundQuestionTimeout
                 }, {
                     type: TransitionType.Keyboard,
                     keys: "123456789",
-                    dest: "state_tryTeamAnswer"
+                    dest: "state_checkIfTeamCanAnswer"
                 }]
         }, {
             name: "state_waitForBuzzesResumeTimer",
-            onExit: stateMachine.saveRemainingTime,
+            onExit: stateMachine.saveRemainingCountdownTime,
             transitions: [{
                     type: TransitionType.Timeout,
                     duration: () => stateMachine.remainingQuestionTimeMs, //todo look at code implementing stateMachineInstance
                     dest: "state_showAnswer",
-                    fn: operator.playTimeoutSound
+                    fn: operator.playSoundQuestionTimeout
                 }, {
                     type: TransitionType.Keyboard,
                     keys: "123456789",
-                    dest: "state_tryTeamAnswer"
+                    dest: "state_checkIfTeamCanAnswer"
                 }
             ]
         }, {
-            name: "state_tryTeamAnswer",
+            name: "state_checkIfTeamCanAnswer",
             transitions: [{
                     type: TransitionType.If,
                     condition: operator.canTeamBuzz,
@@ -98,8 +102,7 @@ export function getStates(stateMachine: StateMachine, operator: Operator, settin
                     type: TransitionType.Keyboard,
                     keys: "y",
                     dest: "state_showAnswer",
-                    fn: operator.handleAnswerRight
-
+                    fn: operator.handleAnswerCorrect
                 }, {
                     type: TransitionType.Keyboard,
                     keys: "n",
@@ -107,35 +110,24 @@ export function getStates(stateMachine: StateMachine, operator: Operator, settin
                 }, {
                     type: TransitionType.Timeout,
                     duration: settings.timeoutAnswerMs,
-                    countdownTimerShowDots: true,
+                    countdownTimerShowDots: true, // wait what
                     dest: "state_subtractMoney"
                 }
             ]
         },
         {
             name: "state_subtractMoney",
-            onEnter: operator.handleAnswerWrong,
+            onEnter: operator.handleAnswerIncorrectOrAnswerTimeout,
             transitions: [{
                     type: TransitionType.If,
                     condition: operator.haveAllTeamsAnswered,
                     then: {dest: "state_showAnswer"},
                     else: {dest: "state_waitForBuzzesResumeTimer"}
                 }]
-        },
-        /*
-        {
-            name: "state_playTimeoutSound",
-            onEnter: operator.playTimeoutSound,
-            transitions: [{
-                    type: TransitionType.Immediate,
-                    dest: "state_showAnswer"
-                }]
-        },
-        */
-        {
+        }, {
             name: "state_showAnswer",
             onEnter: operator.handleShowAnswer,
-            showSlide: "slide-clue-answer",
+            showPresentationSlide: "slide-clue-answer",
             transitions: [{
                     type: TransitionType.Timeout,
                     duration: settings.displayDurationAnswerMs,
@@ -147,11 +139,11 @@ export function getStates(stateMachine: StateMachine, operator: Operator, settin
                     type: TransitionType.If,
                     condition: operator.shouldGameEnd,
                     then: {dest: "state_gameEnd"},
-                    else: {dest: "state_fetchClue"}
+                    else: {dest: "state_getClueFromJService"}
                 }]
         }, {
             name: "state_gameEnd",
-            showSlide: "slide-game-end",
+            showPresentationSlide: "slide-game-end",
             onEnter: operator.handleGameEnd,
             transitions: [{
                     type: TransitionType.Manual,

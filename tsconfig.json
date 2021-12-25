@@ -1,9 +1,12 @@
 {
     "compilerOptions": {
-        "target": "ES2017",
+        // https://www.typescriptlang.org/tsconfig
+        "target": "ES2021",
         "strict": true,
         "sourceMap": true,
-        "strictNullChecks": false
+        "strictNullChecks": false,
+        // "exactOptionalPropertyTypes": true, // turn this on when we enable strictNullChecks
+        "noImplicitOverride": true
     },
     "exclude": [
         "node_modules"

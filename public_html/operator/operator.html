@@ -3,7 +3,7 @@
     <head>
         <title>J operator</title>
         <meta charset="UTF-8">
-        <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+        <link rel="icon" href="../favicon.ico" type="image/x-icon">
         <link rel="stylesheet" href="css/tabs.css">
         <link rel="stylesheet" href="css/progressBarOperator.css">
         <link rel="stylesheet" href="css/operator.css">
@@ -51,21 +51,17 @@
 
                 <p>
 
-                    Team 1 name: <input type="text" id="team-name-0" value="team one"><br>
-                    Team 2 name: <input type="text" id="team-name-1" value="team two"><br>
-                    Team 3 name: <input type="text" id="team-name-2" value="team three"><br>
-                    Team 4 name: <input type="text" id="team-name-3" value="team four"><br>
-
                 <p><button id="go-to-game-rules">Go to game rules</button></p>
 
                 <button id="go-to-jeopardy-logo">Go to Jeopardy logo</button>
+                <button id="go-to-event-cost">Go to event cost</button>
 
                 <p>
                     Opening music:<br>
-                    <audio preload="auto" src="../sound/music-opening.mp3" controls loop style="width:100%"></audio>
+                    <audio id="music-game-start" preload="auto" src="../sound/music-opening.mp3" controls loop style="width:100%"></audio>
                 <p>
                     Closing music:<br>
-                    <audio id="music-closing" preload="auto" src="../sound/music-closing.mp3" controls style="width:100%"></audio>
+                    <audio id="music-game-end" preload="auto" src="../sound/music-closing.mp3" controls style="width:100%"></audio>
 
 
             </div>
@@ -158,7 +154,7 @@
             <audio preload="auto" src="../sound/answer-correct.mp3"   id="answer-correct" ></audio>
             <audio preload="auto" src="../sound/answer-incorrect.mp3" id="answer-incorrect"></audio>
             <audio preload="auto" src="../sound/question-timeout.mp3" id="question-timeout"></audio>
-            <audio preload="auto" src="../sound/round-end.wav"        id="round-end" ></audio>
+            <audio preload="auto" src="../sound/round-end.wav"        id="round-end"></audio>
             <audio preload="auto" src="../sound/team-buzz.wav"        id="team-buzz"></audio>
             <audio preload="auto" src="../sound/tick.wav"             id="tick"></audio>
         </div>

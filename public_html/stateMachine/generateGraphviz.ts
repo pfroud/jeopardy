@@ -1,16 +1,21 @@
 import { StateMachineState, StateMachineTransition, TransitionType } from "./stateInterfaces.js";
 
-export function generateGraphvizImpl(stateArray: StateMachineState[]) {
+export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
 
-    const lines: string[] = ["digraph jeopardy{\n"];
+    const lines: string[] = [];
+    lines.push("digraph jeopardy {");
+    lines.push("\tgraph [id=\"jeopardy\"];")
+    lines.push("\tnode [shape=\"rect\"];");
 
     stateArray.forEach((state: StateMachineState) => {
+
+        lines.push(`\t${state.name} [id="${state.name}"];`);
 
         state.transitions.forEach((transition: StateMachineTransition) => {
 
 
             switch (transition.type) {
-                case TransitionType.Keyboard:
+                case TransitionType.Keyboard: {
                     const keys = transition.keys;
                     var label = "keyboard: ";
                     if (keys === " ") {
@@ -23,25 +28,25 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]) {
                         label += ` / ${transition.fn.name}`;
                     }
 
-                    lines.push(`${state.name} -> ${transition.dest} [label="${label}"];`);
+                    lines.push(`\t${state.name} -> ${transition.dest} [label="${label}"];`);
                     break;
 
-
-                case TransitionType.Promise:
-                case TransitionType.Immediate:
+                }
+                case TransitionType.Promise: {
                     var label = transition.type.toString();
                     if (transition.fn) {
                         label += ` / ${transition.fn.name}`;
                     }
 
-                    lines.push(`${state.name} -> ${transition.dest} [label="${label}"];`);
+                    lines.push(`\t${state.name} -> ${transition.dest} [label="${label}"];`);
                     break;
-
-                case TransitionType.Timeout:
+                }
+                case TransitionType.Timeout: {
                     var label: string;
                     if (typeof transition.duration === "number") {
                         label = transition.type.toString() + ": " + (transition.duration / 1000) + "sec";
                     } else {
+                        // the timeout is a function which returns a number
                         label = transition.type.toString() + ": " + transition.duration;
 
                     }
@@ -49,20 +54,19 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]) {
                         label += ` / ${transition.fn.name}`;
                     }
 
-                    lines.push(`${state.name} -> ${transition.dest} [label="${label}"];`);
+                    lines.push(`\t${state.name} -> ${transition.dest} [label="${label}"];`);
                     break;
-
-
-                case TransitionType.Manual:
-                    var label = transition.type.toString() + ': \\"' + transition.triggerName.replace("manualTrigger_","") + '\\"';
+                }
+                case TransitionType.Manual: {
+                    var label = transition.type.toString() + ': \\"' + transition.triggerName.replace("manualTrigger_", "") + '\\"';
                     if (transition.fn) {
                         label += ` / ${transition.fn.name}`;
                     }
 
-                    lines.push(`${state.name} -> ${transition.dest} [label="${label}"];`);
+                    lines.push(`\t${state.name} -> ${transition.dest} [label="${label}"];`);
                     break;
-
-                case TransitionType.If:
+                }
+                case TransitionType.If: {
                     const condition = transition.condition.name;
 
                     var labelThen = "if(" + condition + ")";
@@ -75,21 +79,30 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]) {
                         labelThen += ` / ${transition.else.fn.name}`;
                     }
 
-                    lines.push(`${state.name} -> ${transition.then.dest} [label="${labelThen}"];`);
-                    lines.push(`${state.name} -> ${transition.else.dest} [label="${labelElse}"];`);
+                    lines.push(`\t${state.name} -> ${transition.then.dest} [label="${labelThen}"];`);
+                    lines.push(`\t${state.name} -> ${transition.else.dest} [label="${labelElse}"];`);
                     break;
-
+                }
                 default:
                     console.error("unknown transition type!");
                     break;
             }
 
         });
-        lines.push("\n");
+        lines.push(""); // empty string becomes one newline because the whole array gets joines wih t\n
 
     });
     lines.push("}");
 
-    window.prompt("graphviz", lines.join("\n"));
+    const joined = lines.join("\n");
+
+    // max length of string allowed in window.prompt is 2053 so I'm going to open a new window
+    const gvDocument = window.open("", "generatedGraphviz", "popup").document;
+    gvDocument.title = "Generated DOT for Graphviz";
+
+    const pre = gvDocument.createElement("pre");
+    pre.innerText = joined;
+    gvDocument.body.appendChild(pre);
+
 
 }

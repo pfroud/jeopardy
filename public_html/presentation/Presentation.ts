@@ -38,11 +38,22 @@ export class Presentation {
 
         this._initSlides();
 
-
         if (window.opener) {
-            this.showSlide("slide-jeopardy-logo");
-            window.opener.operator.handlePresentationReady(this);
+
+            if (window.opener.operator) {
+                this.showSlide("slide-jeopardy-logo");
+                (window as any).opener.operator.handlePresentationReady(this);
+            } else{
+                $("<div>window.opener.operator is null</div>")
+                    .css("background-color", "red")
+                    .css("position", "absolute")
+                    .css("font-size", "60px")
+                    .css("top", "20px")
+                    .css("padding", "5px 10px")
+                    .appendTo("body");
+            }
         } else {
+            // todo instead of showing this error message, we should open operator.html then close this window.
             $("<div>window.opener is null</div>")
                 .css("background-color", "red")
                 .css("position", "absolute")
@@ -56,11 +67,6 @@ export class Presentation {
     private _initSlides(): void {
         this.slideDivs = {};
         this.visibleSlide = undefined;
-
-        /*
-        const slideNames = this.slideNames = ["jeopardy-logo", "game-rules", "spinner",
-            "clue-category-and-dollars", "clue-question", "clue-answer", "event-cost", "buzzer-test", "game-end"];
-            */
 
         this.slideNames = [];
 
@@ -96,13 +102,13 @@ export class Presentation {
         this.divCategoryBig.html(clueObj.category.title);
         this.divDollarsBig.html("$" + clueObj.value);
 
-        this.divQuestion.html(clueObj.question.replace(/\\/g, ""));
+        this.divQuestion.html(clueObj.question.replace(/\\/g, "")); //sometimes there's a stray backslash
 
         this.divClueAnswer.html("Answer:<p><div style=\"font-weight:bold\">"
             + clueObj.answer + "</div>");
     }
 
-    public fitQuestionToScreen(): void {
+    public fitClueQuestionToScreen(): void {
 
         //remove the style tag which may have been set by previous call to this function
         this.divQuestion.css("font-size", "");
