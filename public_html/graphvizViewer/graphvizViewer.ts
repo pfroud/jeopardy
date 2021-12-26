@@ -29,12 +29,16 @@ window.addEventListener('DOMContentLoaded', () => {
 
 export class GraphvizViewer {
 
-    private static readonly SVG_GROUP_CLASS_NAME_PRESENT_STATE = "present-state";
-    private static readonly SVG_GROUP_CLASS_NAME_LAST_TRANSITION = "last-transition";
-    private static readonly THE_COLOR = "red";
+    private readonly DEBUG = true;
+
+    private static readonly SVG_ATTRIBUTE_STATE_TRAIL_INDEX = "data-state-trail-index";
+    private static readonly SVG_ATTRIBUTE_TRANSITION_TRAIL_INDEX = "data-transition-trail-index";
+    private static readonly TRAIL_LENGTH = 3;
+    private static readonly TRAIL_COLORS = ["red", "orange", "yellow"];
 
     private readonly svg: SVGElement;
-    // private stateTrail: SVGGElement[] = new Array(3);
+    private stateTrail: SVGGElement[] = new Array();
+    private transitionTrail: SVGGElement[] = new Array();
 
     constructor(svgDocument: XMLDocument) {
         this.svg = svgDocument.querySelector<SVGElement>("svg");
@@ -42,38 +46,67 @@ export class GraphvizViewer {
 
         // https://stackoverflow.com/a/4906603
         var styleElement = svgDocument.createElementNS("http://www.w3.org/2000/svg", "style");
-        styleElement.textContent =
-            `g.${GraphvizViewer.SVG_GROUP_CLASS_NAME_PRESENT_STATE} polygon {fill: ${GraphvizViewer.THE_COLOR}; stroke-width: 3}\n` +
-            `g.${GraphvizViewer.SVG_GROUP_CLASS_NAME_PRESENT_STATE} text {font-weight: bold;}\n` +
-            `g.${GraphvizViewer.SVG_GROUP_CLASS_NAME_LAST_TRANSITION} path {stroke: ${GraphvizViewer.THE_COLOR}; stroke-width: 4}\n` +
-            `g.${GraphvizViewer.SVG_GROUP_CLASS_NAME_LAST_TRANSITION} polygon {fill: ${GraphvizViewer.THE_COLOR}; stroke: ${GraphvizViewer.THE_COLOR}}\n` +
-            `g.${GraphvizViewer.SVG_GROUP_CLASS_NAME_LAST_TRANSITION} text {fill: ${GraphvizViewer.THE_COLOR}; font-weight: bold}`;
+
+        const lines: string[] = new Array(0);
+
+        for (let i = 0; i < GraphvizViewer.TRAIL_LENGTH; i++) {
+            const color = GraphvizViewer.TRAIL_COLORS[i];
+            if (i === 0) {
+                lines.push(`g[${GraphvizViewer.SVG_ATTRIBUTE_STATE_TRAIL_INDEX}="${i}"] polygon {fill: ${color}; stroke-width: 3}`);
+                lines.push(`g[${GraphvizViewer.SVG_ATTRIBUTE_STATE_TRAIL_INDEX}="${i}"] text {font-weight: bold}`);
+            } else {
+                lines.push(`g[${GraphvizViewer.SVG_ATTRIBUTE_STATE_TRAIL_INDEX}="${i}"] polygon {fill: ${color}}`);
+            }
+
+            lines.push(`g[${GraphvizViewer.SVG_ATTRIBUTE_TRANSITION_TRAIL_INDEX}="${i}"] path {stroke: ${color}; stroke-width: 4}`);
+            lines.push(`g[${GraphvizViewer.SVG_ATTRIBUTE_TRANSITION_TRAIL_INDEX}="${i}"] polygon {fill: ${color}; stroke: ${color}; stroke-width: 4}`);
+            lines.push(`g[${GraphvizViewer.SVG_ATTRIBUTE_TRANSITION_TRAIL_INDEX}="${i}"] text {fill: ${color}; font-weight: bold}`);
+        }
+
+
+        styleElement.textContent = lines.join("\n");
         this.svg.appendChild(styleElement);
     }
 
     public updateGraphviz(previousStateName: string, newStateName: string): void {
+
+        if (this.DEBUG) {
+            console.log(`graphvizViewer: ${previousStateName} --> ${newStateName}`);
+        }
+
         const groupForState = this.svg.querySelector<SVGGElement>(`g#${newStateName}`);
-        if (!groupForState) {
-            // todo is this how you check if it found anything???
-            console.warn(`couldn't find a group with ID "${newStateName}"`);
-            return;
+        if (groupForState) {
+
+            // add element to the beginning of the array
+            this.stateTrail.unshift(groupForState);
+
+            if (this.stateTrail.length > GraphvizViewer.TRAIL_LENGTH) {
+                // remove the last element of the array
+                this.stateTrail.pop().removeAttribute(GraphvizViewer.SVG_ATTRIBUTE_STATE_TRAIL_INDEX);
+            }
+
+            for (let i = 0; i < this.stateTrail.length; i++) {
+                this.stateTrail[i].setAttribute(GraphvizViewer.SVG_ATTRIBUTE_STATE_TRAIL_INDEX, i.toString());
+            }
+
         }
+
         if (previousStateName) {
-            /*
-            TODO
-            Some of the states transition immediately (e.g. a conditional transition).
-            Would be nice to show that the state was active.
-            Actually we should show a trail of the previous two or three states.
-            AND the transitions we took - need to ass IDs somehow.
-            */
-            this.svg.querySelector(`g#${previousStateName}`).classList.remove(GraphvizViewer.SVG_GROUP_CLASS_NAME_PRESENT_STATE);
-        }
+            const groupForTransition = this.svg.querySelector<SVGGElement>(`g#${previousStateName}_to_${newStateName}`);
+            if (groupForTransition) {
 
-        groupForState.classList.add(GraphvizViewer.SVG_GROUP_CLASS_NAME_PRESENT_STATE);
+                // add element to the beginning ofthe  array
+                this.transitionTrail.unshift(groupForTransition);
 
-        const transition = this.svg.querySelector(`g#${previousStateName}_to_${newStateName}`);
-        if (transition) {
-            transition.classList.add(GraphvizViewer.SVG_GROUP_CLASS_NAME_LAST_TRANSITION);
+                if (this.transitionTrail.length > GraphvizViewer.TRAIL_LENGTH) {
+                    // remove the last element of the array
+                    this.transitionTrail.pop().removeAttribute(GraphvizViewer.SVG_ATTRIBUTE_TRANSITION_TRAIL_INDEX);
+                }
+
+                for (let i = 0; i < this.transitionTrail.length; i++) {
+                    this.transitionTrail[i].setAttribute(GraphvizViewer.SVG_ATTRIBUTE_TRANSITION_TRAIL_INDEX, i.toString());
+                }
+            }
         }
 
     }

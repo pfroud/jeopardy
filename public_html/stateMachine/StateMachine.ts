@@ -21,7 +21,7 @@ interface KeyboardKeysUsed {
 }
 
 export class StateMachine {
-    private readonly DEBUG: boolean;
+    private readonly DEBUG = true;
     public readonly operator: Operator;
     public readonly settings: Settings;
     private readonly audioManager: AudioManager;
@@ -40,7 +40,6 @@ export class StateMachine {
 
     constructor(settings: Settings, operator: Operator, presentation: Presentation, audioManager: AudioManager) {
 
-        this.DEBUG = true;
 
         this.operator = operator;
         this.presentation = presentation;
@@ -308,7 +307,6 @@ export class StateMachine {
         handleShowSlide.call(this);
         handleOnEnter.call(this);
         startCountdownTimerIfNeeded.call(this, keyboardEvent);
-        handleTransitionIf.call(this);
 
         if (this.graphvizViewer) {
             this.graphvizViewer.updateGraphviz(previousState.name, this.presentState.name);
@@ -317,6 +315,8 @@ export class StateMachine {
         if (this.DEBUG) {
             console.groupEnd();
         }
+
+        handleTransitionIf.call(this);
 
 
     }
