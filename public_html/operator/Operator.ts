@@ -154,7 +154,7 @@ export class Operator {
         this.setAllTeamsState(TeamState.BUZZERS_OFF, true); // the second argument is endLockout
         this.buttonSkipClue.attr("disabled", "true");
         this.buttonSkipClue.trigger("blur");
-        this.stateMachine.goToState("state_fetchClue");
+        this.stateMachine.goToState("fetchClue");
     }
 
     private initTeams(): void {

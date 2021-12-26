@@ -6,6 +6,7 @@ import { CountdownTimer } from "../CountdownTimer.js";
 import { getStatesForJeopardyGame } from "./statesForJeopardyGame.js";
 import { StateMachineState, StateMachineTransition, KeyboardTransition, TimeoutTransition, TransitionType } from "./stateInterfaces.js";
 import { generateGraphvizImpl } from "./generateGraphviz.js";
+import { GraphvizViewer } from "../graphvizViewer/graphvizViewer.js";
 
 interface StateMap {
     [stateName: string]: StateMachineState;
@@ -29,6 +30,7 @@ export class StateMachine {
     private readonly operatorWindowCountdownText: JQuery<HTMLDivElement>;
     private readonly operatorWindowDivStateName: JQuery<HTMLDivElement>;
     private readonly stateMap: StateMap;
+    private graphvizViewer: GraphvizViewer;
     private manualTriggerMap: ManualTriggerMap;
     public remainingQuestionTimeMs: number;
     private countdownTimer: CountdownTimer;
@@ -65,8 +67,17 @@ export class StateMachine {
 
         this.presentState = this.allStates[0]; //idle state
 
-        // this.openStateMachineViewer();
+        this.graphvizViewer = null;
+        this._openGraphvizThing();
 
+    }
+    private _openGraphvizThing() {
+        const graphvizWindow = window.open("../graphvizViewer/graphvizViewer.html", "graphvizViewer");
+    }
+
+    public handleGraphvizViewerReady(graphvizViewer: GraphvizViewer) {
+        graphvizViewer.updateGraphviz(null, this.presentState.name);
+        this.graphvizViewer = graphvizViewer;
     }
 
     private _handleKeyboardEvent(keyboardEvent: KeyboardEvent): void {
@@ -81,11 +92,11 @@ export class StateMachine {
                 // do the first possible transition
                 const transitionObj: StateMachineTransition = transitionArray[i];
                 if (transitionObj.type === TransitionType.Keyboard && transitionObj.keys.includes(keyboardEvent.key)) {
-                    if(this.DEBUG){
+                    if (this.DEBUG) {
                         console.log(`keyboard transition from keyboard key ${keyboardEvent.key}`)
                     }
-                    if(transitionObj.fn){
-                        if(this.DEBUG){
+                    if (transitionObj.fn) {
+                        if (this.DEBUG) {
                             console.log(`calling transition fn ${transitionObj.fn.name}`);
                         }
                         transitionObj.fn.call(this.operator, keyboardEvent);
@@ -143,7 +154,7 @@ export class StateMachine {
         }
 
         countdownTimer.onFinished = () => {
-            if(transitionObj.fn){
+            if (transitionObj.fn) {
                 transitionObj.fn.call(this.operator);
             }
             this.goToState(destinationStateName);
@@ -239,7 +250,7 @@ export class StateMachine {
 
                 const functionToCall = this.presentState.onEnter;
 
-                if(this.DEBUG){
+                if (this.DEBUG) {
                     console.log(`Running the onEnter function: ${functionToCall.name}`);
                 }
 
@@ -289,6 +300,7 @@ export class StateMachine {
 
         handleOnExit.call(this);
 
+        const previousState = this.presentState;
         this.presentState = this.stateMap[destStateName];
         this.operatorWindowDivStateName.html(destStateName);
 
@@ -298,7 +310,9 @@ export class StateMachine {
         startCountdownTimerIfNeeded.call(this, keyboardEvent);
         handleTransitionIf.call(this);
 
-        //this.updateGraphviz(stateName);
+        if (this.graphvizViewer) {
+            this.graphvizViewer.updateGraphviz(previousState.name, this.presentState.name);
+        }
 
         if (this.DEBUG) {
             console.groupEnd();
@@ -416,26 +430,6 @@ export class StateMachine {
         generateGraphvizImpl(this.allStates);
     }
 
-    private updateGraphviz(stateName: string): void {
-        if (!this.svgGroup) {
-            console.warn(`can't show state ${stateName} in the graphviz becasue this.svgGroup is undefined`);
-            return;
-        }
-        // this does not work
-        const group = this.svgGroup.querySelector(`g#${stateName}`);
-        const polygon = group.querySelector("polygon");
-        polygon.setAttribute("fill", "orange");
-    }
 
-    private openStateMachineViewer(): void {
-        const gvDocument = window.open("/graphvizOutput.svg", "liveGraphviz").document;
-
-        const self = this;
-        $(gvDocument).ready(function () {
-
-            self.svgGroup = gvDocument.querySelector("svg g#jeopardy");
-
-        });
-    }
 
 }

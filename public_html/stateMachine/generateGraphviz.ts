@@ -5,7 +5,7 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
     const lines: string[] = [];
     lines.push("digraph jeopardy {");
     lines.push("\tgraph [id=\"jeopardy\"];")
-    lines.push("\tnode [shape=\"rect\"];");
+    lines.push("\tnode [shape=\"rect\", fontname=\"monospace\"];\n");
 
     stateArray.forEach((state: StateMachineState) => {
 
@@ -28,7 +28,9 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                         label += ` / ${transition.fn.name}`;
                     }
 
-                    lines.push(`\t${state.name} -> ${transition.dest} [label="${label}"];`);
+                    const id = `${state.name}_to_${transition.dest}`;
+
+                    lines.push(`\t${state.name} -> ${transition.dest} [label="${label}", id="${id}"];`);
                     break;
 
                 }
@@ -38,7 +40,8 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                         label += ` / ${transition.fn.name}`;
                     }
 
-                    lines.push(`\t${state.name} -> ${transition.dest} [label="${label}"];`);
+                    const id = `${state.name}_to_${transition.dest}`;
+                    lines.push(`\t${state.name} -> ${transition.dest} [label="${label}", id="${id}"];`);
                     break;
                 }
                 case TransitionType.Timeout: {
@@ -54,7 +57,8 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                         label += ` / ${transition.fn.name}`;
                     }
 
-                    lines.push(`\t${state.name} -> ${transition.dest} [label="${label}"];`);
+                    const id = `${state.name}_to_${transition.dest}`;
+                    lines.push(`\t${state.name} -> ${transition.dest} [label="${label}", id="${id}"];`);
                     break;
                 }
                 case TransitionType.Manual: {
@@ -63,7 +67,8 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                         label += ` / ${transition.fn.name}`;
                     }
 
-                    lines.push(`\t${state.name} -> ${transition.dest} [label="${label}"];`);
+                    const id = `${state.name}_to_${transition.dest}`;
+                    lines.push(`\t${state.name} -> ${transition.dest} [label="${label}", id="${id}"];`);
                     break;
                 }
                 case TransitionType.If: {
@@ -73,14 +78,16 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                     if (transition.then.fn) {
                         labelThen += ` / ${transition.then.fn.name}`;
                     }
+                    const idThen = `${state.name}_to_${transition.then.dest}`;
 
                     var labelElse = "if(!" + condition + ")";
                     if (transition.else.fn) {
                         labelThen += ` / ${transition.else.fn.name}`;
                     }
+                    const idElse = `${state.name}_to_${transition.else.dest}`;
 
-                    lines.push(`\t${state.name} -> ${transition.then.dest} [label="${labelThen}"];`);
-                    lines.push(`\t${state.name} -> ${transition.else.dest} [label="${labelElse}"];`);
+                    lines.push(`\t${state.name} -> ${transition.then.dest} [label="${labelThen}", id="${idThen}"];`);
+                    lines.push(`\t${state.name} -> ${transition.else.dest} [label="${labelElse}", id="${idElse}"];`);
                     break;
                 }
                 default:
