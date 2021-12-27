@@ -2,14 +2,16 @@ import { StateMachineState, StateMachineTransition, TransitionType } from "./sta
 
 export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
 
-    const lines: string[] = [];
-    lines.push("digraph jeopardy {");
-    lines.push("\tgraph [id=\"jeopardy\"];")
-    lines.push("\tnode [shape=\"rect\", fontname=\"monospace\"];\n");
+    // TODO need to add onExit and onEnter functions!!!!
+
+    const dotFileLines: string[] = [];
+    dotFileLines.push("digraph jeopardy {");
+    dotFileLines.push("\tgraph [id=\"jeopardy\"];")
+    dotFileLines.push("\tnode [shape=\"rect\", fontname=\"monospace\"];\n");
 
     stateArray.forEach((state: StateMachineState) => {
 
-        lines.push(`\t${state.name} [id="${state.name}"];`);
+        dotFileLines.push(`\t${state.name} [id="${state.name}"];`);
 
         state.transitions.forEach((transition: StateMachineTransition) => {
 
@@ -17,6 +19,7 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
             switch (transition.type) {
                 case TransitionType.Keyboard: {
                     const keys = transition.keys;
+                    // TODO push stuff to array then use join() instead of string concatenating
                     var label = "keyboard: ";
                     if (keys === " ") {
                         label += "[space]"
@@ -30,7 +33,7 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
 
                     const id = `${state.name}_to_${transition.dest}`;
 
-                    lines.push(`\t${state.name} -> ${transition.dest} [label="${label}", id="${id}"];`);
+                    dotFileLines.push(`\t${state.name} -> ${transition.dest} [label="${label}", id="${id}"];`);
                     break;
 
                 }
@@ -41,7 +44,7 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                     }
 
                     const id = `${state.name}_to_${transition.dest}`;
-                    lines.push(`\t${state.name} -> ${transition.dest} [label="${label}", id="${id}"];`);
+                    dotFileLines.push(`\t${state.name} -> ${transition.dest} [label="${label}", id="${id}"];`);
                     break;
                 }
                 case TransitionType.Timeout: {
@@ -58,7 +61,7 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                     }
 
                     const id = `${state.name}_to_${transition.dest}`;
-                    lines.push(`\t${state.name} -> ${transition.dest} [label="${label}", id="${id}"];`);
+                    dotFileLines.push(`\t${state.name} -> ${transition.dest} [label="${label}", id="${id}"];`);
                     break;
                 }
                 case TransitionType.Manual: {
@@ -68,7 +71,7 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                     }
 
                     const id = `${state.name}_to_${transition.dest}`;
-                    lines.push(`\t${state.name} -> ${transition.dest} [label="${label}", id="${id}"];`);
+                    dotFileLines.push(`\t${state.name} -> ${transition.dest} [label="${label}", id="${id}"];`);
                     break;
                 }
                 case TransitionType.If: {
@@ -86,8 +89,8 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                     }
                     const idElse = `${state.name}_to_${transition.else.dest}`;
 
-                    lines.push(`\t${state.name} -> ${transition.then.dest} [label="${labelThen}", id="${idThen}"];`);
-                    lines.push(`\t${state.name} -> ${transition.else.dest} [label="${labelElse}", id="${idElse}"];`);
+                    dotFileLines.push(`\t${state.name} -> ${transition.then.dest} [label="${labelThen}", id="${idThen}"];`);
+                    dotFileLines.push(`\t${state.name} -> ${transition.else.dest} [label="${labelElse}", id="${idElse}"];`);
                     break;
                 }
                 default:
@@ -96,12 +99,12 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
             }
 
         });
-        lines.push(""); // empty string becomes one newline because the whole array gets joines wih t\n
+        dotFileLines.push(""); // empty string becomes one newline because the whole array gets joines wih t\n
 
     });
-    lines.push("}");
+    dotFileLines.push("}");
 
-    const joined = lines.join("\n");
+    const joined = dotFileLines.join("\n");
 
     // max length of string allowed in window.prompt is 2053 so I'm going to open a new window
     const gvDocument = window.open("", "generatedGraphviz", "popup").document;

@@ -249,6 +249,12 @@ export class Operator {
                 this.currentClueObj = clueObj;
 
                 if (isClueValid(clueObj) && !doesQuestionHaveMultimedia(clueObj)) {
+
+                    // remove backslashes
+                    clueObj.question = clueObj.question.replace(/\\/g, "");
+                    clueObj.answer = clueObj.answer.replace(/\\/g, "");
+                    clueObj.category.title = clueObj.category.title.replace(/\\/g, "");
+
                     showClueToOperator.call(this, clueObj);
                     promiseResolveFunc(clueObj);
                 } else {
@@ -301,20 +307,19 @@ export class Operator {
             The person reading the question out loud should emphasize the subject
             of the question. Look for words that are probably the subject and make them bold.
             */
-            const clueQuestionString = clueObj.question.replace(/\\/g, ""); // sometime's there's a backslash
-
             const regex = /\b((this)|(these)|(her)|(his)|(she)|(he)|(here))\b/i; // \b is a word boundary
-            const result = regex.exec(clueQuestionString);
+            const result = regex.exec(clueObj.question);
 
             if (result === null) {
-                return clueQuestionString;
+                // didn't find any words to make bold
+                return clueObj.question;
             } else {
                 const startIndex = result.index;
                 const foundWord = result[0];
 
-                return clueQuestionString.substring(0, startIndex)
+                return clueObj.question.substring(0, startIndex)
                     + '<span class="clue-keyword">' + foundWord + '</span>'
-                    + clueQuestionString.substring(startIndex + foundWord.length);
+                    + clueObj.question.substring(startIndex + foundWord.length);
             }
         }
 
@@ -344,7 +349,7 @@ export class Operator {
     }
 
     public haveAllTeamsAnswered(): boolean {
-        return this.teamArray.every(teamObj => teamObj.hasAnswered);
+        return this.teamArray.every(teamObj => teamObj.state === TeamState.ALREADY_ANSWERED);
     }
 
     public togglePaused(): void {
@@ -426,14 +431,18 @@ export class Operator {
         }
         shallowCopy.sort(comparator);
 
-        let html = "<table><tbody>";
+        const html: string[] = new Array();
+        html.push("<table><tbody>");
+
         shallowCopy.forEach(teamObj => {
-            html += ("<tr><td>" + teamObj.teamName + "</td><td>$" +
+            html.push(
+                "<tr><td>" + teamObj.teamName + "</td><td>$" +
                 teamObj.dollars.toLocaleString() + "</td></tr>");
         });
-        html += "</tbody></table>";
 
-        this.presentation.setGameEndMessage(html);
+        html.push("</tbody></table>");
+
+        this.presentation.setGameEndMessage(html.join(""));
         this.presentation.headerHide();
     }
 

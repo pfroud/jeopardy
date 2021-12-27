@@ -5,7 +5,7 @@ import { Operator } from "./Operator.js";
 
 $(document).ready(function () {
     if (window.location.search.length > 1) {
-        console.log("not doing anything becasue window.location.search is set to something;")
+        console.log("not doing anything becasue window.location.search is set to something");
         return;
     }
 
@@ -14,6 +14,7 @@ $(document).ready(function () {
     const settings = new Settings();
     const audioManager = new AudioManager();
 
+    // so we can access the operator instance in the web browser debugger
     (window as any).operator = new Operator(audioManager, settings);
 
 });

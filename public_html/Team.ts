@@ -32,7 +32,6 @@ export class Team {
     presentationProgressLockout: JQuery<HTMLProgressElement>;
     countdownTimer: CountdownTimer;
     stateBeforeLockout: TeamState;
-    hasAnswered: boolean;
     presentationInstance: Presentation;
 
     constructor(teamIdx: number, presentationInstance: Presentation, settings: Settings, audioManager: AudioManager) {
@@ -41,7 +40,7 @@ export class Team {
         this.teamIdx = teamIdx;
         this.dollars = 0;
         this.presentationInstance = presentationInstance;
-        this.teamName = "team " + (teamIdx + 1);
+        this.teamName = "Team " + (teamIdx + 1);
 
         this.state = null;
 

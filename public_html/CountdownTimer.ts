@@ -5,7 +5,7 @@ import { AudioManager } from "./operator/AudioManager.js";
 export class CountdownTimer {
     private readonly audioManager: AudioManager;
     public updateIntervalMs: number;
-    private readonly durationMs: number;/*  */
+    private readonly durationMs: number;
     public maxMs: number;
     public remainingMs: number;
     hideProgressOnFinish: boolean;
