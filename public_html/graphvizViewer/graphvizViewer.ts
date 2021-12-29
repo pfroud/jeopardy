@@ -95,7 +95,7 @@ export class GraphvizViewer {
             const groupForTransition = this.svg.querySelector<SVGGElement>(`g#${previousStateName}_to_${newStateName}`);
             if (groupForTransition) {
 
-                // add element to the beginning ofthe  array
+                // add element to the beginning of the  array
                 this.transitionTrail.unshift(groupForTransition);
 
                 if (this.transitionTrail.length > GraphvizViewer.TRAIL_LENGTH) {

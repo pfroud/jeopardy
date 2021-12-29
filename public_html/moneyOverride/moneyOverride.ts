@@ -1,6 +1,6 @@
 import { Team } from "../Team";
 
-$(document).ready(function () {
+document.addEventListener("DOMContentLoaded", function () {
     if (!window.opener) {
         console.error("no window.opener");
         return;
@@ -10,7 +10,7 @@ $(document).ready(function () {
 
 
     //////////// populate the table //////////////
-    const table = $("table tbody");
+    const table = document.querySelector("table tbody");
     for (let teamIndex = 0; teamIndex < 4; teamIndex++) {
         makeTableRow(teamIndex);
     }
@@ -19,54 +19,59 @@ $(document).ready(function () {
         const teamObj = teamArray[teamIndex];
         const dollarValues = [1000, 800, 600, 400, 200];
 
-        const tableRow = $("<tr>").appendTo(table);
+        const tableRow = document.createElement("tr");
+        table.appendChild(tableRow);
 
         // cell in first column contains the team name
-        $("<td>")
-            .addClass("team-name")
-            .html(teamObj.teamName)
-            .appendTo(tableRow);
+        const tdTeamName = document.createElement("td");
+        tdTeamName.classList.add("team-name");
+        tdTeamName.innerHTML = teamObj.teamName;
+        tableRow.appendChild(tdTeamName);
 
-        const textInput: JQuery<HTMLInputElement> = $<HTMLInputElement>("<input>")
-            .attr("type", "text")
-            .prop("value", teamObj.dollars)
-            .on("input", function () {
-                teamObj.moneySet(Number(textInput.prop("value")));
-            });
+        const textInput = document.createElement("input");
+        textInput.setAttribute("type", "text");
+        textInput.value = String(teamObj.dollars);
+        textInput.addEventListener("input", function () {
+            teamObj.moneySet(Number(textInput.value));
+        });
 
         // create buttons to subtract money
         dollarValues.forEach(function (dollarValue) {
-            const tdMoneySubtract = $("<td>").appendTo(tableRow);
-            $("<button>")
-                .addClass("money-change")
-                .html("-$" + dollarValue)
-                .appendTo(tdMoneySubtract)
-                .on("click", () => {
-                    teamObj.moneySubtract(dollarValue);
-                    textInput.prop("value", teamObj.dollars);
-                });
+            const cell = document.createElement("td");
+            tableRow.appendChild(cell);
+
+            const button = document.createElement("button");
+            button.classList.add("money-change");
+            button.innerHTML = "-$" + dollarValue;
+            button.addEventListener("click", () => {
+                teamObj.moneySubtract(dollarValue);
+                textInput.value = String(teamObj.dollars);
+            });
+            cell.appendChild(button);
         });
 
         // cell to show the current dollar amount
-        const tdPresentValue = $("<td>")
-            .appendTo(tableRow)
-            .addClass("present-value");
+        const tdPresentValue = document.createElement("td");
+        tdPresentValue.classList.add("present-value");
         tdPresentValue.append(document.createTextNode("$"));
-        textInput.appendTo(tdPresentValue);
+        tdPresentValue.appendChild(textInput);
+        tableRow.appendChild(tdPresentValue);
 
 
         // create buttons to add money
         dollarValues.reverse();
         dollarValues.forEach(function (dollarValue) {
-            const tdMoneyAdd = $("<td>").appendTo(tableRow);
-            $("<button>")
-                .addClass("money-change")
-                .html("+$" + dollarValue)
-                .appendTo(tdMoneyAdd)
-                .on("click", () => {
-                    teamObj.moneyAdd(dollarValue);
-                    textInput.prop("value", teamObj.dollars);
-                });
+            const cell = document.createElement("td");
+            tableRow.appendChild(cell);
+
+            const button = document.createElement("button");
+            button.classList.add("money-change");
+            button.innerHTML = "+$" + dollarValue;
+            button.addEventListener("click", () => {
+                teamObj.moneyAdd(dollarValue);
+                textInput.value = String(teamObj.dollars);
+            });
+            cell.appendChild(button);
         });
 
     }

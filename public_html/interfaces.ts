@@ -1,5 +1,5 @@
 export interface Slides {
-    [name: string]: JQuery<HTMLDivElement>;
+    [name: string]: HTMLDivElement;
 }
 
 export interface Clue {

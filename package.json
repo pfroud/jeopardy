@@ -16,9 +16,6 @@
     "url": "https://github.com/pfroud/jeopardy/issues"
   },
   "homepage": "https://github.com/pfroud/jeopardy#readme",
-  "dependencies": {
-    "@types/jquery": "^3.5.5"
-  },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.28.0",
     "@typescript-eslint/parser": "^4.28.0",

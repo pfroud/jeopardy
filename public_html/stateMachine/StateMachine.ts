@@ -26,9 +26,9 @@ export class StateMachine {
     public readonly settings: Settings;
     private readonly audioManager: AudioManager;
     private readonly presentation: Presentation;
-    private readonly operatorWindowCountdownProgress: JQuery<HTMLProgressElement>;
-    private readonly operatorWindowCountdownText: JQuery<HTMLDivElement>;
-    private readonly operatorWindowDivStateName: JQuery<HTMLDivElement>;
+    private readonly operatorWindowCountdownProgress: HTMLProgressElement;
+    private readonly operatorWindowCountdownText: HTMLDivElement;
+    private readonly operatorWindowDivStateName: HTMLDivElement;
     private readonly stateMap: StateMap;
     private graphvizViewer: GraphvizViewer;
     private manualTriggerMap: ManualTriggerMap;
@@ -45,9 +45,9 @@ export class StateMachine {
         this.settings = settings;
         this.audioManager = audioManager;
 
-        this.operatorWindowCountdownProgress = $("div#state-machine-viz progress#countdown");
-        this.operatorWindowCountdownText = $("div#state-machine-viz div#remaining");
-        this.operatorWindowDivStateName = $("div#state-machine-viz div#state-name");
+        this.operatorWindowCountdownProgress = document.querySelector("div#state-machine-viz progress#countdown");
+        this.operatorWindowCountdownText = document.querySelector("div#state-machine-viz div#remaining");
+        this.operatorWindowDivStateName = document.querySelector("div#state-machine-viz div#state-name");
 
         this.stateMap = {};
         this.manualTriggerMap = {};
@@ -135,12 +135,12 @@ export class StateMachine {
 
         const countdownTimer = this.countdownTimer = new CountdownTimer(durationMs, this.audioManager);
         countdownTimer.progressElements.push(this.operatorWindowCountdownProgress);
-        countdownTimer.textElements.push(this.operatorWindowCountdownText);
+        countdownTimer.textDivs.push(this.operatorWindowCountdownText);
 
         if (transitionObj.countdownTimerShowDots) {
             const teamIndex = Number(keyboardEvent.key) - 1;
             const teamObj = this.operator.teamArray[teamIndex];
-            countdownTimer.dotsElement = teamObj.presentationCountdownDots;
+            countdownTimer.dotsTables.push(teamObj.presentationCountdownDots);
         } else {
             countdownTimer.progressElements.push(this.presentation.getProgressElement());
         }
@@ -148,7 +148,7 @@ export class StateMachine {
         if (setCountdownTimerMax) {
             const newMax = this.settings.timeoutWaitForBuzzesMs; // how do we know to always use this as the max?
             countdownTimer.maxMs = newMax;
-            countdownTimer.progressElements.forEach(elem => elem.attr("max", newMax));
+            countdownTimer.progressElements.forEach(elem => elem.setAttribute("max", String(newMax)));
         }
 
         countdownTimer.onFinished = () => {
@@ -252,7 +252,7 @@ export class StateMachine {
                     console.log(`Running the onEnter function: ${functionToCall.name}`);
                 }
 
-                //todo don't use global reference to operator instnace!
+                //todo don't use global reference to operator instance!
                 //todo make this not suck, because onExit call is not an operatorInstance call
                 const rv = functionToCall.call(this.operator, keyboardEvent);
 
@@ -266,9 +266,9 @@ export class StateMachine {
                             rv.then(
                                 () => this.goToState(transitionObj.dest)
                             ).catch(
-                                (rv: any) => {
+                                (err: Error) => {
                                     console.warn("promise rejected:");
-                                    throw rv;
+                                    throw err;
                                 }
                             );
                             break;
@@ -288,7 +288,7 @@ export class StateMachine {
                 const transitionObj = transitionArray[i];
                 if (transitionObj.type === TransitionType.Timeout) {
                     this._startCountdownTimer(transitionObj, triggeringKeyboardEvent);
-                    this.operatorWindowDivStateName.html(`${destStateName} &rarr; ${transitionObj.dest}`);
+                    this.operatorWindowDivStateName.innerHTML = destStateName + " &rarr; " + transitionObj.dest;
                     break;
                 }
             }
@@ -300,7 +300,7 @@ export class StateMachine {
 
         const previousState = this.presentState;
         this.presentState = this.stateMap[destStateName];
-        this.operatorWindowDivStateName.html(destStateName);
+        this.operatorWindowDivStateName.innerHTML = destStateName;
 
         // TODO why can't I declare these as function name(){...} ???
         handleShowSlide.call(this);
@@ -415,8 +415,8 @@ export class StateMachine {
                         break;
                 }
 
-                function printWarning(stateName: string, transitionIndex: number, message: string) {
-                    console.warn(`state "${stateName}": transition ${transitionIndex}: ${message}`);
+                function printWarning(stateName: string, transitionIdx: number, message: string) {
+                    console.warn(`state "${stateName}": transition ${transitionIdx}: ${message}`);
                 }
 
             }, this);

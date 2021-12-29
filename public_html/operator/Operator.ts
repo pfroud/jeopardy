@@ -11,23 +11,23 @@ export class Operator {
     audioManager: AudioManager;
     settings: Settings;
     presentation: Presentation;
-    divClueWrapper: JQuery<HTMLDivElement>;
-    divClueQuestion: JQuery<HTMLDivElement>;
-    divClueDollars: JQuery<HTMLDivElement>;
-    divClueCategory: JQuery<HTMLDivElement>;
-    divClueAnswer: JQuery<HTMLDivElement>;
-    divClueAirdate: JQuery<HTMLDivElement>;
-    trQuestion: JQuery<HTMLTableRowElement>;
-    trAnswer: JQuery<HTMLTableRowElement>;
-    divPaused: JQuery<HTMLDivElement>;
-    divInstructions: JQuery<HTMLDivElement>;
+    divClueWrapper: HTMLDivElement;
+    divClueQuestion: HTMLDivElement;
+    divClueDollars: HTMLDivElement;
+    divClueCategory: HTMLDivElement;
+    divClueAnswer: HTMLDivElement;
+    divClueAirdate: HTMLDivElement;
+    trQuestion: HTMLTableRowElement;
+    trAnswer: HTMLTableRowElement;
+    divPaused: HTMLDivElement;
+    divInstructions: HTMLDivElement;
     currentClueObj: Clue;
     teamArray: Team[];
     isPaused: boolean;
     stateMachine: StateMachine;
-    buttonStartGame: JQuery<HTMLButtonElement>;
+    buttonStartGame: HTMLButtonElement;
     teamPresentlyAnswering: Team;
-    buttonSkipClue: JQuery<HTMLButtonElement>;
+    buttonSkipClue: HTMLButtonElement;
 
     constructor(audioManager: AudioManager, settings: Settings) {
         this.audioManager = audioManager;
@@ -36,18 +36,18 @@ export class Operator {
 
         this.presentation = null;
 
-        this.divClueWrapper = $("div#clue");
-        this.divClueQuestion = $("div#clue-question");
-        this.divClueDollars = $("div#clue-dollars");
-        this.divClueCategory = $("div#clue-category");
-        this.divClueAnswer = $("div#clue-answer");
-        this.divClueAirdate = $("div#clue-airdate");
-        this.trQuestion = $("tr#question");
-        this.trAnswer = $("tr#answer");
-        this.divPaused = $("div#paused");
-        this.divInstructions = $("div#instructions");
-        this.buttonStartGame = $("button#start-game");
-        this.buttonSkipClue = $("button#skip-clue");
+        this.divClueWrapper = document.querySelector("div#clue");
+        this.divClueQuestion = document.querySelector("div#clue-question");
+        this.divClueDollars = document.querySelector("div#clue-dollars");
+        this.divClueCategory = document.querySelector("div#clue-category");
+        this.divClueAnswer = document.querySelector("div#clue-answer");
+        this.divClueAirdate = document.querySelector("div#clue-airdate");
+        this.trQuestion = document.querySelector("tr#question");
+        this.trAnswer = document.querySelector("tr#answer");
+        this.divPaused = document.querySelector("div#paused");
+        this.divInstructions = document.querySelector("div#instructions");
+        this.buttonStartGame = document.querySelector("button#start-game");
+        this.buttonSkipClue = document.querySelector("button#skip-clue");
 
         this.currentClueObj = null;
         this.teamPresentlyAnswering = null;
@@ -82,8 +82,8 @@ export class Operator {
 
         this.stateMachine = new StateMachine(this.settings, this, presentationInstanceFromOtherWindow, this.audioManager);
 
-        this.buttonStartGame.prop("disabled", false);
-        this.divInstructions.html("Ready. Click the button to start the game.");
+        this.buttonStartGame.removeAttribute("disabled");
+        this.divInstructions.innerHTML = "Ready. Click the button to start the game.";
     }
 
     private initBuzzerFootswitchIconDisplay(): void {
@@ -132,19 +132,19 @@ export class Operator {
     }
 
     private initMouseListeners(): void {
-        $("button#go-to-game-rules").on("click", () => this.presentation.showSlide("game-rules"));
-        $("button#go-to-jeopardy-logo").on("click", () => this.presentation.showSlide("jeopardy-logo"));
-        $("button#go-to-event-cost").on("click", () => this.presentation.showSlide("event-cost"));
+        document.querySelector("button#go-to-game-rules").addEventListener("click", () => this.presentation.showSlide("game-rules"));
+        document.querySelector("button#go-to-jeopardy-logo").addEventListener("click", () => this.presentation.showSlide("jeopardy-logo"));
+        document.querySelector("button#go-to-event-cost").addEventListener("click", () => this.presentation.showSlide("event-cost"));
 
-        this.buttonStartGame.on("click", () => {
+        this.buttonStartGame.addEventListener("click", () => {
             this.stateMachine.manualTrigger("manualTrigger_startGame");
-            this.buttonStartGame.prop("disabled", true);
+            this.buttonStartGame.setAttribute("disabled", "disabled");
         });
 
 
-        this.buttonSkipClue.on("click", () => this.skipClue());
+        this.buttonSkipClue.addEventListener("click", () => this.skipClue());
 
-        $("a#aMoneyOverride").on("click", () =>
+        document.querySelector("a#aMoneyOverride").addEventListener("click", () =>
             window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney", "popup"));
 
     }
@@ -152,8 +152,8 @@ export class Operator {
 
     public skipClue(): void {
         this.setAllTeamsState(TeamState.BUZZERS_OFF, true); // the second argument is endLockout
-        this.buttonSkipClue.attr("disabled", "true");
-        this.buttonSkipClue.trigger("blur");
+        this.buttonSkipClue.setAttribute("disabled", "disabled");
+        this.buttonSkipClue.blur();
         this.stateMachine.goToState("fetchClue");
     }
 
@@ -184,7 +184,7 @@ export class Operator {
 
         teamObj.startAnswer();
 
-        this.divInstructions.html("Did they answer correctly? y / n");
+        this.divInstructions.innerHTML = "Did they answer correctly? y / n";
     }
 
     public shouldGameEnd(): boolean {
@@ -233,19 +233,24 @@ export class Operator {
             This function only shows the category. 
             The state machine will show the clue question after a timeout.
             */
-            this.divClueWrapper.show();
-            this.divClueCategory.html(clueObj.category.title);
-            this.divClueDollars.html("$" + clueObj.value);
+            this.divClueWrapper.style.display = "";
+            this.divClueCategory.innerHTML = clueObj.category.title;
+            this.divClueDollars.innerHTML = "$" + clueObj.value;
             // example of what format the airdate is in: "2013-01-25T12:00:00.000Z
-            this.divClueAirdate.html((new Date(clueObj.airdate)).toDateString());
+            this.divClueAirdate.innerHTML = (new Date(clueObj.airdate)).toDateString();
             this.presentation.setClueObj(clueObj);
-            this.trAnswer.hide();
-            this.divInstructions.html("Read aloud the category and dollar value.");
+            this.trAnswer.style.display = "none";
+            this.divInstructions.innerHTML = "Read aloud the category and dollar value.";
         }
 
         const fetchClueHelper = (promiseResolveFunc: (arg0: Clue) => void, tryNum: number, maxTries: number) => {
-            $.getJSON("http://jservice.io/api/random", response => {
-                const clueObj = response[0];
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", "http://jservice.io/api/random");
+            xhr.addEventListener("load", () => {
+                if (xhr.status != 200) {
+                    alert(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
+                }
+                const clueObj = JSON.parse(xhr.response)[0];
                 this.currentClueObj = clueObj;
 
                 if (isClueValid(clueObj) && !doesQuestionHaveMultimedia(clueObj)) {
@@ -277,9 +282,9 @@ export class Operator {
         }
 
         return new Promise((resolve) => {
-            this.buttonStartGame.trigger("blur");
-            this.trQuestion.hide();
-            this.divInstructions.html("Loading clue...");
+            this.buttonStartGame.blur();
+            this.trQuestion.style.display = "none";
+            this.divInstructions.innerHTML = "Loading clue...";
             fetchClueHelper.call(this, resolve, 1, 5);
         });
 
@@ -294,13 +299,13 @@ export class Operator {
 
         this.setAllTeamsState(TeamState.READING_QUESTION);
 
-        this.divInstructions.html("Read the question out loud. Buzzers open when you press space.");
+        this.divInstructions.innerHTML = "Read the question out loud. Buzzers open when you press space.";
 
-        this.divClueQuestion.html(getClueQuestionHtmlWithSubjectInBold(this.currentClueObj));
-        this.trQuestion.show();
-        this.trAnswer.hide();
+        this.divClueQuestion.innerHTML = getClueQuestionHtmlWithSubjectInBold(this.currentClueObj);
+        this.trQuestion.style.display = "";
+        this.trAnswer.style.display = "none";
 
-        this.buttonSkipClue.attr("disabled", "false");
+        this.buttonSkipClue.removeAttribute("disabled");
 
         function getClueQuestionHtmlWithSubjectInBold(clueObj: Clue): string {
             /*
@@ -326,16 +331,16 @@ export class Operator {
     }
 
     public handleDoneReadingClueQuestion(): void {
-        this.trAnswer.show(); //show answer to operator
-        this.divClueAnswer.html(this.currentClueObj.answer);
-        this.divInstructions.html("Wait for people to answer.");
+        this.trAnswer.style.display = ""; //show answer to operator
+        this.divClueAnswer.innerHTML = this.currentClueObj.answer;
+        this.divInstructions.innerHTML = "Wait for people to answer.";
         this.setAllTeamsState(TeamState.CAN_ANSWER);
-        this.buttonSkipClue.attr("disabled", "true");
+        this.buttonSkipClue.setAttribute("disabled", "disabled");
     }
 
     public handleShowAnswer(): void {
         this.setAllTeamsState(TeamState.BUZZERS_OFF);
-        this.divInstructions.html("Let people read the answer.");
+        this.divInstructions.innerHTML = "Let people read the answer.";
     }
 
     public setAllTeamsState(targetState: TeamState, endLockout = false): void {
@@ -358,42 +363,50 @@ export class Operator {
 
     public setPaused(isPaused: boolean): void {
         this.isPaused = isPaused;
-        this.divPaused.toggle(isPaused);
+        this.divPaused.style.display = isPaused ? "" : "none";
         this.stateMachine.setPaused(isPaused);
         this.teamArray.forEach(teamObj => teamObj.setPaused(isPaused));
         this.presentation.setPaused(isPaused);
     }
 
     private lookForSavedGame(): void {
-        const divSavedGame = $("div#saved-game-prompt");
+        const divSavedGame = document.querySelector<HTMLDivElement>("div#saved-game-prompt");
 
         const rawLocalStorageResult = window.localStorage.getItem("jeopardy-teams");
         if (rawLocalStorageResult === null) {
-            divSavedGame.hide();
+            divSavedGame.style.display = "none";
             return;
         }
 
-        const tableDetails = $("table#saved-game-details tbody");
+        const tableDetails = document.querySelector("table#saved-game-details tbody");
 
         const parsed = JSON.parse(rawLocalStorageResult);
 
         parsed.forEach(function (savedTeam: TeamDumpToJson) {
-            const tr = $("<tr>").appendTo(tableDetails);
-            $("<td>").html(savedTeam.name).addClass("team-name").appendTo(tr);
-            $("<td>").html("$" + savedTeam.dollars).appendTo(tr);
+            const tableRow = document.createElement("tr");
+            tableDetails.appendChild(tableRow);
+
+            const cellTeamName = document.createElement("td");
+            cellTeamName.innerHTML = savedTeam.name;
+            cellTeamName.classList.add("team-name");
+            tableRow.appendChild(cellTeamName);
+
+            const cellTeamDollars = document.createElement("td");
+            cellTeamDollars.innerHTML = "$" + savedTeam.dollars;
+            tableRow.appendChild(cellTeamDollars);
         });
 
-        $("button#saved-game-load").on("click", () => {
+        document.querySelector("button#saved-game-load").addEventListener("click", () => {
             this.loadGame();
-            divSavedGame.hide();
+            divSavedGame.style.display = "none";
         });
-        $("button#saved-game-delete").on("click", function () {
+        document.querySelector("button#saved-game-delete").addEventListener("click", function () {
             if (window.confirm("Delete the saved game?")) {
                 window.localStorage.removeItem("jeopardy-teams");
-                divSavedGame.hide();
+                divSavedGame.style.display = "none";
             }
         });
-        $("button#saved-game-dismiss").on("click", () => divSavedGame.hide());
+        document.querySelector("button#saved-game-dismiss").addEventListener("click", () => divSavedGame.style.display = "none");
 
 
     }

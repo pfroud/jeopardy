@@ -7,16 +7,16 @@ import { CountdownTimer } from "./CountdownTimer.js";
 
 interface TeamDivs {
     operator: {
-        wrapper: JQuery<HTMLDivElement>;
-        dollars: JQuery<HTMLDivElement>;
-        teamName: JQuery<HTMLDivElement>;
-        state: JQuery<HTMLDivElement>;
+        wrapper: HTMLDivElement;
+        dollars: HTMLDivElement;
+        teamName: HTMLDivElement;
+        state: HTMLDivElement;
     };
     presentation: {
-        wrapper: JQuery<HTMLDivElement>;
-        dollars: JQuery<HTMLDivElement>;
-        teamName: JQuery<HTMLDivElement>;
-        buzzerShow: JQuery<HTMLDivElement>;
+        wrapper: HTMLDivElement;
+        dollars: HTMLDivElement;
+        teamName: HTMLDivElement;
+        buzzerShow: HTMLDivElement;
     };
 }
 
@@ -28,8 +28,8 @@ export class Team {
     teamName: string;
     state: TeamState;
     div: TeamDivs;
-    presentationCountdownDots: JQuery<HTMLTableElement>;
-    presentationProgressLockout: JQuery<HTMLProgressElement>;
+    presentationCountdownDots: HTMLTableElement;
+    presentationProgressLockout: HTMLProgressElement;
     countdownTimer: CountdownTimer;
     stateBeforeLockout: TeamState;
     presentationInstance: Presentation;
@@ -80,22 +80,23 @@ export class Team {
     }
 
     private initTeamNameListener() {
-        const teamNameInput: JQuery<HTMLInputElement> = $("input#team-name-" + this.teamIdx);
-        teamNameInput.on("input", (elem) => {
-            this.setTeamName(elem.target.value);
+        const teamNameInput = document.querySelector<HTMLInputElement>("input#team-name-" + this.teamIdx);
+        teamNameInput.addEventListener("input", (elem) => {
+            // https://github.com/microsoft/TypeScript/issues/39925
+            this.setTeamName((elem.currentTarget as HTMLInputElement).value);
         });
     }
 
     public handleAnswerCorrect(clueObj: Clue): void {
         this.audioManager.play("answerCorrect");
         this.moneyAdd(clueObj.value);
-        this.presentationCountdownDots.find("td").removeClass("active");
+        this.presentationCountdownDots.querySelector("td").classList.remove("active");
     }
 
     public handleAnswerIncorrectOrAnswerTimeout(clueObj: Clue): void {
         this.audioManager.play("answerIncorrectOrAnswerTimeout");
         // todo set class on the <table> instead of finding <td>s
-        this.presentationCountdownDots.find("td").removeClass("active");
+        this.presentationCountdownDots.querySelector("td").classList.remove("active");
         this.moneySubtract(clueObj.value * this.settings.wrongAnswerPenaltyMultiplier);
         this.setState(this.settings.allowMultipleAnswersToSameQuestion ? TeamState.CAN_ANSWER : TeamState.ALREADY_ANSWERED);
     }
@@ -157,51 +158,66 @@ export class Team {
     }
 
     private _updateDollarsDisplay(): void {
-        this.div.presentation.dollars.html("$" + this.dollars.toLocaleString());
-        this.div.operator.dollars.html("$" + this.dollars.toLocaleString());
+        this.div.presentation.dollars.innerHTML = "$" + this.dollars.toLocaleString();
+        this.div.operator.dollars.innerHTML = "$" + this.dollars.toLocaleString();
     }
 
     private createDivsPresentation(): void {
-        const divTeam = this.div.presentation.wrapper = $<HTMLDivElement>("<div>")
-            .addClass("team")
-            .attr("data-team-index", this.teamIdx)
-            .attr("data-team-state", "");
+        const divTeam = this.div.presentation.wrapper = document.createElement("div");
+        divTeam.classList.add("team");
+        divTeam.setAttribute("data-team-index", String(this.teamIdx));
+        divTeam.setAttribute("data-team-state", "");
 
-        const divBuzzerDisplay = this.div.presentation.buzzerShow = $<HTMLDivElement>("<div>").addClass("buzzer-show").addClass("not-pressed");
+        const divBuzzerDisplay = this.div.presentation.buzzerShow = document.createElement("div");
+        divBuzzerDisplay.classList.add("buzzer-show");
+        divBuzzerDisplay.classList.add("not-pressed");
 
-        const imgSwitchClosed = $("<img>")
-            .attr("src", "img/switch-closed.svg")
-            .attr("attr", "switch closed")
-            .addClass("buzzer-pressed");
+        const imgSwitchClosed = document.createElement("img");
+        imgSwitchClosed.setAttribute("src", "img/switch-closed.svg");
+        imgSwitchClosed.setAttribute("attr", "switch closed");
+        imgSwitchClosed.classList.add("buzzer-pressed");
 
-        const imgSwitchOpened = $("<img>")
-            .attr("src", "img/switch-opened.svg")
-            .attr("attr", "switch opened")
-            .addClass("buzzer-not-pressed");
+        const imgSwitchOpened = document.createElement("img");
+        imgSwitchOpened.setAttribute("src", "img/switch-opened.svg");
+        imgSwitchOpened.setAttribute("attr", "switch opened");
+        imgSwitchOpened.classList.add("buzzer-not-pressed");
 
         divBuzzerDisplay.append(imgSwitchClosed);
         divBuzzerDisplay.append(imgSwitchOpened);
         divTeam.append(divBuzzerDisplay);
 
-        const tableCountdownDots = this.presentationCountdownDots = $<HTMLTableElement>("<table>").addClass("countdown-dots");
+        const tableCountdownDots = this.presentationCountdownDots = document.createElement("table");
+        tableCountdownDots.classList.add("countdown-dots");
 
         for (let i = 5; i > 1; i--) {
-            tableCountdownDots.append($("<td>").attr("data-countdown", i));
+            const tdDescending = document.createElement("td");
+            tableCountdownDots.setAttribute("data-countdown", String(i));
+            tableCountdownDots.appendChild(tdDescending);
         }
-        tableCountdownDots.append($("<td>").attr("data-countdown", 1));
+
+        const tdOne = document.createElement("td");
+        tdOne.setAttribute("data-countdown", "1");
+        tableCountdownDots.appendChild(tdOne);
+
         for (let i = 2; i <= 5; i++) {
-            tableCountdownDots.append($("<td>").attr("data-countdown", i));
+            const tdAscending = document.createElement("td");
+            tdAscending.setAttribute("data-countdown", String(i));
+            tableCountdownDots.appendChild(tdAscending);
         }
 
         divTeam.append(tableCountdownDots);
 
-        const divDollars = this.div.presentation.dollars = $<HTMLDivElement>("<div>").addClass("team-dollars").html("$" + this.dollars);
+        const divDollars = this.div.presentation.dollars = document.createElement("div");
+        divDollars.classList.add("team-dollars")
+        divDollars.innerHTML = "$" + this.dollars;
         divTeam.append(divDollars);
 
-        const divName = this.div.presentation.teamName = $<HTMLDivElement>("<div>").addClass("team-name").html(this.teamName);
+        const divName = this.div.presentation.teamName = document.createElement("div");
+        divName.classList.add("team-name")
+        divName.innerHTML = this.teamName;
         divTeam.append(divName);
 
-        const progress = this.presentationProgressLockout = $<HTMLProgressElement>("<progress>");
+        const progress = this.presentationProgressLockout = document.createElement("progress");
         divTeam.append(progress);
 
         this.presentationInstance.footerTeams.append(divTeam);
@@ -212,31 +228,40 @@ export class Team {
     }
 
     private createDivsOperator(): void {
-        const divTeam = this.div.operator.wrapper = $<HTMLDivElement>("<div>")
-            .addClass("team")
-            .attr("data-team-index", this.teamIdx)
-            .attr("data-team-state", "");
+        const divTeam = this.div.operator.wrapper = document.createElement("div");
+        divTeam.classList.add("team");
+        divTeam.setAttribute("data-team-index", String(this.teamIdx));
+        divTeam.setAttribute("data-team-state", "");
 
-        const divName = this.div.operator.teamName = $<HTMLDivElement>("<div>").addClass("team-name").html(this.teamName);
+        const divName = this.div.operator.teamName = document.createElement("div");
+        divName.classList.add("team-name")
+        divName.innerHTML = this.teamName;
         divTeam.append(divName);
 
-        const divDollars = this.div.operator.dollars = $<HTMLDivElement>("<div>").addClass("team-dollars").html("$" + this.dollars);
+        const divDollars = this.div.operator.dollars = document.createElement("div");
+        divDollars.classList.add("team-dollars")
+        divDollars.innerHTML = "$" + this.dollars;
         divTeam.append(divDollars);
 
-        const divState = this.div.operator.state = $<HTMLDivElement>("<div>").addClass("team-state").html(this.state);
+        const divState = this.div.operator.state = document.createElement("div");
+        divState.classList.add("team-state")
+        divState.innerHTML = this.state;
         divTeam.append(divState);
 
-        divTeam.append($("<progress>").addClass("time-left").css("display:none"));
+        const progress = document.createElement("progress");
+        progress.classList.add("time-left")
+        progress.style.display = "none";
+        divTeam.append(progress);
 
-        $("footer").append(divTeam);
+        document.querySelector("footer").appendChild(divTeam);
 
     }
 
     public setTeamName(teamName: string): void {
         // todo delete the entire mechanism to rename teams
         this.teamName = teamName;
-        this.div.operator.teamName.html(teamName);
-        this.div.presentation.teamName.html(teamName);
+        this.div.operator.teamName.innerHTML = teamName;
+        this.div.presentation.teamName.innerHTML = teamName;
     }
 
     public setState(targetState: TeamState, endLockout = false): void {
@@ -245,9 +270,9 @@ export class Team {
             this.stateBeforeLockout = targetState;
         } else {
             this.state = targetState;
-            this.div.operator.wrapper.attr("data-team-state", targetState);
-            this.div.presentation.wrapper.attr("data-team-state", targetState);
-            this.div.operator.state.html(this.state);
+            this.div.operator.wrapper.setAttribute("data-team-state", targetState);
+            this.div.presentation.wrapper.setAttribute("data-team-state", targetState);
+            this.div.operator.state.innerHTML = this.state;
 
             if (this.countdownTimer) {
                 this.countdownTimer.pause();
@@ -281,15 +306,17 @@ export class Team {
 
     public startAnswer(): void {
         this.setState(TeamState.ANSWERING);
-        this.presentationCountdownDots.find("td").addClass("active");
+        this.presentationCountdownDots.querySelector("td").classList.add("active");
     }
 
     public showKeyDown(): void {
-        this.div.presentation.buzzerShow.addClass("pressed").removeClass("not-pressed");
+        this.div.presentation.buzzerShow.classList.add("pressed");
+        this.div.presentation.buzzerShow.classList.remove("not-pressed");
     }
 
     public showKeyUp(): void {
-        this.div.presentation.buzzerShow.addClass("not-pressed").removeClass("pressed");
+        this.div.presentation.buzzerShow.classList.add("not-pressed");
+        this.div.presentation.buzzerShow.classList.remove("pressed");
     }
 
     public jsonDump(): TeamDumpToJson {
@@ -303,11 +330,11 @@ export class Team {
         this.teamName = jsonObj.name;
         this.dollars = jsonObj.dollars;
 
-        this.div.presentation.dollars.html("$" + this.dollars);
-        this.div.presentation.teamName.html(this.teamName);
+        this.div.presentation.dollars.innerHTML = "$" + this.dollars;
+        this.div.presentation.teamName.innerHTML = this.teamName;
 
-        this.div.operator.teamName.html(this.teamName);
-        this.div.operator.dollars.html("$" + this.dollars);
+        this.div.operator.teamName.innerHTML = this.teamName;
+        this.div.operator.dollars.innerHTML = "$" + this.dollars;
     }
 
 }

@@ -3,9 +3,9 @@ import { Settings } from "../Settings.js";
 import { AudioManager } from "./AudioManager.js";
 import { Operator } from "./Operator.js";
 
-$(document).ready(function () {
+document.addEventListener("DOMContentLoaded", function () {
     if (window.location.search.length > 1) {
-        console.log("not doing anything becasue window.location.search is set to something");
+        console.log("not doing anything because window.location.search is set to something");
         return;
     }
 
@@ -20,10 +20,10 @@ $(document).ready(function () {
 });
 
 function initKeyboardShortcuts(): void {
-    const inputSetup = $("input#tab-setup");
-    const inputGame = $("input#tab-game");
-    const inputAdmin = $("input#tab-admin");
-    const inputSettings = $("input#tab-settings");
+    const inputSetup = document.querySelector("input#tab-setup");
+    const inputGame = document.querySelector("input#tab-game");
+    const inputAdmin = document.querySelector("input#tab-admin");
+    const inputSettings = document.querySelector("input#tab-settings");
 
     document.addEventListener("keydown", function (keyboardEvent) {
         if (document.activeElement && document.activeElement.tagName === "INPUT") {
@@ -32,16 +32,16 @@ function initKeyboardShortcuts(): void {
 
         switch (keyboardEvent.key.toLowerCase()) {
             case "s":
-                inputSetup.prop("checked", true);
+                inputSetup.setAttribute("checked", "checked");
                 break;
             case "g":
-                inputGame.prop("checked", true);
+                inputGame.setAttribute("checked", "checked");
                 break;
             case "a":
-                inputAdmin.prop("checked", true);
+                inputAdmin.setAttribute("checked", "checked");
                 break;
             case "e":
-                inputSettings.prop("checked", true);
+                inputSettings.setAttribute("checked", "checked");
                 //                keyboardEvent.preventDefault(); //chrome opens its menu if holding Alt
                 break;
 

@@ -8,11 +8,11 @@ export class Settings {
     allowMultipleAnswersToSameQuestion: boolean;
     teamDollarsWhenGameShouldEnd: number;
     guiInput: {
-        displayDurationCategory: JQuery<HTMLInputElement>;
-        displayDurationAnswer: JQuery<HTMLInputElement>;
-        timeoutWaitForBuzzes: JQuery<HTMLInputElement>;
-        timeoutAnswer: JQuery<HTMLInputElement>;
-        allowMultipleTries: JQuery<HTMLInputElement>;
+        displayDurationCategory: HTMLInputElement;
+        displayDurationAnswer: HTMLInputElement;
+        timeoutWaitForBuzzes: HTMLInputElement;
+        timeoutAnswer: HTMLInputElement;
+        allowMultipleTries: HTMLInputElement;
     };
 
     constructor() {
@@ -39,34 +39,34 @@ export class Settings {
         this.teamDollarsWhenGameShouldEnd = 10000;
 
         this.guiInput = {
-            displayDurationCategory: $("input#display-duration-category"),
-            displayDurationAnswer: $("input#display-duration-answer"),
-            timeoutWaitForBuzzes: $("input#timeout-wait-for-buzzes"),
-            timeoutAnswer: $("input#timeout-answer"),
-            allowMultipleTries: $("input#allow-multiple-tries")
+            displayDurationCategory: document.querySelector("input#display-duration-category"),
+            displayDurationAnswer: document.querySelector("input#display-duration-answer"),
+            timeoutWaitForBuzzes: document.querySelector("input#timeout-wait-for-buzzes"),
+            timeoutAnswer: document.querySelector("input#timeout-answer"),
+            allowMultipleTries: document.querySelector("input#allow-multiple-tries")
         };
 
         this.populateGui();
 
-        $("button#saveSettings").on("click", () => this.parseGui());
+        document.querySelector("button#saveSettings").addEventListener("click", () => this.parseGui());
 
     }
 
     public populateGui(): void {
-        this.guiInput.displayDurationCategory.val(this.displayDurationCategoryMs);
-        this.guiInput.displayDurationAnswer.val(this.displayDurationAnswerMs);
-        this.guiInput.timeoutWaitForBuzzes.val(this.timeoutWaitForBuzzesMs);
-        this.guiInput.timeoutAnswer.val(this.timeoutAnswerMs);
-        this.guiInput.allowMultipleTries.prop("checked", this.allowMultipleAnswersToSameQuestion);
+        this.guiInput.displayDurationCategory.value = String(this.displayDurationCategoryMs);
+        this.guiInput.displayDurationAnswer.value = String(this.displayDurationAnswerMs);
+        this.guiInput.timeoutWaitForBuzzes.value = String(this.timeoutWaitForBuzzesMs);
+        this.guiInput.timeoutAnswer.value = String(this.timeoutAnswerMs);
+        this.guiInput.allowMultipleTries.toggleAttribute("checked", this.allowMultipleAnswersToSameQuestion);
     }
 
     public parseGui(): void {
-        this.displayDurationCategoryMs = Number(this.guiInput.displayDurationCategory.val());
-        this.displayDurationAnswerMs = Number(this.guiInput.displayDurationAnswer.val());
-        this.timeoutWaitForBuzzesMs = Number(this.guiInput.timeoutWaitForBuzzes.val());
-        this.timeoutAnswerMs = Number(this.guiInput.timeoutAnswer.val());
+        this.displayDurationCategoryMs = Number(this.guiInput.displayDurationCategory.value);
+        this.displayDurationAnswerMs = Number(this.guiInput.displayDurationAnswer.value);
+        this.timeoutWaitForBuzzesMs = Number(this.guiInput.timeoutWaitForBuzzes.value);
+        this.timeoutAnswerMs = Number(this.guiInput.timeoutAnswer.value);
 
-        this.allowMultipleAnswersToSameQuestion = this.guiInput.allowMultipleTries.prop("checked");
+        this.allowMultipleAnswersToSameQuestion = this.guiInput.allowMultipleTries.hasAttribute("checked");
     }
 
 }

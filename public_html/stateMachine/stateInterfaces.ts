@@ -1,7 +1,9 @@
+import { Clue } from "../interfaces";
+
 export interface StateMachineState {
     name: string;
     showPresentationSlide?: string;
-    onEnter?: () => void;
+    onEnter?: (keyboardEvent?: KeyboardEvent) => (Promise<Clue> | void);
     onExit?: () => void;
     transitions: StateMachineTransition[];
 }

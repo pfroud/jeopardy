@@ -1,39 +1,39 @@
 import { Clue } from "../interfaces.js";
 
 interface Slides {
-    [slideName: string]: JQuery<HTMLDivElement>;
+    [slideName: string]: HTMLDivElement;
 }
 
 export class Presentation {
-    divCategoryInHeader: JQuery<HTMLDivElement>;
-    divDollarsInHeader: JQuery<HTMLDivElement>;
-    header: JQuery<HTMLElement>;
-    divQuestion: JQuery<HTMLDivElement>;
-    divCategoryBig: JQuery<HTMLDivElement>;
-    divDollarsBig: JQuery<HTMLDivElement>;
-    divClueAnswer: JQuery<HTMLDivElement>;
-    divPaused: JQuery<HTMLDivElement>;
-    footerTeams: JQuery<HTMLElement>;
-    progress: JQuery<HTMLProgressElement>;
+    divCategoryInHeader: HTMLDivElement;
+    divDollarsInHeader: HTMLDivElement;
+    header: HTMLElement;
+    divQuestion: HTMLDivElement;
+    divCategoryBig: HTMLDivElement;
+    divDollarsBig: HTMLDivElement;
+    divClueAnswer: HTMLDivElement;
+    divPaused: HTMLDivElement;
+    footerTeams: HTMLElement;
+    progress: HTMLProgressElement;
     slideDivs: Slides;
-    visibleSlide?: JQuery<HTMLDivElement>;
+    visibleSlide?: HTMLDivElement;
     slideNames: string[];
 
     constructor() {
-        this.divCategoryInHeader = $("header div#category");
-        this.divDollarsInHeader = $("header div#dollars");
-        this.header = $("header");
+        this.divCategoryInHeader = document.querySelector("header div#category");
+        this.divDollarsInHeader = document.querySelector("header div#dollars");
+        this.header = document.querySelector("header");
 
-        this.divQuestion = $("div#clue-question");
-        this.divCategoryBig = $("div#category-big");
-        this.divDollarsBig = $("div#dollars-big");
-        this.divClueAnswer = $("div#clue-answer");
+        this.divQuestion = document.querySelector("div#clue-question");
+        this.divCategoryBig = document.querySelector("div#category-big");
+        this.divDollarsBig = document.querySelector("div#dollars-big");
+        this.divClueAnswer = document.querySelector("div#clue-answer");
 
-        this.divPaused = $("div#paused");
+        this.divPaused = document.querySelector("div#paused");
 
-        this.footerTeams = $("footer");
+        this.footerTeams = document.querySelector("footer");
 
-        this.progress = $("progress#countdown");
+        this.progress = document.querySelector("progress#countdown");
 
 
         this._initSlides();
@@ -44,23 +44,25 @@ export class Presentation {
                 this.showSlide("slide-jeopardy-logo");
                 window.opener.operator.handlePresentationReady(this);
             } else {
-                $("<div>window.opener.operator is null</div>")
-                    .css("background-color", "red")
-                    .css("position", "absolute")
-                    .css("font-size", "60px")
-                    .css("top", "20px")
-                    .css("padding", "5px 10px")
-                    .appendTo("body");
+                const warningDiv = document.createElement("div");
+                warningDiv.innerHTML = "window.opener.operator is null";
+                warningDiv.style.backgroundColor = "red";
+                warningDiv.style.position = "absolute";
+                warningDiv.style.fontSize = "60px";
+                warningDiv.style.top = "20px";
+                warningDiv.style.padding = "5px 10px";
+                document.body.appendChild(warningDiv);
             }
         } else {
             // todo instead of showing this error message, we should open operator.html then close this window.
-            $("<div>window.opener is null</div>")
-                .css("background-color", "red")
-                .css("position", "absolute")
-                .css("font-size", "60px")
-                .css("top", "20px")
-                .css("padding", "5px 10px")
-                .appendTo("body");
+            const warningDiv = document.createElement("div");
+            warningDiv.innerHTML = "window.opener is null";
+            warningDiv.style.backgroundColor = "red";
+            warningDiv.style.position = "absolute";
+            warningDiv.style.fontSize = "60px";
+            warningDiv.style.top = "20px";
+            warningDiv.style.padding = "5px 10px";
+            document.body.appendChild(warningDiv);
         }
     }
 
@@ -69,24 +71,24 @@ export class Presentation {
 
         this.slideNames = [];
 
-        $<HTMLDivElement>('div[id ^= "slide-"').each((index: number, elem: HTMLDivElement) => {
+        document.querySelectorAll<HTMLDivElement>('div[id ^= "slide-"').forEach(elem => {
             const id = elem.id;
             this.slideNames.push(id);
-            this.slideDivs[id] = $<HTMLDivElement>(elem);
+            this.slideDivs[id] = elem;
         });
 
     }
 
-    public getProgressElement(): JQuery<HTMLProgressElement> {
+    public getProgressElement(): HTMLProgressElement {
         return this.progress;
     }
 
     public showSlide(slideName: string): void {
         if (this.slideNames.includes(slideName)) {
-            this.visibleSlide && this.visibleSlide.hide();
+            this.visibleSlide && (this.visibleSlide.style.display = "none");
 
             const targetSlide = this.slideDivs[slideName];
-            targetSlide.show();
+            targetSlide.style.display = "";
 
             this.visibleSlide = targetSlide;
         } else {
@@ -95,52 +97,52 @@ export class Presentation {
     }
 
     public setClueObj(clueObj: Clue): void {
-        this.divCategoryInHeader.html(clueObj.category.title);
-        this.divDollarsInHeader.html("$" + clueObj.value);
+        this.divCategoryInHeader.innerHTML = clueObj.category.title;
+        this.divDollarsInHeader.innerHTML = "$" + clueObj.value;
 
-        this.divCategoryBig.html(clueObj.category.title);
-        this.divDollarsBig.html("$" + clueObj.value);
+        this.divCategoryBig.innerHTML = clueObj.category.title;
+        this.divDollarsBig.innerHTML = "$" + clueObj.value;
 
-        this.divQuestion.html(clueObj.question.replace(/\\/g, "")); //sometimes there's a stray backslash
+        this.divQuestion.innerHTML = clueObj.question;
 
-        this.divClueAnswer.html(`Answer:<p><div style="font-weight:bold">${clueObj.answer}</div>`);
+        this.divClueAnswer.innerHTML = `Answer:<p><div style="font-weight:bold">${clueObj.answer}</div>`;
     }
 
     public fitClueQuestionToScreen(): void {
 
         //remove the style tag which may have been set by previous call to this function
-        this.divQuestion.css("font-size", "");
+        this.divQuestion.style.fontSize = "";
 
-        const heightOfMain = $("main").height();
+        const heightOfMain = document.querySelector("main").clientHeight;
 
-        while (this.divQuestion.height() > heightOfMain) {
+        while (this.divQuestion.clientHeight > heightOfMain) {
             const newFontSize = getFontSize(this.divQuestion) - 10;
-            this.divQuestion.css("font-size", `${newFontSize}px`);
+            this.divQuestion.style.fontSize = newFontSize + "px";
         }
 
-        function getFontSize(elem: JQuery<HTMLElement>) {
-            return Number(elem.css("font-size").replace("px", ""));
+        function getFontSize(elem: HTMLElement) {
+            return Number(elem.style.fontSize.replace("px", ""));
         }
     }
 
     public setTeamsVisible(isVisible: boolean): void {
-        this.footerTeams.toggle(isVisible);
+        this.footerTeams.style.display = isVisible ? "" : "none";
     }
 
     public setPaused(isPaused: boolean): void {
-        this.divPaused.toggle(isPaused);
+        this.divPaused.style.display = isPaused ? "" : "none";
     }
 
     public setGameEndMessage(message: string): void {
-        $("div#slide-game-end div#team-ranking").html(message);
+        document.querySelector("div#slide-game-end div#team-ranking").innerHTML = message;
     }
 
     public headerShow(): void {
-        this.header.show();
+        this.header.style.display = "";
     }
 
     public headerHide(): void {
-        this.header.hide();
+        this.header.style.display = "none";
     }
 
 }

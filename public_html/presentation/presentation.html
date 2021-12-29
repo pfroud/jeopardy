@@ -1,111 +1,113 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>J presentation</title>
-        <meta charset="UTF-8">
-        <link rel="icon" href="../favicon.ico" type="image/x-icon">
-        <link rel="stylesheet" href="font/korinna/korinna.css">
-        <link rel="stylesheet" href="font/swiss911/swiss911.css">
-        <link rel="stylesheet" href="css/progressBarPresentation.css">
-        <link rel="stylesheet" href="css/presentation.css">
-    </head>
-    <body>
-        <script src="../lib/jquery-3.4.1.min.js"></script>
-        <script  type="module" src="Presentation.js"></script>
-        <script type="module">
 
-            const opener = window.opener;
-            window.addEventListener("error", function (errorObj) {
-                opener.console.error("ERROR FROM PRESENTATION WINDOW:");
-                opener.console.error(errorObj.error);
-            });
+<head>
+    <title>J presentation</title>
+    <meta charset="UTF-8">
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="font/korinna/korinna.css">
+    <link rel="stylesheet" href="font/swiss911/swiss911.css">
+    <link rel="stylesheet" href="css/progressBarPresentation.css">
+    <link rel="stylesheet" href="css/presentation.css">
+</head>
 
-            import { Presentation } from "./Presentation.js";
-            var presentation;
-            $(document).ready(() => presentation = new Presentation());
-        </script>
+<body>
+    <script type="module" src="Presentation.js"></script>
+    <script type="module">
 
-        <header>
-            <progress id="game-timer"></progress>
-            <div id="category">category</div>
-            <div id="dollars">$0000</div>
-            <progress id="countdown"></progress>
-        </header>
+        const opener = window.opener;
+        window.addEventListener("error", function (errorObj) {
+            opener.console.error("ERROR FROM PRESENTATION WINDOW:");
+            opener.console.error(errorObj.error);
+        });
 
-        <div id="paused" style="display:none">
-            <!-- https://stackoverflow.com/a/22885848 -->
-            &#9612;&#9612; PAUSED
+        import { Presentation } from "./Presentation.js";
+        var presentation;
+        $(document).ready(() => presentation = new Presentation());
+    </script>
+
+    <header>
+        <progress id="game-timer"></progress>
+        <div id="category">category</div>
+        <div id="dollars">$0000</div>
+        <progress id="countdown"></progress>
+    </header>
+
+    <div id="paused" style="display:none">
+        <!-- https://stackoverflow.com/a/22885848 -->
+        &#9612;&#9612; PAUSED
+    </div>
+
+    <main>
+        <div class="slide" id="slide-jeopardy-logo">
+            <img id="logo-jeopardy" src="img/j-logo.png" alt="Jeopardy logo">
+            <img id="logo-jeopardy-shadow" src="img/j-logo.png" alt="Jeopardy logo shadow">
         </div>
 
-        <main>
-            <div class="slide" id="slide-jeopardy-logo">
-                <img id="logo-jeopardy" src="img/j-logo.png" alt="Jeopardy logo">
-                <img id="logo-jeopardy-shadow" src="img/j-logo.png" alt="Jeopardy logo shadow">
+        <div class="slide" id="slide-game-rules">
+            <p>
+                Non-exhaustive list of rules. The word "you" means your entire team.
+            </p>
+
+            <ul>
+                <li>The category is shown, then the clue is shown and read aloud.
+                    Buzzers open AFTER the question has been read aloud.
+                    If you buzz while the clue is being read aloud, your buzzer is briefly locked out.</li>
+
+                <li>Answers do NOT need to start your answer with &ldquo;what is&rdquo;.</li>
+
+                <li>There is a time limit to answer. If you run out of time OR answer wrong, you lose money.</li>
+
+                <li>If you buzz while another team is answering, your buzzer is briefly locked out.</li>
+
+                <li>Each team only gets one try to answer each question.</li>
+            </ul>
+
+        </div>
+
+        <div class="slide" id="slide-buzzer-test">
+            <p>Test your buzzers!</p>
+        </div>
+
+        <div class="slide" id="slide-spinner">
+            <div id="spinner"></div>
+        </div>
+
+        <div class="slide" id="slide-clue-category-and-dollars">
+            <div id="category-big"></div>
+            <div id="dollars-big"></div>
+            <!--<progress value="2" max="4"></progress>-->
+        </div>
+
+        <div class="slide" id="slide-clue-question">
+            <div id="clue-question"></div>
+            <!--<progress value="2" max="4"></progress>-->
+        </div>
+
+        <div class="slide" id="slide-clue-answer">
+            <div id="clue-answer"></div>
+            <!--<progress value="2" max="4"></progress>-->
+        </div>
+
+        <div class="slide" id="slide-event-cost">
+            <img id="cost-chart" src="img/cost-chart/cost-chart.svg" alt="cost chart">
+        </div>
+
+        <div class="slide" id="slide-game-end">
+            <p>Game over!</p>
+
+            <div id="team-ranking">
+                <!-- generated at runtime -->
             </div>
+        </div>
 
-            <div class="slide" id="slide-game-rules">
-                <p>
-                    Non-exhaustive list of rules. The word "you" means your entire team.
-                </p>
+    </main>
 
-                <ul>
-                    <li>The category is shown, then the clue is shown and read aloud.
-                        Buzzers open AFTER the question has been read aloud.
-                        If you buzz while the clue is being read aloud, your buzzer is briefly locked out.</li>
-
-                    <li>Answers do NOT need to start your answer with &ldquo;what is&rdquo;.</li>
-
-                    <li>There is a time limit to answer. If you run out of time OR answer wrong, you lose money.</li>
-
-                    <li>If you buzz while another team is answering, your buzzer is briefly locked out.</li>
-
-                    <li>Each team only gets one try to answer each question.</li>
-                </ul>
-
-            </div>
-
-            <div class="slide" id="slide-buzzer-test">
-                <p>Test your buzzers!</p>
-            </div>
-
-            <div class="slide" id="slide-spinner">
-                <div id="spinner"></div>
-            </div>
-
-            <div class="slide" id="slide-clue-category-and-dollars">
-                <div id="category-big"></div>
-                <div id="dollars-big"></div>
-                <!--<progress value="2" max="4"></progress>-->
-            </div>
-
-            <div class="slide" id="slide-clue-question">
-                <div id="clue-question"></div>
-                <!--<progress value="2" max="4"></progress>-->
-            </div>
-
-            <div class="slide" id="slide-clue-answer">
-                <div id="clue-answer"></div>
-                <!--<progress value="2" max="4"></progress>-->
-            </div>
-
-            <div class="slide" id="slide-event-cost">
-                <img id="cost-chart" src="img/cost-chart/cost-chart.svg" alt="cost chart">
-            </div>
-
-            <div class="slide" id="slide-game-end">
-                <p>Game over!</p>
-
-                <div id="team-ranking">
-                    <!-- generated at runtime -->
-                </div>
-            </div>
-
-        </main>
-
-        <footer style="display:none">
-            <!-- generated at runtime -->
-        </footer>
+    <footer style="display:none">
+        <!-- generated at runtime -->
+    </footer>
 
 
-    </body>
+</body>
+
 </html>
