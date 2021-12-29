@@ -1,8 +1,8 @@
 export interface StateMachineState {
     name: string;
     showPresentationSlide?: string;
-    onEnter?: Function; //what are the possible inptus and outputs of this function?
-    onExit?: Function; //what are the possible inptus and outputs of this function?
+    onEnter?: () => void;
+    onExit?: () => void;
     transitions: StateMachineTransition[];
 }
 
@@ -20,7 +20,7 @@ export interface ManualTransition {
     type: TransitionType.Manual;
     triggerName: string;
     dest: string;
-    fn?: Function;
+    fn?: () => void;
 }
 
 export interface IfTransition {
@@ -28,18 +28,18 @@ export interface IfTransition {
     condition: (arg0: KeyboardEvent) => boolean;
     then: {
         dest: string;
-        fn?: Function;
+        fn?: () => void;
     };
     else: {
         dest: string;
-        fn?: Function;
+        fn?: () => void;
     };
 }
 
 export interface PromiseTransition {
     type: TransitionType.Promise;
     dest: string;
-    fn?: Function;
+    fn?: () => void;
 }
 
 export interface TimeoutTransition {
@@ -47,12 +47,12 @@ export interface TimeoutTransition {
     duration: (() => number) | number;
     dest: string;
     countdownTimerShowDots?: boolean;
-    fn?: Function;
+    fn?: () => void;
 }
 
 export interface KeyboardTransition {
     type: TransitionType.Keyboard;
     keys: string;
     dest: string;
-    fn?: Function;
+    fn?: (keyboardEvent: KeyboardEvent) => void;
 }

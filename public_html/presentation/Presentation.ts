@@ -42,8 +42,8 @@ export class Presentation {
 
             if (window.opener.operator) {
                 this.showSlide("slide-jeopardy-logo");
-                (window as any).opener.operator.handlePresentationReady(this);
-            } else{
+                window.opener.operator.handlePresentationReady(this);
+            } else {
                 $("<div>window.opener.operator is null</div>")
                     .css("background-color", "red")
                     .css("position", "absolute")
@@ -66,7 +66,6 @@ export class Presentation {
 
     private _initSlides(): void {
         this.slideDivs = {};
-        this.visibleSlide = undefined;
 
         this.slideNames = [];
 
@@ -91,7 +90,7 @@ export class Presentation {
 
             this.visibleSlide = targetSlide;
         } else {
-            throw new RangeError('slide name "' + slideName + '" not in known slides: ' + Object.keys(this.slideDivs));
+            throw new RangeError(`slide name "${slideName}" not in known slides: ${Object.keys(this.slideDivs)}`);
         }
     }
 
@@ -104,8 +103,7 @@ export class Presentation {
 
         this.divQuestion.html(clueObj.question.replace(/\\/g, "")); //sometimes there's a stray backslash
 
-        this.divClueAnswer.html("Answer:<p><div style=\"font-weight:bold\">"
-            + clueObj.answer + "</div>");
+        this.divClueAnswer.html(`Answer:<p><div style="font-weight:bold">${clueObj.answer}</div>`);
     }
 
     public fitClueQuestionToScreen(): void {
@@ -117,7 +115,7 @@ export class Presentation {
 
         while (this.divQuestion.height() > heightOfMain) {
             const newFontSize = getFontSize(this.divQuestion) - 10;
-            this.divQuestion.css("font-size", newFontSize + "px");
+            this.divQuestion.css("font-size", `${newFontSize}px`);
         }
 
         function getFontSize(elem: JQuery<HTMLElement>) {

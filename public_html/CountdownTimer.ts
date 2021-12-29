@@ -164,7 +164,7 @@ export class CountdownTimer {
         if (this.dotsElement) {
             const tds = this.dotsElement.find("td");
             if (tds.length !== 9) {
-                console.warn("found " + tds.length + "dot(s) element(s), expected exactly 9");
+                console.warn(`found ${tds.length} dots <td> element(s), expected exactly 9`);
             }
             tds.addClass("active");
         }

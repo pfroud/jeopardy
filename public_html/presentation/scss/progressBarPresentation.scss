@@ -17,23 +17,20 @@ progress {
     $color-lockout-paused-foreground: purple;
 
     &[value] {
-        &::-webkit-progress-bar{
+        &::-webkit-progress-bar {
             // background of bar in Chrome
             background-color: $color-normal-backgroud;
         }
-
 
         &::-moz-progress-bar {
             // foreground of bar in Firefox
             background-color: $color-normal-foreground;
         }
 
-
         &::-webkit-progress-value {
             // foreground of bar in Chrome
             background-color: $color-normal-foreground;
         }
-
 
         &.paused {
             &::-webkit-progress-value {
@@ -70,13 +67,10 @@ progress {
                 }
             }
         }
-
     }
 
-
     &:not([value]) {
-        &::-webkit-progress-bar{
-
+        &::-webkit-progress-bar {
             // try colors here https://codepen.io/chriscoyier/pen/lAkyo
             $color1: #ddd;
             $color2: #eee;
@@ -84,15 +78,13 @@ progress {
 
             // https://www.pexels.com/blog/css-only-loaders/
             // https://codepen.io/brunjo/pen/azdWjY
-            background-image: 
-                repeating-linear-gradient(
+            background-image: repeating-linear-gradient(
                 -45deg,
                 $color1,
                 $color1 $size,
                 $color2 $size,
-                $color2 2*$size
-                );
+                $color2 2 * $size
+            );
         }
     }
-
 }

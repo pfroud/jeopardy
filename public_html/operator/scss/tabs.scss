@@ -24,14 +24,13 @@ label[for^="tab"] {
         border-color: $color-inactive-hover;
         cursor: pointer;
     }
-
 }
 
 input[type="radio"] {
     display: none;
 
-    &:checked  + label {
-        color: black; 
+    &:checked + label {
+        color: black;
         border: 1px solid black;
         border-bottom: 1px solid #fff;
 
@@ -40,17 +39,10 @@ input[type="radio"] {
         }
     }
 
-
     &#tab-setup:checked ~ div#content-setup,
-        &#tab-game:checked ~ div#content-game,
-        &#tab-admin:checked ~ div#content-admin,
-        &#tab-settings:checked ~ div#content-settings
-        {
+    &#tab-game:checked ~ div#content-game,
+    &#tab-admin:checked ~ div#content-admin,
+    &#tab-settings:checked ~ div#content-settings {
         display: block;
     }
-
 }
-
-
-
-

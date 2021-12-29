@@ -198,7 +198,7 @@ export class Operator {
         teamObj.canBeLockedOut() && teamObj.startLockout();
     }
 
-    public getClueFromJService() {
+    public getClueFromJService(): Promise<Clue> {
         // only same the game if somebody has more than $0
         if (this.teamArray.some(teamObj => teamObj.dollars > 0)) {
             this.saveGame();
@@ -268,7 +268,7 @@ export class Operator {
                             answer: `couldn't fetch clue after ${maxTries} tries`,
                             question: `couldn't fetch clue after ${maxTries} tries`,
                             value: 0,
-                            airdate: null,
+                            airdate: "",
                             category: { title: "error" }
                         });
                     }
@@ -276,7 +276,7 @@ export class Operator {
             });
         }
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this.buttonStartGame.trigger("blur");
             this.trQuestion.hide();
             this.divInstructions.html("Loading clue...");
@@ -338,7 +338,7 @@ export class Operator {
         this.divInstructions.html("Let people read the answer.");
     }
 
-    public setAllTeamsState(targetState: TeamState, endLockout: boolean = false): void {
+    public setAllTeamsState(targetState: TeamState, endLockout = false): void {
         this.teamArray.forEach(teamObj => teamObj.setState(targetState, endLockout));
     }
 
@@ -424,20 +424,23 @@ export class Operator {
         this.audioManager.play("musicClosing");
 
         // sort teams by how much money they have
-        let shallowCopy = this.teamArray.slice();
+        const shallowCopy = this.teamArray.slice();
         function comparator(team1: Team, team2: Team) {
             //sort descending
             return team2.dollars - team1.dollars;
         }
         shallowCopy.sort(comparator);
 
-        const html: string[] = new Array();
+        const html: string[] = [];
         html.push("<table><tbody>");
 
         shallowCopy.forEach(teamObj => {
             html.push(
-                "<tr><td>" + teamObj.teamName + "</td><td>$" +
-                teamObj.dollars.toLocaleString() + "</td></tr>");
+                "<tr>" +
+                "<td>" + teamObj.teamName + "</td>" +
+                "<td>$" + teamObj.dollars.toLocaleString() + "</td>" +
+                "</tr>"
+            );
         });
 
         html.push("</tbody></table>");

@@ -4,11 +4,12 @@ body {
     font-size: 26px;
 }
 
-input, button {
+input,
+button {
     font-size: inherit;
 }
 
-input[type="checkbox"]{
+input[type="checkbox"] {
     width: 20px;
     height: 20px;
 }
@@ -36,7 +37,6 @@ div#clue {
     padding: 20px;
 }
 
-
 div#state-machine-viz {
     progress#countdown {
         width: 100%;
@@ -60,8 +60,8 @@ div#paused {
     border-radius: 20px;
     padding: 20px;
     border: 1px solid darkorange;
-    text-shadow: 3px 3px rgba(0,0,0,0.2);
-    filter: drop-shadow(10px 13px rgba(0,0,0,0.4));
+    text-shadow: 3px 3px rgba(0, 0, 0, 0.2);
+    filter: drop-shadow(10px 13px rgba(0, 0, 0, 0.4));
     bottom: 120px;
 }
 
@@ -85,15 +85,7 @@ footer {
             font-weight: bold;
         }
     }
-
-    div.team-name, div.team-dollars, div.team-state, progress.time-left {
-        /*! supress netbeans warning */
-    }
-
 }
-
-
-
 
 span.key-shortcut-letter {
     text-decoration: underline;
@@ -120,6 +112,4 @@ div#saved-game-prompt {
     table#saved-game-details td.team-name {
         padding-right: 10px;
     }
-
-
 }

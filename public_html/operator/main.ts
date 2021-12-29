@@ -14,8 +14,8 @@ $(document).ready(function () {
     const settings = new Settings();
     const audioManager = new AudioManager();
 
-    // so we can access the operator instance in the web browser debugger
-    (window as any).operator = new Operator(audioManager, settings);
+    // So we can access the operator instance in the web browser debugger.
+    /*(window as any).operator =*/ new Operator(audioManager, settings);
 
 });
 
@@ -26,7 +26,7 @@ function initKeyboardShortcuts(): void {
     const inputSettings = $("input#tab-settings");
 
     document.addEventListener("keydown", function (keyboardEvent) {
-        if (document.activeElement.tagName === "INPUT") {
+        if (document.activeElement && document.activeElement.tagName === "INPUT") {
             return;
         }
 

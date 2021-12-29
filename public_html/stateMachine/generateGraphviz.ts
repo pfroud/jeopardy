@@ -20,7 +20,7 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                 case TransitionType.Keyboard: {
                     const keys = transition.keys;
                     // TODO push stuff to array then use join() instead of string concatenating
-                    var label = "keyboard: ";
+                    let label = "keyboard: ";
                     if (keys === " ") {
                         label += "[space]"
                     } else {
@@ -38,7 +38,7 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
 
                 }
                 case TransitionType.Promise: {
-                    var label = transition.type.toString();
+                    let label = transition.type.toString();
                     if (transition.fn) {
                         label += ` / ${transition.fn.name}`;
                     }
@@ -48,7 +48,7 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                     break;
                 }
                 case TransitionType.Timeout: {
-                    var label: string;
+                    let label: string;
                     if (typeof transition.duration === "number") {
                         label = transition.type.toString() + ": " + (transition.duration / 1000) + "sec";
                     } else {
@@ -65,7 +65,7 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                     break;
                 }
                 case TransitionType.Manual: {
-                    var label = transition.type.toString() + ': \\"' + transition.triggerName.replace("manualTrigger_", "") + '\\"';
+                    let label = transition.type.toString() + ': \\"' + transition.triggerName.replace("manualTrigger_", "") + '\\"';
                     if (transition.fn) {
                         label += ` / ${transition.fn.name}`;
                     }
@@ -77,15 +77,15 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                 case TransitionType.If: {
                     const condition = transition.condition.name;
 
-                    var labelThen = "if(" + condition + ")";
+                    let labelThen = "if(" + condition + ")";
                     if (transition.then.fn) {
                         labelThen += ` / ${transition.then.fn.name}`;
                     }
                     const idThen = `${state.name}_to_${transition.then.dest}`;
 
-                    var labelElse = "if(!" + condition + ")";
+                    let labelElse = "if(!" + condition + ")";
                     if (transition.else.fn) {
-                        labelThen += ` / ${transition.else.fn.name}`;
+                        labelElse += ` / ${transition.else.fn.name}`;
                     }
                     const idElse = `${state.name}_to_${transition.else.dest}`;
 

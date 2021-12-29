@@ -40,7 +40,7 @@ export class Team {
         this.teamIdx = teamIdx;
         this.dollars = 0;
         this.presentationInstance = presentationInstance;
-        this.teamName = "Team " + (teamIdx + 1);
+        this.teamName = `Team ${teamIdx + 1}`;
 
         this.state = null;
 
@@ -324,5 +324,5 @@ export enum TeamState {
     ANSWERING = "answering",
     ALREADY_ANSWERED = "already-answered", // the team tried answering the question but got it wrong
     LOCKOUT = "lockout" //team buzzed while operator was reading the question
-};
+}
 

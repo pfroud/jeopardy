@@ -36,7 +36,6 @@ export class StateMachine {
     private countdownTimer: CountdownTimer;
     private presentState: StateMachineState;
     private allStates: StateMachineState[];
-    private svgGroup: SVGElement;
 
     constructor(settings: Settings, operator: Operator, presentation: Presentation, audioManager: AudioManager) {
 
@@ -70,17 +69,17 @@ export class StateMachine {
         this._openGraphvizThing();
 
     }
-    private _openGraphvizThing() {
+    private _openGraphvizThing(): void {
         const graphvizWindow = window.open("../graphvizViewer/graphvizViewer.html", "graphvizViewer");
     }
 
-    public handleGraphvizViewerReady(graphvizViewer: GraphvizViewer) {
+    public handleGraphvizViewerReady(graphvizViewer: GraphvizViewer): void {
         graphvizViewer.updateGraphviz(null, this.presentState.name);
         this.graphvizViewer = graphvizViewer;
     }
 
     private _handleKeyboardEvent(keyboardEvent: KeyboardEvent): void {
-        if (document.activeElement.tagName === "INPUT") {
+        if (document.activeElement && document.activeElement.tagName === "INPUT") {
             return;
         }
 
@@ -289,7 +288,7 @@ export class StateMachine {
                 const transitionObj = transitionArray[i];
                 if (transitionObj.type === TransitionType.Timeout) {
                     this._startCountdownTimer(transitionObj, triggeringKeyboardEvent);
-                    this.operatorWindowDivStateName.html(destStateName + " &rarr; " + transitionObj.dest);
+                    this.operatorWindowDivStateName.html(`${destStateName} &rarr; ${transitionObj.dest}`);
                     break;
                 }
             }
@@ -324,7 +323,7 @@ export class StateMachine {
     private _parseAndValidateStates(): void {
 
         // pass one of two - add states to stateMap
-        this.allStates.forEach((stateObj: StateMachineState, index: number) => {
+        this.allStates.forEach((stateObj: StateMachineState) => {
             this.stateMap[stateObj.name] = stateObj;
 
             if (stateObj.showPresentationSlide &&
@@ -335,9 +334,9 @@ export class StateMachine {
         }, this);
 
         // pass two of two - validate all the transitions
-        this.allStates.forEach((stateObj: StateMachineState, stateIndex: number) => {
+        this.allStates.forEach((stateObj: StateMachineState) => {
 
-            let keyboardKeysUsedInTransitionsFromThisState: KeyboardKeysUsed = {};
+            const keyboardKeysUsedInTransitionsFromThisState: KeyboardKeysUsed = {};
 
             stateObj.transitions.forEach((transitionObj: StateMachineTransition, transitionIndex: number) => {
 
@@ -398,7 +397,7 @@ export class StateMachine {
                     case TransitionType.If:
                         if (!(transitionObj.condition instanceof Function)) {
                             printWarning(stateObj.name, transitionIndex,
-                                "condition is not a function: " + transitionObj.condition);
+                                `condition is not a function: ${transitionObj.condition}`);
                         }
                         if (!(transitionObj.then.dest in this.stateMap)) {
                             printWarning(stateObj.name, transitionIndex,

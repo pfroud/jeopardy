@@ -37,17 +37,17 @@ export class GraphvizViewer {
     private static readonly TRAIL_COLORS = ["red", "orange", "yellow"];
 
     private readonly svg: SVGElement;
-    private stateTrail: SVGGElement[] = new Array();
-    private transitionTrail: SVGGElement[] = new Array();
+    private stateTrail: SVGGElement[] = [];
+    private transitionTrail: SVGGElement[] = [];
 
     constructor(svgDocument: XMLDocument) {
         this.svg = svgDocument.querySelector<SVGElement>("svg");
 
 
         // https://stackoverflow.com/a/4906603
-        var styleElement = svgDocument.createElementNS("http://www.w3.org/2000/svg", "style");
+        const styleElement = svgDocument.createElementNS("http://www.w3.org/2000/svg", "style");
 
-        const lines: string[] = new Array(0);
+        const lines: string[] = [];
 
         for (let i = 0; i < GraphvizViewer.TRAIL_LENGTH; i++) {
             const color = GraphvizViewer.TRAIL_COLORS[i];
@@ -82,7 +82,7 @@ export class GraphvizViewer {
 
             if (this.stateTrail.length > GraphvizViewer.TRAIL_LENGTH) {
                 // remove the last element of the array
-                this.stateTrail.pop().removeAttribute(GraphvizViewer.SVG_ATTRIBUTE_STATE_TRAIL_INDEX);
+                this.stateTrail.pop()?.removeAttribute(GraphvizViewer.SVG_ATTRIBUTE_STATE_TRAIL_INDEX);
             }
 
             for (let i = 0; i < this.stateTrail.length; i++) {
@@ -100,7 +100,7 @@ export class GraphvizViewer {
 
                 if (this.transitionTrail.length > GraphvizViewer.TRAIL_LENGTH) {
                     // remove the last element of the array
-                    this.transitionTrail.pop().removeAttribute(GraphvizViewer.SVG_ATTRIBUTE_TRANSITION_TRAIL_INDEX);
+                    this.transitionTrail.pop()?.removeAttribute(GraphvizViewer.SVG_ATTRIBUTE_TRANSITION_TRAIL_INDEX);
                 }
 
                 for (let i = 0; i < this.transitionTrail.length; i++) {
