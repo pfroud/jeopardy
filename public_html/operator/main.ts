@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const audioManager = new AudioManager();
 
     // So we can access the operator instance in the web browser debugger.
-    /*(window as any).operator =*/ new Operator(audioManager, settings);
+    (window as any).operator = new Operator(audioManager, settings);
 
 });
 

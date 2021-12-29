@@ -140,7 +140,7 @@ export class StateMachine {
         if (transitionObj.countdownTimerShowDots) {
             const teamIndex = Number(keyboardEvent.key) - 1;
             const teamObj = this.operator.teamArray[teamIndex];
-            countdownTimer.dotsTables.push(teamObj.presentationCountdownDots);
+            countdownTimer.dotsTables = [teamObj.presentationCountdownDots];
         } else {
             countdownTimer.progressElements.push(this.presentation.getProgressElement());
         }

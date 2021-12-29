@@ -279,6 +279,7 @@ export class Operator {
                     }
                 }
             });
+            xhr.send();
         }
 
         return new Promise((resolve) => {

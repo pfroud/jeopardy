@@ -85,10 +85,11 @@ export class Presentation {
 
     public showSlide(slideName: string): void {
         if (this.slideNames.includes(slideName)) {
-            this.visibleSlide && (this.visibleSlide.style.display = "none");
+            // display is set to none in the CSS file
+            this.visibleSlide && (this.visibleSlide.style.display = "");
 
             const targetSlide = this.slideDivs[slideName];
-            targetSlide.style.display = "";
+            targetSlide.style.display = "block";
 
             this.visibleSlide = targetSlide;
         } else {

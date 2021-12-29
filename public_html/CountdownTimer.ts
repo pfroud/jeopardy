@@ -210,7 +210,10 @@ export class CountdownTimer {
 
             if (this.previousSecondThatPassed !== secondsThatJustPassed) {
                 this.dotsTables.forEach(table => {
-                    table.querySelectorAll('td[data-countdown="' + secondsThatJustPassed + '"]').forEach(td => td.classList.remove("active"));
+
+                    table.querySelectorAll('td[data-countdown="' + secondsThatJustPassed + '"]')
+                        .forEach(td => td.classList.remove("active"));
+
                     if (secondsThatJustPassed !== 6 && secondsThatJustPassed !== 1) {
                         this.audioManager.play("tick");
                     }
@@ -224,10 +227,10 @@ export class CountdownTimer {
     private _finish(): void {
         this.hasFinished = true;
         this.textDivs.forEach(elem => elem.innerHTML = "done");
+        this.dotsTables && this.dotsTables.forEach(table => table.querySelectorAll("td").forEach(td => td.classList.remove("active")));
         clearInterval(this.intervalID);
 
         if (this.hideProgressOnFinish) {
-
             this.progressElements.forEach(elem => elem.style.display = "none");
         }
         this.onFinished && this.onFinished();

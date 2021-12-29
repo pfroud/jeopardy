@@ -74,17 +74,8 @@ export class Team {
 
         this.createDivsOperator();
         this.createDivsPresentation();
-        this.initTeamNameListener();
 
         this.setState(TeamState.BUZZERS_OFF);
-    }
-
-    private initTeamNameListener() {
-        const teamNameInput = document.querySelector<HTMLInputElement>("input#team-name-" + this.teamIdx);
-        teamNameInput.addEventListener("input", (elem) => {
-            // https://github.com/microsoft/TypeScript/issues/39925
-            this.setTeamName((elem.currentTarget as HTMLInputElement).value);
-        });
     }
 
     public handleAnswerCorrect(clueObj: Clue): void {
@@ -191,7 +182,7 @@ export class Team {
 
         for (let i = 5; i > 1; i--) {
             const tdDescending = document.createElement("td");
-            tableCountdownDots.setAttribute("data-countdown", String(i));
+            tdDescending.setAttribute("data-countdown", String(i));
             tableCountdownDots.appendChild(tdDescending);
         }
 
@@ -257,12 +248,6 @@ export class Team {
 
     }
 
-    public setTeamName(teamName: string): void {
-        // todo delete the entire mechanism to rename teams
-        this.teamName = teamName;
-        this.div.operator.teamName.innerHTML = teamName;
-        this.div.presentation.teamName.innerHTML = teamName;
-    }
 
     public setState(targetState: TeamState, endLockout = false): void {
         // TODO talk about why the endLockout boolean is needed
