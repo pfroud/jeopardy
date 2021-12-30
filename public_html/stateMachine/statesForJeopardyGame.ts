@@ -24,9 +24,14 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
         }, {
             name: "getClueFromJService",
             presentationSlideToShow: "slide-spinner",
-            onEnter: operator.getClueFromJService,
             transitions: [{
                 type: TransitionType.Promise,
+                /*
+                The promise only tells the state machine when to go to the next state.
+                The promise does NOT pass the clue object to the state machine.
+                The clue object is only stored by the operator.
+                */
+                functionToGetPromise: operator.getClueFromJService.bind(operator),
                 destination: "showClueCategoryAndDollars"
             }]
         }, {
@@ -48,7 +53,7 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             */
             name: "showClueQuestion",
             presentationSlideToShow: "slide-clue-question",
-            onEnter: operator.showClueQuestion,
+            onEnter: operator.showClueQuestion.bind(operator),
             transitions: [{
                 type: TransitionType.Keyboard,
                 keyboardKeys: " ", //space
@@ -57,17 +62,17 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 type: TransitionType.Keyboard,
                 keyboardKeys: "123456789",
                 destination: "showClueQuestion",
-                fn: operator.handleLockout
+                fn: operator.handleLockout.bind(operator)
             }]
         }, {
             name: "waitForBuzzesRestartTimer",
-            onEnter: operator.handleDoneReadingClueQuestion,
-            onExit: stateMachine.saveRemainingCountdownTime,
+            onEnter: operator.handleDoneReadingClueQuestion.bind(operator),
+            onExit: stateMachine.saveRemainingCountdownTime.bind(stateMachine),
             transitions: [{
                 type: TransitionType.Timeout,
                 duration: settings.timeoutWaitForBuzzesMs,
                 destination: "showAnswer",
-                fn: operator.playSoundQuestionTimeout
+                fn: operator.playSoundQuestionTimeout.bind(operator)
             }, {
                 type: TransitionType.Keyboard,
                 keyboardKeys: "123456789",
@@ -80,7 +85,7 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 type: TransitionType.Timeout,
                 duration: () => stateMachine.remainingQuestionTimeMs, //todo look at code implementing stateMachineInstance
                 destination: "showAnswer",
-                fn: operator.playSoundQuestionTimeout
+                fn: operator.playSoundQuestionTimeout.bind(operator)
             }, {
                 type: TransitionType.Keyboard,
                 keyboardKeys: "123456789",
@@ -91,18 +96,18 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             name: "checkIfTeamCanAnswer",
             transitions: [{
                 type: TransitionType.If,
-                condition: operator.canTeamBuzz,
+                condition: operator.canTeamBuzz.bind(operator),
                 then: { destination: "waitForTeamAnswer" },
                 else: { destination: "waitForBuzzesResumeTimer" }
             }]
         }, {
             name: "waitForTeamAnswer",
-            onEnter: operator.handleBuzzerPress,
+            onEnter: operator.handleBuzzerPress.bind(operator),
             transitions: [{
                 type: TransitionType.Keyboard,
                 keyboardKeys: "y",
                 destination: "showAnswer",
-                fn: operator.handleAnswerCorrect
+                fn: operator.handleAnswerCorrect.bind(operator)
             }, {
                 type: TransitionType.Keyboard,
                 keyboardKeys: "n",
@@ -117,16 +122,16 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
         },
         {
             name: "subtractMoney",
-            onEnter: operator.handleAnswerIncorrectOrAnswerTimeout,
+            onEnter: operator.handleAnswerIncorrectOrAnswerTimeout.bind(operator),
             transitions: [{
                 type: TransitionType.If,
-                condition: operator.haveAllTeamsAnswered,
+                condition: operator.haveAllTeamsAnswered.bind(operator),
                 then: { destination: "showAnswer" },
                 else: { destination: "waitForBuzzesResumeTimer" }
             }]
         }, {
             name: "showAnswer",
-            onEnter: operator.handleShowAnswer,
+            onEnter: operator.handleShowAnswer.bind(operator),
             presentationSlideToShow: "slide-clue-answer",
             transitions: [{
                 type: TransitionType.Timeout,
@@ -137,14 +142,14 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             name: "checkGameEnd",
             transitions: [{
                 type: TransitionType.If,
-                condition: operator.shouldGameEnd,
+                condition: operator.shouldGameEnd.bind(operator),
                 then: { destination: "gameEnd" },
                 else: { destination: "getClueFromJService" }
             }]
         }, {
             name: "gameEnd",
             presentationSlideToShow: "slide-game-end",
-            onEnter: operator.handleGameEnd,
+            onEnter: operator.handleGameEnd.bind(operator),
             transitions: [{
                 type: TransitionType.ManualTrigger,
                 triggerName: "manualTrigger_reset",

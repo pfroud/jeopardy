@@ -81,7 +81,7 @@ export class Team {
     public handleAnswerCorrect(clueObj: Clue): void {
         this.audioManager.play("answerCorrect");
         this.moneyAdd(clueObj.value);
-        this.presentationCountdownDots.querySelector("td").classList.remove("active");
+        this.presentationCountdownDots.querySelectorAll("td").forEach(td => td.classList.remove("active"));
     }
 
     public handleAnswerIncorrectOrAnswerTimeout(clueObj: Clue): void {

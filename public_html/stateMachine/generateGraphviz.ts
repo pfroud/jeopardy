@@ -38,11 +38,7 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
 
                 }
                 case TransitionType.Promise: {
-                    let label = transition.type.toString();
-                    if (transition.fn) {
-                        label += ` / ${transition.fn.name}`;
-                    }
-
+                    const label = transition.type.toString() + ": " + transition.functionToGetPromise;
                     const id = `${state.name}_to_${transition.destination}`;
                     dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${label}", id="${id}"];`);
                     break;

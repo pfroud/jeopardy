@@ -198,8 +198,8 @@ export class Operator {
         teamObj.canBeLockedOut() && teamObj.startLockout();
     }
 
-    public getClueFromJService(): Promise<Clue> {
-        // only same the game if somebody has more than $0
+    public getClueFromJService(): Promise<void> {
+        // only save the game if somebody has more than $0
         if (this.teamArray.some(teamObj => teamObj.dollars > 0)) {
             this.saveGame();
         }
@@ -243,15 +243,24 @@ export class Operator {
             this.divInstructions.innerHTML = "Read aloud the category and dollar value.";
         }
 
-        const fetchClueHelper = (promiseResolveFunc: (arg0: Clue) => void, tryNum: number, maxTries: number) => {
+        // Use a recursive helper function so we can do retries.
+        const fetchClueHelper = (
+            promiseResolveFunc: () => void,
+            promiseRejectFunc: (rejectReason: Error) => void,
+            tryNum: number,
+            maxTries: number
+        ) => {
+            // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
             const xhr = new XMLHttpRequest();
             xhr.open("GET", "http://jservice.io/api/random");
             xhr.addEventListener("load", () => {
+
                 if (xhr.status != 200) {
-                    alert(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
+                    alert(`Error ${xhr.status}: ${xhr.statusText}`);
                 }
-                const clueObj = JSON.parse(xhr.response)[0];
-                this.currentClueObj = clueObj;
+
+                const parsed = JSON.parse(xhr.response);
+                const clueObj = parsed[0];
 
                 if (isClueValid(clueObj) && !doesQuestionHaveMultimedia(clueObj)) {
 
@@ -260,34 +269,38 @@ export class Operator {
                     clueObj.answer = clueObj.answer.replace(/\\/g, "");
                     clueObj.category.title = clueObj.category.title.replace(/\\/g, "");
 
+                    this.currentClueObj = clueObj;
                     showClueToOperator.call(this, clueObj);
-                    promiseResolveFunc(clueObj);
+                    // we don't actually need to return the clue object to the state machine
+                    promiseResolveFunc();
                 } else {
                     if (tryNum < maxTries) {
-                        fetchClueHelper.call(this, promiseResolveFunc, tryNum + 1, maxTries);
+                        fetchClueHelper.call(this, promiseResolveFunc, promiseRejectFunc, tryNum + 1, maxTries);
                     } else {
-                        // Would make sense to call the promise reject function?
-                        // But then a function somewhere down the line has to generate
-                        // this error message.
-                        promiseResolveFunc({
-                            answer: `couldn't fetch clue after ${maxTries} tries`,
-                            question: `couldn't fetch clue after ${maxTries} tries`,
-                            value: 0,
-                            airdate: "",
-                            category: { title: "error" }
-                        });
+                        promiseRejectFunc(new Error(`couldn't fetch clue after ${maxTries} tries`));
                     }
                 }
             });
             xhr.send();
         }
 
-        return new Promise((resolve) => {
+
+        /*
+        The promise only tells the state machine when to go to the next state.
+        The promise does NOT pass the clue object to the state machine.
+        The clue object is only stored by the operator.
+        */
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/Promise#syntax
+        const promiseExecutor = (
+            resolveFunc: () => void,
+            rejectFunc: (rejectReason: Error) => void
+        ) => {
             this.buttonStartGame.blur();
             this.trQuestion.style.display = "none";
             this.divInstructions.innerHTML = "Loading clue...";
-            fetchClueHelper.call(this, resolve, 1, 5);
-        });
+            fetchClueHelper.call(this, resolveFunc, rejectFunc, 1, 5);
+        }
+        return new Promise<void>(promiseExecutor);
 
     }
 

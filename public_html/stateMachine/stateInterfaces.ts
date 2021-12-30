@@ -3,7 +3,7 @@ import { Clue } from "../interfaces";
 export interface StateMachineState {
     name: string;
     presentationSlideToShow?: string;
-    onEnter?: (keyboardEvent?: KeyboardEvent) => (Promise<Clue> | void);
+    onEnter?: (keyboardEvent?: KeyboardEvent) => void;
     onExit?: () => void;
     transitions: StateMachineTransition[];
 }
@@ -40,8 +40,9 @@ export interface IfTransition {
 
 export interface PromiseTransition {
     type: TransitionType.Promise;
+    functionToGetPromise: () => Promise<void>;
     destination: string;
-    fn?: () => void;
+    //fn?: () => void;
 }
 
 export interface TimeoutTransition {

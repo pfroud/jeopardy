@@ -7,6 +7,7 @@ import { getStatesForJeopardyGame } from "./statesForJeopardyGame.js";
 import { StateMachineState, StateMachineTransition, KeyboardTransition, TimeoutTransition, TransitionType } from "./stateInterfaces.js";
 import { generateGraphvizImpl } from "./generateGraphviz.js";
 import { GraphvizViewer } from "../graphvizViewer/graphvizViewer.js";
+import { Clue } from "../interfaces.js";
 
 interface StateMap {
     [stateName: string]: StateMachineState;
@@ -83,7 +84,7 @@ export class StateMachine {
                         if (this.DEBUG) {
                             console.log(`calling transition fn ${transitionObj.fn.name}`);
                         }
-                        transitionObj.fn.call(this.operator, keyboardEvent);
+                        transitionObj.fn(keyboardEvent);
                     }
 
                     this.goToState(transitionObj.destination, keyboardEvent);
@@ -138,7 +139,7 @@ export class StateMachine {
 
         this.countdownTimer.onFinished = () => {
             if (timeoutTransitionObj.fn) {
-                timeoutTransitionObj.fn.call(this.operator);
+                timeoutTransitionObj.fn();
             }
             this.goToState(timeoutTransitionObj.destination);
         }
@@ -153,7 +154,8 @@ export class StateMachine {
 
     public manualTrigger(triggerName: string): void {
         // Search for the first transition which has a matching manual trigger.
-        this.presentState.transitions.forEach(transitionObj => {
+        for (let i = 0; i < this.presentState.transitions.length; i++) {
+            const transitionObj = this.presentState.transitions[i];
             if (transitionObj.type === TransitionType.ManualTrigger && transitionObj.triggerName === triggerName) {
                 if (this.DEBUG) {
                     console.log(`Manual trigger "${triggerName}" from ${this.presentState.name} to ${transitionObj.destination}`);
@@ -161,7 +163,7 @@ export class StateMachine {
                 this.goToState(transitionObj.destination);
                 return;
             }
-        });
+        }
         console.warn(`the present state (${this.presentState.name}) does not have any manual trigger transitions called "${triggerName}"`);
     }
 
@@ -185,7 +187,7 @@ export class StateMachine {
             if (this.DEBUG) {
                 console.log(`Running the onExit function of ${this.presentState}: ${this.presentState.onExit.name}`);
             }
-            this.presentState.onExit.call(this); //todo fix this, because onEnter always is an operatorInstance call
+            this.presentState.onExit();
         }
 
         const previousState = this.presentState;
@@ -218,26 +220,7 @@ export class StateMachine {
             if (this.DEBUG) {
                 console.log(`Running the onEnter function on ${this.presentState.name}: ${this.presentState.onEnter.name}`);
             }
-            //todo don't use global reference to operator instance!
-            //todo make this not suck, because onExit call is not an operatorInstance call
-            const rv = this.presentState.onEnter.call(this.operator, keyboardEvent);
-            if (rv && rv.constructor.name === "Promise") {
-                for (let i = 0; i < transitionArray.length; i++) {
-                    const transitionObj = transitionArray[i];
-
-                    if (transitionObj.type === TransitionType.Promise) {
-                        rv.then(
-                            () => this.goToState(transitionObj.destination)
-                        ).catch(
-                            (err: Error) => {
-                                console.warn("promise rejected:");
-                                throw err;
-                            }
-                        );
-                        break;
-                    }
-                }
-            }
+            this.presentState.onEnter(keyboardEvent);
         }
 
 
@@ -254,6 +237,27 @@ export class StateMachine {
             }
         }
 
+        //////////////////////////////////////////////////////////////
+        //////////////// Handle promise transition ///////////////////
+        //////////////////////////////////////////////////////////////
+        for (let i = 0; i < transitionArray.length; i++) {
+            const transitionObj = transitionArray[i];
+
+            if (transitionObj.type === TransitionType.Promise) {
+                const thePromise: Promise<void> = transitionObj.functionToGetPromise();
+                thePromise.then(
+                    () => this.goToState(transitionObj.destination)
+                ).catch(
+                    (err: Error) => {
+                        alert("promise rejected: " + err);
+                        throw err;
+                    }
+                );
+                break;
+            }
+        }
+
+
         if (this.DEBUG) {
             console.groupEnd();
         }
@@ -267,7 +271,7 @@ export class StateMachine {
                 if (this.DEBUG) {
                     console.log(`Transition type if: the condition function is ${transitionObj.condition.name}`);
                 }
-                if (transitionObj.condition.call(this.operator, keyboardEvent)) {
+                if (transitionObj.condition(keyboardEvent)) {
                     this.goToState(transitionObj.then.destination, keyboardEvent);
                 } else {
                     this.goToState(transitionObj.else.destination, keyboardEvent);
