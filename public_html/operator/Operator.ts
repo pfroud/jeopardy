@@ -137,7 +137,7 @@ export class Operator {
         document.querySelector("button#go-to-event-cost").addEventListener("click", () => this.presentation.showSlide("event-cost"));
 
         this.buttonStartGame.addEventListener("click", () => {
-            this.stateMachine.manualTrigger("manualTrigger_startGame");
+            this.stateMachine.manualTrigger("startGame");
             this.buttonStartGame.setAttribute("disabled", "disabled");
         });
 

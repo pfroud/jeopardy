@@ -18,7 +18,7 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
 
             switch (transition.type) {
                 case TransitionType.Keyboard: {
-                    const keys = transition.keys;
+                    const keys = transition.keyboardKeys;
                     // TODO push stuff to array then use join() instead of string concatenating
                     let label = "keyboard: ";
                     if (keys === " ") {
@@ -31,9 +31,9 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                         label += ` / ${transition.fn.name}`;
                     }
 
-                    const id = `${state.name}_to_${transition.dest}`;
+                    const id = `${state.name}_to_${transition.destination}`;
 
-                    dotFileLines.push(`\t${state.name} -> ${transition.dest} [label="${label}", id="${id}"];`);
+                    dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${label}", id="${id}"];`);
                     break;
 
                 }
@@ -43,8 +43,8 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                         label += ` / ${transition.fn.name}`;
                     }
 
-                    const id = `${state.name}_to_${transition.dest}`;
-                    dotFileLines.push(`\t${state.name} -> ${transition.dest} [label="${label}", id="${id}"];`);
+                    const id = `${state.name}_to_${transition.destination}`;
+                    dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${label}", id="${id}"];`);
                     break;
                 }
                 case TransitionType.Timeout: {
@@ -60,18 +60,18 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                         label += ` / ${transition.fn.name}`;
                     }
 
-                    const id = `${state.name}_to_${transition.dest}`;
-                    dotFileLines.push(`\t${state.name} -> ${transition.dest} [label="${label}", id="${id}"];`);
+                    const id = `${state.name}_to_${transition.destination}`;
+                    dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${label}", id="${id}"];`);
                     break;
                 }
-                case TransitionType.Manual: {
+                case TransitionType.ManualTrigger: {
                     let label = transition.type.toString() + ': \\"' + transition.triggerName.replace("manualTrigger_", "") + '\\"';
                     if (transition.fn) {
                         label += ` / ${transition.fn.name}`;
                     }
 
-                    const id = `${state.name}_to_${transition.dest}`;
-                    dotFileLines.push(`\t${state.name} -> ${transition.dest} [label="${label}", id="${id}"];`);
+                    const id = `${state.name}_to_${transition.destination}`;
+                    dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${label}", id="${id}"];`);
                     break;
                 }
                 case TransitionType.If: {
@@ -81,16 +81,16 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                     if (transition.then.fn) {
                         labelThen += ` / ${transition.then.fn.name}`;
                     }
-                    const idThen = `${state.name}_to_${transition.then.dest}`;
+                    const idThen = `${state.name}_to_${transition.then.destination}`;
 
                     let labelElse = "if(!" + condition + ")";
                     if (transition.else.fn) {
                         labelElse += ` / ${transition.else.fn.name}`;
                     }
-                    const idElse = `${state.name}_to_${transition.else.dest}`;
+                    const idElse = `${state.name}_to_${transition.else.destination}`;
 
-                    dotFileLines.push(`\t${state.name} -> ${transition.then.dest} [label="${labelThen}", id="${idThen}"];`);
-                    dotFileLines.push(`\t${state.name} -> ${transition.else.dest} [label="${labelElse}", id="${idElse}"];`);
+                    dotFileLines.push(`\t${state.name} -> ${transition.then.destination} [label="${labelThen}", id="${idThen}"];`);
+                    dotFileLines.push(`\t${state.name} -> ${transition.else.destination} [label="${labelElse}", id="${idElse}"];`);
                     break;
                 }
                 default:

@@ -12,10 +12,6 @@ interface StateMap {
     [stateName: string]: StateMachineState;
 }
 
-interface ManualTriggerMap {
-    [transitionName: string]: StateMachineTransition;
-}
-
 interface KeyboardKeysUsed {
     [keyboardKey: string]: number;
 }
@@ -33,7 +29,6 @@ export class StateMachine {
     private readonly stateMap: StateMap = {};
     private readonly DEBUG = true;
     private graphvizViewer: GraphvizViewer;
-    private manualTriggerMap: ManualTriggerMap = {};
     private countdownTimer: CountdownTimer;
     private presentState: StateMachineState;
     private allStates: StateMachineState[];
@@ -60,6 +55,7 @@ export class StateMachine {
     }
     private openGraphvizThing(): void {
         window.open("../graphvizViewer/graphvizViewer.html", "graphvizViewer");
+        // The graphviz viewer window will call StateMachine.handleGraphvizViewerReady().
     }
 
     public handleGraphvizViewerReady(graphvizViewer: GraphvizViewer): void {
@@ -69,26 +65,28 @@ export class StateMachine {
 
     private handleKeyboardEvent(keyboardEvent: KeyboardEvent): void {
         if (document.activeElement?.tagName === "INPUT") {
+            // Don't do anything if the cursor is in a <input> field.
             return;
         }
 
         if (this.presentState && !this.operator.isPaused) {
-            const transitionArray: StateMachineTransition[] = this.presentState.transitions;
 
-            for (let i = 0; i < transitionArray.length; i++) {
-                // do the first possible transition
-                const transitionObj: StateMachineTransition = transitionArray[i];
-                if (transitionObj.type === TransitionType.Keyboard && transitionObj.keys.includes(keyboardEvent.key)) {
+            // Search for the first transition with a keyboard transition for the key pressed.
+            for (let i = 0; i < this.presentState.transitions.length; i++) {
+                const transitionObj = this.presentState.transitions[i];
+                if (transitionObj.type === TransitionType.Keyboard && transitionObj.keyboardKeys.includes(keyboardEvent.key)) {
                     if (this.DEBUG) {
                         console.log(`keyboard transition from keyboard key ${keyboardEvent.key}`)
                     }
+
                     if (transitionObj.fn) {
                         if (this.DEBUG) {
                             console.log(`calling transition fn ${transitionObj.fn.name}`);
                         }
                         transitionObj.fn.call(this.operator, keyboardEvent);
                     }
-                    this.goToState(transitionObj.dest, keyboardEvent);
+
+                    this.goToState(transitionObj.destination, keyboardEvent);
                     break;
                 }
             }
@@ -105,48 +103,46 @@ export class StateMachine {
         }
     }
 
-    private startCountdownTimer(transitionObj: TimeoutTransition, keyboardEvent: KeyboardEvent): void {
+    private startCountdownTimer(timeoutTransitionObj: TimeoutTransition, keyboardEvent: KeyboardEvent): void {
         let durationMs;
         let setCountdownTimerMax = false;
-        if (transitionObj.duration instanceof Function) {
-            durationMs = transitionObj.duration();
+        if (timeoutTransitionObj.duration instanceof Function) {
+            durationMs = timeoutTransitionObj.duration();
             // todo check why we need to do this, probably can clean it up
             setCountdownTimerMax = true;
         } else {
-            durationMs = transitionObj.duration;
+            durationMs = timeoutTransitionObj.duration;
         }
 
         if (this.DEBUG) {
             console.log(`Starting countdown timer with duration ${durationMs} millisec`);
         }
 
-        const destinationStateName = transitionObj.dest;
+        this.countdownTimer = new CountdownTimer(durationMs, this.audioManager);
+        this.countdownTimer.progressElements.push(this.operatorWindowCountdownProgress);
+        this.countdownTimer.textDivs.push(this.operatorWindowCountdownText);
 
-        const countdownTimer = this.countdownTimer = new CountdownTimer(durationMs, this.audioManager);
-        countdownTimer.progressElements.push(this.operatorWindowCountdownProgress);
-        countdownTimer.textDivs.push(this.operatorWindowCountdownText);
-
-        if (transitionObj.countdownTimerShowDots) {
+        if (timeoutTransitionObj.countdownTimerShowDots) {
             const teamIndex = Number(keyboardEvent.key) - 1;
             const teamObj = this.operator.teamArray[teamIndex];
-            countdownTimer.dotsTables = [teamObj.presentationCountdownDots];
+            this.countdownTimer.dotsTables = [teamObj.presentationCountdownDots];
         } else {
-            countdownTimer.progressElements.push(this.presentation.getProgressElement());
+            this.countdownTimer.progressElements.push(this.presentation.getProgressElement());
         }
 
         if (setCountdownTimerMax) {
             const newMax = this.settings.timeoutWaitForBuzzesMs; // how do we know to always use this as the max?
-            countdownTimer.maxMs = newMax;
-            countdownTimer.progressElements.forEach(elem => elem.setAttribute("max", String(newMax)));
+            this.countdownTimer.maxMs = newMax;
+            this.countdownTimer.progressElements.forEach(elem => elem.setAttribute("max", String(newMax)));
         }
 
-        countdownTimer.onFinished = () => {
-            if (transitionObj.fn) {
-                transitionObj.fn.call(this.operator);
+        this.countdownTimer.onFinished = () => {
+            if (timeoutTransitionObj.fn) {
+                timeoutTransitionObj.fn.call(this.operator);
             }
-            this.goToState(destinationStateName);
+            this.goToState(timeoutTransitionObj.destination);
         }
-        countdownTimer.start();
+        this.countdownTimer.start();
     }
 
     public saveRemainingCountdownTime(): void {
@@ -156,173 +152,147 @@ export class StateMachine {
     }
 
     public manualTrigger(triggerName: string): void {
-
-        // This is wrong, it will go to the destination state no matter what
-        // todo change this to:
-        // if the current state has a manual trigger matching the triggerName, then run the trigger
-        if (triggerName in this.manualTriggerMap) {
-            const transitionObj = this.manualTriggerMap[triggerName];
-            if (transitionObj.type !== TransitionType.If) {
-                // TODO this is a hack - remove after re-writing manualTrigger method
-                this.goToState(transitionObj.dest);
+        // Search for the first transition which has a matching manual trigger.
+        this.presentState.transitions.forEach(transitionObj => {
+            if (transitionObj.type === TransitionType.ManualTrigger && transitionObj.triggerName === triggerName) {
+                if (this.DEBUG) {
+                    console.log(`Manual trigger "${triggerName}" from ${this.presentState.name} to ${transitionObj.destination}`);
+                }
+                this.goToState(transitionObj.destination);
+                return;
             }
-        } else {
-            console.warn(`manual trigger failed: trigger "${triggerName}" not in map of known triggers`);
-        }
-
+        });
+        console.warn(`the present state (${this.presentState.name}) does not have any manual trigger transitions called "${triggerName}"`);
     }
 
     public goToState(destStateName: string, keyboardEvent?: KeyboardEvent): void {
-
         if (!(destStateName in this.stateMap)) {
             throw new RangeError(`can't go to state named "${destStateName}", state not found`);
         }
 
         if (this.countdownTimer) {
             this.countdownTimer.pause();
-            //            this.countdownTimer = null;
         }
 
         if (this.DEBUG) {
             console.group(`changing states: ${this.presentState.name} --> ${destStateName}`);
         }
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        const handleOnExit = () => {
-            if (this.presentState.onExit) {
-                const functionToCall = this.presentState.onExit;
-                if (!(functionToCall instanceof Function)) {
-                    console.info(`state "${this.presentState.name}": cannot call onExit function "${functionToCall}", not a function`);
-                    return;
-                }
-                if (this.DEBUG) {
-                    console.log(`Running the onExit function of ${this.presentState}: ${functionToCall.name}`);
-                }
-                functionToCall.call(this); //todo fix this, because onEnter always is an operatorInstance call
+
+        ////////////////////////////////////////////////////////////////////////////////////////
+        /////////////////// Handle onExit function of the state we're leaving //////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////
+        if (this.presentState.onExit) {
+            if (this.DEBUG) {
+                console.log(`Running the onExit function of ${this.presentState}: ${this.presentState.onExit.name}`);
             }
+            this.presentState.onExit.call(this); //todo fix this, because onEnter always is an operatorInstance call
         }
-
-        const handleTransitionIf = () => {
-            const transitionArray = this.presentState.transitions;
-            for (let i = 0; i < transitionArray.length; i++) {
-                const transitionObj = transitionArray[i];
-                if (transitionObj.type === TransitionType.If) {
-                    if (this.DEBUG) {
-                        console.log(`Transition type if: the condition function is ${transitionObj.condition.name}`);
-                    }
-                    if (transitionObj.condition.call(this.operator, keyboardEvent)) {
-                        this.goToState(transitionObj.then.dest, keyboardEvent);
-                    } else {
-                        this.goToState(transitionObj.else.dest, keyboardEvent);
-                    }
-                }
-                break;
-            }
-        }
-
-        const handleShowSlide = () => {
-            if (this.presentState.showPresentationSlide) {
-                if (this.presentation.slideNames.includes(this.presentState.showPresentationSlide)) {
-                    if (this.DEBUG) {
-                        console.log(`Showing presentation slide "${this.presentState.showPresentationSlide}"`);
-                    }
-                    this.presentation.showSlide(this.presentState.showPresentationSlide);
-                } else {
-                    console.warn(`entering state "${this.presentState.name}": can't show slide "${this.presentState.showPresentationSlide}", slide not found`);
-                }
-            }
-        }
-
-        const handleOnEnter = () => {
-            if (this.presentState.onEnter) {
-
-                const functionToCall = this.presentState.onEnter;
-
-                if (this.DEBUG) {
-                    console.log(`Running the onEnter function: ${functionToCall.name}`);
-                }
-
-                //todo don't use global reference to operator instance!
-                //todo make this not suck, because onExit call is not an operatorInstance call
-                const rv = functionToCall.call(this.operator, keyboardEvent);
-
-                if (rv && rv.constructor.name === "Promise") {
-
-                    const transitionArray = this.presentState.transitions;
-                    for (let i = 0; i < transitionArray.length; i++) {
-                        const transitionObj = transitionArray[i];
-
-                        if (transitionObj.type === TransitionType.Promise) {
-                            rv.then(
-                                () => this.goToState(transitionObj.dest)
-                            ).catch(
-                                (err: Error) => {
-                                    console.warn("promise rejected:");
-                                    throw err;
-                                }
-                            );
-                            break;
-                        }
-                    }
-
-
-
-
-                }
-            }
-        }
-
-        const startCountdownTimerIfNeeded = (triggeringKeyboardEvent: KeyboardEvent) => {
-            const transitionArray = this.presentState.transitions;
-            for (let i = 0; i < transitionArray.length; i++) {
-                const transitionObj = transitionArray[i];
-                if (transitionObj.type === TransitionType.Timeout) {
-                    this.startCountdownTimer(transitionObj, triggeringKeyboardEvent);
-                    this.operatorWindowDivStateName.innerHTML = destStateName + " &rarr; " + transitionObj.dest;
-                    break;
-                }
-            }
-        }
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-        handleOnExit.call(this);
 
         const previousState = this.presentState;
         this.presentState = this.stateMap[destStateName];
         this.operatorWindowDivStateName.innerHTML = destStateName;
-
-        // TODO why can't I declare these as function name(){...} ???
-        handleShowSlide.call(this);
-        handleOnEnter.call(this);
-        startCountdownTimerIfNeeded.call(this, keyboardEvent);
-
         if (this.graphvizViewer) {
             this.graphvizViewer.updateGraphviz(previousState.name, this.presentState.name);
+        }
+
+        const transitionArray = this.presentState.transitions;
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////// Handle showPresentationSlide ///////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (this.presentState.presentationSlideToShow) {
+            if (this.presentation.slideNames.includes(this.presentState.presentationSlideToShow)) {
+                if (this.DEBUG) {
+                    console.log(`Showing presentation slide "${this.presentState.presentationSlideToShow}"`);
+                }
+                this.presentation.showSlide(this.presentState.presentationSlideToShow);
+            } else {
+                console.warn(`entering state "${this.presentState.name}": can't show slide "${this.presentState.presentationSlideToShow}", slide not found`);
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        /////////////////////////// Handle onEnter function ///////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////
+        if (this.presentState.onEnter) {
+            if (this.DEBUG) {
+                console.log(`Running the onEnter function on ${this.presentState.name}: ${this.presentState.onEnter.name}`);
+            }
+            //todo don't use global reference to operator instance!
+            //todo make this not suck, because onExit call is not an operatorInstance call
+            const rv = this.presentState.onEnter.call(this.operator, keyboardEvent);
+            if (rv && rv.constructor.name === "Promise") {
+                for (let i = 0; i < transitionArray.length; i++) {
+                    const transitionObj = transitionArray[i];
+
+                    if (transitionObj.type === TransitionType.Promise) {
+                        rv.then(
+                            () => this.goToState(transitionObj.destination)
+                        ).catch(
+                            (err: Error) => {
+                                console.warn("promise rejected:");
+                                throw err;
+                            }
+                        );
+                        break;
+                    }
+                }
+            }
+        }
+
+
+        //////////////////////////////////////////////////////////////////////
+        ///////////////////// Start countdown timer if needed ////////////////
+        //////////////////////////////////////////////////////////////////////
+        // Search for the first timeout transition.
+        for (let i = 0; i < transitionArray.length; i++) {
+            const transitionObj = transitionArray[i];
+            if (transitionObj.type === TransitionType.Timeout) {
+                this.startCountdownTimer(transitionObj, keyboardEvent);
+                this.operatorWindowDivStateName.innerHTML = destStateName + " &rarr; " + transitionObj.destination;
+                break;
+            }
         }
 
         if (this.DEBUG) {
             console.groupEnd();
         }
 
-        handleTransitionIf.call(this);
+        ////////////////////////////////////////////////////////////////
+        /////////////////////// Handle if transition ///////////////////
+        ////////////////////////////////////////////////////////////////
+        for (let i = 0; i < transitionArray.length; i++) {
+            const transitionObj = transitionArray[i];
+            if (transitionObj.type === TransitionType.If) {
+                if (this.DEBUG) {
+                    console.log(`Transition type if: the condition function is ${transitionObj.condition.name}`);
+                }
+                if (transitionObj.condition.call(this.operator, keyboardEvent)) {
+                    this.goToState(transitionObj.then.destination, keyboardEvent);
+                } else {
+                    this.goToState(transitionObj.else.destination, keyboardEvent);
+                }
+            }
+            break;
+        }
 
 
     }
 
     private parseAndValidateStates(): void {
 
-        // pass one of two - add states to stateMap
+        // Pass one of two: populate the stateMap; validate the slides.
         this.allStates.forEach((stateObj: StateMachineState) => {
             this.stateMap[stateObj.name] = stateObj;
 
-            if (stateObj.showPresentationSlide &&
-                !this.presentation.slideNames.includes(stateObj.showPresentationSlide)) {
-                console.warn(`state "${stateObj.name}": showSlide: unknown slide "${stateObj.showPresentationSlide}"`);
+            if (stateObj.presentationSlideToShow &&
+                !this.presentation.slideNames.includes(stateObj.presentationSlideToShow)) {
+                console.warn(`state "${stateObj.name}": showSlide: unknown slide "${stateObj.presentationSlideToShow}"`);
             }
 
         }, this);
 
-        // pass two of two - validate all the transitions
+        // Pass two of two - validate all the transitions.
         this.allStates.forEach((stateObj: StateMachineState) => {
 
             const keyboardKeysUsedInTransitionsFromThisState: KeyboardKeysUsed = {};
@@ -330,14 +300,14 @@ export class StateMachine {
             stateObj.transitions.forEach((transitionObj: StateMachineTransition, transitionIndex: number) => {
 
                 if (transitionObj.type !== TransitionType.If) {
-                    if (!transitionObj.dest) {
+                    if (!transitionObj.destination) {
                         printWarning(stateObj.name, transitionIndex,
                             "no destination state");
                         return;
                     }
-                    if (!(transitionObj.dest in this.stateMap)) {
+                    if (!(transitionObj.destination in this.stateMap)) {
                         printWarning(stateObj.name, transitionIndex,
-                            `unknown destination state "${transitionObj.dest}"`);
+                            `unknown destination state "${transitionObj.destination}"`);
                     }
                 }
 
@@ -350,24 +320,18 @@ export class StateMachine {
                         break;
                     }
                     case TransitionType.Keyboard: {
-                        const keyboardKeys = transitionObj.keys;
+                        const keyboardKeys = transitionObj.keyboardKeys;
                         if (!keyboardKeys) {
                             printWarning(stateObj.name, transitionIndex,
                                 `no keys for keyboard transition`);
                         }
 
-                        //TODO I think this check is not needed now that I'm using typescript
-                        if (keyboardKeys.constructor.name !== "String") {
-                            printWarning(stateObj.name, transitionIndex,
-                                `property keys has type ${keyboardKeys.constructor.name}, expected String`);
-                        }
-
-                        // make sure each keyboard key is not used in multiple transitions from this state
+                        // Make sure each keyboard key is not used in multiple transitions from this state.
                         for (let i = 0; i < keyboardKeys.length; i++) {
                             const key = keyboardKeys.charAt(i);
                             if (key in keyboardKeysUsedInTransitionsFromThisState) {
                                 printWarning(stateObj.name, transitionIndex,
-                                    `keyboard key "${key}" was already used in a transition from this state: ${keyboardKeysUsedInTransitionsFromThisState[key]}`);
+                                    `keyboard key "${key}" was already used in a transition from this state with index ${keyboardKeysUsedInTransitionsFromThisState[key]}`);
                             } else {
                                 keyboardKeysUsedInTransitionsFromThisState[key] = transitionIndex;
                             }
@@ -375,24 +339,20 @@ export class StateMachine {
 
                         break;
                     }
-                    case TransitionType.Manual:
-                        this.manualTriggerMap[transitionObj.triggerName] = transitionObj;
+                    case TransitionType.ManualTrigger:
+                        // no further validation needed.
                         break;
 
                     case TransitionType.Promise:
-                        // no further validation needed
+                        // no further validation needed.
                         break;
 
                     case TransitionType.If:
-                        if (!(transitionObj.condition instanceof Function)) {
-                            printWarning(stateObj.name, transitionIndex,
-                                `condition is not a function: ${transitionObj.condition}`);
-                        }
-                        if (!(transitionObj.then.dest in this.stateMap)) {
+                        if (!(transitionObj.then.destination in this.stateMap)) {
                             printWarning(stateObj.name, transitionIndex,
                                 `unknown 'then' state "${transitionObj.then}"`);
                         }
-                        if (!(transitionObj.else.dest in this.stateMap)) {
+                        if (!(transitionObj.else.destination in this.stateMap)) {
                             printWarning(stateObj.name, transitionIndex,
                                 `unknown 'else' state "${transitionObj.else}"`);
                         }
@@ -414,7 +374,7 @@ export class StateMachine {
 
     }
 
-    public graphviz(): void {
+    public generateDotFileForGraphviz(): void {
         generateGraphvizImpl(this.allStates);
     }
 

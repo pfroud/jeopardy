@@ -15,30 +15,30 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
     return [
         {
             name: "idle",
-            showPresentationSlide: "slide-jeopardy-logo",
+            presentationSlideToShow: "slide-jeopardy-logo",
             transitions: [{
-                type: TransitionType.Manual,
-                triggerName: "manualTrigger_startGame",
-                dest: "getClueFromJService"
+                type: TransitionType.ManualTrigger,
+                triggerName: "startGame",
+                destination: "getClueFromJService"
             }]
         }, {
             name: "getClueFromJService",
-            showPresentationSlide: "slide-spinner",
+            presentationSlideToShow: "slide-spinner",
             onEnter: operator.getClueFromJService,
             transitions: [{
                 type: TransitionType.Promise,
-                dest: "showClueCategoryAndDollars"
+                destination: "showClueCategoryAndDollars"
             }]
         }, {
             /*
             The category and dollar value are shown on the center of the presentation window for a fixed amount of time.
             */
             name: "showClueCategoryAndDollars",
-            showPresentationSlide: "slide-clue-category-and-dollars",
+            presentationSlideToShow: "slide-clue-category-and-dollars",
             transitions: [{
                 type: TransitionType.Timeout,
                 duration: settings.displayDurationCategoryMs,
-                dest: "showClueQuestion"
+                destination: "showClueQuestion"
             }]
         }, {
             /*
@@ -47,16 +47,16 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             Also the category and dollar value are shown on the presentation header.
             */
             name: "showClueQuestion",
-            showPresentationSlide: "slide-clue-question",
+            presentationSlideToShow: "slide-clue-question",
             onEnter: operator.showClueQuestion,
             transitions: [{
                 type: TransitionType.Keyboard,
-                keys: " ", //space
-                dest: "waitForBuzzesRestartTimer"
+                keyboardKeys: " ", //space
+                destination: "waitForBuzzesRestartTimer"
             }, {
                 type: TransitionType.Keyboard,
-                keys: "123456789",
-                dest: "showClueQuestion",
+                keyboardKeys: "123456789",
+                destination: "showClueQuestion",
                 fn: operator.handleLockout
             }]
         }, {
@@ -66,12 +66,12 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             transitions: [{
                 type: TransitionType.Timeout,
                 duration: settings.timeoutWaitForBuzzesMs,
-                dest: "showAnswer",
+                destination: "showAnswer",
                 fn: operator.playSoundQuestionTimeout
             }, {
                 type: TransitionType.Keyboard,
-                keys: "123456789",
-                dest: "checkIfTeamCanAnswer"
+                keyboardKeys: "123456789",
+                destination: "checkIfTeamCanAnswer"
             }]
         }, {
             name: "waitForBuzzesResumeTimer",
@@ -79,12 +79,12 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             transitions: [{
                 type: TransitionType.Timeout,
                 duration: () => stateMachine.remainingQuestionTimeMs, //todo look at code implementing stateMachineInstance
-                dest: "showAnswer",
+                destination: "showAnswer",
                 fn: operator.playSoundQuestionTimeout
             }, {
                 type: TransitionType.Keyboard,
-                keys: "123456789",
-                dest: "checkIfTeamCanAnswer"
+                keyboardKeys: "123456789",
+                destination: "checkIfTeamCanAnswer"
             }
             ]
         }, {
@@ -92,26 +92,26 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             transitions: [{
                 type: TransitionType.If,
                 condition: operator.canTeamBuzz,
-                then: { dest: "waitForTeamAnswer" },
-                else: { dest: "waitForBuzzesResumeTimer" }
+                then: { destination: "waitForTeamAnswer" },
+                else: { destination: "waitForBuzzesResumeTimer" }
             }]
         }, {
             name: "waitForTeamAnswer",
             onEnter: operator.handleBuzzerPress,
             transitions: [{
                 type: TransitionType.Keyboard,
-                keys: "y",
-                dest: "showAnswer",
+                keyboardKeys: "y",
+                destination: "showAnswer",
                 fn: operator.handleAnswerCorrect
             }, {
                 type: TransitionType.Keyboard,
-                keys: "n",
-                dest: "subtractMoney"
+                keyboardKeys: "n",
+                destination: "subtractMoney"
             }, {
                 type: TransitionType.Timeout,
                 duration: settings.timeoutAnswerMs,
                 countdownTimerShowDots: true, // wait what
-                dest: "subtractMoney"
+                destination: "subtractMoney"
             }
             ]
         },
@@ -121,34 +121,34 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             transitions: [{
                 type: TransitionType.If,
                 condition: operator.haveAllTeamsAnswered,
-                then: { dest: "showAnswer" },
-                else: { dest: "waitForBuzzesResumeTimer" }
+                then: { destination: "showAnswer" },
+                else: { destination: "waitForBuzzesResumeTimer" }
             }]
         }, {
             name: "showAnswer",
             onEnter: operator.handleShowAnswer,
-            showPresentationSlide: "slide-clue-answer",
+            presentationSlideToShow: "slide-clue-answer",
             transitions: [{
                 type: TransitionType.Timeout,
                 duration: settings.displayDurationAnswerMs,
-                dest: "checkGameEnd"
+                destination: "checkGameEnd"
             }]
         }, {
             name: "checkGameEnd",
             transitions: [{
                 type: TransitionType.If,
                 condition: operator.shouldGameEnd,
-                then: { dest: "gameEnd" },
-                else: { dest: "getClueFromJService" }
+                then: { destination: "gameEnd" },
+                else: { destination: "getClueFromJService" }
             }]
         }, {
             name: "gameEnd",
-            showPresentationSlide: "slide-game-end",
+            presentationSlideToShow: "slide-game-end",
             onEnter: operator.handleGameEnd,
             transitions: [{
-                type: TransitionType.Manual,
+                type: TransitionType.ManualTrigger,
                 triggerName: "manualTrigger_reset",
-                dest: "idle"
+                destination: "idle"
             }]
         }
     ];

@@ -2,7 +2,7 @@ import { Clue } from "../interfaces";
 
 export interface StateMachineState {
     name: string;
-    showPresentationSlide?: string;
+    presentationSlideToShow?: string;
     onEnter?: (keyboardEvent?: KeyboardEvent) => (Promise<Clue> | void);
     onExit?: () => void;
     transitions: StateMachineTransition[];
@@ -11,17 +11,17 @@ export interface StateMachineState {
 export type StateMachineTransition = ManualTransition | IfTransition | PromiseTransition | TimeoutTransition | KeyboardTransition;
 
 export enum TransitionType {
-    Manual = "manual",
-    If = "if",
-    Promise = "promise",
-    Timeout = "timeout",
-    Keyboard = "keyboard"
+    ManualTrigger,
+    If,
+    Promise,
+    Timeout,
+    Keyboard
 }
 
 export interface ManualTransition {
-    type: TransitionType.Manual;
+    type: TransitionType.ManualTrigger;
     triggerName: string;
-    dest: string;
+    destination: string;
     fn?: () => void;
 }
 
@@ -29,32 +29,32 @@ export interface IfTransition {
     type: TransitionType.If;
     condition: (arg0: KeyboardEvent) => boolean;
     then: {
-        dest: string;
+        destination: string;
         fn?: () => void;
     };
     else: {
-        dest: string;
+        destination: string;
         fn?: () => void;
     };
 }
 
 export interface PromiseTransition {
     type: TransitionType.Promise;
-    dest: string;
+    destination: string;
     fn?: () => void;
 }
 
 export interface TimeoutTransition {
     type: TransitionType.Timeout;
     duration: (() => number) | number;
-    dest: string;
+    destination: string;
     countdownTimerShowDots?: boolean;
-    fn?: () => void;
+    fn?: () => void; //called when time runs out
 }
 
 export interface KeyboardTransition {
     type: TransitionType.Keyboard;
-    keys: string;
-    dest: string;
+    keyboardKeys: string;
+    destination: string;
     fn?: (keyboardEvent: KeyboardEvent) => void;
 }
