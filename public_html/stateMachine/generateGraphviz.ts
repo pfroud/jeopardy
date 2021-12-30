@@ -5,9 +5,9 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
     // TODO need to add onExit and onEnter functions!!!!
 
     const dotFileLines: string[] = [];
-    dotFileLines.push("digraph jeopardy {");
-    dotFileLines.push("\tgraph [id=\"jeopardy\"];")
-    dotFileLines.push("\tnode [shape=\"rect\", fontname=\"monospace\"];\n");
+    dotFileLines.push('digraph jeopardy {');
+    dotFileLines.push('\tgraph [id="jeopardy"];')
+    dotFileLines.push('\tnode [shape="rect", fontname="monospace"];\n');
 
     stateArray.forEach((state: StateMachineState) => {
 
