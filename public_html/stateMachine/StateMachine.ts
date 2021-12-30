@@ -21,25 +21,24 @@ interface KeyboardKeysUsed {
 }
 
 export class StateMachine {
-    private readonly DEBUG = true;
     public readonly operator: Operator;
     public readonly settings: Settings;
+    public remainingQuestionTimeMs = -1;
+
     private readonly audioManager: AudioManager;
     private readonly presentation: Presentation;
     private readonly operatorWindowCountdownProgress: HTMLProgressElement;
     private readonly operatorWindowCountdownText: HTMLDivElement;
     private readonly operatorWindowDivStateName: HTMLDivElement;
-    private readonly stateMap: StateMap;
+    private readonly stateMap: StateMap = {};
+    private readonly DEBUG = true;
     private graphvizViewer: GraphvizViewer;
-    private manualTriggerMap: ManualTriggerMap;
-    public remainingQuestionTimeMs: number;
+    private manualTriggerMap: ManualTriggerMap = {};
     private countdownTimer: CountdownTimer;
     private presentState: StateMachineState;
     private allStates: StateMachineState[];
 
     constructor(settings: Settings, operator: Operator, presentation: Presentation, audioManager: AudioManager) {
-
-
         this.operator = operator;
         this.presentation = presentation;
         this.settings = settings;
@@ -49,28 +48,18 @@ export class StateMachine {
         this.operatorWindowCountdownText = document.querySelector("div#state-machine-viz div#remaining");
         this.operatorWindowDivStateName = document.querySelector("div#state-machine-viz div#state-name");
 
-        this.stateMap = {};
-        this.manualTriggerMap = {};
-
-        this.remainingQuestionTimeMs = -1;
-
-        window.addEventListener("keydown", keyboardEvent => this._handleKeyboardEvent(keyboardEvent));
-
-        this.countdownTimer = null;
-
-        this.presentState = undefined;
+        window.addEventListener("keydown", keyboardEvent => this.handleKeyboardEvent(keyboardEvent));
 
         this.allStates = getStatesForJeopardyGame(this, operator, settings);
-        this._parseAndValidateStates();
+        this.parseAndValidateStates();
 
         this.presentState = this.allStates[0]; //idle state
 
-        this.graphvizViewer = null;
-        this._openGraphvizThing();
+        this.openGraphvizThing();
 
     }
-    private _openGraphvizThing(): void {
-        const graphvizWindow = window.open("../graphvizViewer/graphvizViewer.html", "graphvizViewer");
+    private openGraphvizThing(): void {
+        window.open("../graphvizViewer/graphvizViewer.html", "graphvizViewer");
     }
 
     public handleGraphvizViewerReady(graphvizViewer: GraphvizViewer): void {
@@ -78,7 +67,7 @@ export class StateMachine {
         this.graphvizViewer = graphvizViewer;
     }
 
-    private _handleKeyboardEvent(keyboardEvent: KeyboardEvent): void {
+    private handleKeyboardEvent(keyboardEvent: KeyboardEvent): void {
         if (document.activeElement?.tagName === "INPUT") {
             return;
         }
@@ -116,7 +105,7 @@ export class StateMachine {
         }
     }
 
-    private _startCountdownTimer(transitionObj: TimeoutTransition, keyboardEvent: KeyboardEvent): void {
+    private startCountdownTimer(transitionObj: TimeoutTransition, keyboardEvent: KeyboardEvent): void {
         let durationMs;
         let setCountdownTimerMax = false;
         if (transitionObj.duration instanceof Function) {
@@ -287,7 +276,7 @@ export class StateMachine {
             for (let i = 0; i < transitionArray.length; i++) {
                 const transitionObj = transitionArray[i];
                 if (transitionObj.type === TransitionType.Timeout) {
-                    this._startCountdownTimer(transitionObj, triggeringKeyboardEvent);
+                    this.startCountdownTimer(transitionObj, triggeringKeyboardEvent);
                     this.operatorWindowDivStateName.innerHTML = destStateName + " &rarr; " + transitionObj.dest;
                     break;
                 }
@@ -320,7 +309,7 @@ export class StateMachine {
 
     }
 
-    private _parseAndValidateStates(): void {
+    private parseAndValidateStates(): void {
 
         // pass one of two - add states to stateMap
         this.allStates.forEach((stateObj: StateMachineState) => {

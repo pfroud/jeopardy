@@ -36,7 +36,7 @@ export class Presentation {
         this.progress = document.querySelector("progress#countdown");
 
 
-        this._initSlides();
+        this.initSlides();
 
         if (window.opener) {
 
@@ -66,7 +66,7 @@ export class Presentation {
         }
     }
 
-    private _initSlides(): void {
+    private initSlides(): void {
         this.slideDivs = {};
 
         this.slideNames = [];

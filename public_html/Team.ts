@@ -86,25 +86,24 @@ export class Team {
 
     public handleAnswerIncorrectOrAnswerTimeout(clueObj: Clue): void {
         this.audioManager.play("answerIncorrectOrAnswerTimeout");
-        // todo set class on the <table> instead of finding <td>s
         this.presentationCountdownDots.querySelectorAll("td").forEach(td => td.classList.remove("active"));
         this.moneySubtract(clueObj.value * this.settings.wrongAnswerPenaltyMultiplier);
         this.setState(this.settings.allowMultipleAnswersToSameQuestion ? TeamState.CAN_ANSWER : TeamState.ALREADY_ANSWERED);
     }
 
     public moneyAdd(amountAdd: number): void {
-        this._animateDollarsChange(this.dollars + amountAdd);
+        this.animateDollarsChange(this.dollars + amountAdd);
     }
 
     public moneySubtract(amountSubtract: number): void {
-        this._animateDollarsChange(this.dollars - amountSubtract);
+        this.animateDollarsChange(this.dollars - amountSubtract);
     }
 
     public moneySet(newDollars: number): void {
-        this._animateDollarsChange(newDollars);
+        this.animateDollarsChange(newDollars);
     }
 
-    private _animateDollarsChange(targetDollars: number): void {
+    private animateDollarsChange(targetDollars: number): void {
 
         if (this.dollars === targetDollars) {
             return;
@@ -126,7 +125,7 @@ export class Team {
                 instance.dollars += DIRECTION_MULTIPLIER * difference;
             }
 
-            instance._updateDollarsDisplay();
+            instance.updateDollarsDisplay();
             if (instance.dollars !== targetDollars) {
                 setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MS, instance);
             }
@@ -148,7 +147,7 @@ export class Team {
         }
     }
 
-    private _updateDollarsDisplay(): void {
+    private updateDollarsDisplay(): void {
         this.div.presentation.dollars.innerHTML = "$" + this.dollars.toLocaleString();
         this.div.operator.dollars.innerHTML = "$" + this.dollars.toLocaleString();
     }

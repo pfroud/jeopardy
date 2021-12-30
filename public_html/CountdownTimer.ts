@@ -78,12 +78,12 @@ export class CountdownTimer {
             clearInterval(this.intervalID);
             clearTimeout(this.timeoutID);
             this.isPaused = true;
-            this._guiSetPaused(true);
+            this.guiSetPaused(true);
 
             const presentTs = CountdownTimer.getNowTimestamp();
             const elapsedSinceLastInterval = presentTs - this.tsLastInterval;
             this.remainingMs -= elapsedSinceLastInterval;
-            this._guiIntervalUpdate();
+            this.guiIntervalUpdate();
 
             this.onPause?.();
 
@@ -98,19 +98,19 @@ export class CountdownTimer {
             if (this.remainingMs < this.updateIntervalMs) {
                 // the interval would only run once more. can use timeout instead.
                 clearInterval(this.intervalID);
-                this.timeoutID = setTimeout(this._handleInterval, this.remainingMs, this);
+                this.timeoutID = setTimeout(this.handleInterval, this.remainingMs, this);
             } else {
-                this.intervalID = setInterval(this._handleInterval, this.updateIntervalMs, this);
+                this.intervalID = setInterval(this.handleInterval, this.updateIntervalMs, this);
             }
 
             this.isPaused = false;
-            this._guiSetPaused(false);
+            this.guiSetPaused(false);
 
             this.onResume?.();
         }
     }
 
-    private _guiSetPaused(isPaused: boolean): void {
+    private guiSetPaused(isPaused: boolean): void {
         this.progressElements.forEach(elem => elem.classList.toggle("paused", isPaused));
         this.textDivs.forEach(elem => elem.classList.toggle("paused", isPaused));
         this.dotsTables?.forEach(e => e.classList.toggle("paused", isPaused));
@@ -124,12 +124,12 @@ export class CountdownTimer {
         clearInterval(this.intervalID);
         clearTimeout(this.timeoutID);
 
-        this._guiReset();
+        this.guiReset();
         this.onReset?.();
     }
 
-    private _guiReset(): void {
-        this._guiSetPaused(false);
+    private guiReset(): void {
+        this.guiSetPaused(false);
 
         this.dotsTables?.forEach(table => table.querySelectorAll("td").forEach(td => td.classList.remove("active")));
 
@@ -144,17 +144,17 @@ export class CountdownTimer {
 
     public start(): void {
         if (!this.hasStarted && !this.hasFinished) {
-            this._guiStart();
+            this.guiStart();
             this.hasStarted = true;
             this.tsLastInterval = CountdownTimer.getNowTimestamp();
 
-            this.intervalID = setInterval(this._handleInterval, this.updateIntervalMs, this);
+            this.intervalID = setInterval(this.handleInterval, this.updateIntervalMs, this);
             this.onStart?.();
         }
     }
 
-    private _guiStart(): void {
-        this._guiSetPaused(false);
+    private guiStart(): void {
+        this.guiSetPaused(false);
 
         this.progressElements.forEach(elem => {
             elem.setAttribute("max", String(this.maxMs));
@@ -176,28 +176,28 @@ export class CountdownTimer {
         this.textDivs.forEach(elem => elem.innerHTML = (this.durationMs / 1000).toFixed(1));
     }
 
-    private _handleInterval(instance: CountdownTimer): void {
+    private handleInterval(instance: CountdownTimer): void {
         const presentTS = CountdownTimer.getNowTimestamp();
         const elapsedSinceLastInterval = presentTS - instance.tsLastInterval;
         instance.remainingMs -= elapsedSinceLastInterval;
         instance.tsLastInterval = presentTS;
 
         //        console.log(`difference=${elapsedSinceLastInterval}; remaningMS=${instance.remainingMs}`);
-        instance._guiIntervalUpdate();
+        instance.guiIntervalUpdate();
 
         if (instance.remainingMs <= 0) {
-            instance._finish();
+            instance.finish();
         } else if (instance.remainingMs < instance.updateIntervalMs) {
             // interval would only run one more time. can use timeout instead.
             clearInterval(instance.intervalID);
-            this.timeoutID = setTimeout(instance._handleInterval, instance.remainingMs, instance);
+            this.timeoutID = setTimeout(instance.handleInterval, instance.remainingMs, instance);
         }
 
         instance.onTick?.();
 
     }
 
-    private _guiIntervalUpdate(): void {
+    private guiIntervalUpdate(): void {
         this.textDivs.forEach(elem => elem.innerHTML = (this.remainingMs / 1000).toFixed(1));
 
         this.progressElements.forEach(elem => elem.setAttribute("value", String(this.remainingMs)));
@@ -222,7 +222,7 @@ export class CountdownTimer {
         }
     }
 
-    private _finish(): void {
+    private finish(): void {
         this.hasFinished = true;
         this.textDivs.forEach(elem => elem.innerHTML = "done");
         this.dotsTables?.forEach(table => table.querySelectorAll("td").forEach(td => td.classList.remove("active")));
