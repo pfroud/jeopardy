@@ -87,7 +87,7 @@ export class Team {
     public handleAnswerIncorrectOrAnswerTimeout(clueObj: Clue): void {
         this.audioManager.play("answerIncorrectOrAnswerTimeout");
         // todo set class on the <table> instead of finding <td>s
-        this.presentationCountdownDots.querySelector("td").classList.remove("active");
+        this.presentationCountdownDots.querySelectorAll("td").forEach(td => td.classList.remove("active"));
         this.moneySubtract(clueObj.value * this.settings.wrongAnswerPenaltyMultiplier);
         this.setState(this.settings.allowMultipleAnswersToSameQuestion ? TeamState.CAN_ANSWER : TeamState.ALREADY_ANSWERED);
     }
