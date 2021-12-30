@@ -1,7 +1,6 @@
 {
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
-
     // https://code.visualstudio.com/docs/editor/tasks
     // https://graphviz.org/documentation/
     "version": "2.0.0",
@@ -25,6 +24,14 @@
                 "showReuseMessage": false,
                 "clear": false
             }
+        },
+        {
+            // https://code.visualstudio.com/docs/languages/css#_step-3-create-tasksjson
+            "label": "Sass Compile",
+            "type": "shell",
+            // https://sass-lang.com/documentation/cli/dart-sass#many-to-many-mode
+            "command": "sass public_html/operator/scss:public_html/operator/css public_html/presentation/scss:public_html/presentation/css public_html/moneyOverride/scss:public_html/moneyOverride/css",
+            "group": "build"
         }
     ]
 }
