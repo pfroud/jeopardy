@@ -1,23 +1,23 @@
-import { Clue } from "../interfaces.js";
+import { Clue } from "../operator/Operator.js";
 
 interface Slides {
     [slideName: string]: HTMLDivElement;
 }
 
 export class Presentation {
-    divCategoryInHeader: HTMLDivElement;
-    divDollarsInHeader: HTMLDivElement;
-    header: HTMLElement;
-    divQuestion: HTMLDivElement;
-    divCategoryBig: HTMLDivElement;
-    divDollarsBig: HTMLDivElement;
-    divClueAnswer: HTMLDivElement;
-    divPaused: HTMLDivElement;
-    footerTeams: HTMLElement;
-    progress: HTMLProgressElement;
-    slideDivs: Slides;
-    visibleSlide?: HTMLDivElement;
-    slideNames: string[];
+    public readonly slideNames: string[] = [];
+    private readonly divCategoryInHeader: HTMLDivElement;
+    private readonly divDollarsInHeader: HTMLDivElement;
+    private readonly header: HTMLElement;
+    private readonly divQuestion: HTMLDivElement;
+    private readonly divCategoryBig: HTMLDivElement;
+    private readonly divDollarsBig: HTMLDivElement;
+    private readonly divClueAnswer: HTMLDivElement;
+    private readonly divPaused: HTMLDivElement;
+    private readonly footerTeams: HTMLElement;
+    private readonly progress: HTMLProgressElement;
+    private readonly slideDivs: Slides = {};
+    private visibleSlide?: HTMLDivElement;
 
     constructor() {
         this.divCategoryInHeader = document.querySelector("header div#category");
@@ -67,15 +67,14 @@ export class Presentation {
     }
 
     private initSlides(): void {
-        this.slideDivs = {};
-
-        this.slideNames = [];
 
         document.querySelectorAll<HTMLDivElement>('div[id ^= "slide-"').forEach(elem => {
             const id = elem.id;
             this.slideNames.push(id);
             this.slideDivs[id] = elem;
         });
+        Object.freeze(this.slideNames);
+        Object.freeze(this.slideDivs);
 
     }
 
@@ -151,6 +150,10 @@ export class Presentation {
 
     public headerHide(): void {
         this.header.style.display = "none";
+    }
+
+    public appendTeamDivToFooter(divForTeam: HTMLDivElement): void {
+        this.footerTeams.append(divForTeam);
     }
 
 }

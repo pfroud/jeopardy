@@ -1,13 +1,32 @@
 export class Settings {
-    displayDurationCategoryMs: number;
-    displayDurationAnswerMs: number;
-    timeoutWaitForBuzzesMs: number;
-    timeoutAnswerMs: number;
-    durationLockout: number;
-    wrongAnswerPenaltyMultiplier: number;
-    allowMultipleAnswersToSameQuestion: boolean;
-    teamDollarsWhenGameShouldEnd: number;
-    guiInput: {
+    // How long to show the category in big text in the presentation window
+    public displayDurationCategoryMs = 3 * 1000;
+
+    // How long to show the answer in the presentation window
+    public displayDurationAnswerMs = 3 * 1000;
+
+    // How long to wait for a team to buzz
+    public timeoutWaitForBuzzesMs = 10 * 1000;
+
+    // Once a team has buzzed, how long they have to answer
+    public timeoutAnswerMs = 5 * 1000;
+
+    /*
+     * Two sources on the quarter-second lockout:
+     * https://www.jeopardy.com/jbuzz/behind-scenes/how-does-jeopardy-buzzer-work
+     * https://www.facebook.com/Jeopardy/photos/a.187939387923652/710960202288232/
+     */
+    public durationLockoutMillisec = 250;
+
+    // Set this to 1 to be like the the TV show, set it to 0 for no guessing penalty.
+    public wrongAnswerPenaltyMultiplier = 0.5;
+
+    public allowMultipleAnswersToSameQuestion = false;
+
+    // Stop the game when a team reaches this many dollars
+    public teamDollarsWhenGameShouldEnd = 10_000;
+
+    private guiInput: {
         displayDurationCategory: HTMLInputElement;
         displayDurationAnswer: HTMLInputElement;
         timeoutWaitForBuzzes: HTMLInputElement;
@@ -16,28 +35,6 @@ export class Settings {
     };
 
     constructor() {
-        // how long to show stuff on the presentation window
-        this.displayDurationCategoryMs = 3 * 1000;
-        this.displayDurationAnswerMs = 3 * 1000;
-
-        // how long to wait for people to answer
-        this.timeoutWaitForBuzzesMs = 10 * 1000;
-        this.timeoutAnswerMs = 5 * 1000;
-
-        /*
-         * Two sources on the quarter-second lockout:
-         * https://www.jeopardy.com/jbuzz/behind-scenes/how-does-jeopardy-buzzer-work
-         * https://www.facebook.com/Jeopardy/photos/a.187939387923652/710960202288232/
-         */
-        this.durationLockout = 250;
-
-        //set this to 1 to be like the the TV show, 0 for no guessing penalty
-        this.wrongAnswerPenaltyMultiplier = 0.5;
-
-        this.allowMultipleAnswersToSameQuestion = false;
-
-        this.teamDollarsWhenGameShouldEnd = 10000;
-
         this.guiInput = {
             displayDurationCategory: document.querySelector("input#display-duration-category"),
             displayDurationAnswer: document.querySelector("input#display-duration-answer"),
@@ -45,11 +42,9 @@ export class Settings {
             timeoutAnswer: document.querySelector("input#timeout-answer"),
             allowMultipleTries: document.querySelector("input#allow-multiple-tries")
         };
-
+        Object.freeze(this.guiInput);
         this.populateGui();
-
         document.querySelector("button#saveSettings").addEventListener("click", () => this.parseGui());
-
     }
 
     public populateGui(): void {

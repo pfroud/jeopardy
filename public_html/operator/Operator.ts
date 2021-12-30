@@ -3,38 +3,42 @@ import { StateMachine } from "../stateMachine/StateMachine.js";
 import { AudioManager } from "./AudioManager.js";
 import { Settings } from "../Settings.js";
 import { Presentation } from "../presentation/Presentation.js";
-import { Clue } from "../interfaces.js";
 
-const TEAM_COUNT = 9;
+export interface Clue {
+    answer: string;
+    question: string;
+    value: number;
+    airdate: string;
+    category: { title: string }
+}
 
 export class Operator {
-    audioManager: AudioManager;
-    settings: Settings;
-    presentation: Presentation;
-    divClueWrapper: HTMLDivElement;
-    divClueQuestion: HTMLDivElement;
-    divClueDollars: HTMLDivElement;
-    divClueCategory: HTMLDivElement;
-    divClueAnswer: HTMLDivElement;
-    divClueAirdate: HTMLDivElement;
-    trQuestion: HTMLTableRowElement;
-    trAnswer: HTMLTableRowElement;
-    divPaused: HTMLDivElement;
-    divInstructions: HTMLDivElement;
-    currentClueObj: Clue;
-    teamArray: Team[];
-    isPaused: boolean;
-    stateMachine: StateMachine;
-    buttonStartGame: HTMLButtonElement;
-    teamPresentlyAnswering: Team;
-    buttonSkipClue: HTMLButtonElement;
+    public static readonly TEAM_COUNT = 9;
+
+    private readonly audioManager: AudioManager;
+    private readonly settings: Settings;
+    private readonly divClueWrapper: HTMLDivElement;
+    private readonly divClueQuestion: HTMLDivElement;
+    private readonly divClueDollars: HTMLDivElement;
+    private readonly divClueCategory: HTMLDivElement;
+    private readonly divClueAnswer: HTMLDivElement;
+    private readonly divClueAirdate: HTMLDivElement;
+    private readonly trQuestion: HTMLTableRowElement;
+    private readonly trAnswer: HTMLTableRowElement;
+    private readonly divPaused: HTMLDivElement;
+    private readonly divInstructions: HTMLDivElement;
+    private readonly teamArray = new Array(Operator.TEAM_COUNT);
+    private readonly buttonStartGame: HTMLButtonElement;
+    private readonly buttonSkipClue: HTMLButtonElement;
+    private currentClueObj: Clue;
+    private presentation: Presentation;
+    private isPaused = false;
+    private stateMachine: StateMachine;
+    private teamPresentlyAnswering: Team;
 
     constructor(audioManager: AudioManager, settings: Settings) {
         this.audioManager = audioManager;
         this.settings = settings;
-
-
-        this.presentation = null;
 
         this.divClueWrapper = document.querySelector("div#clue");
         this.divClueQuestion = document.querySelector("div#clue-question");
@@ -48,13 +52,6 @@ export class Operator {
         this.divInstructions = document.querySelector("div#instructions");
         this.buttonStartGame = document.querySelector("button#start-game");
         this.buttonSkipClue = document.querySelector("button#skip-clue");
-
-        this.currentClueObj = null;
-        this.teamPresentlyAnswering = null;
-
-        this.teamArray = new Array(TEAM_COUNT);
-
-        this.isPaused = false;
 
         this.initPauseKeyboardListener();
         this.initMouseListeners();
@@ -92,7 +89,7 @@ export class Operator {
         so people can verify their buzzers are working.
         */
         const teamNumbers: string[] =
-            new Array(TEAM_COUNT).fill(1).map(
+            new Array(Operator.TEAM_COUNT).fill(1).map(
                 (elem, index) => String(index + 1)
             );
 
@@ -163,9 +160,10 @@ export class Operator {
             return;
         }
 
-        for (let i = 0; i < TEAM_COUNT; i++) {
+        for (let i = 0; i < Operator.TEAM_COUNT; i++) {
             this.teamArray[i] = new Team(i, this.presentation, this.settings, this.audioManager);
         }
+        Object.freeze(this.teamArray);
         this.presentation.setTeamsVisible(true);
     }
 
@@ -381,6 +379,14 @@ export class Operator {
         this.stateMachine.setPaused(isPaused);
         this.teamArray.forEach(teamObj => teamObj.setPaused(isPaused));
         this.presentation.setPaused(isPaused);
+    }
+
+    public getIsPaused(): boolean {
+        return this.isPaused;
+    }
+
+    public getTeam(teamIdx: number): Team {
+        return this.teamArray[teamIdx];
     }
 
     private lookForSavedGame(): void {

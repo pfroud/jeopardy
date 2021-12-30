@@ -1,5 +1,3 @@
-import { Clue } from "../interfaces";
-
 export interface StateMachineState {
     name: string;
     presentationSlideToShow?: string;

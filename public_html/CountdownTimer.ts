@@ -1,72 +1,42 @@
 import { AudioManager } from "./operator/AudioManager.js";
 
 export class CountdownTimer {
-    private readonly audioManager: AudioManager;
-    public updateIntervalMs: number;
-    private readonly durationMs: number;
+    public readonly textDivs: HTMLDivElement[] = [];
+    public readonly progressElements: HTMLProgressElement[] = [];
+    public readonly dotsTables: HTMLTableElement[] = [];
     public maxMs: number;
     public remainingMs: number;
-    hideProgressOnFinish: boolean;
-    previousSecondThatPassed: number;
-    tsLastInterval: number;
-    private intervalID: number;
-    private timeoutID: number;
-    private hasStarted: boolean;
-    private hasFinished: boolean;
-    private isPaused: boolean;
     public onStart?: () => void;
     public onPause?: () => void;
     public onResume?: () => void;
     public onReset?: () => void;
     public onFinished?: () => void;
     public onTick?: () => void;
-    textDivs: HTMLDivElement[];
-    progressElements: HTMLProgressElement[];
-    dotsTables: HTMLTableElement[];
+    public hideProgressOnFinish = false;
+
+
+    private readonly updateIntervalMs = 50;
+    private readonly audioManager: AudioManager;
+    private readonly durationMs: number;
+    private previousSecondThatPassed = -1;
+    private tsLastInterval: number; //timestamp in Unix epoch
+    private hasStarted = false;
+    private hasFinished = false;
+    private isPaused = false;
+    private intervalID: number; //value returned by window.setInterval(), used to cancel it later
+    private timeoutID: number; //value returned by window.setTimeout(), used to cancel it later
 
     constructor(durationMs: number, audioManager?: AudioManager) {
         if (!Number.isInteger(durationMs) || !isFinite(durationMs) || isNaN(durationMs)) {
             throw new TypeError("duration is required, and must be an integer number");
         }
-
         if (durationMs < 1) {
             throw new RangeError("duration cannot be less than one");
         }
-
         this.audioManager = audioManager;
-
-        this.updateIntervalMs = 50;
-
         this.durationMs = durationMs;
         this.maxMs = durationMs;
         this.remainingMs = durationMs;
-
-        this.hideProgressOnFinish = false;
-        this.previousSecondThatPassed = -1;
-
-        // timestamps in Unix epoch
-        this.tsLastInterval = null;
-
-        // value returned by window.setInterval and window.setTimeout, used to cancel them later
-        this.intervalID = undefined;
-        this.timeoutID = undefined;
-
-        this.hasStarted = false;
-        this.hasFinished = false;
-        this.isPaused = false;
-
-        // optional custom events
-        this.onStart = null;
-        this.onPause = null;
-        this.onResume = null;
-        this.onReset = null;
-        this.onFinished = null;
-        this.onTick = null;
-
-        // display elements
-        this.textDivs = [];
-        this.progressElements = [];
-        this.dotsTables = undefined;
     }
 
     public togglePaused(): void {

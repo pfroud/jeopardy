@@ -4,10 +4,9 @@ import { AudioManager } from "../operator/AudioManager.js";
 import { Presentation } from "../presentation/Presentation.js";
 import { CountdownTimer } from "../CountdownTimer.js";
 import { getStatesForJeopardyGame } from "./statesForJeopardyGame.js";
-import { StateMachineState, StateMachineTransition, KeyboardTransition, TimeoutTransition, TransitionType } from "./stateInterfaces.js";
+import { StateMachineState, StateMachineTransition, TimeoutTransition, TransitionType } from "./stateInterfaces.js";
 import { generateGraphvizImpl } from "./generateGraphviz.js";
 import { GraphvizViewer } from "../graphvizViewer/graphvizViewer.js";
-import { Clue } from "../interfaces.js";
 
 interface StateMap {
     [stateName: string]: StateMachineState;
@@ -18,21 +17,21 @@ interface KeyboardKeysUsed {
 }
 
 export class StateMachine {
-    public readonly operator: Operator;
-    public readonly settings: Settings;
     public remainingQuestionTimeMs = -1;
 
+    private readonly DEBUG = true;
+    private readonly operator: Operator;
+    private readonly settings: Settings;
     private readonly audioManager: AudioManager;
     private readonly presentation: Presentation;
     private readonly operatorWindowCountdownProgress: HTMLProgressElement;
     private readonly operatorWindowCountdownText: HTMLDivElement;
     private readonly operatorWindowDivStateName: HTMLDivElement;
     private readonly stateMap: StateMap = {};
-    private readonly DEBUG = true;
+    private readonly allStates: StateMachineState[];
     private graphvizViewer: GraphvizViewer;
     private countdownTimer: CountdownTimer;
     private presentState: StateMachineState;
-    private allStates: StateMachineState[];
 
     constructor(settings: Settings, operator: Operator, presentation: Presentation, audioManager: AudioManager) {
         this.operator = operator;
@@ -49,7 +48,7 @@ export class StateMachine {
         this.allStates = getStatesForJeopardyGame(this, operator, settings);
         this.parseAndValidateStates();
 
-        this.presentState = this.allStates[0]; //idle state
+        this.presentState = this.stateMap["idle"];
 
         this.openGraphvizThing();
 
@@ -70,7 +69,7 @@ export class StateMachine {
             return;
         }
 
-        if (this.presentState && !this.operator.isPaused) {
+        if (this.presentState && !this.operator.getIsPaused()) {
 
             // Search for the first transition with a keyboard transition for the key pressed.
             for (let i = 0; i < this.presentState.transitions.length; i++) {
@@ -125,8 +124,8 @@ export class StateMachine {
 
         if (timeoutTransitionObj.countdownTimerShowDots) {
             const teamIndex = Number(keyboardEvent.key) - 1;
-            const teamObj = this.operator.teamArray[teamIndex];
-            this.countdownTimer.dotsTables = [teamObj.presentationCountdownDots];
+            const teamObj = this.operator.getTeam(teamIndex);
+            this.countdownTimer.dotsTables.push(teamObj.presentationCountdownDots);
         } else {
             this.countdownTimer.progressElements.push(this.presentation.getProgressElement());
         }

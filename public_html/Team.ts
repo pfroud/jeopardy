@@ -1,9 +1,8 @@
 import { Presentation } from "./presentation/Presentation.js";
 import { Settings } from "./Settings.js";
 import { AudioManager } from "./operator/AudioManager.js";
-import { Clue } from "./interfaces.js";
+import { Clue } from "./operator/Operator.js";
 import { CountdownTimer } from "./CountdownTimer.js";
-
 
 interface TeamDivs {
     operator: {
@@ -21,43 +20,39 @@ interface TeamDivs {
 }
 
 export class Team {
-    settings: Settings;
-    audioManager: AudioManager;
-    teamIdx: number;
-    dollars: number;
-    teamName: string;
-    state: TeamState;
-    div: TeamDivs;
-    presentationCountdownDots: HTMLTableElement;
-    presentationProgressLockout: HTMLProgressElement;
-    countdownTimer: CountdownTimer;
-    stateBeforeLockout: TeamState;
-    presentationInstance: Presentation;
+    public readonly teamName: string;
+    public dollars = 0;
+    public presentationCountdownDots: HTMLTableElement;
+
+    private readonly settings: Settings;
+    private readonly audioManager: AudioManager;
+    private readonly presentationInstance: Presentation;
+    private readonly teamIdx: number;
+    private countdownTimer: CountdownTimer;
+    private state: TeamState;
+    private stateBeforeLockout: TeamState;
+    private presentationProgressLockout: HTMLProgressElement;
+    private readonly div: TeamDivs = {
+        operator: {
+            wrapper: null,
+            dollars: null,
+            teamName: null,
+            state: null
+        },
+        presentation: {
+            wrapper: null,
+            dollars: null,
+            teamName: null,
+            buzzerShow: null
+        }
+    };
 
     constructor(teamIdx: number, presentationInstance: Presentation, settings: Settings, audioManager: AudioManager) {
         this.settings = settings;
         this.audioManager = audioManager;
         this.teamIdx = teamIdx;
-        this.dollars = 0;
         this.presentationInstance = presentationInstance;
         this.teamName = `Team ${teamIdx + 1}`;
-
-        this.state = null;
-
-        this.div = {
-            operator: {
-                wrapper: null,
-                dollars: null,
-                teamName: null,
-                state: null
-            },
-            presentation: {
-                wrapper: null,
-                dollars: null,
-                teamName: null,
-                buzzerShow: null
-            }
-        };
 
         /*
          this.statistics = {
@@ -67,10 +62,6 @@ export class Team {
          buzzTooEarly: 0
          };
          */
-
-        this.presentationCountdownDots = null;
-        this.presentationProgressLockout = null;
-        this.countdownTimer = null;
 
         this.createDivsOperator();
         this.createDivsPresentation();
@@ -210,10 +201,7 @@ export class Team {
         const progress = this.presentationProgressLockout = document.createElement("progress");
         divTeam.append(progress);
 
-        this.presentationInstance.footerTeams.append(divTeam);
-
-
-
+        this.presentationInstance.appendTeamDivToFooter(divTeam);
 
     }
 
@@ -273,7 +261,7 @@ export class Team {
         this.stateBeforeLockout = this.state;
         this.setState(TeamState.LOCKOUT);
 
-        const countdownShowCategory = this.countdownTimer = new CountdownTimer(this.settings.durationLockout);
+        const countdownShowCategory = this.countdownTimer = new CountdownTimer(this.settings.durationLockoutMillisec);
         // todo would be nice to show progress element on display and presentation. need to change CountdownTimer to allow that
         countdownShowCategory.progressElements.push(this.presentationProgressLockout);
         countdownShowCategory.hideProgressOnFinish = true;
@@ -310,6 +298,7 @@ export class Team {
         };
     }
 
+    /*
     public jsonLoad(jsonObj: TeamDumpToJson): void {
         this.teamName = jsonObj.name;
         this.dollars = jsonObj.dollars;
@@ -320,6 +309,7 @@ export class Team {
         this.div.operator.teamName.innerHTML = this.teamName;
         this.div.operator.dollars.innerHTML = "$" + this.dollars;
     }
+    */
 
 }
 

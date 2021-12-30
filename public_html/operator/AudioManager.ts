@@ -3,7 +3,7 @@ interface AudioElements {
 }
 
 export class AudioManager {
-    private audio: AudioElements;
+    private readonly audio: AudioElements;
 
     constructor() {
         this.audio = {
@@ -16,6 +16,7 @@ export class AudioManager {
             musicGameEnd: document.querySelector<HTMLAudioElement>("audio#music-game-end"),
             musicGameStart: document.querySelector<HTMLAudioElement>("audio#music-game-start")
         };
+        Object.freeze(this.audio);
     }
 
     public play(audioName: string): void {
