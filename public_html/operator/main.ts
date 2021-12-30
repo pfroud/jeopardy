@@ -26,7 +26,7 @@ function initKeyboardShortcuts(): void {
     const inputSettings = document.querySelector("input#tab-settings");
 
     document.addEventListener("keydown", function (keyboardEvent) {
-        if (document.activeElement && document.activeElement.tagName === "INPUT") {
+        if (document.activeElement?.tagName === "INPUT") {
             return;
         }
 

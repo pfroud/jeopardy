@@ -79,7 +79,7 @@ export class StateMachine {
     }
 
     private _handleKeyboardEvent(keyboardEvent: KeyboardEvent): void {
-        if (document.activeElement && document.activeElement.tagName === "INPUT") {
+        if (document.activeElement?.tagName === "INPUT") {
             return;
         }
 

@@ -85,8 +85,15 @@ export class Presentation {
 
     public showSlide(slideName: string): void {
         if (this.slideNames.includes(slideName)) {
-            // display is set to none in the CSS file
-            this.visibleSlide && (this.visibleSlide.style.display = "");
+            if (this.visibleSlide) {
+                /*
+                The display style is set to "none" in the CSS file.
+                When we remove the inline style which was set to "block",
+                the slide is hidden.
+                */
+                this.visibleSlide.style.display = "";
+            }
+
 
             const targetSlide = this.slideDivs[slideName];
             targetSlide.style.display = "block";

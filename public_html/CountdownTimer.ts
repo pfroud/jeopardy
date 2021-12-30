@@ -1,5 +1,3 @@
-"use strict";
-
 import { AudioManager } from "./operator/AudioManager.js";
 
 export class CountdownTimer {
@@ -16,12 +14,12 @@ export class CountdownTimer {
     private hasStarted: boolean;
     private hasFinished: boolean;
     private isPaused: boolean;
-    public onStart: () => void;
-    public onPause: () => void;
-    public onResume: () => void;
-    public onReset: () => void;
-    public onFinished: () => void;
-    public onTick: () => void;
+    public onStart?: () => void;
+    public onPause?: () => void;
+    public onResume?: () => void;
+    public onReset?: () => void;
+    public onFinished?: () => void;
+    public onTick?: () => void;
     textDivs: HTMLDivElement[];
     progressElements: HTMLProgressElement[];
     dotsTables: HTMLTableElement[];
@@ -87,7 +85,7 @@ export class CountdownTimer {
             this.remainingMs -= elapsedSinceLastInterval;
             this._guiIntervalUpdate();
 
-            this.onPause && this.onPause();
+            this.onPause?.();
 
         }
     }
@@ -108,14 +106,14 @@ export class CountdownTimer {
             this.isPaused = false;
             this._guiSetPaused(false);
 
-            this.onResume && this.onResume();
+            this.onResume?.();
         }
     }
 
     private _guiSetPaused(isPaused: boolean): void {
         this.progressElements.forEach(elem => elem.classList.toggle("paused", isPaused));
         this.textDivs.forEach(elem => elem.classList.toggle("paused", isPaused));
-        this.dotsTables && this.dotsTables.forEach(e => e.classList.toggle("paused", isPaused));
+        this.dotsTables?.forEach(e => e.classList.toggle("paused", isPaused));
     }
 
     public reset(): void {
@@ -127,13 +125,13 @@ export class CountdownTimer {
         clearTimeout(this.timeoutID);
 
         this._guiReset();
-        this.onReset && this.onReset();
+        this.onReset?.();
     }
 
     private _guiReset(): void {
         this._guiSetPaused(false);
 
-        this.dotsTables && this.dotsTables.forEach(table => table.querySelectorAll("td").forEach(td => td.classList.remove("active")));
+        this.dotsTables?.forEach(table => table.querySelectorAll("td").forEach(td => td.classList.remove("active")));
 
         this.progressElements.forEach(elem => {
             elem.setAttribute("value", String(this.durationMs));
@@ -151,7 +149,7 @@ export class CountdownTimer {
             this.tsLastInterval = CountdownTimer.getNowTimestamp();
 
             this.intervalID = setInterval(this._handleInterval, this.updateIntervalMs, this);
-            this.onStart && this.onStart();
+            this.onStart?.();
         }
     }
 
@@ -195,7 +193,7 @@ export class CountdownTimer {
             this.timeoutID = setTimeout(instance._handleInterval, instance.remainingMs, instance);
         }
 
-        instance.onTick && instance.onTick();
+        instance.onTick?.();
 
     }
 
@@ -227,13 +225,13 @@ export class CountdownTimer {
     private _finish(): void {
         this.hasFinished = true;
         this.textDivs.forEach(elem => elem.innerHTML = "done");
-        this.dotsTables && this.dotsTables.forEach(table => table.querySelectorAll("td").forEach(td => td.classList.remove("active")));
+        this.dotsTables?.forEach(table => table.querySelectorAll("td").forEach(td => td.classList.remove("active")));
         clearInterval(this.intervalID);
 
         if (this.hideProgressOnFinish) {
             this.progressElements.forEach(elem => elem.style.display = "none");
         }
-        this.onFinished && this.onFinished();
+        this.onFinished?.();
     }
 
     static getNowTimestamp(): number {
