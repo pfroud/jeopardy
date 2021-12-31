@@ -132,7 +132,7 @@ export class StateMachine {
 
         if (setCountdownTimerMax) {
             const newMax = this.settings.timeoutWaitForBuzzesMs; // how do we know to always use this as the max?
-            this.countdownTimer.maxMs = newMax;
+            //this.countdownTimer.maxMillisec = newMax; //TODO create a new countdown timer!
             this.countdownTimer.progressElements.forEach(elem => elem.setAttribute("max", String(newMax)));
         }
 
@@ -147,7 +147,7 @@ export class StateMachine {
 
     public saveRemainingCountdownTime(): void {
         if (this.countdownTimer) {
-            this.remainingQuestionTimeMs = this.countdownTimer.remainingMs;
+            this.remainingQuestionTimeMs = this.countdownTimer.remainingMillisec;
         }
     }
 
