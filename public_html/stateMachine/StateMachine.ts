@@ -119,21 +119,23 @@ export class StateMachine {
         }
 
         this.countdownTimer = new CountdownTimer(durationMs, this.audioManager);
-        this.countdownTimer.progressElements.push(this.operatorWindowCountdownProgress);
-        this.countdownTimer.textDivs.push(this.operatorWindowCountdownText);
+        this.countdownTimer.addProgressElement(this.operatorWindowCountdownProgress);
+        this.countdownTimer.addTextDiv(this.operatorWindowCountdownText);
 
         if (timeoutTransitionObj.countdownTimerShowDots) {
             const teamIndex = Number(keyboardEvent.key) - 1;
             const teamObj = this.operator.getTeam(teamIndex);
-            this.countdownTimer.dotsTables.push(teamObj.presentationCountdownDots);
+            this.countdownTimer.addDotsTable(teamObj.presentationCountdownDots);
         } else {
-            this.countdownTimer.progressElements.push(this.presentation.getProgressElement());
+            this.countdownTimer.addProgressElement(this.presentation.getProgressElement());
         }
 
         if (setCountdownTimerMax) {
             const newMax = this.settings.timeoutWaitForBuzzesMs; // how do we know to always use this as the max?
-            //this.countdownTimer.maxMillisec = newMax; //TODO create a new countdown timer!
-            this.countdownTimer.progressElements.forEach(elem => elem.setAttribute("max", String(newMax)));
+
+            // TODO the two lines below need to be destroyed
+            //this.countdownTimer.maxMillisec = newMax;
+            //this.countdownTimer.progressElements.forEach(elem => elem.setAttribute("max", String(newMax)));
         }
 
         this.countdownTimer.onFinished = () => {
@@ -147,7 +149,7 @@ export class StateMachine {
 
     public saveRemainingCountdownTime(): void {
         if (this.countdownTimer) {
-            this.remainingQuestionTimeMs = this.countdownTimer.remainingMillisec;
+            this.remainingQuestionTimeMs = this.countdownTimer.getRemainingMillisec();
         }
     }
 
