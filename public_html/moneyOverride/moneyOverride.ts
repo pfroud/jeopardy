@@ -1,4 +1,5 @@
-import { Team } from "../Team";
+import { Operator } from "../operator/Operator.js";
+import { Team } from "../Team.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     if (!window.opener) {
@@ -8,10 +9,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const teamArray: Team[] = window.opener.operator.teamArray;
 
-
     //////////// populate the table //////////////
     const table = document.querySelector("table tbody");
-    for (let teamIndex = 0; teamIndex < 4; teamIndex++) {
+    for (let teamIndex = 0; teamIndex < Operator.TEAM_COUNT; teamIndex++) {
         makeTableRow(teamIndex);
     }
 
@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
             button.classList.add("money-change");
             button.innerHTML = "-$" + dollarValue;
             button.addEventListener("click", () => {
-                teamObj.moneySubtract(dollarValue);
+                teamObj.moneySubtract(dollarValue, false);
                 textInput.value = String(teamObj.dollars);
             });
             cell.appendChild(button);
@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
             button.classList.add("money-change");
             button.innerHTML = "+$" + dollarValue;
             button.addEventListener("click", () => {
-                teamObj.moneyAdd(dollarValue);
+                teamObj.moneyAdd(dollarValue, false);
                 textInput.value = String(teamObj.dollars);
             });
             cell.appendChild(button);

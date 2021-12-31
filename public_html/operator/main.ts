@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", function () {
     function initKeyboardShortcuts(): void {
         const inputSetup = document.querySelector("input#tab-setup");
         const inputGame = document.querySelector("input#tab-game");
-        const inputAdmin = document.querySelector("input#tab-admin");
         const inputSettings = document.querySelector("input#tab-settings");
 
         document.addEventListener("keydown", function (keyboardEvent) {
@@ -33,9 +32,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     break;
                 case "g":
                     inputGame.setAttribute("checked", "checked");
-                    break;
-                case "a":
-                    inputAdmin.setAttribute("checked", "checked");
                     break;
                 case "e":
                     inputSettings.setAttribute("checked", "checked");

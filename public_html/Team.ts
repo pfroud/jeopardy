@@ -82,12 +82,23 @@ export class Team {
         this.setState(this.settings.allowMultipleAnswersToSameQuestion ? TeamState.CAN_ANSWER : TeamState.ALREADY_ANSWERED);
     }
 
-    public moneyAdd(amountAdd: number): void {
-        this.animateDollarsChange(this.dollars + amountAdd);
+    public moneyAdd(amountAdd: number, animate = true): void {
+        if (animate) {
+            this.animateDollarsChange(this.dollars + amountAdd);
+        } else {
+            this.dollars += amountAdd;
+            this.updateDollarsDisplay();
+        }
+
     }
 
-    public moneySubtract(amountSubtract: number): void {
-        this.animateDollarsChange(this.dollars - amountSubtract);
+    public moneySubtract(amountSubtract: number, animate = true): void {
+        if (animate) {
+            this.animateDollarsChange(this.dollars - amountSubtract);
+        } else {
+            this.dollars -= amountSubtract;
+            this.updateDollarsDisplay();
+        }
     }
 
     public moneySet(newDollars: number): void {

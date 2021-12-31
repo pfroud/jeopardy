@@ -5,7 +5,7 @@ import { Presentation } from "../presentation/Presentation.js";
 import { CountdownTimer } from "../CountdownTimer.js";
 import { getStatesForJeopardyGame } from "./statesForJeopardyGame.js";
 import { StateMachineState, StateMachineTransition, TimeoutTransition, TransitionType } from "./stateInterfaces.js";
-import { generateGraphvizImpl } from "./generateGraphviz.js";
+import { generateDotFileForGraphviz } from "./generateDotFileForGraphviz.js";
 import { GraphvizViewer } from "../graphvizViewer/graphvizViewer.js";
 
 interface StateMap {
@@ -17,7 +17,7 @@ interface KeyboardKeysUsed {
 }
 
 export class StateMachine {
-    public remainingQuestionTimeMs = -1;
+    //public remainingQuestionTimeMs = -1;
 
     private readonly DEBUG = true;
     private readonly operator: Operator;
@@ -50,10 +50,10 @@ export class StateMachine {
 
         this.presentState = this.stateMap["idle"];
 
-        this.openGraphvizThing();
+        //this.openGraphvizViewer();
 
     }
-    private openGraphvizThing(): void {
+    private openGraphvizViewer(): void {
         window.open("../graphvizViewer/graphvizViewer.html", "graphvizViewer");
         // The graphviz viewer window will call StateMachine.handleGraphvizViewerReady().
     }
@@ -105,11 +105,8 @@ export class StateMachine {
 
     private startCountdownTimer(timeoutTransitionObj: TimeoutTransition, keyboardEvent: KeyboardEvent): void {
         let durationMs;
-        let setCountdownTimerMax = false;
         if (timeoutTransitionObj.duration instanceof Function) {
             durationMs = timeoutTransitionObj.duration();
-            // todo check why we need to do this, probably can clean it up
-            setCountdownTimerMax = true;
         } else {
             durationMs = timeoutTransitionObj.duration;
         }
@@ -122,6 +119,14 @@ export class StateMachine {
         this.countdownTimer.addProgressElement(this.operatorWindowCountdownProgress);
         this.countdownTimer.addTextDiv(this.operatorWindowCountdownText);
 
+        /*
+        The showDots boolean is now used for a special case.
+        Once a team has buzzed and we're waiting for them to answer, we want some special stuff to happen:
+            - in the presentation window: the state machine uses a timeout transition, but instead of showing progress like normal
+            we want to show it on the nine countdown dots.
+            - in the operator window: create or use a second <progress> element, instead of using the same one that shows
+            how much time is left for teams to buzz in.
+        */
         if (timeoutTransitionObj.countdownTimerShowDots) {
             const teamIndex = Number(keyboardEvent.key) - 1;
             const teamObj = this.operator.getTeam(teamIndex);
@@ -130,13 +135,6 @@ export class StateMachine {
             this.countdownTimer.addProgressElement(this.presentation.getProgressElement());
         }
 
-        if (setCountdownTimerMax) {
-            const newMax = this.settings.timeoutWaitForBuzzesMs; // how do we know to always use this as the max?
-
-            // TODO the two lines below need to be destroyed
-            //this.countdownTimer.maxMillisec = newMax;
-            //this.countdownTimer.progressElements.forEach(elem => elem.setAttribute("max", String(newMax)));
-        }
 
         this.countdownTimer.onFinished = () => {
             if (timeoutTransitionObj.fn) {
@@ -144,13 +142,8 @@ export class StateMachine {
             }
             this.goToState(timeoutTransitionObj.destination);
         }
-        this.countdownTimer.start();
-    }
 
-    public saveRemainingCountdownTime(): void {
-        if (this.countdownTimer) {
-            this.remainingQuestionTimeMs = this.countdownTimer.getRemainingMillisec();
-        }
+        this.countdownTimer.start();
     }
 
     public manualTrigger(triggerName: string): void {
@@ -379,8 +372,8 @@ export class StateMachine {
 
     }
 
-    public generateDotFileForGraphviz(): void {
-        generateGraphvizImpl(this.allStates);
+    public showDotFileForGraphviz(): void {
+        generateDotFileForGraphviz(this.allStates);
     }
 
 

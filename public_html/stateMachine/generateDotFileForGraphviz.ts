@@ -1,6 +1,6 @@
 import { StateMachineState, StateMachineTransition, TransitionType } from "./stateInterfaces.js";
 
-export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
+export function generateDotFileForGraphviz(stateArray: StateMachineState[]): void {
 
     // TODO need to add onExit and onEnter functions!!!!
 
@@ -28,7 +28,7 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                     }
 
                     if (transition.fn) {
-                        label += ` / ${transition.fn.name}`;
+                        label += ` / ${transition.fn.name.replace("bound ", "")}`;
                     }
 
                     const id = `${state.name}_to_${transition.destination}`;
@@ -38,7 +38,7 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
 
                 }
                 case TransitionType.Promise: {
-                    const label = transition.type.toString() + ": " + transition.functionToGetPromise;
+                    const label = transition.type.toString();// + ": " + transition.functionToGetPromise; //becomes "function () { [native code] }"
                     const id = `${state.name}_to_${transition.destination}`;
                     dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${label}", id="${id}"];`);
                     break;
@@ -53,7 +53,7 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
 
                     }
                     if (transition.fn) {
-                        label += ` / ${transition.fn.name}`;
+                        label += ` / ${transition.fn.name.replace("bound ", "")}`;
                     }
 
                     const id = `${state.name}_to_${transition.destination}`;
@@ -63,7 +63,7 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                 case TransitionType.ManualTrigger: {
                     let label = transition.type.toString() + ': \\"' + transition.triggerName.replace("manualTrigger_", "") + '\\"';
                     if (transition.fn) {
-                        label += ` / ${transition.fn.name}`;
+                        label += ` / ${transition.fn.name.replace("bound ", "")}`;
                     }
 
                     const id = `${state.name}_to_${transition.destination}`;
@@ -71,17 +71,17 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
                     break;
                 }
                 case TransitionType.If: {
-                    const condition = transition.condition.name;
+                    const condition = transition.condition.name.replace("bound ", "");
 
                     let labelThen = "if(" + condition + ")";
                     if (transition.then.fn) {
-                        labelThen += ` / ${transition.then.fn.name}`;
+                        labelThen += ` / ${transition.then.fn.name.replace("bound ", "")}`;
                     }
                     const idThen = `${state.name}_to_${transition.then.destination}`;
 
                     let labelElse = "if(!" + condition + ")";
                     if (transition.else.fn) {
-                        labelElse += ` / ${transition.else.fn.name}`;
+                        labelElse += ` / ${transition.else.fn.name.replace("bound ", "")}`;
                     }
                     const idElse = `${state.name}_to_${transition.else.destination}`;
 
@@ -102,12 +102,12 @@ export function generateGraphvizImpl(stateArray: StateMachineState[]): void {
 
     const joined = dotFileLines.join("\n");
 
-    // max length of string allowed in window.prompt is 2053 so I'm going to open a new window
     const gvDocument = window.open("", "generatedGraphviz", "popup").document;
     gvDocument.title = "Generated DOT for Graphviz";
 
     const pre = gvDocument.createElement("pre");
     pre.innerText = joined;
+    gvDocument.body.innerHTML = ""; //clear if we already added a <pre> 
     gvDocument.body.appendChild(pre);
 
 

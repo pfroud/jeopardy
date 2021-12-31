@@ -5,13 +5,6 @@ import { Settings } from "../Settings.js";
 
 export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: Operator, settings: Settings): StateMachineState[] {
 
-    /*
-     * where to replace two states with one state and onTransition:
-     * definitley: showQuestion(Init)
-     * maybe: waitForBuzzes{restartTime,resumeTimer}
-     *      yeah just have resumeTime be default, then call restartTime when coming from showQuestion press space
-     */
-
     return [
         {
             name: "idle",
@@ -43,6 +36,7 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             transitions: [{
                 type: TransitionType.Timeout,
                 duration: settings.displayDurationCategoryMs,
+                //countdownTimerProgressElementGroup: "shared",
                 destination: "showClueQuestion"
             }]
         }, {
@@ -57,7 +51,7 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             transitions: [{
                 type: TransitionType.Keyboard,
                 keyboardKeys: " ", //space
-                destination: "waitForBuzzesRestartTimer"
+                destination: "waitForBuzzes"
             }, {
                 type: TransitionType.Keyboard,
                 keyboardKeys: "123456789",
@@ -65,12 +59,13 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 fn: operator.handleLockout.bind(operator)
             }]
         }, {
-            name: "waitForBuzzesRestartTimer",
+            name: "waitForBuzzes",
             onEnter: operator.handleDoneReadingClueQuestion.bind(operator),
-            onExit: stateMachine.saveRemainingCountdownTime.bind(stateMachine),
+            //onExit: stateMachine.saveRemainingCountdownTime.bind(stateMachine),
             transitions: [{
                 type: TransitionType.Timeout,
                 duration: settings.timeoutWaitForBuzzesMs,
+                //countdownTimerProgressElementGroup: "shared",
                 destination: "showAnswer",
                 fn: operator.playSoundQuestionTimeout.bind(operator)
             }, {
@@ -78,27 +73,29 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 keyboardKeys: "123456789",
                 destination: "checkIfTeamCanAnswer"
             }]
+            /*
         }, {
             name: "waitForBuzzesResumeTimer",
             onExit: stateMachine.saveRemainingCountdownTime,
             transitions: [{
                 type: TransitionType.Timeout,
                 duration: () => stateMachine.remainingQuestionTimeMs, //todo look at code implementing stateMachineInstance
+                countdownTimerProgressElementGroup: "shared",
                 destination: "showAnswer",
                 fn: operator.playSoundQuestionTimeout.bind(operator)
             }, {
                 type: TransitionType.Keyboard,
                 keyboardKeys: "123456789",
                 destination: "checkIfTeamCanAnswer"
-            }
-            ]
+            }]
+            */
         }, {
             name: "checkIfTeamCanAnswer",
             transitions: [{
                 type: TransitionType.If,
                 condition: operator.canTeamBuzz.bind(operator),
                 then: { destination: "waitForTeamAnswer" },
-                else: { destination: "waitForBuzzesResumeTimer" }
+                else: { destination: "waitForBuzzes" }
             }]
         }, {
             name: "waitForTeamAnswer",
@@ -115,6 +112,7 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             }, {
                 type: TransitionType.Timeout,
                 duration: settings.timeoutAnswerMs,
+                //countdownTimerProgressElementGroup: "waiting-for-answer",
                 countdownTimerShowDots: true, // wait what
                 destination: "subtractMoney"
             }
@@ -127,7 +125,7 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 type: TransitionType.If,
                 condition: operator.haveAllTeamsAnswered.bind(operator),
                 then: { destination: "showAnswer" },
-                else: { destination: "waitForBuzzesResumeTimer" }
+                else: { destination: "waitForBuzzes" }
             }]
         }, {
             name: "showAnswer",
@@ -136,6 +134,7 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             transitions: [{
                 type: TransitionType.Timeout,
                 duration: settings.displayDurationAnswerMs,
+                //countdownTimerProgressElementGroup: "shared",
                 destination: "checkGameEnd"
             }]
         }, {
