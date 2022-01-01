@@ -1,7 +1,9 @@
+import { CountdownTimer } from "../CountdownTimer";
+
 export interface StateMachineState {
     name: string;
     presentationSlideToShow?: string;
-    onEnter?: (keyboardEvent?: KeyboardEvent) => void;
+    onEnter?: (keyboardEvent?: KeyboardEvent) => void;// TODO why does this get a keyboard event??
     onExit?: () => void;
     transitions: StateMachineTransition[];
 }
@@ -21,19 +23,19 @@ export interface ManualTransition {
     type: TransitionType.ManualTrigger;
     triggerName: string;
     destination: string;
-    fn?: () => void;
+    onTransition?: () => void;
 }
 
 export interface IfTransition {
     type: TransitionType.If;
-    condition: (arg0: KeyboardEvent) => boolean;
+    condition: (arg0: KeyboardEvent) => boolean;// TODO why does this get a keyboard event??
     then: {
         destination: string;
-        fn?: () => void;
+        onTransitionThen?: () => void;
     };
     else: {
         destination: string;
-        fn?: () => void;
+        onTransitionElse?: () => void;
     };
 }
 
@@ -43,18 +45,27 @@ export interface PromiseTransition {
     destination: string;
 }
 
-export interface TimeoutTransition {
+// https://stackoverflow.com/a/37688375
+interface TimeoutTransitionBase {
     type: TransitionType.Timeout;
-    duration: (() => number) | number;
     destination: string;
     countdownTimerShowDots?: boolean;
-    //countdownTimerProgressElementGroup: string;
-    fn?: () => void; //called when time runs out
+    onTransition?: () => void; //called when time runs out
 }
+// https://stackoverflow.com/a/61281828
+interface StartNewCountdownTimer extends TimeoutTransitionBase {
+    durationForNewCountdownTimer: (() => number) | number;
+    countdownTimerToResume?: never;
+}
+interface ContinueCountdownTimer extends TimeoutTransitionBase {
+    durationForNewCountdownTimer?: never;
+    countdownTimerToResume: () => CountdownTimer;
+}
+export type TimeoutTransition = StartNewCountdownTimer | ContinueCountdownTimer;
 
 export interface KeyboardTransition {
     type: TransitionType.Keyboard;
     keyboardKeys: string;
     destination: string;
-    fn?: (keyboardEvent: KeyboardEvent) => void;
+    onTransition?: (keyboardEvent: KeyboardEvent) => void;
 }

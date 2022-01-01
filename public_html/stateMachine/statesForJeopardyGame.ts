@@ -35,9 +35,13 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             presentationSlideToShow: "slide-clue-category-and-dollars",
             transitions: [{
                 type: TransitionType.Timeout,
-                duration: settings.displayDurationCategoryMs,
-                //countdownTimerProgressElementGroup: "shared",
-                destination: "showClueQuestion"
+                durationForNewCountdownTimer: settings.displayDurationCategoryMs,
+                destination: "showClueQuestion",
+                /*
+                Don't put this as onEnter of the showClueQuestion state because it does
+                a bunch of stuff and would get called every time lockout happens
+                */
+                onTransition: operator.handleShowClueQuestion.bind(operator)
             }]
         }, {
             /*
@@ -47,48 +51,33 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             */
             name: "showClueQuestion",
             presentationSlideToShow: "slide-clue-question",
-            onEnter: operator.showClueQuestion.bind(operator),
             transitions: [{
                 type: TransitionType.Keyboard,
                 keyboardKeys: " ", //space
-                destination: "waitForBuzzes"
+                destination: "waitForBuzzes",
+                /*
+                Don't put this function as the onEnter for the waitForBuzzes state
+                because there are two other ways to enter the waitForBuzzes state.
+                */
+                onTransition: operator.handleDoneReadingClueQuestion.bind(operator)
             }, {
                 type: TransitionType.Keyboard,
                 keyboardKeys: "123456789",
                 destination: "showClueQuestion",
-                fn: operator.handleLockout.bind(operator)
+                onTransition: operator.handleLockout.bind(operator)
             }]
         }, {
             name: "waitForBuzzes",
-            onEnter: operator.handleDoneReadingClueQuestion.bind(operator),
-            //onExit: stateMachine.saveRemainingCountdownTime.bind(stateMachine),
             transitions: [{
                 type: TransitionType.Timeout,
-                duration: settings.timeoutWaitForBuzzesMs,
-                //countdownTimerProgressElementGroup: "shared",
                 destination: "showAnswer",
-                fn: operator.playSoundQuestionTimeout.bind(operator)
+                countdownTimerToResume: operator.getCountdownTimerToResumeForWaitForBuzzesState.bind(operator),
+                onTransition: operator.playSoundQuestionTimeout.bind(operator)
             }, {
                 type: TransitionType.Keyboard,
                 keyboardKeys: "123456789",
                 destination: "checkIfTeamCanAnswer"
             }]
-            /*
-        }, {
-            name: "waitForBuzzesResumeTimer",
-            onExit: stateMachine.saveRemainingCountdownTime,
-            transitions: [{
-                type: TransitionType.Timeout,
-                duration: () => stateMachine.remainingQuestionTimeMs, //todo look at code implementing stateMachineInstance
-                countdownTimerProgressElementGroup: "shared",
-                destination: "showAnswer",
-                fn: operator.playSoundQuestionTimeout.bind(operator)
-            }, {
-                type: TransitionType.Keyboard,
-                keyboardKeys: "123456789",
-                destination: "checkIfTeamCanAnswer"
-            }]
-            */
         }, {
             name: "checkIfTeamCanAnswer",
             transitions: [{
@@ -99,33 +88,35 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             }]
         }, {
             name: "waitForTeamAnswer",
-            onEnter: operator.handleBuzzerPress.bind(operator),
+            onEnter: operator.handleBuzzerPress.bind(operator), // TODO I want to move this to the transition but it takes a keyboard event???
             transitions: [{
                 type: TransitionType.Keyboard,
                 keyboardKeys: "y",
                 destination: "showAnswer",
-                fn: operator.handleAnswerCorrect.bind(operator)
+                onTransition: operator.handleAnswerCorrect.bind(operator)
             }, {
                 type: TransitionType.Keyboard,
                 keyboardKeys: "n",
-                destination: "subtractMoney"
+                destination: "answerWrongOrTimeout"
             }, {
                 type: TransitionType.Timeout,
-                duration: settings.timeoutAnswerMs,
-                //countdownTimerProgressElementGroup: "waiting-for-answer",
-                countdownTimerShowDots: true, // wait what
-                destination: "subtractMoney"
+                durationForNewCountdownTimer: settings.timeoutAnswerMs,
+                countdownTimerShowDots: true,
+                destination: "answerWrongOrTimeout"
             }
             ]
         },
         {
-            name: "subtractMoney",
-            onEnter: operator.handleAnswerIncorrectOrAnswerTimeout.bind(operator),
+            name: "answerWrongOrTimeout",
+            onEnter: operator.handleAnswerWrongOrTimeout.bind(operator),
             transitions: [{
                 type: TransitionType.If,
                 condition: operator.haveAllTeamsAnswered.bind(operator),
                 then: { destination: "showAnswer" },
-                else: { destination: "waitForBuzzes" }
+                else: {
+                    destination: "waitForBuzzes"
+                    // TODO here is where we need to resume the countdown timer
+                }
             }]
         }, {
             name: "showAnswer",
@@ -133,8 +124,7 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             presentationSlideToShow: "slide-clue-answer",
             transitions: [{
                 type: TransitionType.Timeout,
-                duration: settings.displayDurationAnswerMs,
-                //countdownTimerProgressElementGroup: "shared",
+                durationForNewCountdownTimer: settings.displayDurationAnswerMs,
                 destination: "checkGameEnd"
             }]
         }, {

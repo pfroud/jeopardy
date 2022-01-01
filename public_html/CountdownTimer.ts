@@ -9,17 +9,16 @@ export class CountdownTimer {
     public onReset?: () => void;
     public onFinished?: () => void;
     public onTick?: () => void;
-    public hideProgressOnFinish = false;
 
-    private readonly DEBUG = true;
-    private static readonly desiredFrameRateHz = 10;
+    private readonly DEBUG = false;
+    private static readonly desiredFrameRateHz = 30;
     private readonly updateIntervalMillisec = 1000 / CountdownTimer.desiredFrameRateHz;
     private readonly audioManager: AudioManager;
-    private readonly textDivs: HTMLDivElement[] = [];
-    private readonly progressElements: HTMLProgressElement[] = [];
-    private readonly dotsTables: HTMLTableElement[] = [];
+    private readonly textDivs = new Set<HTMLDivElement>();
+    private readonly progressElements = new Set<HTMLProgressElement>();
+    private readonly dotsTables = new Set<HTMLTableElement>();
     private remainingMillisec: number;
-    private previousDotsDeactivated = NaN; //only used for dots elements I think
+    private previousDotsDeactivated = NaN; //only used for dots elements
     private timestampOfLastInterval = NaN;
     private intervalID = NaN; //value returned by window.setInterval(), used to cancel it later
     private isStarted = false;
@@ -34,7 +33,9 @@ export class CountdownTimer {
             throw new RangeError("duration cannot be less than one");
         }
         this.audioManager = audioManager;
+
         this.maxMillisec = durationMillisec;
+
         this.remainingMillisec = durationMillisec;
         if (this.DEBUG) {
             console.log(`CountdownTimer constructed with duration ${durationMillisec.toLocaleString()} millisec.`);
@@ -48,7 +49,6 @@ export class CountdownTimer {
     public pause(): void {
         if (this.isStarted && !this.isFinished && !this.isPaused) {
             clearInterval(this.intervalID);
-            //clearTimeout(this.timeoutID);
             this.isPaused = true;
             this.guiUpdatePaused();
 
@@ -98,35 +98,6 @@ export class CountdownTimer {
         this.dotsTables?.forEach(e => e.classList.toggle("paused", this.isPaused));
     }
 
-    public reset(): void {
-        if (this.DEBUG) {
-            console.log("CountdownTimer: reset.");
-        }
-        this.isStarted = false;
-        this.isFinished = false;
-        this.isPaused = false;
-        this.remainingMillisec = this.maxMillisec;
-        clearInterval(this.intervalID);
-        //clearTimeout(this.timeoutID);
-
-        this.guiReset();
-        this.onReset?.();
-    }
-
-    private guiReset(): void {
-        this.guiUpdatePaused();
-
-        this.dotsTables?.forEach(table => table.querySelectorAll("td").forEach(td => td.classList.remove("active")));
-
-        this.progressElements.forEach(elem => {
-            elem.setAttribute("value", String(this.maxMillisec));
-            elem.style.display = "none"
-        });
-
-        this.textDivs.forEach(elem => elem.innerHTML = (this.maxMillisec / 1000).toFixed(1));
-
-    }
-
     public start(): void {
         if (!this.isStarted && !this.isFinished) {
             if (this.DEBUG) {
@@ -142,7 +113,6 @@ export class CountdownTimer {
             this.progressElements.forEach(progressElement => {
                 progressElement.setAttribute("max", String(this.maxMillisec));
                 progressElement.setAttribute("value", String(this.maxMillisec));
-                progressElement.style.display = ""; // in case of hideProgressOnFinish
             });
             if (this.dotsTables) {
                 this.dotsTables.forEach(tableElement => {
@@ -179,12 +149,12 @@ export class CountdownTimer {
 
         if (this.remainingMillisec <= 0) {
             if (this.DEBUG) {
-                logLine += "Finishing."
+                logLine += "Finishing.";
             }
             this.finish();
         } else {
             if (this.DEBUG) {
-                logLine += "Letting the interval happen again."
+                logLine += "Letting the interval happen again.";
             }
         }
 
@@ -267,22 +237,19 @@ export class CountdownTimer {
         this.dotsTables?.forEach(table => table.querySelectorAll("td").forEach(td => td.classList.remove("active")));
         clearInterval(this.intervalID);
 
-        if (this.hideProgressOnFinish) {
-            this.progressElements.forEach(elem => elem.style.display = "none");
-        }
         this.onFinished?.();
     }
 
     public addTextDiv(textDiv: HTMLDivElement): void {
-        this.textDivs.push(textDiv);
+        this.textDivs.add(textDiv);
     }
 
     public addProgressElement(progressElement: HTMLProgressElement): void {
-        this.progressElements.push(progressElement);
+        this.progressElements.add(progressElement);
     }
 
     public addDotsTable(dotsTable: HTMLTableElement): void {
-        this.dotsTables.push(dotsTable);
+        this.dotsTables.add(dotsTable);
     }
 
     public getRemainingMillisec(): number {

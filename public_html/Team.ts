@@ -21,9 +21,9 @@ interface TeamDivs {
 
 export class Team {
     public readonly teamName: string;
-    public dollars = 0;
-    public presentationCountdownDots: HTMLTableElement;
 
+    private dollars = 0;
+    private countdownDotsInPresentationWindow: HTMLTableElement;
     private readonly settings: Settings;
     private readonly audioManager: AudioManager;
     private readonly presentationInstance: Presentation;
@@ -31,7 +31,8 @@ export class Team {
     private countdownTimer: CountdownTimer;
     private state: TeamState;
     private stateBeforeLockout: TeamState;
-    private presentationProgressLockout: HTMLProgressElement;
+    private progressElementInPresentationWindow: HTMLProgressElement;
+    private progressElementInOperatorWindow: HTMLProgressElement;
     private readonly div: TeamDivs = {
         operator: {
             wrapper: null,
@@ -63,21 +64,21 @@ export class Team {
          };
          */
 
-        this.createDivsOperator();
-        this.createDivsPresentation();
+        this.createElementsInOperatorWindow();
+        this.createElementsInPresentationWindow();
 
         this.setState(TeamState.BUZZERS_OFF);
     }
 
     public handleAnswerCorrect(clueObj: Clue): void {
+        this.stopAnswer();
         this.audioManager.play("answerCorrect");
         this.moneyAdd(clueObj.value);
-        this.presentationCountdownDots.querySelectorAll("td").forEach(td => td.classList.remove("active"));
     }
 
     public handleAnswerIncorrectOrAnswerTimeout(clueObj: Clue): void {
+        this.stopAnswer();
         this.audioManager.play("answerIncorrectOrAnswerTimeout");
-        this.presentationCountdownDots.querySelectorAll("td").forEach(td => td.classList.remove("active"));
         this.moneySubtract(clueObj.value * this.settings.wrongAnswerPenaltyMultiplier);
         this.setState(this.settings.allowMultipleAnswersToSameQuestion ? TeamState.CAN_ANSWER : TeamState.ALREADY_ANSWERED);
     }
@@ -154,7 +155,7 @@ export class Team {
         this.div.operator.dollars.innerHTML = "$" + this.dollars.toLocaleString();
     }
 
-    private createDivsPresentation(): void {
+    private createElementsInPresentationWindow(): void {
         const divTeam = this.div.presentation.wrapper = document.createElement("div");
         divTeam.classList.add("team");
         divTeam.setAttribute("data-team-index", String(this.teamIdx));
@@ -178,7 +179,7 @@ export class Team {
         divBuzzerDisplay.append(imgSwitchOpened);
         divTeam.append(divBuzzerDisplay);
 
-        const tableCountdownDots = this.presentationCountdownDots = document.createElement("table");
+        const tableCountdownDots = this.countdownDotsInPresentationWindow = document.createElement("table");
         tableCountdownDots.classList.add("countdown-dots");
 
         for (let i = 5; i > 1; i--) {
@@ -200,45 +201,45 @@ export class Team {
         divTeam.append(tableCountdownDots);
 
         const divDollars = this.div.presentation.dollars = document.createElement("div");
-        divDollars.classList.add("team-dollars")
+        divDollars.classList.add("team-dollars");
         divDollars.innerHTML = "$" + this.dollars;
         divTeam.append(divDollars);
 
         const divName = this.div.presentation.teamName = document.createElement("div");
-        divName.classList.add("team-name")
+        divName.classList.add("team-name");
         divName.innerHTML = this.teamName;
         divTeam.append(divName);
 
-        const progress = this.presentationProgressLockout = document.createElement("progress");
+        const progress = this.progressElementInPresentationWindow = document.createElement("progress");
+        progress.style.display = "none";
         divTeam.append(progress);
 
         this.presentationInstance.appendTeamDivToFooter(divTeam);
 
     }
 
-    private createDivsOperator(): void {
+    private createElementsInOperatorWindow(): void {
         const divTeam = this.div.operator.wrapper = document.createElement("div");
         divTeam.classList.add("team");
         divTeam.setAttribute("data-team-index", String(this.teamIdx));
         divTeam.setAttribute("data-team-state", "");
 
         const divName = this.div.operator.teamName = document.createElement("div");
-        divName.classList.add("team-name")
+        divName.classList.add("team-name");
         divName.innerHTML = this.teamName;
         divTeam.append(divName);
 
         const divDollars = this.div.operator.dollars = document.createElement("div");
-        divDollars.classList.add("team-dollars")
+        divDollars.classList.add("team-dollars");
         divDollars.innerHTML = "$" + this.dollars;
         divTeam.append(divDollars);
 
         const divState = this.div.operator.state = document.createElement("div");
-        divState.classList.add("team-state")
+        divState.classList.add("team-state");
         divState.innerHTML = this.state;
         divTeam.append(divState);
 
-        const progress = document.createElement("progress");
-        progress.classList.add("time-left")
+        const progress = this.progressElementInOperatorWindow = document.createElement("progress");
         progress.style.display = "none";
         divTeam.append(progress);
 
@@ -274,14 +275,15 @@ export class Team {
 
         const countdownShowCategory = this.countdownTimer = new CountdownTimer(this.settings.durationLockoutMillisec);
         // todo would be nice to show progress element on display and presentation. need to change CountdownTimer to allow that
-        countdownShowCategory.addProgressElement(this.presentationProgressLockout);
-        countdownShowCategory.hideProgressOnFinish = true;
+        countdownShowCategory.addProgressElement(this.progressElementInPresentationWindow);
+        this.progressElementInPresentationWindow.style.display = "";//show
         countdownShowCategory.onFinished = () => this.endLockout();
         countdownShowCategory.start();
 
     }
 
     public endLockout(): void {
+        this.progressElementInPresentationWindow.style.display = "none";
         this.setState(this.stateBeforeLockout, true);
         this.stateBeforeLockout = null;
         this.countdownTimer = null;
@@ -289,7 +291,13 @@ export class Team {
 
     public startAnswer(): void {
         this.setState(TeamState.ANSWERING);
-        this.presentationCountdownDots.querySelector("td").classList.add("active");
+        this.countdownDotsInPresentationWindow.querySelector("td").classList.add("active");
+        this.progressElementInOperatorWindow.style.display = "";//show
+    }
+
+    public stopAnswer(): void {
+        this.countdownDotsInPresentationWindow.querySelectorAll("td").forEach(td => td.classList.remove("active"));
+        this.progressElementInOperatorWindow.style.display = "none";
     }
 
     public showKeyDown(): void {
@@ -308,6 +316,20 @@ export class Team {
             dollars: this.dollars
         };
     }
+
+    public getCountdownDotsInPresentationWindow(): HTMLTableElement {
+        return this.countdownDotsInPresentationWindow;
+    }
+
+    public getProgressElementInOperatorWindow(): HTMLProgressElement {
+        return this.progressElementInOperatorWindow;
+    }
+
+    public getDollars(): number {
+        return this.dollars;
+    }
+
+
 
     /*
     public jsonLoad(jsonObj: TeamDumpToJson): void {

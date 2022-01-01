@@ -102,14 +102,14 @@ header {
         display: block;
         margin-bottom: 20px;
     }
-}
 
-progress#game-timer {
-    width: 100vw;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    height: 10px;
+    progress#game-timer {
+        width: 100vw;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        height: 10px;
+    }
 }
 
 main {
@@ -218,18 +218,9 @@ footer {
         text-align: center;
         flex: 1;
 
-        // since we're not using the dollar animation, probably can delete this
-        position: relative; //need this to center the dollar animations
-
-        /*
-        &[data-team-state="buzzers-off"],
-        &[data-team-state="reading-question"],
-        &[data-team-state="already-answered"],
-        &[data-team-state="lockout"]
-        {
+        &[data-team-state="lockout"]:not(progress) {
             opacity: 0.4;
         }
-        */
 
         &[data-team-state="buzzers-off"] table.countdown-dots {
             visibility: hidden;
@@ -274,10 +265,6 @@ footer {
             &.paused td.active {
                 background-color: firebrick;
             }
-        }
-
-        progress {
-            display: none;
         }
 
         div.buzzer-show {

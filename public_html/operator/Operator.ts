@@ -3,6 +3,7 @@ import { StateMachine } from "../stateMachine/StateMachine.js";
 import { AudioManager } from "./AudioManager.js";
 import { Settings } from "../Settings.js";
 import { Presentation } from "../presentation/Presentation.js";
+import { CountdownTimer } from "../CountdownTimer.js";
 
 export interface Clue {
     answer: string;
@@ -35,6 +36,7 @@ export class Operator {
     private isPaused = false;
     private stateMachine: StateMachine;
     private teamPresentlyAnswering: Team;
+    private countdownTimerForWaitForBuzzesState: CountdownTimer;
 
     constructor(audioManager: AudioManager, settings: Settings) {
         this.audioManager = audioManager;
@@ -124,7 +126,7 @@ export class Operator {
         this.teamPresentlyAnswering.handleAnswerCorrect(this.currentClueObj);
     }
 
-    public handleAnswerIncorrectOrAnswerTimeout(): void {
+    public handleAnswerWrongOrTimeout(): void {
         this.teamPresentlyAnswering.handleAnswerIncorrectOrAnswerTimeout(this.currentClueObj);
     }
 
@@ -146,9 +148,6 @@ export class Operator {
 
         document.querySelector("a#aGenerateGraphviz").addEventListener("click", () =>
             this.stateMachine.showDotFileForGraphviz());
-
-
-
     }
 
 
@@ -188,6 +187,8 @@ export class Operator {
         teamObj.startAnswer();
 
         this.divInstructions.innerHTML = "Did they answer correctly? y / n";
+
+        this.saveCountdownTimerToResumeForWaitForBuzzesState();
     }
 
     public shouldGameEnd(): boolean {
@@ -206,6 +207,8 @@ export class Operator {
         if (this.teamArray.some(teamObj => teamObj.dollars > 0)) {
             this.saveGame();
         }
+
+        this.resetDurationForWaitForBuzzesState();
 
         function isClueValid(clueObj: Clue): boolean {
             return clueObj.value !== null &&
@@ -236,7 +239,7 @@ export class Operator {
             This function only shows the category. 
             The state machine will show the clue question after a timeout.
             */
-            this.divClueWrapper.style.display = "";
+            this.divClueWrapper.style.display = ""; //show
             this.divClueCategory.innerHTML = clueObj.category.title;
             this.divClueDollars.innerHTML = "$" + clueObj.value;
             // example of what format the airdate is in: "2013-01-25T12:00:00.000Z
@@ -244,7 +247,7 @@ export class Operator {
             this.presentation.setClueObj(clueObj);
             this.trAnswer.style.display = "none";
             this.divInstructions.innerHTML = "Read aloud the category and dollar value.";
-        }
+        };
 
         // Use a recursive helper function so we can do retries.
         const fetchClueHelper = (
@@ -285,7 +288,7 @@ export class Operator {
                 }
             });
             xhr.send();
-        }
+        };
 
 
         /*
@@ -302,12 +305,12 @@ export class Operator {
             this.trQuestion.style.display = "none";
             this.divInstructions.innerHTML = "Loading clue...";
             fetchClueHelper.call(this, resolveFunc, rejectFunc, 1, 5);
-        }
+        };
         return new Promise<void>(promiseExecutor);
 
     }
 
-    public showClueQuestion(): void {
+    public handleShowClueQuestion(): void {
         /*
         The presentation is already showing the clue question because of the
         slide change in the state machine.
@@ -319,7 +322,7 @@ export class Operator {
         this.divInstructions.innerHTML = "Read the question out loud. Buzzers open when you press space.";
 
         this.divClueQuestion.innerHTML = getClueQuestionHtmlWithSubjectInBold(this.currentClueObj);
-        this.trQuestion.style.display = "";
+        this.trQuestion.style.display = "";//show
         this.trAnswer.style.display = "none";
 
         this.buttonSkipClue.removeAttribute("disabled");
@@ -465,7 +468,7 @@ export class Operator {
         const shallowCopy = this.teamArray.slice();
         function comparator(team1: Team, team2: Team) {
             //sort descending
-            return team2.dollars - team1.dollars;
+            return team2.getDollars() - team1.getDollars();
         }
         shallowCopy.sort(comparator);
 
@@ -485,6 +488,18 @@ export class Operator {
 
         this.presentation.setGameEndMessage(html.join(""));
         this.presentation.headerHide();
+    }
+
+    private resetDurationForWaitForBuzzesState(): void {
+        // this.durationForWaitForBuzzesState = this.settings.timeoutWaitForBuzzesMs;
+    }
+
+    private saveCountdownTimerToResumeForWaitForBuzzesState(): void {
+        this.countdownTimerForWaitForBuzzesState = this.stateMachine.getCountdownTimer();
+    }
+
+    public getCountdownTimerToResumeForWaitForBuzzesState(): CountdownTimer {
+        return this.countdownTimerForWaitForBuzzesState;
     }
 
 

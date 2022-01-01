@@ -76,14 +76,14 @@ export class StateMachine {
                 const transitionObj = this.presentState.transitions[i];
                 if (transitionObj.type === TransitionType.Keyboard && transitionObj.keyboardKeys.includes(keyboardEvent.key)) {
                     if (this.DEBUG) {
-                        console.log(`keyboard transition from keyboard key ${keyboardEvent.key}`)
+                        console.log(`keyboard transition from keyboard key ${keyboardEvent.key}`);
                     }
 
-                    if (transitionObj.fn) {
+                    if (transitionObj.onTransition) {
                         if (this.DEBUG) {
-                            console.log(`calling transition fn ${transitionObj.fn.name}`);
+                            console.log(`calling transition fn ${transitionObj.onTransition.name}`);
                         }
-                        transitionObj.fn(keyboardEvent);
+                        transitionObj.onTransition(keyboardEvent);
                     }
 
                     this.goToState(transitionObj.destination, keyboardEvent);
@@ -104,44 +104,59 @@ export class StateMachine {
     }
 
     private startCountdownTimer(timeoutTransitionObj: TimeoutTransition, keyboardEvent: KeyboardEvent): void {
-        let durationMs;
-        if (timeoutTransitionObj.duration instanceof Function) {
-            durationMs = timeoutTransitionObj.duration();
-        } else {
-            durationMs = timeoutTransitionObj.duration;
-        }
 
-        if (this.DEBUG) {
-            console.log(`Starting countdown timer with duration ${durationMs} millisec`);
-        }
+        if (timeoutTransitionObj)
 
-        this.countdownTimer = new CountdownTimer(durationMs, this.audioManager);
-        this.countdownTimer.addProgressElement(this.operatorWindowCountdownProgress);
-        this.countdownTimer.addTextDiv(this.operatorWindowCountdownText);
+            if (timeoutTransitionObj.countdownTimerToResume) {
+                this.countdownTimer = timeoutTransitionObj.countdownTimerToResume();
 
-        /*
-        The showDots boolean is now used for a special case.
-        Once a team has buzzed and we're waiting for them to answer, we want some special stuff to happen:
-            - in the presentation window: the state machine uses a timeout transition, but instead of showing progress like normal
-            we want to show it on the nine countdown dots.
-            - in the operator window: create or use a second <progress> element, instead of using the same one that shows
-            how much time is left for teams to buzz in.
-        */
-        if (timeoutTransitionObj.countdownTimerShowDots) {
-            const teamIndex = Number(keyboardEvent.key) - 1;
-            const teamObj = this.operator.getTeam(teamIndex);
-            this.countdownTimer.addDotsTable(teamObj.presentationCountdownDots);
-        } else {
-            this.countdownTimer.addProgressElement(this.presentation.getProgressElement());
-        }
+            } else if (timeoutTransitionObj.durationForNewCountdownTimer) {
+                let durationMs;
+                if (timeoutTransitionObj.durationForNewCountdownTimer instanceof Function) {
+                    durationMs = timeoutTransitionObj.durationForNewCountdownTimer();
+                } else {
+                    durationMs = timeoutTransitionObj.durationForNewCountdownTimer;
+                }
+
+                if (this.DEBUG) {
+                    console.log(`Starting countdown timer with duration ${durationMs} millisec`);
+                }
+                this.countdownTimer = new CountdownTimer(durationMs, this.audioManager);
+                this.countdownTimer.addTextDiv(this.operatorWindowCountdownText);
 
 
-        this.countdownTimer.onFinished = () => {
-            if (timeoutTransitionObj.fn) {
-                timeoutTransitionObj.fn();
+                /*
+                The showDots boolean is now used for a special case.
+                Once a team has buzzed and we're waiting for them to answer, we want some special stuff to happen:
+                - in the presentation window: the state machine uses a timeout transition, but instead of showing progress like normal
+                    we want to show it on the nine countdown dots.
+                    - in the operator window: create or use a second <progress> element, instead of using the same one that shows
+                    how much time is left for teams to buzz in.
+                */
+                if (timeoutTransitionObj.countdownTimerShowDots) {
+                    const teamIndex = Number(keyboardEvent.key) - 1;
+                    const teamObj = this.operator.getTeam(teamIndex);
+                    this.countdownTimer.addDotsTable(teamObj.getCountdownDotsInPresentationWindow());
+                    this.countdownTimer.addProgressElement(teamObj.getProgressElementInOperatorWindow());
+                } else {
+                    this.countdownTimer.addProgressElement(this.presentation.getProgressElement());
+                    this.countdownTimer.addProgressElement(this.operatorWindowCountdownProgress);
+                }
+
+
+                this.countdownTimer.onFinished = () => {
+                    if (timeoutTransitionObj.onTransition) {
+                        timeoutTransitionObj.onTransition();
+                    }
+                    this.goToState(timeoutTransitionObj.destination);
+                };
+
+
+
+            } else {
+                throw new TypeError("the TimeoutTransition object implements neither StartNewCountdownTimer nor ContinueCountdownTimer");
             }
-            this.goToState(timeoutTransitionObj.destination);
-        }
+
 
         this.countdownTimer.start();
     }
@@ -311,7 +326,7 @@ export class StateMachine {
 
                 switch (transitionObj.type) {
                     case TransitionType.Timeout: {
-                        if (!transitionObj.duration) {
+                        if (!transitionObj.durationForNewCountdownTimer) {
                             printWarning(stateObj.name, transitionIndex,
                                 "timeout has no duration property");
                         }
@@ -374,6 +389,10 @@ export class StateMachine {
 
     public showDotFileForGraphviz(): void {
         generateDotFileForGraphviz(this.allStates);
+    }
+
+    public getCountdownTimer(): CountdownTimer {
+        return this.countdownTimer;
     }
 
 

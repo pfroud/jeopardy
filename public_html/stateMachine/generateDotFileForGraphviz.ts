@@ -6,82 +6,88 @@ export function generateDotFileForGraphviz(stateArray: StateMachineState[]): voi
 
     const dotFileLines: string[] = [];
     dotFileLines.push('digraph jeopardy {');
-    dotFileLines.push('\tgraph [id="jeopardy"];')
+    dotFileLines.push('\tgraph [id="jeopardy"];');
     dotFileLines.push('\tnode [shape="rect", fontname="monospace"];\n');
 
     stateArray.forEach((state: StateMachineState) => {
 
-        dotFileLines.push(`\t${state.name} [id="${state.name}"];`);
+
+        let stateLabel = "<b>" + state.name + "</b>";
+        if (state.onEnter) {
+            stateLabel += "<br/>onEnter: " + state.onEnter.name.replace("bound ", "");
+        }
+        if (state.onExit) {
+            stateLabel += "<br/>onExit: " + state.onExit.name.replace("bound ", "");
+        }
+        dotFileLines.push(`\t${state.name} [label= < ${stateLabel} >, id="${state.name}"];`);
 
         state.transitions.forEach((transition: StateMachineTransition) => {
 
 
             switch (transition.type) {
                 case TransitionType.Keyboard: {
-                    const keys = transition.keyboardKeys;
-                    // TODO push stuff to array then use join() instead of string concatenating
-                    let label = "keyboard: ";
-                    if (keys === " ") {
-                        label += "[space]"
+                    let transitionLabel = "keyboard: ";
+                    if (transition.keyboardKeys === " ") {
+                        transitionLabel += "[space]";
                     } else {
-                        label += '\\"' + keys + '\\"';
+                        transitionLabel += '\\"' + transition.keyboardKeys + '\\"';
                     }
 
-                    if (transition.fn) {
-                        label += ` / ${transition.fn.name.replace("bound ", "")}`;
+                    if (transition.onTransition) {
+                        transitionLabel += ` / ${transition.onTransition.name.replace("bound ", "")}`;
                     }
 
-                    const id = `${state.name}_to_${transition.destination}`;
+                    const transitionID = `${state.name}_to_${transition.destination}`;
 
-                    dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${label}", id="${id}"];`);
+                    dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
 
                 }
                 case TransitionType.Promise: {
-                    const label = transition.type.toString();// + ": " + transition.functionToGetPromise; //becomes "function () { [native code] }"
-                    const id = `${state.name}_to_${transition.destination}`;
-                    dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${label}", id="${id}"];`);
+                    const transitionLabel = transition.type.toString();
+                    const transitionID = `${state.name}_to_${transition.destination}`;
+                    dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
                 }
                 case TransitionType.Timeout: {
-                    let label: string;
-                    if (typeof transition.duration === "number") {
-                        label = transition.type.toString() + ": " + (transition.duration / 1000) + "sec";
+                    let transitionLabel: string;
+                    if (typeof transition.durationForNewCountdownTimer === "number") {
+                        transitionLabel = transition.type.toString() + ": " + (transition.durationForNewCountdownTimer / 1000) + "sec";
                     } else {
                         // the timeout is a function which returns a number
-                        label = transition.type.toString() + ": " + transition.duration;
+                        transitionLabel = transition.type.toString() + ": " + transition.durationForNewCountdownTimer;
 
                     }
-                    if (transition.fn) {
-                        label += ` / ${transition.fn.name.replace("bound ", "")}`;
+                    if (transition.onTransition) {
+                        transitionLabel += ` / ${transition.onTransition.name.replace("bound ", "")}`;
                     }
 
-                    const id = `${state.name}_to_${transition.destination}`;
-                    dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${label}", id="${id}"];`);
+                    const transitionID = `${state.name}_to_${transition.destination}`;
+                    dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
                 }
                 case TransitionType.ManualTrigger: {
-                    let label = transition.type.toString() + ': \\"' + transition.triggerName.replace("manualTrigger_", "") + '\\"';
-                    if (transition.fn) {
-                        label += ` / ${transition.fn.name.replace("bound ", "")}`;
+                    let transitionLabel = transition.type.toString() + ': \\"' + transition.triggerName.replace("manualTrigger_", "") + '\\"';
+                    if (transition.onTransition) {
+                        transitionLabel += ` / ${transition.onTransition.name.replace("bound ", "")}`;
                     }
 
-                    const id = `${state.name}_to_${transition.destination}`;
-                    dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${label}", id="${id}"];`);
+                    const transitionID = `${state.name}_to_${transition.destination}`;
+                    dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
                 }
                 case TransitionType.If: {
                     const condition = transition.condition.name.replace("bound ", "");
 
                     let labelThen = "if(" + condition + ")";
-                    if (transition.then.fn) {
-                        labelThen += ` / ${transition.then.fn.name.replace("bound ", "")}`;
+                    if (transition.then.onTransitionThen) {
+                        labelThen += ` / ${transition.then.onTransitionThen.name.replace("bound ", "")}`;
                     }
                     const idThen = `${state.name}_to_${transition.then.destination}`;
 
                     let labelElse = "if(!" + condition + ")";
-                    if (transition.else.fn) {
-                        labelElse += ` / ${transition.else.fn.name.replace("bound ", "")}`;
+                    if (transition.else.onTransitionElse) {
+                        labelElse += ` / ${transition.else.onTransitionElse.name.replace("bound ", "")}`;
                     }
                     const idElse = `${state.name}_to_${transition.else.destination}`;
 
