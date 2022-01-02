@@ -4,7 +4,7 @@ import { AudioManager } from "../operator/AudioManager.js";
 import { Presentation } from "../presentation/Presentation.js";
 import { CountdownTimer } from "../CountdownTimer.js";
 import { getStatesForJeopardyGame } from "./statesForJeopardyGame.js";
-import { StateMachineState, StateMachineTransition, TimeoutTransition, TransitionType } from "./stateInterfaces.js";
+import { StateMachineState, StateMachineTransition, TimeoutTransition, TransitionType, CountdownTimerSource, CountdownOperation } from "./stateInterfaces.js";
 import { generateDotFileForGraphviz } from "./generateDotFileForGraphviz.js";
 import { GraphvizViewer } from "../graphvizViewer/graphvizViewer.js";
 
@@ -17,9 +17,7 @@ interface KeyboardKeysUsed {
 }
 
 export class StateMachine {
-    //public remainingQuestionTimeMs = -1;
-
-    private readonly DEBUG = true;
+    private readonly DEBUG = false;
     private readonly operator: Operator;
     private readonly settings: Settings;
     private readonly audioManager: AudioManager;
@@ -110,19 +108,21 @@ export class StateMachine {
 
     private startCountdownTimer(timeoutTransitionObj: TimeoutTransition, keyboardEvent: KeyboardEvent): void {
 
-        if (timeoutTransitionObj)
+        let countdownTimerSource: CountdownTimerSource;
+        if (typeof timeoutTransitionObj.countdownTimerSource === "function") {
+            countdownTimerSource = timeoutTransitionObj.countdownTimerSource();
+        } else {
+            countdownTimerSource = timeoutTransitionObj.countdownTimerSource;
+        }
 
-            if (timeoutTransitionObj.countdownTimerToResume) {
-                this.countdownTimer = timeoutTransitionObj.countdownTimerToResume();
-
-            } else if (timeoutTransitionObj.durationForNewCountdownTimer) {
-                const durationMs = timeoutTransitionObj.durationForNewCountdownTimer;
+        switch (countdownTimerSource.type) {
+            case CountdownOperation.CreateNew: {
+                const durationMs = countdownTimerSource.duration;
 
                 if (this.DEBUG) {
                     console.log(`Starting countdown timer with duration ${durationMs} millisec`);
                 }
                 this.countdownTimer = new CountdownTimer(durationMs, this.audioManager);
-                this.countdownTimer.addTextDiv(this.operatorWindowCountdownText);
 
 
                 /*
@@ -139,10 +139,10 @@ export class StateMachine {
                     this.countdownTimer.addDotsTable(teamObj.getCountdownDotsInPresentationWindow());
                     this.countdownTimer.addProgressElement(teamObj.getProgressElementInOperatorWindow());
                 } else {
+                    this.countdownTimer.addTextDiv(this.operatorWindowCountdownText);
                     this.countdownTimer.addProgressElement(this.presentation.getProgressElement());
                     this.countdownTimer.addProgressElement(this.operatorWindowCountdownProgress);
                 }
-
 
                 this.countdownTimer.onFinished = () => {
                     if (timeoutTransitionObj.onTransition) {
@@ -151,14 +151,15 @@ export class StateMachine {
                     this.goToState(timeoutTransitionObj.destination);
                 };
 
-
-
-            } else {
-                throw new TypeError("the TimeoutTransition object implements neither StartNewCountdownTimer nor ContinueCountdownTimer");
+                this.countdownTimer.start();
+                break;
             }
+            case CountdownOperation.ResumeExisting:
+                this.countdownTimer = countdownTimerSource.countdownTimerToResume;
+                this.countdownTimer.resume();
+                break;
+        }
 
-
-        this.countdownTimer.start();
     }
 
     public manualTrigger(triggerName: string): void {
@@ -183,7 +184,6 @@ export class StateMachine {
         if (!(destStateName in this.stateMap)) {
             throw new RangeError(`can't go to state named "${destStateName}", state not found`);
         }
-
 
         this.countdownTimer?.pause();
 
@@ -322,11 +322,6 @@ export class StateMachine {
             stateObj.transitions.forEach((transitionObj: StateMachineTransition, transitionIndex: number) => {
 
                 if (transitionObj.type !== TransitionType.If) {
-                    if (!transitionObj.destination) {
-                        printWarning(stateObj.name, transitionIndex,
-                            "no destination state");
-                        return;
-                    }
                     if (!(transitionObj.destination in this.stateMap)) {
                         printWarning(stateObj.name, transitionIndex,
                             `unknown destination state "${transitionObj.destination}"`);
@@ -334,19 +329,8 @@ export class StateMachine {
                 }
 
                 switch (transitionObj.type) {
-                    case TransitionType.Timeout: {
-                        if (!transitionObj.durationForNewCountdownTimer) {
-                            printWarning(stateObj.name, transitionIndex,
-                                "timeout has no duration property");
-                        }
-                        break;
-                    }
                     case TransitionType.Keyboard: {
                         const keyboardKeys = transitionObj.keyboardKeys;
-                        if (!keyboardKeys) {
-                            printWarning(stateObj.name, transitionIndex,
-                                `no keys for keyboard transition`);
-                        }
 
                         // Make sure each keyboard key is not used in multiple transitions from this state.
                         for (let i = 0; i < keyboardKeys.length; i++) {
@@ -361,13 +345,6 @@ export class StateMachine {
 
                         break;
                     }
-                    case TransitionType.ManualTrigger:
-                        // no further validation needed.
-                        break;
-
-                    case TransitionType.Promise:
-                        // no further validation needed.
-                        break;
 
 
                     case TransitionType.If:
@@ -381,10 +358,6 @@ export class StateMachine {
                         }
                         break;
 
-                    default:
-                        printWarning(stateObj.name, transitionIndex,
-                            `unknown transition type!`);
-                        break;
                 }
 
                 function printWarning(stateName: string, transitionIdx: number, message: string) {

@@ -256,5 +256,9 @@ export class CountdownTimer {
         return this.remainingMillisec;
     }
 
+    public getIsStarted(): boolean {
+        return this.isStarted;
+    }
+
 
 }

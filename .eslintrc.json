@@ -38,6 +38,7 @@
         "no-param-reassign": "error", // https://eslint.org/docs/rules/no-param-reassign
         "no-throw-literal": "error", // https://eslint.org/docs/rules/no-throw-literal
         "prefer-promise-reject-errors": "error", // https://eslint.org/docs/rules/prefer-promise-reject-errors
+        "semi": "warn", //semicolon https://eslint.org/docs/rules/semi
         /*
         Turn off the no-shadow rule in ESLint then turn it on for TSLint,
         otherwise it will flag every enum as "already declared in the upper scope".

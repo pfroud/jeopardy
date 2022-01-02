@@ -6,18 +6,7 @@ export interface StateMachineState {
     onEnter?: (keyboardEvent?: KeyboardEvent) => void;// TODO why does this get a keyboard event??
     onExit?: () => void;
     transitions: StateMachineTransition[];
-    //graphvizNodeShape: NodeShape;
 }
-
-/*
-export enum NodeShape {
-    // https://www.gliffy.com/blog/guide-to-flowchart-symbols
-    // https://graphviz.org/doc/info/shapes.html
-    Terminal = "oval",
-    Process = "rect",
-    Decision = "diamond"
-}
-*/
 
 export type StateMachineTransition = ManualTransition | IfTransition | PromiseTransition | TimeoutTransition | KeyboardTransition;
 
@@ -60,24 +49,30 @@ export interface PromiseTransition {
     guardCondition?: () => boolean;
 }
 
-// https://stackoverflow.com/a/37688375
-interface TimeoutTransitionBase {
+export interface TimeoutTransition {
     type: TransitionType.Timeout;
     destination: string;
     countdownTimerShowDots?: boolean;
+    countdownTimerSource: CountdownTimerSource | (() => CountdownTimerSource);
     onTransition?: () => void; //called when time runs out
     guardCondition?: () => boolean;
 }
-// https://stackoverflow.com/a/61281828
-interface StartNewCountdownTimer extends TimeoutTransitionBase {
-    durationForNewCountdownTimer: number;
-    countdownTimerToResume?: never;
+
+// https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions
+export enum CountdownOperation {
+    CreateNew,
+    ResumeExisting
 }
-interface ContinueCountdownTimer extends TimeoutTransitionBase {
-    durationForNewCountdownTimer?: never;
-    countdownTimerToResume: () => CountdownTimer;
+export interface CreateNewCountdownTimer {
+    type: CountdownOperation.CreateNew;
+    duration: number;
 }
-export type TimeoutTransition = StartNewCountdownTimer | ContinueCountdownTimer;
+export interface ResumeExistingCountdownTimer {
+    type: CountdownOperation.ResumeExisting;
+    countdownTimerToResume: CountdownTimer;
+}
+export type CountdownTimerSource = CreateNewCountdownTimer | ResumeExistingCountdownTimer;
+
 
 export interface KeyboardTransition {
     type: TransitionType.Keyboard;

@@ -4,6 +4,7 @@ import { AudioManager } from "./AudioManager.js";
 import { Settings } from "../Settings.js";
 import { Presentation } from "../presentation/Presentation.js";
 import { CountdownTimer } from "../CountdownTimer.js";
+import { CountdownOperation, CountdownTimerSource } from "../stateMachine/stateInterfaces.js";
 
 export interface Clue {
     answer: string;
@@ -36,7 +37,9 @@ export class Operator {
     private isPaused = false;
     private stateMachine: StateMachine;
     private teamPresentlyAnswering: Team;
+
     private countdownTimerForWaitForBuzzesState: CountdownTimer;
+    private reset = true;
 
     constructor(audioManager: AudioManager, settings: Settings) {
         this.audioManager = audioManager;
@@ -188,7 +191,7 @@ export class Operator {
 
         this.divInstructions.innerHTML = "Did they answer correctly? y / n";
 
-        this.saveCountdownTimerToResumeForWaitForBuzzesState();
+        this.saveCountdownTimerForWaitForBuzzesState();
     }
 
     public shouldGameEnd(): boolean {
@@ -356,6 +359,8 @@ export class Operator {
         this.divInstructions.innerHTML = "Wait for people to answer.";
         this.setAllTeamsState(TeamState.CAN_ANSWER);
         this.buttonSkipClue.setAttribute("disabled", "disabled");
+
+        this.resetDurationForWaitForBuzzesState();
     }
 
     public handleShowAnswer(): void {
@@ -491,17 +496,21 @@ export class Operator {
     }
 
     private resetDurationForWaitForBuzzesState(): void {
-        // this.durationForWaitForBuzzesState = this.settings.timeoutWaitForBuzzesMs;
+        this.reset = true;
     }
 
-    private saveCountdownTimerToResumeForWaitForBuzzesState(): void {
+    public saveCountdownTimerForWaitForBuzzesState(): void {
         this.countdownTimerForWaitForBuzzesState = this.stateMachine.getCountdownTimer();
     }
 
-    public getCountdownTimerToResumeForWaitForBuzzesState(): CountdownTimer {
-        return this.countdownTimerForWaitForBuzzesState;
+    public getCountdownTimerSource(): CountdownTimerSource {
+        if (this.reset) {
+            this.reset = false;
+            return { type: CountdownOperation.CreateNew, duration: this.settings.timeoutWaitForBuzzesMs };
+        } else {
+            return { type: CountdownOperation.ResumeExisting, countdownTimerToResume: this.countdownTimerForWaitForBuzzesState };
+        }
     }
-
 
 
 }

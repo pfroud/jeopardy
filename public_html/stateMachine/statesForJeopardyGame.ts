@@ -1,5 +1,5 @@
 import { StateMachine } from "./StateMachine.js";
-import { StateMachineState, TransitionType } from "./stateInterfaces.js";
+import { CountdownOperation, StateMachineState, TransitionType } from "./stateInterfaces.js";
 import { Operator } from "../operator/Operator.js";
 import { Settings } from "../Settings.js";
 
@@ -14,7 +14,6 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 triggerName: "startGame",
                 destination: "getClueFromJService"
             }],
-            //graphvizNodeShape: NodeShape.Terminal
         }, {
             name: "getClueFromJService",
             presentationSlideToShow: "slide-spinner",
@@ -28,7 +27,6 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 functionToGetPromise: operator.getClueFromJService.bind(operator),
                 destination: "showClueCategoryAndDollars"
             }],
-            //graphvizNodeShape: NodeShape.Process
         }, {
             /*
             The category and dollar value are shown on the center of the presentation window for a fixed amount of time.
@@ -37,7 +35,7 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             presentationSlideToShow: "slide-clue-category-and-dollars",
             transitions: [{
                 type: TransitionType.Timeout,
-                durationForNewCountdownTimer: settings.displayDurationCategoryMs,
+                countdownTimerSource: { type: CountdownOperation.CreateNew, duration: settings.displayDurationCategoryMs },
                 destination: "showClueQuestion",
                 /*
                 Don't put this as onEnter of the showClueQuestion state because it does
@@ -45,7 +43,6 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 */
                 onTransition: operator.handleShowClueQuestion.bind(operator)
             }],
-            //graphvizNodeShape: NodeShape.Process
         }, {
             /*
             The clue question is shown on center of the presentation window. The person operating the
@@ -69,22 +66,20 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 destination: "showClueQuestion",
                 onTransition: operator.handleLockout.bind(operator)
             }],
-            //graphvizNodeShape: NodeShape.Process
         }, {
             name: "waitForBuzzes",
             transitions: [{
-                type: TransitionType.Timeout,
-                destination: "showAnswer",
-                countdownTimerToResume: operator.getCountdownTimerToResumeForWaitForBuzzesState.bind(operator),
-                onTransition: operator.playSoundQuestionTimeout.bind(operator)
-            }, {
                 type: TransitionType.Keyboard,
                 keyboardKeys: "123456789",
                 destination: "waitForTeamAnswer",
+                onTransition: operator.saveCountdownTimerForWaitForBuzzesState.bind(operator),
                 guardCondition: operator.canTeamBuzz.bind(operator)
-            }
-            ],
-            //graphvizNodeShape: NodeShape.Decision
+            }, {
+                type: TransitionType.Timeout,
+                destination: "showAnswer",
+                countdownTimerSource: operator.getCountdownTimerSource.bind(operator),
+                onTransition: operator.playSoundQuestionTimeout.bind(operator)
+            }],
         }, {
             name: "waitForTeamAnswer",
             onEnter: operator.handleBuzzerPress.bind(operator), // TODO I want to move this to the transition but it takes a keyboard event???
@@ -99,11 +94,10 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 destination: "answerWrongOrTimeout"
             }, {
                 type: TransitionType.Timeout,
-                durationForNewCountdownTimer: settings.timeoutAnswerMs,
+                countdownTimerSource: { type: CountdownOperation.CreateNew, duration: settings.timeoutAnswerMs },
                 countdownTimerShowDots: true,
                 destination: "answerWrongOrTimeout"
             }],
-            //graphvizNodeShape: NodeShape.Decision
         },
         {
             name: "answerWrongOrTimeout",
@@ -112,22 +106,17 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 type: TransitionType.If,
                 condition: operator.haveAllTeamsAnswered.bind(operator),
                 then: { destination: "showAnswer" },
-                else: {
-                    destination: "waitForBuzzes"
-                    // TODO here is where we need to resume the countdown timer
-                }
+                else: { destination: "waitForBuzzes" }
             }],
-            //graphvizNodeShape: NodeShape.Decision
         }, {
             name: "showAnswer",
             onEnter: operator.handleShowAnswer.bind(operator),
             presentationSlideToShow: "slide-clue-answer",
             transitions: [{
                 type: TransitionType.Timeout,
-                durationForNewCountdownTimer: settings.displayDurationAnswerMs,
+                countdownTimerSource: { type: CountdownOperation.CreateNew, duration: settings.displayDurationAnswerMs },
                 destination: "checkGameEnd"
             }],
-            //graphvizNodeShape: NodeShape.Process
         }, {
             name: "checkGameEnd",
             transitions: [{
@@ -136,17 +125,15 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 then: { destination: "gameEnd" },
                 else: { destination: "getClueFromJService" }
             }],
-            //graphvizNodeShape: NodeShape.Decision
         }, {
             name: "gameEnd",
             presentationSlideToShow: "slide-game-end",
             onEnter: operator.handleGameEnd.bind(operator),
             transitions: [{
                 type: TransitionType.ManualTrigger,
-                triggerName: "manualTrigger_reset",
+                triggerName: "reset",
                 destination: "idle"
             }],
-            //graphvizNodeShape: NodeShape.Terminal
         }
     ];
 

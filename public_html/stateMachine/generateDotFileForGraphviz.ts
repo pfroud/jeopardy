@@ -14,13 +14,12 @@ export function generateDotFileForGraphviz(stateArray: StateMachineState[]): voi
 
         let stateLabel = "<b>" + state.name + "</b>";
         if (state.onEnter) {
-            stateLabel += "<br/>onEnter: " + state.onEnter.name.replace("bound ", "");
+            stateLabel += "<br/>onEnter: " + state.onEnter.name.replace("bound ", "") + "()";
         }
         if (state.onExit) {
-            stateLabel += "<br/>onExit: " + state.onExit.name.replace("bound ", "");
+            stateLabel += "<br/>onExit: " + state.onExit.name.replace("bound ", "") + "()";
         }
         dotFileLines.push(`\t${state.name} [label= < ${stateLabel} >, id="${state.name}"];`);
-        //dotFileLines.push(`\t${state.name} [label= < ${stateLabel} >, id="${state.name}", shape="${state.graphvizNodeShape}"];`);
 
         state.transitions.forEach((transition: StateMachineTransition) => {
 
@@ -39,7 +38,7 @@ export function generateDotFileForGraphviz(stateArray: StateMachineState[]): voi
                     }
 
                     if (transition.onTransition) {
-                        transitionLabel += ` / ${transition.onTransition.name.replace("bound ", "")}`;
+                        transitionLabel += ` / ${transition.onTransition.name.replace("bound ", "")}()`;
                     }
 
                     const transitionID = `${state.name}_to_${transition.destination}`;
@@ -58,14 +57,14 @@ export function generateDotFileForGraphviz(stateArray: StateMachineState[]): voi
                     break;
                 }
                 case TransitionType.Timeout: {
-                    let transitionLabel = transition.type.toString() + ": " + (transition.durationForNewCountdownTimer / 1000) + "sec";
+                    let transitionLabel = transition.type.toString() + ": " + transition.countdownTimerSource;
 
                     if (transition.guardCondition) {
                         transitionLabel += ` [${transition.guardCondition.name.replace("bound ", "")}] `;
                     }
 
                     if (transition.onTransition) {
-                        transitionLabel += ` / ${transition.onTransition.name.replace("bound ", "")}`;
+                        transitionLabel += ` / ${transition.onTransition.name.replace("bound ", "")}()`;
                     }
 
                     const transitionID = `${state.name}_to_${transition.destination}`;
@@ -78,7 +77,7 @@ export function generateDotFileForGraphviz(stateArray: StateMachineState[]): voi
                         transitionLabel += ` [${transition.guardCondition.name.replace("bound ", "")}] `;
                     }
                     if (transition.onTransition) {
-                        transitionLabel += ` / ${transition.onTransition.name.replace("bound ", "")}`;
+                        transitionLabel += ` / ${transition.onTransition.name.replace("bound ", "")}()`;
                     }
 
                     const transitionID = `${state.name}_to_${transition.destination}`;
@@ -91,13 +90,13 @@ export function generateDotFileForGraphviz(stateArray: StateMachineState[]): voi
 
                     let labelThen = "if(" + condition + ")";
                     if (transition.then.onTransitionThen) {
-                        labelThen += ` / ${transition.then.onTransitionThen.name.replace("bound ", "")}`;
+                        labelThen += ` / ${transition.then.onTransitionThen.name.replace("bound ", "")}()`;
                     }
                     const idThen = `${state.name}_to_${transition.then.destination}`;
 
                     let labelElse = "if(!" + condition + ")";
                     if (transition.else.onTransitionElse) {
-                        labelElse += ` / ${transition.else.onTransitionElse.name.replace("bound ", "")}`;
+                        labelElse += ` / ${transition.else.onTransitionElse.name.replace("bound ", "")}()`;
                     }
                     const idElse = `${state.name}_to_${transition.else.destination}`;
 
