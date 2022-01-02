@@ -6,7 +6,18 @@ export interface StateMachineState {
     onEnter?: (keyboardEvent?: KeyboardEvent) => void;// TODO why does this get a keyboard event??
     onExit?: () => void;
     transitions: StateMachineTransition[];
+    //graphvizNodeShape: NodeShape;
 }
+
+/*
+export enum NodeShape {
+    // https://www.gliffy.com/blog/guide-to-flowchart-symbols
+    // https://graphviz.org/doc/info/shapes.html
+    Terminal = "oval",
+    Process = "rect",
+    Decision = "diamond"
+}
+*/
 
 export type StateMachineTransition = ManualTransition | IfTransition | PromiseTransition | TimeoutTransition | KeyboardTransition;
 
@@ -24,7 +35,9 @@ export interface ManualTransition {
     triggerName: string;
     destination: string;
     onTransition?: () => void;
+    guardCondition?: () => boolean;
 }
+
 
 export interface IfTransition {
     type: TransitionType.If;
@@ -39,10 +52,12 @@ export interface IfTransition {
     };
 }
 
+
 export interface PromiseTransition {
     type: TransitionType.Promise;
     functionToGetPromise: () => Promise<void>;
     destination: string;
+    guardCondition?: () => boolean;
 }
 
 // https://stackoverflow.com/a/37688375
@@ -51,10 +66,11 @@ interface TimeoutTransitionBase {
     destination: string;
     countdownTimerShowDots?: boolean;
     onTransition?: () => void; //called when time runs out
+    guardCondition?: () => boolean;
 }
 // https://stackoverflow.com/a/61281828
 interface StartNewCountdownTimer extends TimeoutTransitionBase {
-    durationForNewCountdownTimer: (() => number) | number;
+    durationForNewCountdownTimer: number;
     countdownTimerToResume?: never;
 }
 interface ContinueCountdownTimer extends TimeoutTransitionBase {
@@ -68,4 +84,5 @@ export interface KeyboardTransition {
     keyboardKeys: string;
     destination: string;
     onTransition?: (keyboardEvent: KeyboardEvent) => void;
+    guardCondition?: (keyboardEvent: KeyboardEvent) => boolean;
 }

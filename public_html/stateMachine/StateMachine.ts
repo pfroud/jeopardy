@@ -75,6 +75,11 @@ export class StateMachine {
             for (let i = 0; i < this.presentState.transitions.length; i++) {
                 const transitionObj = this.presentState.transitions[i];
                 if (transitionObj.type === TransitionType.Keyboard && transitionObj.keyboardKeys.includes(keyboardEvent.key)) {
+
+                    if (transitionObj.guardCondition && !transitionObj.guardCondition(keyboardEvent)) {
+                        continue;
+                    }
+
                     if (this.DEBUG) {
                         console.log(`keyboard transition from keyboard key ${keyboardEvent.key}`);
                     }
@@ -111,12 +116,7 @@ export class StateMachine {
                 this.countdownTimer = timeoutTransitionObj.countdownTimerToResume();
 
             } else if (timeoutTransitionObj.durationForNewCountdownTimer) {
-                let durationMs;
-                if (timeoutTransitionObj.durationForNewCountdownTimer instanceof Function) {
-                    durationMs = timeoutTransitionObj.durationForNewCountdownTimer();
-                } else {
-                    durationMs = timeoutTransitionObj.durationForNewCountdownTimer;
-                }
+                const durationMs = timeoutTransitionObj.durationForNewCountdownTimer;
 
                 if (this.DEBUG) {
                     console.log(`Starting countdown timer with duration ${durationMs} millisec`);
@@ -166,6 +166,9 @@ export class StateMachine {
         for (let i = 0; i < this.presentState.transitions.length; i++) {
             const transitionObj = this.presentState.transitions[i];
             if (transitionObj.type === TransitionType.ManualTrigger && transitionObj.triggerName === triggerName) {
+                if (transitionObj.guardCondition && !transitionObj.guardCondition()) {
+                    continue;
+                }
                 if (this.DEBUG) {
                     console.log(`Manual trigger "${triggerName}" from ${this.presentState.name} to ${transitionObj.destination}`);
                 }
@@ -181,9 +184,8 @@ export class StateMachine {
             throw new RangeError(`can't go to state named "${destStateName}", state not found`);
         }
 
-        if (this.countdownTimer) {
-            this.countdownTimer.pause();
-        }
+
+        this.countdownTimer?.pause();
 
         if (this.DEBUG) {
             console.group(`changing states: ${this.presentState.name} --> ${destStateName}`);
@@ -240,6 +242,9 @@ export class StateMachine {
         for (let i = 0; i < transitionArray.length; i++) {
             const transitionObj = transitionArray[i];
             if (transitionObj.type === TransitionType.Timeout) {
+                if (transitionObj.guardCondition && !transitionObj.guardCondition()) {
+                    continue;
+                }
                 this.startCountdownTimer(transitionObj, keyboardEvent);
                 this.operatorWindowDivStateName.innerHTML = destStateName + " &rarr; " + transitionObj.destination;
                 break;
@@ -251,8 +256,10 @@ export class StateMachine {
         //////////////////////////////////////////////////////////////
         for (let i = 0; i < transitionArray.length; i++) {
             const transitionObj = transitionArray[i];
-
             if (transitionObj.type === TransitionType.Promise) {
+                if (transitionObj.guardCondition && !transitionObj.guardCondition()) {
+                    continue;
+                }
                 const thePromise: Promise<void> = transitionObj.functionToGetPromise();
                 thePromise.then(
                     () => this.goToState(transitionObj.destination)
@@ -274,6 +281,7 @@ export class StateMachine {
         ////////////////////////////////////////////////////////////////
         /////////////////////// Handle if transition ///////////////////
         ////////////////////////////////////////////////////////////////
+
         for (let i = 0; i < transitionArray.length; i++) {
             const transitionObj = transitionArray[i];
             if (transitionObj.type === TransitionType.If) {
@@ -288,6 +296,7 @@ export class StateMachine {
             }
             break;
         }
+
 
 
     }
@@ -359,6 +368,7 @@ export class StateMachine {
                     case TransitionType.Promise:
                         // no further validation needed.
                         break;
+
 
                     case TransitionType.If:
                         if (!(transitionObj.then.destination in this.stateMap)) {

@@ -13,7 +13,8 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 type: TransitionType.ManualTrigger,
                 triggerName: "startGame",
                 destination: "getClueFromJService"
-            }]
+            }],
+            //graphvizNodeShape: NodeShape.Terminal
         }, {
             name: "getClueFromJService",
             presentationSlideToShow: "slide-spinner",
@@ -26,7 +27,8 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 */
                 functionToGetPromise: operator.getClueFromJService.bind(operator),
                 destination: "showClueCategoryAndDollars"
-            }]
+            }],
+            //graphvizNodeShape: NodeShape.Process
         }, {
             /*
             The category and dollar value are shown on the center of the presentation window for a fixed amount of time.
@@ -42,7 +44,8 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 a bunch of stuff and would get called every time lockout happens
                 */
                 onTransition: operator.handleShowClueQuestion.bind(operator)
-            }]
+            }],
+            //graphvizNodeShape: NodeShape.Process
         }, {
             /*
             The clue question is shown on center of the presentation window. The person operating the
@@ -65,7 +68,8 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 keyboardKeys: "123456789",
                 destination: "showClueQuestion",
                 onTransition: operator.handleLockout.bind(operator)
-            }]
+            }],
+            //graphvizNodeShape: NodeShape.Process
         }, {
             name: "waitForBuzzes",
             transitions: [{
@@ -76,16 +80,11 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             }, {
                 type: TransitionType.Keyboard,
                 keyboardKeys: "123456789",
-                destination: "checkIfTeamCanAnswer"
-            }]
-        }, {
-            name: "checkIfTeamCanAnswer",
-            transitions: [{
-                type: TransitionType.If,
-                condition: operator.canTeamBuzz.bind(operator),
-                then: { destination: "waitForTeamAnswer" },
-                else: { destination: "waitForBuzzes" }
-            }]
+                destination: "waitForTeamAnswer",
+                guardCondition: operator.canTeamBuzz.bind(operator)
+            }
+            ],
+            //graphvizNodeShape: NodeShape.Decision
         }, {
             name: "waitForTeamAnswer",
             onEnter: operator.handleBuzzerPress.bind(operator), // TODO I want to move this to the transition but it takes a keyboard event???
@@ -103,8 +102,8 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 durationForNewCountdownTimer: settings.timeoutAnswerMs,
                 countdownTimerShowDots: true,
                 destination: "answerWrongOrTimeout"
-            }
-            ]
+            }],
+            //graphvizNodeShape: NodeShape.Decision
         },
         {
             name: "answerWrongOrTimeout",
@@ -117,7 +116,8 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                     destination: "waitForBuzzes"
                     // TODO here is where we need to resume the countdown timer
                 }
-            }]
+            }],
+            //graphvizNodeShape: NodeShape.Decision
         }, {
             name: "showAnswer",
             onEnter: operator.handleShowAnswer.bind(operator),
@@ -126,7 +126,8 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 type: TransitionType.Timeout,
                 durationForNewCountdownTimer: settings.displayDurationAnswerMs,
                 destination: "checkGameEnd"
-            }]
+            }],
+            //graphvizNodeShape: NodeShape.Process
         }, {
             name: "checkGameEnd",
             transitions: [{
@@ -134,7 +135,8 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 condition: operator.shouldGameEnd.bind(operator),
                 then: { destination: "gameEnd" },
                 else: { destination: "getClueFromJService" }
-            }]
+            }],
+            //graphvizNodeShape: NodeShape.Decision
         }, {
             name: "gameEnd",
             presentationSlideToShow: "slide-game-end",
@@ -143,7 +145,8 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 type: TransitionType.ManualTrigger,
                 triggerName: "manualTrigger_reset",
                 destination: "idle"
-            }]
+            }],
+            //graphvizNodeShape: NodeShape.Terminal
         }
     ];
 
