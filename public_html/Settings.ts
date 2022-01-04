@@ -1,15 +1,15 @@
 export class Settings {
     // How long to show the category in big text in the presentation window
-    public displayDurationCategoryMs = 3 * 1000;
+    public displayDurationCategoryMillisec = 3 * 1000;
 
     // How long to show the answer in the presentation window
-    public displayDurationAnswerMs = 3 * 1000;
+    public displayDurationAnswerMillisec = 3 * 1000;
 
     // How long to wait for a team to buzz
-    public timeoutWaitForBuzzesMs = 10 * 1000;
+    public timeoutWaitForBuzzesMillisec = 10 * 1000;
 
     // Once a team has buzzed, how long they have to answer
-    public timeoutAnswerMs = 5 * 1000;
+    public timeoutWaitForAnswerMillisec = 5 * 1000;
 
     /*
      * Two sources on the quarter-second lockout:
@@ -25,6 +25,8 @@ export class Settings {
 
     // Stop the game when a team reaches this many dollars
     public teamDollarsWhenGameShouldEnd = 10_000;
+
+    public gameTimeLimitMillisec = 10 * 60 * 1000;
 
     private guiInput: {
         displayDurationCategory: HTMLInputElement;
@@ -48,18 +50,18 @@ export class Settings {
     }
 
     public populateGui(): void {
-        this.guiInput.displayDurationCategory.value = String(this.displayDurationCategoryMs);
-        this.guiInput.displayDurationAnswer.value = String(this.displayDurationAnswerMs);
-        this.guiInput.timeoutWaitForBuzzes.value = String(this.timeoutWaitForBuzzesMs);
-        this.guiInput.timeoutAnswer.value = String(this.timeoutAnswerMs);
+        this.guiInput.displayDurationCategory.value = String(this.displayDurationCategoryMillisec);
+        this.guiInput.displayDurationAnswer.value = String(this.displayDurationAnswerMillisec);
+        this.guiInput.timeoutWaitForBuzzes.value = String(this.timeoutWaitForBuzzesMillisec);
+        this.guiInput.timeoutAnswer.value = String(this.timeoutWaitForAnswerMillisec);
         this.guiInput.allowMultipleTries.toggleAttribute("checked", this.allowMultipleAnswersToSameQuestion);
     }
 
     public parseGui(): void {
-        this.displayDurationCategoryMs = Number(this.guiInput.displayDurationCategory.value);
-        this.displayDurationAnswerMs = Number(this.guiInput.displayDurationAnswer.value);
-        this.timeoutWaitForBuzzesMs = Number(this.guiInput.timeoutWaitForBuzzes.value);
-        this.timeoutAnswerMs = Number(this.guiInput.timeoutAnswer.value);
+        this.displayDurationCategoryMillisec = Number(this.guiInput.displayDurationCategory.value);
+        this.displayDurationAnswerMillisec = Number(this.guiInput.displayDurationAnswer.value);
+        this.timeoutWaitForBuzzesMillisec = Number(this.guiInput.timeoutWaitForBuzzes.value);
+        this.timeoutWaitForAnswerMillisec = Number(this.guiInput.timeoutAnswer.value);
 
         this.allowMultipleAnswersToSameQuestion = this.guiInput.allowMultipleTries.hasAttribute("checked");
     }

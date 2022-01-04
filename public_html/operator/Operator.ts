@@ -32,6 +32,7 @@ export class Operator {
     private readonly teamArray = new Array(Operator.TEAM_COUNT);
     private readonly buttonStartGame: HTMLButtonElement;
     private readonly buttonSkipClue: HTMLButtonElement;
+    private readonly gameTimer: CountdownTimer;
     private currentClueObj: Clue;
     private presentation: Presentation;
     private isPaused = false;
@@ -39,7 +40,7 @@ export class Operator {
     private teamPresentlyAnswering: Team;
 
     private countdownTimerForWaitForBuzzesState: CountdownTimer;
-    private reset = true;
+    private resetDurationForWaitForBuzzState = true;
 
     constructor(audioManager: AudioManager, settings: Settings) {
         this.audioManager = audioManager;
@@ -62,6 +63,10 @@ export class Operator {
         this.initMouseListeners();
         this.lookForSavedGame();
 
+        this.gameTimer = new CountdownTimer(this.settings.gameTimeLimitMillisec);
+        this.gameTimer.addProgressElement(document.querySelector("div#game-timer progress"));
+        this.gameTimer.addTextDiv(document.querySelector("div#game-timer div#remaining-time-text"));
+
         window.open("../presentation/presentation.html", "windowPresentation");
 
         /*
@@ -78,11 +83,11 @@ export class Operator {
         this.presentation = presentationInstanceFromOtherWindow;
         this.initTeams();
 
-        this.presentation.setTeamsVisible(true);
-
         this.initBuzzerFootswitchIconDisplay();
 
-        this.stateMachine = new StateMachine(this.settings, this, presentationInstanceFromOtherWindow, this.audioManager);
+        this.gameTimer.addProgressElement(this.presentation.getProgressElementForGameTimer());
+
+        this.stateMachine = new StateMachine(this.settings, this, this.presentation, this.audioManager);
 
         this.buttonStartGame.removeAttribute("disabled");
         this.divInstructions.innerHTML = "Ready. Click the button to start the game.";
@@ -138,11 +143,7 @@ export class Operator {
         document.querySelector("button#go-to-jeopardy-logo").addEventListener("click", () => this.presentation.showSlide("jeopardy-logo"));
         document.querySelector("button#go-to-event-cost").addEventListener("click", () => this.presentation.showSlide("event-cost"));
 
-        this.buttonStartGame.addEventListener("click", () => {
-            this.stateMachine.manualTrigger("startGame");
-            this.buttonStartGame.setAttribute("disabled", "disabled");
-        });
-
+        this.buttonStartGame.addEventListener("click", () => this.startGame());
 
         this.buttonSkipClue.addEventListener("click", () => this.skipClue());
 
@@ -151,6 +152,12 @@ export class Operator {
 
         document.querySelector("a#aGenerateGraphviz").addEventListener("click", () =>
             this.stateMachine.showDotFileForGraphviz());
+    }
+
+    private startGame() {
+        this.stateMachine.manualTrigger("startGame");
+        this.buttonStartGame.setAttribute("disabled", "disabled");
+        this.gameTimer.start();
     }
 
 
@@ -171,7 +178,6 @@ export class Operator {
             this.teamArray[i] = new Team(i, this.presentation, this.settings, this.audioManager);
         }
         Object.freeze(this.teamArray);
-        this.presentation.setTeamsVisible(true);
     }
 
 
@@ -195,8 +201,11 @@ export class Operator {
     }
 
     public shouldGameEnd(): boolean {
-        const maxDollars = this.settings.teamDollarsWhenGameShouldEnd;
-        return this.teamArray.some(teamObj => teamObj.dollars >= maxDollars);
+        if (this.gameTimer.getIsFinished()) {
+            return true;
+        } else {
+            return this.teamArray.some(teamObj => teamObj.dollars >= this.settings.teamDollarsWhenGameShouldEnd);
+        }
     }
 
     public handleLockout(keyboardEvent: KeyboardEvent): void {
@@ -390,6 +399,7 @@ export class Operator {
         this.isPaused = isPaused;
         this.divPaused.style.display = isPaused ? "" : "none";
         this.stateMachine.setPaused(isPaused);
+        this.gameTimer.setPaused(isPaused);
         this.teamArray.forEach(teamObj => teamObj.setPaused(isPaused));
         this.presentation.setPaused(isPaused);
     }
@@ -466,8 +476,12 @@ export class Operator {
     }
 
     public handleGameEnd(): void {
+        this.gameTimer.pause();
 
-        this.audioManager.play("musicClosing");
+        this.audioManager.play("roundEnd").then(
+            () => this.audioManager.play("musicGameEnd")
+        );
+
 
         // sort teams by how much money they have
         const shallowCopy = this.teamArray.slice();
@@ -492,11 +506,11 @@ export class Operator {
         html.push("</tbody></table>");
 
         this.presentation.setGameEndMessage(html.join(""));
-        this.presentation.headerHide();
+        this.presentation.hideHeaderAndFooter();
     }
 
     private resetDurationForWaitForBuzzesState(): void {
-        this.reset = true;
+        this.resetDurationForWaitForBuzzState = true;
     }
 
     public saveCountdownTimerForWaitForBuzzesState(): void {
@@ -504,9 +518,9 @@ export class Operator {
     }
 
     public getCountdownTimerSource(): CountdownTimerSource {
-        if (this.reset) {
-            this.reset = false;
-            return { type: CountdownOperation.CreateNew, duration: this.settings.timeoutWaitForBuzzesMs };
+        if (this.resetDurationForWaitForBuzzState) {
+            this.resetDurationForWaitForBuzzState = false;
+            return { type: CountdownOperation.CreateNew, duration: this.settings.timeoutWaitForBuzzesMillisec };
         } else {
             return { type: CountdownOperation.ResumeExisting, countdownTimerToResume: this.countdownTimerForWaitForBuzzesState };
         }

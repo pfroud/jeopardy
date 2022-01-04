@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
         textInput.setAttribute("type", "text");
         textInput.value = String(teamObj.getDollars());
         textInput.addEventListener("input", function () {
-            teamObj.moneySet(Number(textInput.value));
+            teamObj.moneySet(Number(textInput.value), false);
         });
 
         // create buttons to subtract money

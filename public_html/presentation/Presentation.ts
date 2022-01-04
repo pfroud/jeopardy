@@ -15,7 +15,8 @@ export class Presentation {
     private readonly divClueAnswer: HTMLDivElement;
     private readonly divPaused: HTMLDivElement;
     private readonly footerTeams: HTMLElement;
-    private readonly progress: HTMLProgressElement;
+    private readonly progressElementForStateMachine: HTMLProgressElement;
+    private readonly progressElementForGameTimer: HTMLProgressElement;
     private readonly slideDivs: Slides = {};
     private visibleSlide?: HTMLDivElement;
 
@@ -33,7 +34,8 @@ export class Presentation {
 
         this.footerTeams = document.querySelector("footer");
 
-        this.progress = document.querySelector("progress#countdown");
+        this.progressElementForGameTimer = document.querySelector("progress#game-timer");
+        this.progressElementForStateMachine = document.querySelector("progress#state-machine");
 
 
         this.initSlides();
@@ -78,8 +80,12 @@ export class Presentation {
 
     }
 
-    public getProgressElement(): HTMLProgressElement {
-        return this.progress;
+    public getProgressElementForStateMachine(): HTMLProgressElement {
+        return this.progressElementForStateMachine;
+    }
+
+    public getProgressElementForGameTimer(): HTMLProgressElement {
+        return this.progressElementForGameTimer;
     }
 
     public showSlide(slideName: string): void {
@@ -132,10 +138,6 @@ export class Presentation {
         }
     }
 
-    public setTeamsVisible(isVisible: boolean): void {
-        this.footerTeams.style.display = isVisible ? "" : "none";
-    }
-
     public setPaused(isPaused: boolean): void {
         this.divPaused.style.display = isPaused ? "" : "none";
     }
@@ -144,12 +146,9 @@ export class Presentation {
         document.querySelector("div#slide-game-end div#team-ranking").innerHTML = message;
     }
 
-    public headerShow(): void {
-        this.header.style.display = "";
-    }
-
-    public headerHide(): void {
+    public hideHeaderAndFooter(): void {
         this.header.style.display = "none";
+        this.footerTeams.style.display = "none";
     }
 
     public appendTeamDivToFooter(divForTeam: HTMLDivElement): void {

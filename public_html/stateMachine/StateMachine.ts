@@ -37,8 +37,8 @@ export class StateMachine {
         this.settings = settings;
         this.audioManager = audioManager;
 
-        this.operatorWindowCountdownProgress = document.querySelector("div#state-machine-viz progress#countdown");
-        this.operatorWindowCountdownText = document.querySelector("div#state-machine-viz div#remaining");
+        this.operatorWindowCountdownProgress = document.querySelector("div#state-machine-viz progress");
+        this.operatorWindowCountdownText = document.querySelector("div#state-machine-viz div#remaining-time-text");
         this.operatorWindowDivStateName = document.querySelector("div#state-machine-viz div#state-name");
 
         window.addEventListener("keydown", keyboardEvent => this.handleKeyboardEvent(keyboardEvent));
@@ -97,13 +97,7 @@ export class StateMachine {
     }
 
     public setPaused(isPaused: boolean): void {
-        if (this.countdownTimer) {
-            if (isPaused) {
-                this.countdownTimer.pause();
-            } else {
-                this.countdownTimer.resume();
-            }
-        }
+        this.countdownTimer?.setPaused(isPaused);
     }
 
     private startCountdownTimer(timeoutTransitionObj: TimeoutTransition, keyboardEvent: KeyboardEvent): void {
@@ -140,7 +134,7 @@ export class StateMachine {
                     this.countdownTimer.addProgressElement(teamObj.getProgressElementInOperatorWindow());
                 } else {
                     this.countdownTimer.addTextDiv(this.operatorWindowCountdownText);
-                    this.countdownTimer.addProgressElement(this.presentation.getProgressElement());
+                    this.countdownTimer.addProgressElement(this.presentation.getProgressElementForStateMachine());
                     this.countdownTimer.addProgressElement(this.operatorWindowCountdownProgress);
                 }
 

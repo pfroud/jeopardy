@@ -102,8 +102,14 @@ export class Team {
         }
     }
 
-    public moneySet(newDollars: number): void {
-        this.animateDollarsChange(newDollars);
+    public moneySet(newDollars: number, animate = true): void {
+        if (animate) {
+            this.animateDollarsChange(newDollars);
+
+        } else {
+            this.dollars = newDollars;
+            this.updateDollarsDisplay();
+        }
     }
 
     private animateDollarsChange(targetDollars: number): void {
@@ -141,13 +147,7 @@ export class Team {
     }
 
     public setPaused(isPaused: boolean): void {
-        if (this.countdownTimer) {
-            if (isPaused) {
-                this.countdownTimer.pause();
-            } else {
-                this.countdownTimer.resume();
-            }
-        }
+        this.countdownTimer?.setPaused(isPaused);
     }
 
     private updateDollarsDisplay(): void {

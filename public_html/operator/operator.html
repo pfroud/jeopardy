@@ -76,11 +76,18 @@
         <!-- ====================================================================== -->
         <div class="tab-content" id="content-game">
 
-            <button id="start-game" disabled>Start game</button>
+            <div id="game-timer">
+                Game timer:<br>
+                <progress></progress>
+                <div id="remaining-time-text"></div>
+            </div>
+
+            <br><br>
+
+            <button id="start-game" disabled>Start game</button> &emsp;
+            <button id="skip-clue" disabled>Skip clue</button>
 
             <div id="instructions">waiting for presentation window...</div>
-
-
 
             <div id="clue" style="display:none">
                 <table>
@@ -117,14 +124,13 @@
                 </table>
             </div>
 
-            <button id="skip-clue" disabled>skip clue</button>
 
             <div id="state-machine-viz">
                 <hr>
                 Current state:<br>
-                <progress id="countdown"></progress>
+                <progress></progress>
                 <div id="state-name">not initialized...</div>
-                <div id="remaining">0.0</div>
+                <div id="remaining-time-text"></div>
             </div>
 
 

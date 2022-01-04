@@ -46,6 +46,14 @@ export class CountdownTimer {
         this.isPaused ? this.resume() : this.pause();
     }
 
+    public setPaused(setPaused_: boolean): void {
+        if (setPaused_) {
+            this.pause();
+        } else {
+            this.resume();
+        }
+    }
+
     public pause(): void {
         if (this.isStarted && !this.isFinished && !this.isPaused) {
             clearInterval(this.intervalID);
@@ -167,7 +175,18 @@ export class CountdownTimer {
     }
 
     private guiUpdateForInterval(): void {
-        this.textDivs.forEach(elem => elem.innerHTML = (this.remainingMillisec / 1000).toFixed(1));
+
+        let textToSet: string;
+        const remainingSeconds = this.remainingMillisec / 1000;
+        if (this.remainingMillisec > 60 * 1000) {
+            const date = new Date(this.remainingMillisec);
+            textToSet = date.getMinutes() + " min " + date.getSeconds() + " sec";
+        } else {
+            textToSet = remainingSeconds.toFixed(1) + " sec";
+        }
+
+        this.textDivs.forEach(elem => elem.innerHTML = textToSet);
+
         this.progressElements.forEach(elem => elem.setAttribute("value", String(this.remainingMillisec)));
 
         if (this.dotsTables) {
@@ -241,10 +260,16 @@ export class CountdownTimer {
     }
 
     public addTextDiv(textDiv: HTMLDivElement): void {
+        if (!textDiv) {
+            throw new Error("trying to add falsey text div");
+        }
         this.textDivs.add(textDiv);
     }
 
     public addProgressElement(progressElement: HTMLProgressElement): void {
+        if (!progressElement) {
+            throw new Error("trying to add falsey <progress> element");
+        }
         this.progressElements.add(progressElement);
     }
 
@@ -258,6 +283,10 @@ export class CountdownTimer {
 
     public getIsStarted(): boolean {
         return this.isStarted;
+    }
+
+    public getIsFinished(): boolean {
+        return this.isFinished;
     }
 
 

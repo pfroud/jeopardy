@@ -1,4 +1,4 @@
-$height-header: 70px;
+$height-header: 80px;
 $height-footer: 180px;
 
 @function big-shadow($count) {
@@ -64,7 +64,7 @@ div#paused {
     color: black;
     font-weight: bold;
     position: absolute;
-    top: 100px;
+    top: 110px;
     font-size: 30px;
     border-radius: 20px;
     padding: 20px;
@@ -83,6 +83,7 @@ header {
     font-size: 60px;
     letter-spacing: 2px;
     text-shadow: $big-shadow;
+    padding-top: 5px;
 
     div#category {
         text-transform: uppercase;
@@ -96,19 +97,18 @@ header {
         right: 8px;
     }
 
-    progress {
-        width: 100%;
-        height: 20px;
-        display: block;
-        margin-bottom: 20px;
-    }
-
     progress#game-timer {
-        width: 100vw;
+        width: 100%;
         position: absolute;
         top: 0px;
         left: 0px;
-        height: 10px;
+        height: 8px;
+    }
+
+    progress#state-machine {
+        width: 100%;
+        height: 8px;
+        display: block;
     }
 }
 

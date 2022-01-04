@@ -35,7 +35,7 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             presentationSlideToShow: "slide-clue-category-and-dollars",
             transitions: [{
                 type: TransitionType.Timeout,
-                countdownTimerSource: { type: CountdownOperation.CreateNew, duration: settings.displayDurationCategoryMs },
+                countdownTimerSource: { type: CountdownOperation.CreateNew, duration: settings.displayDurationCategoryMillisec },
                 destination: "showClueQuestion",
                 /*
                 Don't put this as onEnter of the showClueQuestion state because it does
@@ -94,7 +94,7 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 destination: "answerWrongOrTimeout"
             }, {
                 type: TransitionType.Timeout,
-                countdownTimerSource: { type: CountdownOperation.CreateNew, duration: settings.timeoutAnswerMs },
+                countdownTimerSource: { type: CountdownOperation.CreateNew, duration: settings.timeoutWaitForAnswerMillisec },
                 countdownTimerShowDots: true,
                 destination: "answerWrongOrTimeout"
             }],
@@ -114,7 +114,7 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             presentationSlideToShow: "slide-clue-answer",
             transitions: [{
                 type: TransitionType.Timeout,
-                countdownTimerSource: { type: CountdownOperation.CreateNew, duration: settings.displayDurationAnswerMs },
+                countdownTimerSource: { type: CountdownOperation.CreateNew, duration: settings.displayDurationAnswerMillisec },
                 destination: "checkGameEnd"
             }],
         }, {

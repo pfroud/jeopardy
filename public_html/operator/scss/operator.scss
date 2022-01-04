@@ -48,15 +48,16 @@ main {
                 }
             }
 
-            div#state-machine-viz {
-                progress#countdown {
+            div#state-machine-viz,
+            div#game-timer {
+                progress {
                     width: 100%;
                     height: 35px;
                 }
 
                 div {
                     margin-top: -42px;
-                    &#remaining {
+                    &#remaining-time-text {
                         text-align: right;
                     }
                 }
