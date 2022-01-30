@@ -139,9 +139,9 @@ export class Operator {
     }
 
     private initMouseListeners(): void {
-        document.querySelector("button#go-to-game-rules").addEventListener("click", () => this.presentation.showSlide("game-rules"));
-        document.querySelector("button#go-to-jeopardy-logo").addEventListener("click", () => this.presentation.showSlide("jeopardy-logo"));
-        document.querySelector("button#go-to-event-cost").addEventListener("click", () => this.presentation.showSlide("event-cost"));
+        document.querySelector("button#go-to-game-rules").addEventListener("click", () => this.presentation.showSlide("slide-game-rules"));
+        document.querySelector("button#go-to-jeopardy-logo").addEventListener("click", () => this.presentation.showSlide("slide-jeopardy-logo"));
+        document.querySelector("button#go-to-event-cost").addEventListener("click", () => this.presentation.showSlide("slide-event-cost"));
 
         this.buttonStartGame.addEventListener("click", () => this.startGame());
 
@@ -165,7 +165,7 @@ export class Operator {
         this.setAllTeamsState(TeamState.BUZZERS_OFF, true); // the second argument is endLockout
         this.buttonSkipClue.setAttribute("disabled", "disabled");
         this.buttonSkipClue.blur();
-        this.stateMachine.goToState("fetchClue");
+        this.stateMachine.goToState("getClueFromJService");
     }
 
     private initTeams(): void {
