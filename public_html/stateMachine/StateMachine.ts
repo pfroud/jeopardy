@@ -18,6 +18,7 @@ interface KeyboardKeysUsed {
 
 export class StateMachine {
     private readonly DEBUG = false;
+    private readonly OPEN_GRAPHVIZ_VIEWER = false;
     private readonly operator: Operator;
     private readonly settings: Settings;
     private readonly audioManager: AudioManager;
@@ -48,7 +49,9 @@ export class StateMachine {
 
         this.presentState = this.stateMap["idle"];
 
-        //this.openGraphvizViewer();
+        if (this.OPEN_GRAPHVIZ_VIEWER) {
+            this.openGraphvizViewer();
+        }
 
     }
     private openGraphvizViewer(): void {
