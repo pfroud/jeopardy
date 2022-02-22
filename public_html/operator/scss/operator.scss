@@ -23,12 +23,16 @@ main {
             div#saved-game-prompt {
                 border: 1px solid black;
                 display: inline-block;
-                padding: 10px;
+                padding: 15px;
                 border-radius: 10px;
                 background-color: lightyellow;
 
-                table#saved-game-details td.team-name {
-                    padding-right: 10px;
+                table#saved-game-details {
+                    border-collapse: collapse;
+                    td {
+                        border: 1px solid black;
+                        padding: 5px 10px 5px 10px;
+                    }
                 }
             }
         }

@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     //////////// populate the table //////////////
     const table = document.querySelector("table tbody");
-    for (let teamIndex = 0; teamIndex < Operator.TEAM_COUNT; teamIndex++) {
+    for (let teamIndex = 0; teamIndex < Operator.teamCount; teamIndex++) {
         makeTableRow(teamIndex);
     }
 

@@ -312,7 +312,6 @@ export class Team {
 
     public jsonDump(): TeamDumpToJson {
         return {
-            name: this.teamName,
             dollars: this.dollars
         };
     }
@@ -330,24 +329,18 @@ export class Team {
     }
 
 
-
-    /*
     public jsonLoad(jsonObj: TeamDumpToJson): void {
-        this.teamName = jsonObj.name;
         this.dollars = jsonObj.dollars;
 
         this.div.presentation.dollars.innerHTML = "$" + this.dollars;
-        this.div.presentation.teamName.innerHTML = this.teamName;
 
-        this.div.operator.teamName.innerHTML = this.teamName;
         this.div.operator.dollars.innerHTML = "$" + this.dollars;
     }
-    */
+
 
 }
 
 export interface TeamDumpToJson {
-    name: string;
     dollars: number;
 }
 

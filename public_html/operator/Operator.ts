@@ -15,8 +15,7 @@ export interface Clue {
 }
 
 export class Operator {
-    public static readonly TEAM_COUNT = 9;
-
+    public static teamCount = 9; //can change if we load a game from localStorage
     private readonly audioManager: AudioManager;
     private readonly settings: Settings;
     private readonly divClueWrapper: HTMLDivElement;
@@ -29,7 +28,7 @@ export class Operator {
     private readonly trAnswer: HTMLTableRowElement;
     private readonly divPaused: HTMLDivElement;
     private readonly divInstructions: HTMLDivElement;
-    private readonly teamArray = new Array(Operator.TEAM_COUNT);
+    private readonly teamArray = new Array(Operator.teamCount);
     private readonly buttonStartGame: HTMLButtonElement;
     private readonly buttonSkipClue: HTMLButtonElement;
     private readonly gameTimer: CountdownTimer;
@@ -81,7 +80,7 @@ export class Operator {
         */
         window.focus();
         this.presentation = presentationInstanceFromOtherWindow;
-        this.initTeams();
+        this.initTeams(Operator.teamCount);
 
         this.initBuzzerFootswitchIconDisplay();
 
@@ -99,7 +98,7 @@ export class Operator {
         so people can verify their buzzers are working.
         */
         const teamNumbers: string[] =
-            new Array(Operator.TEAM_COUNT).fill(1).map(
+            new Array(Operator.teamCount).fill(1).map(
                 (elem, index) => String(index + 1)
             );
 
@@ -168,16 +167,15 @@ export class Operator {
         this.stateMachine.goToState("getClueFromJService");
     }
 
-    private initTeams(): void {
+    private initTeams(teamCount: number): void {
         if (!this.presentation) {
             console.warn("can't init teams because no Presentation instance!");
             return;
         }
 
-        for (let i = 0; i < Operator.TEAM_COUNT; i++) {
+        for (let i = 0; i < teamCount; i++) {
             this.teamArray[i] = new Team(i, this.presentation, this.settings, this.audioManager);
         }
-        Object.freeze(this.teamArray);
     }
 
 
@@ -418,30 +416,34 @@ export class Operator {
 
         const rawLocalStorageResult = window.localStorage.getItem("jeopardy-teams");
         if (rawLocalStorageResult === null) {
+            // no saved game found
             divSavedGame.style.display = "none";
             return;
         }
 
+        const parsedJson: TeamDumpToJson[] = JSON.parse(rawLocalStorageResult);
+
         const tableDetails = document.querySelector("table#saved-game-details tbody");
 
-        const parsed = JSON.parse(rawLocalStorageResult);
+        const tableRowTeamNumber = document.createElement("tr");
+        tableDetails.appendChild(tableRowTeamNumber);
+        for (let i = 0; i < parsedJson.length; i++) {
+            const cellTeamNumber = document.createElement("td");
+            cellTeamNumber.innerHTML = `Team ${i + 1}`;
+            tableRowTeamNumber.appendChild(cellTeamNumber);
+        }
 
-        parsed.forEach(function (savedTeam: TeamDumpToJson) {
-            const tableRow = document.createElement("tr");
-            tableDetails.appendChild(tableRow);
-
-            const cellTeamName = document.createElement("td");
-            cellTeamName.innerHTML = savedTeam.name;
-            cellTeamName.classList.add("team-name");
-            tableRow.appendChild(cellTeamName);
-
+        const tableRowTeamDollars = document.createElement("tr");
+        tableDetails.appendChild(tableRowTeamDollars);
+        for (let i = 0; i < parsedJson.length; i++) {
+            const savedTeam = parsedJson[i];
             const cellTeamDollars = document.createElement("td");
             cellTeamDollars.innerHTML = "$" + savedTeam.dollars;
-            tableRow.appendChild(cellTeamDollars);
-        });
+            tableRowTeamDollars.appendChild(cellTeamDollars);
+        }
 
         document.querySelector("button#saved-game-load").addEventListener("click", () => {
-            this.loadGame();
+            this.loadGame(parsedJson);
             divSavedGame.style.display = "none";
         });
         document.querySelector("button#saved-game-delete").addEventListener("click", function () {
@@ -464,15 +466,10 @@ export class Operator {
         //TODO save the settings
     }
 
-    private loadGame(): void {
-        const storageContents = window.localStorage.getItem("jeopardy-teams");
-        if (!storageContents) {
-            console.warn("The saved game JSON is null");
-            return;
-        }
-        const parsed = JSON.parse(storageContents);
-        for (let i = 0; i < parsed.length; i++) {
-            this.teamArray[i].jsonLoad(parsed[i]);
+    private loadGame(parsedJson: TeamDumpToJson[]): void {
+        this.initTeams(parsedJson.length);
+        for (let i = 0; i < parsedJson.length; i++) {
+            this.teamArray[i].jsonLoad(parsedJson[i]);
         }
     }
 
