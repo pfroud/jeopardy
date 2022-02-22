@@ -6,7 +6,7 @@ export class Settings {
     public displayDurationAnswerMillisec = 3 * 1000;
 
     // How long to wait for a team to buzz
-    public timeoutWaitForBuzzesMillisec = 10 * 1000;
+    public timeoutWaitForBuzzesMillisec = 5 * 1000;
 
     // Once a team has buzzed, how long they have to answer
     public timeoutWaitForAnswerMillisec = 5 * 1000;
