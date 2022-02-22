@@ -363,6 +363,7 @@ export class Operator {
     }
 
     public handleDoneReadingClueQuestion(): void {
+        this.audioManager.play("doneReadingClueQuestion");
         this.trAnswer.style.display = ""; //show answer to operator
         this.divClueAnswer.innerHTML = this.currentClueObj.answer;
         this.divInstructions.innerHTML = "Wait for people to answer.";

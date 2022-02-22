@@ -29,7 +29,8 @@ export class AudioManager {
             teamBuzz: document.querySelector<HTMLAudioElement>("audio#team-buzz"),
             tick: document.querySelector<HTMLAudioElement>("audio#tick"),
             musicGameEnd: document.querySelector<HTMLAudioElement>("audio#music-game-end"),
-            musicGameStart: document.querySelector<HTMLAudioElement>("audio#music-game-start")
+            musicGameStart: document.querySelector<HTMLAudioElement>("audio#music-game-start"),
+            doneReadingClueQuestion: document.querySelector<HTMLAudioElement>("audio#done-reading-clue-question")
         };
         Object.freeze(this.audio);
     }
