@@ -28,10 +28,10 @@ export class Operator {
     private readonly trAnswer: HTMLTableRowElement;
     private readonly divPaused: HTMLDivElement;
     private readonly divInstructions: HTMLDivElement;
-    private readonly teamArray = new Array(Operator.teamCount);
     private readonly buttonStartGame: HTMLButtonElement;
     private readonly buttonSkipClue: HTMLButtonElement;
     private readonly gameTimer: CountdownTimer;
+    private teamArray: Team[];
     private currentClueObj: Clue;
     private presentation: Presentation;
     private isPaused = false;
@@ -173,6 +173,9 @@ export class Operator {
             return;
         }
 
+        this.teamArray = new Array(teamCount);
+        document.querySelector("footer").innerHTML = "";
+        this.presentation.clearFooter();
         for (let i = 0; i < teamCount; i++) {
             this.teamArray[i] = new Team(i, this.presentation, this.settings, this.audioManager);
         }
@@ -202,7 +205,7 @@ export class Operator {
         if (this.gameTimer.getIsFinished()) {
             return true;
         } else {
-            return this.teamArray.some(teamObj => teamObj.dollars >= this.settings.teamDollarsWhenGameShouldEnd);
+            return this.teamArray.some(teamObj => teamObj.getDollars() >= this.settings.teamDollarsWhenGameShouldEnd);
         }
     }
 
@@ -214,7 +217,7 @@ export class Operator {
 
     public getClueFromJService(): Promise<void> {
         // only save the game if somebody has more than $0
-        if (this.teamArray.some(teamObj => teamObj.dollars > 0)) {
+        if (this.teamArray.some(teamObj => teamObj.getDollars() > 0)) {
             this.saveGame();
         }
 
@@ -387,7 +390,7 @@ export class Operator {
     }
 
     public haveAllTeamsAnswered(): boolean {
-        return this.teamArray.every(teamObj => teamObj.state === TeamState.ALREADY_ANSWERED);
+        return this.teamArray.every(teamObj => teamObj.getState() === TeamState.ALREADY_ANSWERED);
     }
 
     public togglePaused(): void {
@@ -496,7 +499,7 @@ export class Operator {
             html.push(
                 "<tr>" +
                 "<td>" + teamObj.teamName + "</td>" +
-                "<td>$" + teamObj.dollars.toLocaleString() + "</td>" +
+                "<td>$" + teamObj.getDollars().toLocaleString() + "</td>" +
                 "</tr>"
             );
         });

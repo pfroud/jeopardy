@@ -14,7 +14,7 @@ export class Presentation {
     private readonly divDollarsBig: HTMLDivElement;
     private readonly divClueAnswer: HTMLDivElement;
     private readonly divPaused: HTMLDivElement;
-    private readonly footerTeams: HTMLElement;
+    private readonly footer: HTMLElement;
     private readonly progressElementForStateMachine: HTMLProgressElement;
     private readonly progressElementForGameTimer: HTMLProgressElement;
     private readonly slideDivs: Slides = {};
@@ -32,7 +32,7 @@ export class Presentation {
 
         this.divPaused = document.querySelector("div#paused");
 
-        this.footerTeams = document.querySelector("footer");
+        this.footer = document.querySelector("footer");
 
         this.progressElementForGameTimer = document.querySelector("progress#game-timer");
         this.progressElementForStateMachine = document.querySelector("progress#state-machine");
@@ -148,11 +148,15 @@ export class Presentation {
 
     public hideHeaderAndFooter(): void {
         this.header.style.display = "none";
-        this.footerTeams.style.display = "none";
+        this.footer.style.display = "none";
+    }
+
+    public clearFooter(): void {
+        this.footer.innerHTML = "";
     }
 
     public appendTeamDivToFooter(divForTeam: HTMLDivElement): void {
-        this.footerTeams.append(divForTeam);
+        this.footer.append(divForTeam);
     }
 
 }

@@ -1,8 +1,8 @@
-import { Presentation } from "./presentation/Presentation.js";
-import { Settings } from "./Settings.js";
+import { CountdownTimer } from "./CountdownTimer.js";
 import { AudioManager } from "./operator/AudioManager.js";
 import { Clue } from "./operator/Operator.js";
-import { CountdownTimer } from "./CountdownTimer.js";
+import { Presentation } from "./presentation/Presentation.js";
+import { Settings } from "./Settings.js";
 
 interface TeamDivs {
     operator: {
@@ -326,6 +326,10 @@ export class Team {
 
     public getDollars(): number {
         return this.dollars;
+    }
+
+    public getState(): TeamState {
+        return this.state;
     }
 
 
