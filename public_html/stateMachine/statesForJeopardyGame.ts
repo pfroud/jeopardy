@@ -51,6 +51,7 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             */
             name: "showClueQuestion",
             presentationSlideToShow: "slide-clue-question",
+            onEnter: operator.fitClueQuestionToScreenInOperatorWindow.bind(operator),
             transitions: [{
                 type: TransitionType.Keyboard,
                 keyboardKeys: " ", //space

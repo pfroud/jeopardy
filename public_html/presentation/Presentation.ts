@@ -9,7 +9,7 @@ export class Presentation {
     private readonly divCategoryInHeader: HTMLDivElement;
     private readonly divDollarsInHeader: HTMLDivElement;
     private readonly header: HTMLElement;
-    private readonly divQuestion: HTMLDivElement;
+    private readonly divClueQuestion: HTMLDivElement;
     private readonly divCategoryBig: HTMLDivElement;
     private readonly divDollarsBig: HTMLDivElement;
     private readonly divClueAnswer: HTMLDivElement;
@@ -25,10 +25,10 @@ export class Presentation {
         this.divDollarsInHeader = document.querySelector("header div#dollars");
         this.header = document.querySelector("header");
 
-        this.divQuestion = document.querySelector("div#clue-question");
+        this.divClueQuestion = document.querySelector("div#slide-clue-question");
         this.divCategoryBig = document.querySelector("div#category-big");
         this.divDollarsBig = document.querySelector("div#dollars-big");
-        this.divClueAnswer = document.querySelector("div#clue-answer");
+        this.divClueAnswer = document.querySelector("div#slide-clue-answer");
 
         this.divPaused = document.querySelector("div#paused");
 
@@ -116,25 +116,23 @@ export class Presentation {
         this.divCategoryBig.innerHTML = clueObj.category.title;
         this.divDollarsBig.innerHTML = "$" + clueObj.value;
 
-        this.divQuestion.innerHTML = clueObj.question;
+        this.divClueQuestion.innerHTML = clueObj.question;
 
         this.divClueAnswer.innerHTML = `Answer:<p><div style="font-weight:bold">${clueObj.answer}</div>`;
     }
 
     public fitClueQuestionToScreen(): void {
-
-        //remove the style tag which may have been set by previous call to this function
-        this.divQuestion.style.fontSize = "";
+        // remove font-size in the inline style property on the div, which may have been set by previous call to this function
+        this.divClueQuestion.style.fontSize = "";
 
         const heightOfMain = document.querySelector("main").clientHeight;
+        while (this.divClueQuestion.clientHeight > heightOfMain) {
+            const oldFontSizeString = window.getComputedStyle(this.divClueQuestion).getPropertyValue("font-size");
+            const oldFontSize = Number(oldFontSizeString.replace("px", ""));
+            const newFontSize = oldFontSize - 10;
 
-        while (this.divQuestion.clientHeight > heightOfMain) {
-            const newFontSize = getFontSize(this.divQuestion) - 10;
-            this.divQuestion.style.fontSize = newFontSize + "px";
-        }
-
-        function getFontSize(elem: HTMLElement) {
-            return Number(elem.style.fontSize.replace("px", ""));
+            // set font-size in the inline style property on the div
+            this.divClueQuestion.style.fontSize = newFontSize + "px";
         }
     }
 

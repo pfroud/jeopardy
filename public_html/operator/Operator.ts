@@ -249,7 +249,7 @@ export class Operator {
 
         const showClueToOperator = (clueObj: Clue) => {
             /*
-            This function only shows the category. 
+            This function only shows the air date, category, and dollar value to the operator.
             The state machine will show the clue question after a timeout.
             */
             this.divClueWrapper.style.display = ""; //show
@@ -257,7 +257,6 @@ export class Operator {
             this.divClueDollars.innerHTML = "$" + clueObj.value;
             // example of what format the airdate is in: "2013-01-25T12:00:00.000Z
             this.divClueAirdate.innerHTML = (new Date(clueObj.airdate)).toDateString();
-            this.presentation.setClueObj(clueObj);
             this.trAnswer.style.display = "none";
             this.divInstructions.innerHTML = "Read aloud the category and dollar value.";
         };
@@ -290,6 +289,7 @@ export class Operator {
 
                     this.currentClueObj = clueObj;
                     showClueToOperator.call(this, clueObj);
+                    this.presentation.setClueObj(clueObj);
                     // we don't actually need to return the clue object to the state machine
                     promiseResolveFunc();
                 } else {
@@ -323,13 +323,16 @@ export class Operator {
 
     }
 
+    public fitClueQuestionToScreenInOperatorWindow(): void {
+        this.presentation.fitClueQuestionToScreen();
+    }
+
     public handleShowClueQuestion(): void {
         /*
-        The presentation is already showing the clue question because of the
-        slide change in the state machine.
+        This method mostly is about showing the clue question to the operator.
+        The clue question is already being shown in the presentation because
+        the state machine changes the slide.
         */
-        this.presentation.fitClueQuestionToScreen();
-
         this.setAllTeamsState(TeamState.READING_QUESTION);
 
         this.divInstructions.innerHTML = "Read the question out loud. Buzzers open when you press space.";
