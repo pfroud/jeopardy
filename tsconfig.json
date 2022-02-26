@@ -1,6 +1,7 @@
 // https://www.typescriptlang.org/tsconfig
 {
     "compilerOptions": {
+        "moduleResolution": "Node", // https://www.typescriptlang.org/tsconfig#moduleResolution
         "target": "ES2021", // https://www.typescriptlang.org/tsconfig#target
         "strict": true, // https://www.typescriptlang.org/tsconfig#strict
         "sourceMap": true, // https://www.typescriptlang.org/tsconfig#sourceMap

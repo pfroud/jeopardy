@@ -143,6 +143,9 @@ export class Presentation {
     public setTeamRankingHtml(htmlString: string): void {
         document.querySelector("div#slide-game-end div#team-ranking").innerHTML = htmlString;
     }
+
+    public getDivForCharts(): HTMLDivElement {
+        return document.querySelector("div#slide-game-end div#chats");
     }
 
     public hideHeaderAndFooter(): void {

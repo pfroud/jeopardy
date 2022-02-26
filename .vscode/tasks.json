@@ -1,7 +1,7 @@
 {
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
-    // https://code.visualstudio.com/docs/editor/tasks
+    // https://code.visualstudio.com/docs/editor/tasks#_custom-tasks
     // https://graphviz.org/documentation/
     "version": "2.0.0",
     "tasks": [
@@ -32,6 +32,20 @@
             // https://sass-lang.com/documentation/cli/dart-sass#many-to-many-mode
             "command": "sass public_html/operator/scss:public_html/operator/css public_html/presentation/scss:public_html/presentation/css public_html/moneyOverride/scss:public_html/moneyOverride/css",
             "group": "build"
+        },
+        {
+            "label": "rollup",
+            "type": "shell",
+            "group": "build",
+            "command": "rollup --config rollup.config.js",
+            "presentation": {
+                "echo": false,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true
+            }
         }
     ]
 }

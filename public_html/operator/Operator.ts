@@ -522,6 +522,16 @@ export class Operator {
 
         this.presentation.setTeamRankingHtml(html.join(""));
         this.presentation.hideHeaderAndFooter();
+
+        /*
+        const divForCharts = this.presentation.getDivForCharts();
+        this.teamArray.forEach(teamObj => {
+            const canvas = document.createElement("canvas");
+            divForCharts.appendChild(canvas);
+            const graphicsContext = canvas.getContext("2d");
+        });
+        */
+
     }
 
     private resetDurationForWaitForBuzzesState(): void {
