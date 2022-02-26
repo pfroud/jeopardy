@@ -89,7 +89,7 @@ export class CountdownTimer {
             this.guiUpdatePaused();
             this.timestampOfLastInterval = Date.now();
 
-            this.intervalID = setInterval(this.handleInterval.bind(this), this.updateIntervalMillisec);
+            this.intervalID = window.setInterval(this.handleInterval.bind(this), this.updateIntervalMillisec);
 
 
             this.onResume?.();
@@ -113,7 +113,7 @@ export class CountdownTimer {
             }
             this.isStarted = true;
             this.timestampOfLastInterval = Date.now();
-            this.intervalID = setInterval(this.handleInterval.bind(this), this.updateIntervalMillisec);
+            this.intervalID = window.setInterval(this.handleInterval.bind(this), this.updateIntervalMillisec);
             this.onStart?.();
 
             ////////////////////// Update GUI //////////////////////////////////////////////////////////////
