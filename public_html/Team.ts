@@ -47,6 +47,13 @@ export class Team {
             buzzerShow: null
         }
     };
+    public hasBuzzedForCurrentQuestion = false;
+
+    public statistics = {
+        questionsNotBuzzed: 0,
+        questionsBuzzedThenAnsweredRight: 0,
+        questionsBuzzedThenAnsweredWrongOrTimedOut: 0
+    };
 
     constructor(teamIdx: number, presentationInstance: Presentation, settings: Settings, audioManager: AudioManager) {
         this.settings = settings;
@@ -54,15 +61,6 @@ export class Team {
         this.teamIdx = teamIdx;
         this.presentationInstance = presentationInstance;
         this.teamName = `Team ${teamIdx + 1}`;
-
-        /*
-         this.statistics = {
-         answerRight: 0,
-         answerWrong:0,
-         answerTimeout: 0,
-         buzzTooEarly: 0
-         };
-         */
 
         this.createElementsInOperatorWindow();
         this.createElementsInPresentationWindow();
@@ -74,6 +72,8 @@ export class Team {
         this.stopAnswer();
         this.audioManager.play("answerCorrect");
         this.moneyAdd(clueObj.value);
+        this.statistics.questionsBuzzedThenAnsweredRight++;
+        this.hasBuzzedForCurrentQuestion = true;
     }
 
     public handleAnswerIncorrectOrAnswerTimeout(clueObj: Clue): void {
@@ -81,6 +81,8 @@ export class Team {
         this.audioManager.play("answerIncorrectOrAnswerTimeout");
         this.moneySubtract(clueObj.value * this.settings.wrongAnswerPenaltyMultiplier);
         this.setState(this.settings.allowMultipleAnswersToSameQuestion ? TeamState.CAN_ANSWER : TeamState.ALREADY_ANSWERED);
+        this.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut++;
+        this.hasBuzzedForCurrentQuestion = true;
     }
 
     public moneyAdd(amountAdd: number, animate = true): void {

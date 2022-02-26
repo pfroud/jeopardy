@@ -375,11 +375,22 @@ export class Operator {
         this.buttonSkipClue.setAttribute("disabled", "disabled");
 
         this.resetDurationForWaitForBuzzesState();
+
+        this.teamArray.forEach(teamObj => teamObj.hasBuzzedForCurrentQuestion = false);
     }
 
     public handleShowAnswer(): void {
         this.setAllTeamsState(TeamState.BUZZERS_OFF);
         this.divInstructions.innerHTML = "Let people read the answer.";
+
+        this.teamArray.forEach(teamObj => {
+            if (!teamObj.hasBuzzedForCurrentQuestion) {
+                teamObj.statistics.questionsNotBuzzed++;
+            }
+
+        });
+
+
     }
 
     public setAllTeamsState(targetState: TeamState, endLockout = false): void {
@@ -509,7 +520,7 @@ export class Operator {
 
         html.push("</tbody></table>");
 
-        this.presentation.setGameEndMessage(html.join(""));
+        this.presentation.setTeamRankingHtml(html.join(""));
         this.presentation.hideHeaderAndFooter();
     }
 

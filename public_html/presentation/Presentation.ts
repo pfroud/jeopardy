@@ -140,8 +140,9 @@ export class Presentation {
         this.divPaused.style.display = isPaused ? "" : "none";
     }
 
-    public setGameEndMessage(message: string): void {
-        document.querySelector("div#slide-game-end div#team-ranking").innerHTML = message;
+    public setTeamRankingHtml(htmlString: string): void {
+        document.querySelector("div#slide-game-end div#team-ranking").innerHTML = htmlString;
+    }
     }
 
     public hideHeaderAndFooter(): void {
