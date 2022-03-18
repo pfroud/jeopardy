@@ -4,6 +4,7 @@ import { Team } from "../Team.js";
 document.addEventListener("DOMContentLoaded", function () {
     if (!window.opener) {
         console.error("no window.opener");
+
         return;
     }
 
@@ -17,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function makeTableRow(teamIndex: number): void {
         const teamObj = teamArray[teamIndex];
-        const dollarValues = [1000, 800, 600, 400, 200];
+        const dollarValues = [1000, 800, 600, 500, 400, 300, 200, 100, 50];
 
         const tableRow = document.createElement("tr");
         table.appendChild(tableRow);
