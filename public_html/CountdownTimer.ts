@@ -27,10 +27,10 @@ export class CountdownTimer {
 
     constructor(durationMillisec: number, audioManager?: AudioManager) {
         if (!Number.isInteger(durationMillisec) || !isFinite(durationMillisec) || isNaN(durationMillisec)) {
-            throw new TypeError("duration must be an integer");
+            throw new TypeError("duration must be an integer: " + durationMillisec);
         }
         if (durationMillisec < 1) {
-            throw new RangeError("duration cannot be less than one");
+            throw new RangeError("duration cannot be less than one:" + durationMillisec);
         }
         this.audioManager = audioManager;
 

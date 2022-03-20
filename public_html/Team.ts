@@ -312,12 +312,6 @@ export class Team {
         this.div.presentation.buzzerShow.classList.remove("pressed");
     }
 
-    public jsonDump(): TeamDumpToJson {
-        return {
-            dollars: this.dollars
-        };
-    }
-
     public getCountdownDotsInPresentationWindow(): HTMLTableElement {
         return this.countdownDotsInPresentationWindow;
     }
@@ -335,19 +329,6 @@ export class Team {
     }
 
 
-    public jsonLoad(jsonObj: TeamDumpToJson): void {
-        this.dollars = jsonObj.dollars;
-
-        this.div.presentation.dollars.innerHTML = "$" + this.dollars;
-
-        this.div.operator.dollars.innerHTML = "$" + this.dollars;
-    }
-
-
-}
-
-export interface TeamDumpToJson {
-    dollars: number;
 }
 
 export enum TeamState {

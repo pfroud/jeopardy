@@ -1,4 +1,4 @@
-import { Team, TeamState, TeamDumpToJson } from "../Team.js";
+import { Team, TeamState } from "../Team.js";
 import { StateMachine } from "../stateMachine/StateMachine.js";
 import { AudioManager } from "./AudioManager.js";
 import { Settings } from "../Settings.js";
@@ -14,8 +14,16 @@ export interface Clue {
     category: { title: string }
 }
 
+interface SavedGameInLocalStorage {
+    gameTimerRemainingMillisec: number,
+    teamDollars: number[]
+    // todo save the settings
+}
+
 export class Operator {
-    public static teamCount = 9; //can change if we load a game from localStorage
+    public static teamCount = 6; //not readonly because it can change if we load a game from localStorage
+    static readonly localStorageKey = "jeopardy-teams";
+
     private readonly audioManager: AudioManager;
     private readonly settings: Settings;
     private readonly divClueWrapper: HTMLDivElement;
@@ -30,7 +38,7 @@ export class Operator {
     private readonly divInstructions: HTMLDivElement;
     private readonly buttonStartGame: HTMLButtonElement;
     private readonly buttonSkipClue: HTMLButtonElement;
-    private readonly gameTimer: CountdownTimer;
+    private gameTimer: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
     private teamArray: Team[];
     private currentClueObj: Clue;
     private presentation: Presentation;
@@ -62,9 +70,7 @@ export class Operator {
         this.initMouseListeners();
         this.lookForSavedGame();
 
-        this.gameTimer = new CountdownTimer(this.settings.gameTimeLimitMillisec);
-        this.gameTimer.addProgressElement(document.querySelector("div#game-timer progress"));
-        this.gameTimer.addTextDiv(document.querySelector("div#game-timer div#remaining-time-text"));
+        this.initGameTimer(this.settings.gameTimeLimitMillisec);
 
         window.open("../presentation/presentation.html", "windowPresentation");
 
@@ -72,6 +78,12 @@ export class Operator {
         The rest of the initialization happens in this.handlePresentationReady(),
         which gets called by the Presentation instance in the window we opened.
         */
+    }
+
+    private initGameTimer(millisec: number) {
+        this.gameTimer = new CountdownTimer(millisec);
+        this.gameTimer.addProgressElement(document.querySelector("div#game-timer progress"));
+        this.gameTimer.addTextDiv(document.querySelector("div#game-timer div#remaining-time-text"));
     }
 
     public handlePresentationReady(presentationInstanceFromOtherWindow: Presentation): void {
@@ -431,20 +443,20 @@ export class Operator {
     private lookForSavedGame(): void {
         const divSavedGame = document.querySelector<HTMLDivElement>("div#saved-game-prompt");
 
-        const rawLocalStorageResult = window.localStorage.getItem("jeopardy-teams");
+        const rawLocalStorageResult = window.localStorage.getItem(Operator.localStorageKey);
         if (rawLocalStorageResult === null) {
             // no saved game found
             divSavedGame.style.display = "none";
             return;
         }
 
-        const parsedJson: TeamDumpToJson[] = JSON.parse(rawLocalStorageResult);
+        const parsedJson: SavedGameInLocalStorage = JSON.parse(rawLocalStorageResult);
 
         const tableDetails = document.querySelector("table#saved-game-details tbody");
 
         const tableRowTeamNumber = document.createElement("tr");
         tableDetails.appendChild(tableRowTeamNumber);
-        for (let i = 0; i < parsedJson.length; i++) {
+        for (let i = 0; i < parsedJson.teamDollars.length; i++) {
             const cellTeamNumber = document.createElement("td");
             cellTeamNumber.innerHTML = `Team ${i + 1}`;
             tableRowTeamNumber.appendChild(cellTeamNumber);
@@ -452,10 +464,10 @@ export class Operator {
 
         const tableRowTeamDollars = document.createElement("tr");
         tableDetails.appendChild(tableRowTeamDollars);
-        for (let i = 0; i < parsedJson.length; i++) {
-            const savedTeam = parsedJson[i];
+        for (let i = 0; i < parsedJson.teamDollars.length; i++) {
+            const savedTeam = parsedJson.teamDollars[i];
             const cellTeamDollars = document.createElement("td");
-            cellTeamDollars.innerHTML = "$" + savedTeam.dollars;
+            cellTeamDollars.innerHTML = "$" + savedTeam;
             tableRowTeamDollars.appendChild(cellTeamDollars);
         }
 
@@ -465,7 +477,7 @@ export class Operator {
         });
         document.querySelector("button#saved-game-delete").addEventListener("click", function () {
             if (window.confirm("Delete the saved game?")) {
-                window.localStorage.removeItem("jeopardy-teams");
+                window.localStorage.removeItem(Operator.localStorageKey);
                 divSavedGame.style.display = "none";
             }
         });
@@ -475,18 +487,29 @@ export class Operator {
     }
 
     private saveGame(): void {
-        window.localStorage.setItem("jeopardy-teams",
-            JSON.stringify(
-                this.teamArray.map(teamObj => teamObj.jsonDump())
-            )
+        const objectToSave: SavedGameInLocalStorage = {
+            gameTimerRemainingMillisec: this.gameTimer.getRemainingMillisec(),
+            teamDollars: this.teamArray.map(teamObj => teamObj.getDollars())
+        };
+
+        window.localStorage.setItem(Operator.localStorageKey,
+            JSON.stringify(objectToSave)
         );
         //TODO save the settings
     }
 
-    private loadGame(parsedJson: TeamDumpToJson[]): void {
-        this.initTeams(parsedJson.length);
-        for (let i = 0; i < parsedJson.length; i++) {
-            this.teamArray[i].jsonLoad(parsedJson[i]);
+    private loadGame(parsedJson: SavedGameInLocalStorage): void {
+
+        /*
+        This in imperfect, we really want to set the timer's max
+        value from settings and set the present value from the 
+        saved game.
+        */
+        this.initGameTimer(parsedJson.gameTimerRemainingMillisec);
+
+        this.initTeams(parsedJson.teamDollars.length);
+        for (let i = 0; i < parsedJson.teamDollars.length; i++) {
+            this.teamArray[i].moneySet(parsedJson.teamDollars[i], false);
         }
     }
 
