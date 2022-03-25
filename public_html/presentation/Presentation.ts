@@ -38,6 +38,8 @@ export class Presentation {
         this.progressElementForStateMachine = document.querySelector("progress#state-machine");
 
 
+        this.loadPetersPaymentInfo();
+
         this.initSlides();
 
         if (window.opener) {
@@ -66,6 +68,15 @@ export class Presentation {
             warningDiv.style.padding = "5px 10px";
             document.body.appendChild(warningDiv);
         }
+    }
+
+    private loadPetersPaymentInfo(): void {
+        const request = new XMLHttpRequest();
+        request.addEventListener("load", () => {
+            document.querySelector("div#peters-payment-info").innerHTML = request.response;
+        });
+        request.open("GET", "peters-payment-info.html");
+        request.send();
     }
 
     private initSlides(): void {
