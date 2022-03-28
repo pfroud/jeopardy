@@ -121,25 +121,6 @@ main {
     div.presentation-slide {
         display: none;
 
-        &#slide-event-cost {
-            img#cost-chart {
-                filter: repeat(drop-shadow(2px 2px 0px black), 12);
-                vertical-align: middle;
-            }
-
-            div#peters-payment-info {
-                display: inline-block;
-                font-size: 30px;
-                text-shadow: $slightly-smaller-shadow;
-                vertical-align: middle;
-                margin-left: 100px;
-
-                li {
-                    margin-bottom: 20px;
-                }
-            }
-        }
-
         &#slide-jeopardy-logo {
             // need special treatment to get the logo and shadow to center
             width: 100%;
