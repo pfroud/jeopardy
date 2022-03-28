@@ -150,7 +150,6 @@ export class Operator {
     }
 
     private initMouseListeners(): void {
-        document.querySelector("button#go-to-game-rules").addEventListener("click", () => this.presentation.showSlide("slide-game-rules"));
         document.querySelector("button#go-to-jeopardy-logo").addEventListener("click", () => this.presentation.showSlide("slide-jeopardy-logo"));
 
         this.buttonStartGame.addEventListener("click", () => this.startGame());
