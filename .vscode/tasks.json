@@ -34,10 +34,12 @@
             "group": "build"
         },
         {
-            "label": "rollup",
+            // https://webpack.js.org/api/cli/
+            // https://webpack.js.org/guides/installation/
+            "label": "webpack",
             "type": "shell",
             "group": "build",
-            "command": "rollup --config rollup.config.js",
+            "command": "npx webpack",
             "presentation": {
                 "echo": false,
                 "reveal": "always",

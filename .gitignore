@@ -6,3 +6,4 @@ node_modules/
 buzzers/
 *.css
 *.css.map
+public_html/bower_components
