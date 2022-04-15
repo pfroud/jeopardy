@@ -7,9 +7,9 @@ https://rollupjs.org/guide/en/#warning-treating-module-as-external-dependency
 */
 
 export default {
-  input: 'public_html/chartjs_test.js',
+  input: 'public_html/chartjs-test/chartjs_test.js',
   output: {
-    file: 'public_html/rollup_bundle.js',
+    file: 'public_html/chartjs-test/rollup_bundle.js',
     format: 'es'
   },
   plugins: [nodeResolve()]
