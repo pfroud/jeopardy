@@ -15,12 +15,10 @@ const options: Chartist.IPieChartOptions = {
     donutWidth: "50%",
     chartPadding: 0,
     showLabel: true,
-    labelPosition: "outside",
+    labelPosition: "outside"
 };
 
 new Chartist.Pie('.ct-chart',
     data,
     options
 );
-
-console.log("asdf");
