@@ -1,8 +1,10 @@
 {
     "recommendations": [
         "dbaeumer.vscode-eslint",
-        "ritwickdey.liveserver",
         "streetsidesoftware.code-spell-checker",
-        "amodio.tsl-problem-matcher"
+        "amodio.tsl-problem-matcher",
+        "adamwalzer.scss-lint",
+        "sibiraj-s.vscode-scss-formatter",
+        "VisualStudioExptTeam.vscodeintellicode"
     ]
 }

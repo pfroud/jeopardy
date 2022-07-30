@@ -1,9 +1,7 @@
 {
     "files.exclude": {
-        "**/*.js": true,
-        "**/*.js.map": true,
-        "node_modules": true
-        "public_html/bower_components": true
+        "node_modules": true,
+        "src/bower_components": true
     },
     "cSpell.words": [
         "Airdate",
