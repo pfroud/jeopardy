@@ -29,7 +29,7 @@
             "label": "Sass",
             "type": "shell",
             // https://sass-lang.com/documentation/cli/dart-sass#many-to-many-mode
-            "command": "sass public_html/operator/scss:public_html/operator/css public_html/presentation/scss:public_html/presentation/css public_html/moneyOverride/scss:public_html/moneyOverride/css",
+            "command": "sass src/operator/scss:src/operator/css src/presentation/scss:src/presentation/css src/moneyOverride/scss:src/moneyOverride/css",
             "group": "build"
         },
         {
