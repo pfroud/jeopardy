@@ -161,7 +161,7 @@ export class Operator {
             window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney", "popup"));
 
         document.querySelector("a#aGenerateGraphviz").addEventListener("click", () =>
-            this.stateMachine.showDotFileForGraphviz());
+            this.stateMachine.showGraphviz());
     }
 
     private startGame() {

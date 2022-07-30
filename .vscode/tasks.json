@@ -3,32 +3,6 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Graphviz",
-            "group": "build",
-            "type": "shell",
-            "command": "C:\\Users\\pfrou\\Downloads\\stable_windows_10_msbuild_Release_Win32_graphviz-2.49.3-win32\\Graphviz\\bin\\dot.exe",
-            // https://graphviz.org/doc/info/command.html
-            "args": [
-                "-Tsvg",
-                "-o",
-                "graphvizOutput.svg",
-                "graphviz-input.gv"
-            ],
-            //
-            // https://code.visualstudio.com/docs/editor/tasks#_defining-a-problem-matcher
-            "problemMatcher": [],
-            //
-            //https://code.visualstudio.com/docs/editor/tasks#_output-behavior
-            "presentation": {
-                "echo": false,
-                "reveal": "never",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": false,
-                "clear": false
-            }
-        },
-        {
             "label": "Start Parcel development server",
             "type": "shell",
             "group": "build",

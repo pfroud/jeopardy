@@ -5,7 +5,7 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    if (!(window.opener).operator) {
+    if (!window.opener.operator) {
         document.body.innerText = "window.opener.operator is falsey";
         return;
     }

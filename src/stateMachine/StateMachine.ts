@@ -8,6 +8,9 @@ import { StateMachineState, StateMachineTransition, TimeoutTransition, Transitio
 import { generateDotFileForGraphviz } from "./generateDotFileForGraphviz";
 import { GraphvizViewer } from "../graphvizViewer/graphvizViewer";
 
+import Viz from "@aduh95/viz.js";
+import getWorker from "@aduh95/viz.js/worker";
+
 interface StateMap {
     [stateName: string]: StateMachineState;
 }
@@ -367,8 +370,28 @@ export class StateMachine {
 
     }
 
-    public showDotFileForGraphviz(): void {
-        generateDotFileForGraphviz(this.allStates);
+    public async showGraphviz(): Promise<void> {
+        const dotFileString = generateDotFileForGraphviz(this.allStates);
+
+
+        const worker = getWorker();
+        const viz = new Viz({ worker });
+
+        viz
+            .renderString("digraph{1 -> 2 }")
+            .then((svgString) => {
+                console.log(svgString);
+            })
+            .catch((error) => {
+                console.error(error);
+            })
+            .finally(
+                () =>
+                    // You can either terminate explicitly:
+                    viz.terminateWorker()
+                // or let it be auto-closed at the end of the process
+            );
+
     }
 
     public getCountdownTimer(): CountdownTimer {

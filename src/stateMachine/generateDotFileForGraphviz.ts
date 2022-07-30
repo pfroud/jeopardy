@@ -1,6 +1,7 @@
 import { StateMachineState, StateMachineTransition, TransitionType } from "./stateInterfaces";
 
-export function generateDotFileForGraphviz(stateArray: StateMachineState[]): void {
+
+export function generateDotFileForGraphviz(stateArray: StateMachineState[]): string {
 
     // TODO need to add onExit and onEnter functions!!!!
 
@@ -110,20 +111,11 @@ export function generateDotFileForGraphviz(stateArray: StateMachineState[]): voi
             }
 
         });
-        dotFileLines.push(""); // empty string becomes one newline because the whole array gets joines wih t\n
+        dotFileLines.push(""); // empty string becomes one newline because the whole array gets joined wih t\n
 
     });
     dotFileLines.push("}");
 
-    const joined = dotFileLines.join("\n");
-
-    const gvDocument = window.open("", "generatedGraphviz", "popup").document;
-    gvDocument.title = "Generated DOT for Graphviz";
-
-    const pre = gvDocument.createElement("pre");
-    pre.innerText = joined;
-    gvDocument.body.innerHTML = ""; //clear if we already added a <pre> 
-    gvDocument.body.appendChild(pre);
-
+    return dotFileLines.join("\n");
 
 }
