@@ -1,6 +1,6 @@
 export class Settings {
     // How long to show the category in big text in the presentation window
-    public displayDurationCategoryMillisec = 3 * 1000;
+    public displayDurationCategoryMillisec = 5 * 1000;
 
     // How long to show the answer in the presentation window
     public displayDurationAnswerMillisec = 3 * 1000;
@@ -21,7 +21,7 @@ export class Settings {
     // Set this to 1 to be like the the TV show, set it to 0 for no guessing penalty.
     public wrongAnswerPenaltyMultiplier = 0.5;
 
-    public allowMultipleAnswersToSameQuestion = false;
+    public allowMultipleAnswersToSameQuestion = true;
 
     // Stop the game when a team reaches this many dollars
     public teamDollarsWhenGameShouldEnd = 10_000;
