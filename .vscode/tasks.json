@@ -29,6 +29,12 @@
             }
         },
         {
+            "label": "Clean",
+            "type": "shell",
+            "group": "build",
+            "command": "tsc --build --clean; rm -Path src/operator/css, src/presentation/css -Recurse -ErrorAction SilentlyContinue",
+        },
+        {
             "label": "Start Parcel development server",
             "type": "shell",
             "group": "build",
