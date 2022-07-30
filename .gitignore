@@ -8,3 +8,5 @@ buzzers/
 *.css
 *.css.map
 src/bower_components
+.parcel-cache/
+dist/

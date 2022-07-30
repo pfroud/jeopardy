@@ -1,4 +1,4 @@
-import { StateMachineState, StateMachineTransition, TransitionType } from "./stateInterfaces.js";
+import { StateMachineState, StateMachineTransition, TransitionType } from "./stateInterfaces";
 
 export function generateDotFileForGraphviz(stateArray: StateMachineState[]): void {
 

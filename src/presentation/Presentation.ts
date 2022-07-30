@@ -1,4 +1,4 @@
-import { Clue } from "../operator/Operator.js";
+import { Clue } from "../operator/Operator";
 
 interface Slides {
     [slideName: string]: HTMLDivElement;

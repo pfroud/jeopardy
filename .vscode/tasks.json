@@ -33,12 +33,17 @@
             "group": "build"
         },
         {
-            // https://webpack.js.org/api/cli/
-            // https://webpack.js.org/guides/installation/
-            "label": "webpack",
+            "label": "Clean",
             "type": "shell",
             "group": "build",
-            "command": "npx webpack",
+            "command": "tsc --build --clean; rm -Path src/operator/css, src/presentation/css -Recurse -ErrorAction SilentlyContinue",
+        },
+        {
+            // https://parceljs.org/features/cli/
+            "label": "Parcel serve",
+            "type": "shell",
+            "group": "build",
+            "command": "npx parcel serve src/index.html src/operator/operator.html src/presentation/presentation.html",
             "presentation": {
                 "echo": false,
                 "reveal": "always",

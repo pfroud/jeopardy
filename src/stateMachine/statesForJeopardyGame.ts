@@ -1,7 +1,7 @@
-import { StateMachine } from "./StateMachine.js";
-import { CountdownOperation, StateMachineState, TransitionType } from "./stateInterfaces.js";
-import { Operator } from "../operator/Operator.js";
-import { Settings } from "../Settings.js";
+import { StateMachine } from "./StateMachine";
+import { CountdownOperation, StateMachineState, TransitionType } from "./stateInterfaces";
+import { Operator } from "../operator/Operator";
+import { Settings } from "../Settings";
 
 export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: Operator, settings: Settings): StateMachineState[] {
 
