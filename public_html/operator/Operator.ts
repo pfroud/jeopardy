@@ -5,6 +5,7 @@ import { Settings } from "../Settings.js";
 import { Presentation } from "../presentation/Presentation.js";
 import { CountdownTimer } from "../CountdownTimer.js";
 import { CountdownOperation, CountdownTimerSource } from "../stateMachine/stateInterfaces.js";
+import * as Chartist from "chartist";
 
 export interface Clue {
     answer: string;
@@ -21,7 +22,7 @@ interface SavedGameInLocalStorage {
 }
 
 export class Operator {
-    public static teamCount = 6; //not readonly because it can change if we load a game from localStorage
+    public static teamCount = 4; //not readonly because it can change if we load a game from localStorage
     static readonly localStorageKey = "jeopardy-teams";
 
     private readonly audioManager: AudioManager;
@@ -547,11 +548,39 @@ export class Operator {
         /*
         const divForCharts = this.presentation.getDivForCharts();
         this.teamArray.forEach(teamObj => {
-            const canvas = document.createElement("canvas");
-            divForCharts.appendChild(canvas);
-            const graphicsContext = canvas.getContext("2d");
+            const div = document.createElement("div");
+            div.style.width = "300px";
+            div.style.height = "300px";
+            divForCharts.appendChild(div);
+
+            const data: Chartist.IChartistData = {
+                series: [
+                    teamObj.statistics.questionsNotBuzzed,
+                    teamObj.statistics.questionsBuzzedThenAnsweredRight,
+                    teamObj.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut
+                ],
+                labels: ["Not buzzed",
+                    "Answered right",
+                    "Answered wrong or timed out"
+                ]
+            };
+
+            const options: Chartist.IPieChartOptions = {
+                width: "100%",
+                height: "100%",
+                donut: true,
+                donutWidth: "50%",
+                chartPadding: 0,
+                showLabel: true,
+                labelPosition: "outside"
+            };
+
+            new Chartist.Pie(div, data, options);
+
+
         });
-        */
+*/
+
 
     }
 

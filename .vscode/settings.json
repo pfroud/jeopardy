@@ -3,6 +3,7 @@
         "**/*.js": true,
         "**/*.js.map": true,
         "node_modules": true
+        "public_html/bower_components": true
     },
     "cSpell.words": [
         "Airdate",

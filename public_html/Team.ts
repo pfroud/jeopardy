@@ -50,9 +50,15 @@ export class Team {
     public hasBuzzedForCurrentQuestion = false;
 
     public statistics = {
+        // want to show a pie chart at the end of the game of the three numbers below
         questionsNotBuzzed: 0,
         questionsBuzzedThenAnsweredRight: 0,
         questionsBuzzedThenAnsweredWrongOrTimedOut: 0
+        /*
+         also want to show a chart of money over time.
+         the x axis will be the question number. the y axis will be how much 
+         money a team has. there will be a line for each team.
+         */
     };
 
     constructor(teamIdx: number, presentationInstance: Presentation, settings: Settings, audioManager: AudioManager) {
