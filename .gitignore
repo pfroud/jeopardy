@@ -1,5 +1,5 @@
 private/
-public_html/presentation/img/reference
+src/presentation/img/reference
 node_modules/
 *.js
 !*.config.js
@@ -7,4 +7,4 @@ node_modules/
 buzzers/
 *.css
 *.css.map
-public_html/bower_components
+src/bower_components
