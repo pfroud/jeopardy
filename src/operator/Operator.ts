@@ -545,7 +545,7 @@ export class Operator {
         this.presentation.setTeamRankingHtml(html.join(""));
         this.presentation.hideHeaderAndFooter();
 
-        /*
+
         const divForCharts = this.presentation.getDivForCharts();
         this.teamArray.forEach(teamObj => {
             const div = document.createElement("div");
@@ -579,7 +579,7 @@ export class Operator {
 
 
         });
-*/
+
 
 
     }
