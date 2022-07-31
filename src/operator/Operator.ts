@@ -549,8 +549,7 @@ export class Operator {
         const divForCharts = this.presentation.getDivForCharts();
         this.teamArray.forEach(teamObj => {
             const div = document.createElement("div");
-            div.style.width = "300px";
-            div.style.height = "300px";
+            div.className = "team-pie-chart";
             divForCharts.appendChild(div);
 
             const data: Chartist.IChartistData = {

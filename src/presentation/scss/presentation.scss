@@ -171,17 +171,25 @@ main {
         }
 
         &#slide-game-end {
-            font-size: 40px;
-            text-shadow: $big-shadow;
-            p {
-                text-align: center;
-            }
-            table td {
-                padding-right: 60px;
-
-                &:nth-of-type(2) {
-                    text-align: right;
+            div#text {
+                font-size: 40px;
+                text-shadow: $big-shadow;
+                p {
+                    text-align: center;
                 }
+                table td {
+                    padding-right: 60px;
+
+                    &:nth-of-type(2) {
+                        text-align: right;
+                    }
+                }
+            }
+            div#charts div.team-pie-chart {
+                width: 300px;
+                height: 300px;
+                display: inline-block;
+                padding: 5px;
             }
         }
     }

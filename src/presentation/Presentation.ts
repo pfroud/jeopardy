@@ -145,7 +145,7 @@ export class Presentation {
     }
 
     public getDivForCharts(): HTMLDivElement {
-        return document.querySelector("div#slide-game-end div#chats");
+        return document.querySelector("div#slide-game-end div#charts");
     }
 
     public hideHeaderAndFooter(): void {
