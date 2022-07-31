@@ -26,7 +26,8 @@
         //
         // https://parceljs.org/languages/typescript/#isolatedmodules
         // https://www.typescriptlang.org/tsconfig#isolatedModules
-        "isolatedModules": true
+        "isolatedModules": true,
+        "module": "es2022"
     },
     "exclude": [
         "node_modules"

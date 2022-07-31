@@ -9,7 +9,6 @@ import { generateDotFileForGraphviz } from "./generateDotFileForGraphviz";
 import { GraphvizViewer } from "../graphvizViewer/graphvizViewer";
 
 import Viz from "@aduh95/viz.js";
-import getWorker from "@aduh95/viz.js/worker";
 
 interface StateMap {
     [stateName: string]: StateMachineState;
@@ -374,8 +373,11 @@ export class StateMachine {
         const dotFileString = generateDotFileForGraphviz(this.allStates);
 
 
-        const worker = getWorker();
-        const viz = new Viz({ worker });
+        const viz = new Viz({
+            worker: new Worker(new URL("../worker.js", import.meta.url), {
+                type: "module",
+            }),
+        });
 
         viz
             .renderString("digraph{1 -> 2 }")
