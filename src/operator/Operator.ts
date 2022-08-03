@@ -227,10 +227,6 @@ export class Operator {
     }
 
     public getClueFromJService(): Promise<void> {
-        // only save the game if somebody has more than $0
-        if (this.teamArray.some(teamObj => teamObj.getDollars() > 0)) {
-            this.saveGame();
-        }
 
         this.resetDurationForWaitForBuzzesState();
 
@@ -395,6 +391,12 @@ export class Operator {
     }
 
     public handleShowAnswer(): void {
+
+        // only save the game if somebody has more than $0
+        if (this.teamArray.some(teamObj => teamObj.getDollars() > 0)) {
+            this.saveGame();
+        }
+
         this.setAllTeamsState(TeamState.BUZZERS_OFF);
         this.divInstructions.innerHTML = "Let people read the answer.";
 
