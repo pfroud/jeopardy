@@ -236,10 +236,14 @@ export class Operator {
 
         function isClueValid(clueObj: Clue): boolean {
             return clueObj.value !== null &&
+                clueObj.value > 0 &&
+                clueObj.question != null &&
                 clueObj.question.length > 0 &&
+                clueObj.question !== "=" &&
                 clueObj.answer.length > 0 &&
                 clueObj.category !== null &&
-                clueObj.category.title.length > 0;
+                clueObj.category.title.length > 0 &&
+                clueObj.category.title !== "=";
         }
 
         function doesQuestionHaveMultimedia(clueObj: Clue): boolean {
