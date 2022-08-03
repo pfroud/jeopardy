@@ -160,8 +160,8 @@ export class Operator {
         document.querySelector("a#aMoneyOverride").addEventListener("click", () =>
             window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney", "popup"));
 
-        document.querySelector("a#aGenerateGraphviz").addEventListener("click", () =>
-            this.stateMachine.showDotFileForGraphviz());
+        //document.querySelector("a#aGenerateGraphviz").addEventListener("click", () =>
+        //   this.stateMachine.showDotFileForGraphviz());
     }
 
     private startGame() {
