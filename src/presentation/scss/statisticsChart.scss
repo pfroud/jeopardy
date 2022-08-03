@@ -1,0 +1,26 @@
+/*
+This stylesheet gets added with the Chartist stylesheet
+"bower_components/chartist/dist/chartist.min.css"
+*/
+
+svg.ct-chart-donut {
+    g.ct-series {
+        &.not-buzzed path.ct-slice-donut {
+            stroke: gray;
+        }
+        &.buzzed-then-answered-right path.ct-slice-donut {
+            stroke: green;
+        }
+        &.buzzed-then-answered-wrong-or-timed-out path.ct-slice-donut {
+            stroke: red;
+        }
+    }
+
+    .ct-label {
+        fill: white;
+        stroke-width: 6px;
+        stroke: black;
+        paint-order: stroke;
+        font-size: 30px;
+    }
+}

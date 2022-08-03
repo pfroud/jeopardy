@@ -546,41 +546,90 @@ export class Operator {
         this.presentation.hideHeaderAndFooter();
 
 
-        const divForCharts = this.presentation.getDivForCharts();
-        this.teamArray.forEach(teamObj => {
-            const div = document.createElement("div");
-            div.className = "team-pie-chart";
-            divForCharts.appendChild(div);
+        this.createStatisticsCharts();
+    }
 
-            const data: Chartist.IChartistData = {
+    private createStatisticsCharts() {
+        const divForCharts = this.presentation.getDivForCharts();
+
+        this.teamArray.forEach(teamObj => {
+            const chartContainer = document.createElement("div");
+            chartContainer.className = "team-pie-chart";
+            divForCharts.appendChild(chartContainer);
+
+            const chartData: Chartist.IChartistData = {
                 series: [
-                    teamObj.statistics.questionsNotBuzzed,
-                    teamObj.statistics.questionsBuzzedThenAnsweredRight,
-                    teamObj.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut
+                    {
+                        value: teamObj.statistics.questionsNotBuzzed,
+                        className: "not-buzzed"
+                    }, {
+                        value: teamObj.statistics.questionsBuzzedThenAnsweredRight,
+                        className: "buzzed-then-answered-right"
+                    }, {
+                        value: teamObj.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut,
+                        className: "buzzed-then-answered-wrong-or-timed-out"
+                    }
                 ],
-                labels: ["Not buzzed",
+                /*
+                labels: [
+                    "Not buzzed",
                     "Answered right",
                     "Answered wrong or timed out"
                 ]
+                */
             };
 
-            const options: Chartist.IPieChartOptions = {
+            // https://gionkunz.github.io/chartist-js/api-documentation.html#chartistpie-declaration-defaultoptions
+            const chartOptions: Chartist.IPieChartOptions = {
                 width: "100%",
                 height: "100%",
                 donut: true,
                 donutWidth: "50%",
+                //
+                /*
+                Padding of the chart drawing area to the container element
+                and labels as a number or padding object {top: 5, right: 5, bottom: 5, left: 5}
+                */
                 chartPadding: 0,
                 showLabel: true,
-                labelPosition: "outside"
+                //
+                /*
+                Label position offset from the standard position which is
+                half distance of the radius. This value can be either positive
+                or negative. Positive values will position the label away from the center.
+                */
+                labelOffset: 0,
+                //
+                /*
+                Label direction can be 'neutral', 'explode' or 'implode'.
+                The labels anchor will be positioned based on those settings
+                as well as the fact if the labels are on the right or left
+                side of the center of the chart. Usually explode is useful
+                when labels are positioned far away from the center.
+                */
+                labelDirection: 'implode',
+                //
+                /*
+                This option can be set to 'inside', 'outside' or 'center'.
+                Positioned with 'inside' the labels will be placed on half
+                the distance of the radius to the border of the Pie by
+                respecting the 'labelOffset'. The 'outside' option will
+                place the labels at the border of the pie and 'center'
+                will place the labels in the absolute center point of the
+                chart. The 'center' option only makes sense in conjunction
+                with the 'labelOffset' option.
+                */
+                labelPosition: "inside",
+                /*
+                labelInterpolationFnc: function (value, idx: number) {
+                    const percentage = Math.round(value / data.series.reduce(sum) * 100) + '%';
+                    return animals[idx] + ' ' + percentage;
+                }
+                */
             };
 
-            new Chartist.Pie(div, data, options);
-
-
+            new Chartist.Pie(chartContainer, chartData, chartOptions);
         });
-
-
-
     }
 
     private resetDurationForWaitForBuzzesState(): void {
