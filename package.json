@@ -27,6 +27,6 @@
     "typescript": "^4.4.4"
   },
   "dependencies": {
-    "chartist": "^0.11.4"
+    "chartist": "^1.1.2"
   }
 }

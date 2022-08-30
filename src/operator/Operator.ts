@@ -557,7 +557,7 @@ export class Operator {
             chartContainer.className = "team-pie-chart";
             divForCharts.appendChild(chartContainer);
 
-            const chartData: Chartist.IChartistData = {
+            const chartData: Chartist.PieChartData = {
                 series: [
                     {
                         value: teamObj.statistics.questionsNotBuzzed,
@@ -580,7 +580,7 @@ export class Operator {
             };
 
             // https://gionkunz.github.io/chartist-js/api-documentation.html#chartistpie-declaration-defaultoptions
-            const chartOptions: Chartist.IPieChartOptions = {
+            const chartOptions: Chartist.PieChartOptions = {
                 width: "100%",
                 height: "100%",
                 donut: true,
@@ -628,7 +628,7 @@ export class Operator {
                 */
             };
 
-            new Chartist.Pie(chartContainer, chartData, chartOptions);
+            new Chartist.PieChart(chartContainer, chartData, chartOptions);
         });
     }
 
