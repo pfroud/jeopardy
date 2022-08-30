@@ -16,6 +16,6 @@ const wasmURL =
 
 initWASM({
     locateFile() {
-        return wasmURL;
+        return String(wasmURL);
     },
 });
