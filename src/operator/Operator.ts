@@ -103,6 +103,8 @@ export class Operator {
 
         this.buttonStartGame.removeAttribute("disabled");
         this.divInstructions.innerHTML = "Ready. Click the button to start the game.";
+
+        this.stateMachine.goToState("gameEnd");
     }
 
     private initBuzzerFootswitchIconDisplay(): void {
@@ -515,10 +517,11 @@ export class Operator {
     public handleGameEnd(): void {
         this.gameTimer.pause();
 
+        /*
         this.audioManager.play("roundEnd").then(
             () => this.audioManager.play("musicGameEnd")
         );
-
+        */
 
         // sort teams by how much money they have
         const shallowCopy = this.teamArray.slice();
