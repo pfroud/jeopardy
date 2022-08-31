@@ -7,7 +7,8 @@
             "type": "shell",
             "group": "build",
             // https://parceljs.org/features/cli/
-            "command": "npx parcel serve src/index.html src/operator/operator.html src/presentation/presentation.html --no-source-maps",
+            // Source maps are not working so I am turning them off
+            "command": "npx parcel serve src/index.html src/operator/operator.html src/presentation/presentation.html src/graphvizViewer/graphvizViewer.html --no-source-maps",
             "presentation": {
                 "echo": false,
                 "reveal": "always",

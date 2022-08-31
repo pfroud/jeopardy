@@ -5,7 +5,6 @@ import { Settings } from "../Settings";
 import { Presentation } from "../presentation/Presentation";
 import { CountdownTimer } from "../CountdownTimer";
 import { CountdownOperation, CountdownTimerSource } from "../stateMachine/stateInterfaces";
-import * as Chartist from "chartist";
 
 export interface Clue {
     answer: string;
@@ -161,7 +160,8 @@ export class Operator {
             window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney", "popup"));
 
         document.querySelector("a#aGenerateGraphviz").addEventListener("click", () =>
-            this.stateMachine.showGraphviz());
+            window.open("../graphvizViewer/graphvizViewer.html", "windowGraphvizViewer", "popup")
+        );
     }
 
     private startGame() {
@@ -601,5 +601,9 @@ export class Operator {
         }
     }
 
+
+    public getStateMachine(): StateMachine {
+        return this.stateMachine;
+    }
 
 }

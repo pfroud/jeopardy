@@ -6,9 +6,9 @@ import { CountdownTimer } from "../CountdownTimer";
 import { getStatesForJeopardyGame } from "./statesForJeopardyGame";
 import { StateMachineState, StateMachineTransition, TimeoutTransition, TransitionType, CountdownTimerSource, CountdownOperation } from "./stateInterfaces";
 import { generateDotFileForGraphviz } from "./generateDotFileForGraphviz";
-import { GraphvizViewer } from "../graphvizViewer/graphvizViewer";
+import { GraphvizViewer } from "../graphvizViewer/GraphvizViewer";
 
-import Viz from "@aduh95/viz.js";
+
 
 interface StateMap {
     [stateName: string]: StateMachineState;
@@ -369,37 +369,12 @@ export class StateMachine {
 
     }
 
-    public async showGraphviz(): Promise<void> {
-        const dotFileString = generateDotFileForGraphviz(this.allStates);
-
-
-        const viz = new Viz({
-            worker: new Worker(new URL("../worker.js", import.meta.url), {
-                type: "module",
-            }),
-        });
-
-        viz
-            .renderString("digraph{1 -> 2 }")
-            .then((svgString) => {
-                console.log(svgString);
-            })
-            .catch((error) => {
-                console.error(error);
-            })
-            .finally(
-                () =>
-                    // You can either terminate explicitly:
-                    viz.terminateWorker()
-                // or let it be auto-closed at the end of the process
-            );
-
-    }
-
     public getCountdownTimer(): CountdownTimer {
         return this.countdownTimer;
     }
 
-
+    public getAllStates(): StateMachineState[] {
+        return this.allStates;
+    }
 
 }

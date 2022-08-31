@@ -4,10 +4,11 @@
         "src/bower_components": true
     },
     "cSpell.words": [
+        "aduh", //author of https://github.com/aduh95/viz.js
         "Airdate",
         "datalabels",
         "Footswitch",
         "millisec",
-        "rarr"
+        "rarr" //html &rarr; right arrow
     ]
 }

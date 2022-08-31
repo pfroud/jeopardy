@@ -8,7 +8,7 @@ export function generateDotFileForGraphviz(stateArray: StateMachineState[]): str
     const dotFileLines: string[] = [];
     dotFileLines.push('digraph jeopardy {');
     dotFileLines.push('\tgraph [id="jeopardy"];');
-    dotFileLines.push('\tnode [shape="rect", fontname="monospace"];\n');
+    dotFileLines.push('\tnode [shape="rect", fontname="Courier"];\n'); // https://graphviz.org/doc/info/attrs.html#d:fontname
 
     stateArray.forEach((state: StateMachineState) => {
 
