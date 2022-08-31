@@ -1,5 +1,5 @@
-import { Operator } from "../operator/Operator.js";
-import { Team } from "../Team.js";
+import { Operator } from "../operator/Operator";
+import { Team } from "../Team";
 
 document.addEventListener("DOMContentLoaded", function () {
     if (!window.opener) {

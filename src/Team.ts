@@ -1,8 +1,8 @@
-import { CountdownTimer } from "./CountdownTimer.js";
-import { AudioManager } from "./operator/AudioManager.js";
-import { Clue } from "./operator/Operator.js";
-import { Presentation } from "./presentation/Presentation.js";
-import { Settings } from "./Settings.js";
+import { CountdownTimer } from "./CountdownTimer";
+import { AudioManager } from "./operator/AudioManager";
+import { Clue } from "./operator/Operator";
+import { Presentation } from "./presentation/Presentation";
+import { Settings } from "./Settings";
 
 interface TeamDivs {
     operator: {

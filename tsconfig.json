@@ -22,7 +22,12 @@
         enable the exactOptionalPropertyTypes option:
         https://www.typescriptlang.org/tsconfig#exactOptionalPropertyTypes
          */
-        "strictNullChecks": false
+        "strictNullChecks": false,
+        //
+        // https://parceljs.org/languages/typescript/#isolatedmodules
+        // https://www.typescriptlang.org/tsconfig#isolatedModules
+        "isolatedModules": true,
+        "module": "es2022"
     },
     "exclude": [
         "node_modules"

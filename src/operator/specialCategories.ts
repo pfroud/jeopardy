@@ -1,3 +1,5 @@
+export { }; //force this file to be a module so we can compile it using --isolatedModules tsc option
+
 /*
 Some categories have special rules or need special explanation.
 */

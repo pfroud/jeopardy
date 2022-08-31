@@ -1,32 +1,3 @@
-window.addEventListener('DOMContentLoaded', () => {
-
-    if (!window.opener) {
-        document.body.innerText = "window.opener is falsey";
-        return;
-    }
-
-    if (!(window.opener).operator) {
-        document.body.innerText = "window.opener.operator is falsey";
-        return;
-    }
-
-    if (!window.opener.operator.stateMachine) {
-        document.body.innerText = "window.opener.operator.stateMachine is falsey";
-        return;
-    }
-
-    // https://stackoverflow.com/a/3379830
-    const objectElement = document.querySelector<HTMLObjectElement>("object#graphviz");
-    objectElement.addEventListener("load", function () {
-        const svgDocument = objectElement.contentDocument;
-        const thing = new GraphvizViewer(svgDocument);
-        window.opener.operator.stateMachine.handleGraphvizViewerReady(thing);
-
-    });
-});
-
-
-
 export class GraphvizViewer {
 
     private readonly DEBUG = true;
@@ -40,12 +11,12 @@ export class GraphvizViewer {
     private stateTrail: SVGGElement[] = [];
     private transitionTrail: SVGGElement[] = [];
 
-    constructor(svgDocument: XMLDocument) {
-        this.svg = svgDocument.querySelector<SVGElement>("svg");
+    constructor(svgElement: SVGSVGElement) {
+        this.svg = svgElement;
 
 
         // https://stackoverflow.com/a/4906603
-        const styleElement = svgDocument.createElementNS("http://www.w3.org/2000/svg", "style");
+        const styleElement = window.document.createElementNS("http://www.w3.org/2000/svg", "style");
 
         const lines: string[] = [];
 

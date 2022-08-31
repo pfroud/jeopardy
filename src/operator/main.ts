@@ -1,6 +1,6 @@
-import { Settings } from "../Settings.js";
-import { AudioManager } from "./AudioManager.js";
-import { Operator } from "./Operator.js";
+import { Settings } from "../Settings";
+import { AudioManager } from "./AudioManager";
+import { Operator } from "./Operator";
 
 document.addEventListener("DOMContentLoaded", function () {
     if (window.location.search.length > 1) {

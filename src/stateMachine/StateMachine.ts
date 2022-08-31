@@ -1,12 +1,14 @@
-import { Operator } from "../operator/Operator.js";
-import { Settings } from "../Settings.js";
-import { AudioManager } from "../operator/AudioManager.js";
-import { Presentation } from "../presentation/Presentation.js";
-import { CountdownTimer } from "../CountdownTimer.js";
-import { getStatesForJeopardyGame } from "./statesForJeopardyGame.js";
-import { StateMachineState, StateMachineTransition, TimeoutTransition, TransitionType, CountdownTimerSource, CountdownOperation } from "./stateInterfaces.js";
-import { generateDotFileForGraphviz } from "./generateDotFileForGraphviz.js";
-import { GraphvizViewer } from "../graphvizViewer/graphvizViewer.js";
+import { Operator } from "../operator/Operator";
+import { Settings } from "../Settings";
+import { AudioManager } from "../operator/AudioManager";
+import { Presentation } from "../presentation/Presentation";
+import { CountdownTimer } from "../CountdownTimer";
+import { getStatesForJeopardyGame } from "./statesForJeopardyGame";
+import { StateMachineState, StateMachineTransition, TimeoutTransition, TransitionType, CountdownTimerSource, CountdownOperation } from "./stateInterfaces";
+import { generateDotFileForGraphviz } from "./generateDotFileForGraphviz";
+import { GraphvizViewer } from "../graphvizViewer/GraphvizViewer";
+
+
 
 interface StateMap {
     [stateName: string]: StateMachineState;
@@ -367,14 +369,12 @@ export class StateMachine {
 
     }
 
-    public showDotFileForGraphviz(): void {
-        generateDotFileForGraphviz(this.allStates);
-    }
-
     public getCountdownTimer(): CountdownTimer {
         return this.countdownTimer;
     }
 
-
+    public getAllStates(): StateMachineState[] {
+        return this.allStates;
+    }
 
 }

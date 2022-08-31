@@ -1,44 +1,14 @@
+// https://code.visualstudio.com/docs/editor/tasks#_custom-tasks
 {
-    // https://code.visualstudio.com/docs/editor/tasks#_custom-tasks
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Graphviz",
-            "group": "build",
-            "type": "shell",
-            "command": "C:\\Users\\pfrou\\Downloads\\stable_windows_10_msbuild_Release_Win32_graphviz-2.49.3-win32\\Graphviz\\bin\\dot.exe",
-            // https://graphviz.org/doc/info/command.html
-            "args": [
-                "-Tsvg",
-                "-o",
-                "graphvizOutput.svg",
-                "graphviz-input.gv"
-            ],
-            "problemMatcher": [], // https://code.visualstudio.com/docs/editor/tasks#_defining-a-problem-matcher
-            "presentation": {
-                "echo": false,
-                "reveal": "never",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": false,
-                "clear": false
-            }
-        },
-        {
-            // https://code.visualstudio.com/docs/languages/css#_step-3-create-tasksjson
-            "label": "Sass",
-            "type": "shell",
-            // https://sass-lang.com/documentation/cli/dart-sass#many-to-many-mode
-            "command": "sass src/operator/scss:src/operator/css src/presentation/scss:src/presentation/css src/moneyOverride/scss:src/moneyOverride/css",
-            "group": "build"
-        },
-        {
-            // https://webpack.js.org/api/cli/
-            // https://webpack.js.org/guides/installation/
-            "label": "webpack",
+            "label": "Start Parcel development server",
             "type": "shell",
             "group": "build",
-            "command": "npx webpack",
+            // https://parceljs.org/features/cli/
+            // Source maps are not working so I am turning them off
+            "command": "npx parcel serve src/index.html src/operator/operator.html src/presentation/presentation.html src/graphvizViewer/graphvizViewer.html --no-source-maps",
             "presentation": {
                 "echo": false,
                 "reveal": "always",

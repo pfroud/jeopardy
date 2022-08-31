@@ -1,11 +1,10 @@
-import { Team, TeamState } from "../Team.js";
-import { StateMachine } from "../stateMachine/StateMachine.js";
-import { AudioManager } from "./AudioManager.js";
-import { Settings } from "../Settings.js";
-import { Presentation } from "../presentation/Presentation.js";
-import { CountdownTimer } from "../CountdownTimer.js";
-import { CountdownOperation, CountdownTimerSource } from "../stateMachine/stateInterfaces.js";
-import * as Chartist from "chartist";
+import { Team, TeamState } from "../Team";
+import { StateMachine } from "../stateMachine/StateMachine";
+import { AudioManager } from "./AudioManager";
+import { Settings } from "../Settings";
+import { Presentation } from "../presentation/Presentation";
+import { CountdownTimer } from "../CountdownTimer";
+import { CountdownOperation, CountdownTimerSource } from "../stateMachine/stateInterfaces";
 
 export interface Clue {
     answer: string;
@@ -160,8 +159,10 @@ export class Operator {
         document.querySelector("a#aMoneyOverride").addEventListener("click", () =>
             window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney", "popup"));
 
-        //document.querySelector("a#aGenerateGraphviz").addEventListener("click", () =>
-        //   this.stateMachine.showDotFileForGraphviz());
+
+        document.querySelector("a#aGenerateGraphviz").addEventListener("click", () =>
+            window.open("../graphvizViewer/graphvizViewer.html", "windowGraphvizViewer", "popup")
+        );
     }
 
     private startGame() {
@@ -607,5 +608,9 @@ export class Operator {
         }
     }
 
+
+    public getStateMachine(): StateMachine {
+        return this.stateMachine;
+    }
 
 }
