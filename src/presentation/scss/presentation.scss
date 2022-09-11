@@ -170,8 +170,8 @@ main {
             font-size: 60px;
         }
 
-        &#slide-game-end {
-            div#text {
+        &#slide-gameEnd-team-ranking-list {
+            div#team-ranking {
                 font-size: 40px;
                 text-shadow: $big-shadow;
                 p {
@@ -185,11 +185,51 @@ main {
                     }
                 }
             }
-            div#charts div.team-pie-chart {
-                width: 300px;
-                height: 300px;
-                display: inline-block;
-                padding: 5px;
+        }
+
+        &#slide-gameEnd-pie-charts {
+            div#charts {
+                // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+
+                div.team-pie-chart {
+                    padding: 20px;
+                    position: relative;
+
+                    div.chart-title {
+                        // https://stackoverflow.com/a/23703655
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translateX(-50%) translateY(-50%);
+                    }
+                }
+            }
+
+            div#chart-legend {
+                margin-top: 50px;
+
+                div.legend-row {
+                    height: 30px;
+
+                    span.color-swatch {
+                        display: inline-block;
+                        width: 20px;
+                        height: 20px;
+                        vertical-align: middle;
+                    }
+
+                    &#not-buzzed span.color-swatch {
+                        background-color: gray;
+                    }
+                    &#buzzed-then-answered-right span.color-swatch {
+                        background-color: green;
+                    }
+                    &#buzzed-then-answered-wrong-or-timed-out span.color-swatch {
+                        background-color: red;
+                    }
+                }
             }
         }
     }
@@ -274,4 +314,29 @@ footer {
             }
         }
     }
+}
+
+body.hide-header-and-footer {
+    header {
+        display: none;
+    }
+
+    /*
+     Normally, the <main> element has its height set to be 
+     100vh minus the height of the header and footer. When 
+     the header and footer are hidden, we should make the
+     <main> element take up the entire height of the window.
+     */
+    main {
+        height: 100%;
+    }
+
+    footer {
+        display: none;
+    }
+}
+
+h1,
+h2 {
+    text-align: center;
 }

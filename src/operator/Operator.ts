@@ -22,7 +22,7 @@ interface SavedGameInLocalStorage {
 }
 
 export class Operator {
-    public static teamCount = 4; //not readonly because it can change if we load a game from localStorage
+    public static teamCount = 8; //not readonly because it can change if we load a game from localStorage
     static readonly localStorageKey = "jeopardy-teams";
 
     private readonly audioManager: AudioManager;
@@ -560,6 +560,11 @@ export class Operator {
             chartContainer.className = "team-pie-chart";
             divForCharts.appendChild(chartContainer);
 
+            const title = document.createElement("div");
+            title.className = "chart-title";
+            title.innerText = teamObj.teamName;
+            chartContainer.appendChild(title);
+
             const chartData: Chartist.PieChartData = {
                 series: [
                     {
@@ -572,22 +577,15 @@ export class Operator {
                         value: teamObj.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut,
                         className: "buzzed-then-answered-wrong-or-timed-out"
                     }
-                ],
-                /*
-                labels: [
-                    "Not buzzed",
-                    "Answered right",
-                    "Answered wrong or timed out"
                 ]
-                */
             };
 
             // https://gionkunz.github.io/chartist-js/api-documentation.html#chartistpie-declaration-defaultoptions
             const chartOptions: Chartist.PieChartOptions = {
-                width: "100%",
-                height: "100%",
+                width: "300px",
+                height: "300px",
                 donut: true,
-                donutWidth: "50%",
+                donutWidth: "40%",
                 //
                 /*
                 Padding of the chart drawing area to the container element
@@ -610,7 +608,7 @@ export class Operator {
                 side of the center of the chart. Usually explode is useful
                 when labels are positioned far away from the center.
                 */
-                labelDirection: 'implode',
+                labelDirection: 'neutral',
                 //
                 /*
                 This option can be set to 'inside', 'outside' or 'center'.
@@ -622,13 +620,7 @@ export class Operator {
                 chart. The 'center' option only makes sense in conjunction
                 with the 'labelOffset' option.
                 */
-                labelPosition: "inside",
-                /*
-                labelInterpolationFnc: function (value, idx: number) {
-                    const percentage = Math.round(value / data.series.reduce(sum) * 100) + '%';
-                    return animals[idx] + ' ' + percentage;
-                }
-                */
+                labelPosition: "center"
             };
 
             new Chartist.PieChart(chartContainer, chartData, chartOptions);

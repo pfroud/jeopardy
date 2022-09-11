@@ -128,7 +128,7 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             }],
         }, {
             name: "gameEnd",
-            presentationSlideToShow: "slide-game-end",
+            presentationSlideToShow: "slide-gameEnd-team-ranking-list",
             onEnter: operator.handleGameEnd.bind(operator),
             transitions: [{
                 type: TransitionType.ManualTrigger,
