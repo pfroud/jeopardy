@@ -23,7 +23,7 @@ interface TeamStatistics {
     questionsNotBuzzed: number;
     questionsBuzzedThenAnsweredRight: number;
     questionsBuzzedThenAnsweredWrongOrTimedOut: number;
-    moneyAtEndOfEachRound: number[]
+    dollarsAtEndOfEachRound: number[]
 }
 
 export class Team {
@@ -57,17 +57,10 @@ export class Team {
     public hasBuzzedForCurrentQuestion = false;
 
     public statistics: TeamStatistics = {
-        questionsNotBuzzed: getRandomIntInclusive(1, 10),
-        questionsBuzzedThenAnsweredRight: getRandomIntInclusive(1, 10),
-        questionsBuzzedThenAnsweredWrongOrTimedOut: getRandomIntInclusive(1, 10),
-
-        moneyAtEndOfEachRound: [
-            getRandomIntInclusive(1, 100),
-            getRandomIntInclusive(1, 100),
-            getRandomIntInclusive(1, 100),
-            getRandomIntInclusive(1, 100),
-            getRandomIntInclusive(1, 100)
-        ]
+        questionsNotBuzzed: 0,
+        questionsBuzzedThenAnsweredRight: 0,
+        questionsBuzzedThenAnsweredWrongOrTimedOut: 0,
+        dollarsAtEndOfEachRound: []
     };
 
     constructor(teamIdx: number, presentationInstance: Presentation, settings: Settings, audioManager: AudioManager) {
@@ -341,6 +334,10 @@ export class Team {
 
     public getState(): TeamState {
         return this.state;
+    }
+
+    public updateDollarsAtEndOfRound(): void {
+        this.statistics.dollarsAtEndOfEachRound.push(this.dollars);
     }
 
 

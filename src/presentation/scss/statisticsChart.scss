@@ -3,7 +3,7 @@ This stylesheet gets added with the Chartist stylesheet
 "bower_components/chartist/dist/chartist.min.css"
 */
 
-svg.ct-chart-donut {
+div#slide-gameEnd-pie-charts svg.ct-chart-donut {
     g.ct-series {
         &.not-buzzed path.ct-slice-donut {
             stroke: gray;
@@ -25,11 +25,22 @@ svg.ct-chart-donut {
     }
 }
 
-svg.ct-chart-line {
-    g.ct-grids line {
-        stroke: white;
+div#slide-gameEnd-line-chart {
+    div#y-axis-label {
+        transform: translate(-20px, 250px) rotate(-90deg);
+        display: inline-block;
     }
-    g.ct-labels span {
-        color: white;
+
+    div#x-axis-label {
+        text-align: center;
+    }
+
+    svg.ct-chart-line {
+        g.ct-grids line {
+            stroke: white;
+        }
+        g.ct-labels span {
+            color: white;
+        }
     }
 }
