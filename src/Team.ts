@@ -253,7 +253,7 @@ export class Team {
         progress.style.display = "none";
         divTeam.append(progress);
 
-        document.querySelector("footer").appendChild(divTeam);
+        document.querySelector("footer").prepend(divTeam);
 
     }
 
