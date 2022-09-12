@@ -19,6 +19,13 @@ interface TeamDivs {
     };
 }
 
+interface TeamStatistics {
+    questionsNotBuzzed: number;
+    questionsBuzzedThenAnsweredRight: number;
+    questionsBuzzedThenAnsweredWrongOrTimedOut: number;
+    moneyAtEndOfEachRound: number[]
+}
+
 export class Team {
     public readonly teamName: string;
 
@@ -49,16 +56,18 @@ export class Team {
     };
     public hasBuzzedForCurrentQuestion = false;
 
-    public statistics = {
-        // want to show a pie chart at the end of the game of the three numbers below
+    public statistics: TeamStatistics = {
         questionsNotBuzzed: getRandomIntInclusive(1, 10),
         questionsBuzzedThenAnsweredRight: getRandomIntInclusive(1, 10),
-        questionsBuzzedThenAnsweredWrongOrTimedOut: getRandomIntInclusive(1, 10)
-        /*
-         also want to show a chart of money over time.
-         the x axis will be the question number. the y axis will be how much 
-         money a team has. there will be a line for each team.
-         */
+        questionsBuzzedThenAnsweredWrongOrTimedOut: getRandomIntInclusive(1, 10),
+
+        moneyAtEndOfEachRound: [
+            getRandomIntInclusive(1, 100),
+            getRandomIntInclusive(1, 100),
+            getRandomIntInclusive(1, 100),
+            getRandomIntInclusive(1, 100),
+            getRandomIntInclusive(1, 100)
+        ]
     };
 
     constructor(teamIdx: number, presentationInstance: Presentation, settings: Settings, audioManager: AudioManager) {

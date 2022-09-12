@@ -144,8 +144,12 @@ export class Presentation {
         document.querySelector("div#slide-gameEnd-team-ranking-list div#team-ranking").innerHTML = htmlString;
     }
 
-    public getDivForCharts(): HTMLDivElement {
-        return document.querySelector("div#slide-gameEnd-pie-charts div#charts");
+    public getDivForPieCharts(): HTMLDivElement {
+        return document.querySelector("div#slide-gameEnd-pie-charts div#pie-charts");
+    }
+
+    public getDivForLineChart(): HTMLDivElement {
+        return document.querySelector("div#slide-gameEnd-line-chart div#line-chart");
     }
 
     public hideHeaderAndFooter(): void {

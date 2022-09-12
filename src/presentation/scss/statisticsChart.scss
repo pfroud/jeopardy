@@ -24,3 +24,12 @@ svg.ct-chart-donut {
         font-size: 40px;
     }
 }
+
+svg.ct-chart-line {
+    g.ct-grids line {
+        stroke: white;
+    }
+    g.ct-labels span {
+        color: white;
+    }
+}

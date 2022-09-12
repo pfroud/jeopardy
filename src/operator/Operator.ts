@@ -6,6 +6,7 @@ import { Presentation } from "../presentation/Presentation";
 import { CountdownTimer } from "../CountdownTimer";
 import { CountdownOperation, CountdownTimerSource } from "../stateMachine/stateInterfaces";
 import * as Chartist from "chartist";
+import { AutoScaleAxis } from "chartist";
 
 export interface Clue {
     answer: string;
@@ -553,12 +554,17 @@ export class Operator {
     }
 
     private createStatisticsCharts() {
-        const divForCharts = this.presentation.getDivForCharts();
+        this.createPieCharts();
+        this.createLineChart();
+    }
+
+    private createPieCharts() {
+        const divForPieCharts = this.presentation.getDivForPieCharts();
 
         this.teamArray.forEach(teamObj => {
             const chartContainer = document.createElement("div");
             chartContainer.className = "team-pie-chart";
-            divForCharts.appendChild(chartContainer);
+            divForPieCharts.appendChild(chartContainer);
 
             const title = document.createElement("div");
             title.className = "chart-title";
@@ -625,6 +631,52 @@ export class Operator {
 
             new Chartist.PieChart(chartContainer, chartData, chartOptions);
         });
+    }
+
+    private createLineChart() {
+
+        interface XYPoint {
+            x: number;
+            y: number;
+        }
+
+        interface LineChartSeriesData {
+            data: XYPoint[]
+        }
+
+        const lineChartDataForAllTeams: LineChartSeriesData[] =
+            this.teamArray.map(
+                team => ({
+                    data: team.statistics.moneyAtEndOfEachRound.map(
+                        (value, index) => ({ x: index, y: value })
+                    )
+                })
+            );
+
+
+        const chartData: Chartist.LineChartData = {
+            series: lineChartDataForAllTeams
+        };
+
+        const chartOptions: Chartist.LineChartOptions = {
+            axisX: {
+                showGrid: false,
+                type: AutoScaleAxis,
+                onlyInteger: true
+            },
+            axisY: {
+                showGrid: true,
+                type: AutoScaleAxis,
+                labelInterpolationFnc: value => "$" + value.toLocaleString()
+            },
+            lineSmooth: false,
+            width: "1000px",
+            height: "500px"
+
+        };
+
+        new Chartist.LineChart(this.presentation.getDivForLineChart(), chartData, chartOptions);
+
     }
 
     private resetDurationForWaitForBuzzesState(): void {
