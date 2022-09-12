@@ -518,11 +518,9 @@ export class Operator {
     public handleGameEnd(): void {
         this.gameTimer.pause();
 
-        /*
         this.audioManager.play("roundEnd").then(
             () => this.audioManager.play("musicGameEnd")
         );
-        */
 
         // sort teams by how much money they have
         const shallowCopy = this.teamArray.slice();
@@ -647,7 +645,7 @@ export class Operator {
         const lineChartDataForAllTeams: LineChartSeriesData[] =
             this.teamArray.map(
                 team => ({
-                    data: team.statistics.moneyAtEndOfEachRound.map(
+                    data: team.statistics.dollarsAtEndOfEachRound.map(
                         (value, index) => ({ x: index, y: value })
                     )
                 })
@@ -667,6 +665,7 @@ export class Operator {
             axisY: {
                 showGrid: true,
                 type: AutoScaleAxis,
+                onlyInteger: true,
                 labelInterpolationFnc: value => "$" + value.toLocaleString()
             },
             lineSmooth: false,
@@ -694,6 +693,10 @@ export class Operator {
         } else {
             return { type: CountdownOperation.ResumeExisting, countdownTimerToResume: this.countdownTimerForWaitForBuzzesState };
         }
+    }
+
+    public updateTeamDollarsAtEndOfRound(): void {
+        this.teamArray.forEach(t => t.updateDollarsAtEndOfRound());
     }
 
 
