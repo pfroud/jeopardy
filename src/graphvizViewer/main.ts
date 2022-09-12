@@ -10,17 +10,17 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    if (!window.opener.operator) {
+    if (!(window.opener as any).operator) {
         document.body.innerText = "window.opener.operator is falsey";
         return;
     }
 
-    if (!window.opener.operator.stateMachine) {
+    if (!((window.opener as any).operator as Operator).getStateMachine()) {
         document.body.innerText = "window.opener.operator.stateMachine is falsey";
         return;
     }
 
-    const dotFileString = generateDotFileForGraphviz(window.opener.operator.stateMachine.getAllStates());
+    const dotFileString = generateDotFileForGraphviz(((window.opener as any).operator as Operator).getStateMachine().getAllStates());
 
     generateSvgFromDotFile(dotFileString)
         .then((svgString) => {
@@ -29,7 +29,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const svgElement = document.querySelector("svg");
             svgElement.style.width = "100%";
             const graphvizViewer = new GraphvizViewer(svgElement);
-            (window.opener.operator as Operator).getStateMachine().handleGraphvizViewerReady(graphvizViewer);
+            ((window.opener as any).operator as Operator).getStateMachine().handleGraphvizViewerReady(graphvizViewer);
 
         })
         .catch((error) => {

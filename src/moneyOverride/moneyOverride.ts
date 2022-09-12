@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    const teamArray: Team[] = window.opener.operator.teamArray;
+    const teamArray: Team[] = ((window.opener as any).operator as Operator).getTeamArray();
 
     //////////// populate the table //////////////
     const table = document.querySelector("table tbody");

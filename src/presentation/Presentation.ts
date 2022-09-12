@@ -1,4 +1,4 @@
-import { Clue } from "../operator/Operator";
+import { Clue, Operator } from "../operator/Operator";
 
 interface Slides {
     [slideName: string]: HTMLDivElement;
@@ -42,9 +42,9 @@ export class Presentation {
 
         if (window.opener) {
 
-            if (window.opener.operator) {
+            if ((window.opener as any).operator) {
                 this.showSlide("slide-jeopardy-logo");
-                window.opener.operator.handlePresentationReady(this);
+                ((window.opener as any).operator as Operator).handlePresentationReady(this);
             } else {
                 const warningDiv = document.createElement("div");
                 warningDiv.innerHTML = "window.opener.operator is null";

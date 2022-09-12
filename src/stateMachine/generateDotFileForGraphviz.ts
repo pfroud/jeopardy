@@ -90,14 +90,14 @@ export function generateDotFileForGraphviz(stateArray: StateMachineState[]): str
                     const condition = transition.condition.name.replace("bound ", "");
 
                     let labelThen = "if(" + condition + ")";
-                    if (transition.then.onTransitionThen) {
-                        labelThen += ` / ${transition.then.onTransitionThen.name.replace("bound ", "")}()`;
+                    if (transition.then.onTransition) {
+                        labelThen += ` / ${transition.then.onTransition.name.replace("bound ", "")}()`;
                     }
                     const idThen = `${state.name}_to_${transition.then.destination}`;
 
                     let labelElse = "if(!" + condition + ")";
-                    if (transition.else.onTransitionElse) {
-                        labelElse += ` / ${transition.else.onTransitionElse.name.replace("bound ", "")}()`;
+                    if (transition.else.onTransition) {
+                        labelElse += ` / ${transition.else.onTransition.name.replace("bound ", "")}()`;
                     }
                     const idElse = `${state.name}_to_${transition.else.destination}`;
 

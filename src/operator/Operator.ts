@@ -709,4 +709,8 @@ export class Operator {
         return this.stateMachine;
     }
 
+    public getTeamArray(): Team[] {
+        return this.teamArray;
+    }
+
 }
