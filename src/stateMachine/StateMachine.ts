@@ -288,8 +288,22 @@ export class StateMachine {
                     console.log(`Transition type if: the condition function is ${transitionObj.condition.name}`);
                 }
                 if (transitionObj.condition(keyboardEvent)) {
+                    if (transitionObj.then.onTransition) {
+                        if (this.DEBUG) {
+                            console.log(`Running the then.onTransition function of ${this.presentState}: ${transitionObj.then.onTransition.name}`);
+                        }
+                        transitionObj.then.onTransition();
+
+                    }
                     this.goToState(transitionObj.then.destination, keyboardEvent);
                 } else {
+                    if (transitionObj.else.onTransition) {
+                        if (this.DEBUG) {
+                            console.log(`Running the else.onTransitionThen function of ${this.presentState}: ${transitionObj.then.onTransition.name}`);
+                        }
+                        transitionObj.else.onTransition();
+
+                    }
                     this.goToState(transitionObj.else.destination, keyboardEvent);
                 }
             }

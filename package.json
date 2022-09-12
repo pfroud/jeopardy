@@ -31,6 +31,6 @@
     "util": "^0.12.4"
   },
   "dependencies": {
-    "chartist": "^0.11.4"
+    "chartist": "^1.1.2"
   }
 }

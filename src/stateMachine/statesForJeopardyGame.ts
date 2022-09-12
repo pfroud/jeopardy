@@ -124,11 +124,14 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 type: TransitionType.If,
                 condition: operator.shouldGameEnd.bind(operator),
                 then: { destination: "gameEnd" },
-                else: { destination: "getClueFromJService" }
+                else: {
+                    destination: "getClueFromJService",
+                    onTransition: operator.updateTeamDollarsAtEndOfRound.bind(operator)
+                }
             }],
         }, {
             name: "gameEnd",
-            presentationSlideToShow: "slide-game-end",
+            presentationSlideToShow: "slide-gameEnd-line-chart",
             onEnter: operator.handleGameEnd.bind(operator),
             transitions: [{
                 type: TransitionType.ManualTrigger,

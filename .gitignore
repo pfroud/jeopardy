@@ -7,6 +7,6 @@ node_modules/
 buzzers/
 *.css
 *.css.map
-src/bower_components
+bower_components
 .parcel-cache/
 dist/

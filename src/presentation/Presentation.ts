@@ -141,16 +141,19 @@ export class Presentation {
     }
 
     public setTeamRankingHtml(htmlString: string): void {
-        document.querySelector("div#slide-game-end div#team-ranking").innerHTML = htmlString;
+        document.querySelector("div#slide-gameEnd-team-ranking-list div#team-ranking").innerHTML = htmlString;
     }
 
-    public getDivForCharts(): HTMLDivElement {
-        return document.querySelector("div#slide-game-end div#chats");
+    public getDivForPieCharts(): HTMLDivElement {
+        return document.querySelector("div#slide-gameEnd-pie-charts div#pie-charts");
+    }
+
+    public getDivForLineChart(): HTMLDivElement {
+        return document.querySelector("div#slide-gameEnd-line-chart div#line-chart");
     }
 
     public hideHeaderAndFooter(): void {
-        this.header.style.display = "none";
-        this.footer.style.display = "none";
+        document.body.className = "hide-header-and-footer";
     }
 
     public clearFooter(): void {

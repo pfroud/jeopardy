@@ -5,6 +5,7 @@ import { Settings } from "../Settings";
 import { Presentation } from "../presentation/Presentation";
 import { CountdownTimer } from "../CountdownTimer";
 import { CountdownOperation, CountdownTimerSource } from "../stateMachine/stateInterfaces";
+import * as Chartist from "chartist";
 
 export interface Clue {
     answer: string;
@@ -21,7 +22,7 @@ interface SavedGameInLocalStorage {
 }
 
 export class Operator {
-    public static teamCount = 4; //not readonly because it can change if we load a game from localStorage
+    public static teamCount = 8; //not readonly because it can change if we load a game from localStorage
     static readonly localStorageKey = "jeopardy-teams";
 
     private readonly audioManager: AudioManager;
@@ -526,7 +527,6 @@ export class Operator {
             () => this.audioManager.play("musicGameEnd")
         );
 
-
         // sort teams by how much money they have
         const shallowCopy = this.teamArray.slice();
         function comparator(team1: Team, team2: Team) {
@@ -552,42 +552,134 @@ export class Operator {
         this.presentation.setTeamRankingHtml(html.join(""));
         this.presentation.hideHeaderAndFooter();
 
-        /*
-        const divForCharts = this.presentation.getDivForCharts();
-        this.teamArray.forEach(teamObj => {
-            const div = document.createElement("div");
-            div.style.width = "300px";
-            div.style.height = "300px";
-            divForCharts.appendChild(div);
 
-            const data: Chartist.IChartistData = {
+        this.createStatisticsCharts();
+    }
+
+    private createStatisticsCharts() {
+        this.createPieCharts();
+        this.createLineChart();
+    }
+
+    private createPieCharts() {
+        const divForPieCharts = this.presentation.getDivForPieCharts();
+
+        this.teamArray.forEach(teamObj => {
+            const chartContainer = document.createElement("div");
+            chartContainer.className = "team-pie-chart";
+            divForPieCharts.appendChild(chartContainer);
+
+            const title = document.createElement("div");
+            title.className = "chart-title";
+            title.innerText = teamObj.teamName;
+            chartContainer.appendChild(title);
+
+            const chartData: Chartist.PieChartData = {
                 series: [
-                    teamObj.statistics.questionsNotBuzzed,
-                    teamObj.statistics.questionsBuzzedThenAnsweredRight,
-                    teamObj.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut
-                ],
-                labels: ["Not buzzed",
-                    "Answered right",
-                    "Answered wrong or timed out"
+                    {
+                        value: teamObj.statistics.questionsNotBuzzed,
+                        className: "not-buzzed"
+                    }, {
+                        value: teamObj.statistics.questionsBuzzedThenAnsweredRight,
+                        className: "buzzed-then-answered-right"
+                    }, {
+                        value: teamObj.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut,
+                        className: "buzzed-then-answered-wrong-or-timed-out"
+                    }
                 ]
             };
 
-            const options: Chartist.IPieChartOptions = {
-                width: "100%",
-                height: "100%",
+            // https://gionkunz.github.io/chartist-js/api-documentation.html#chartistpie-declaration-defaultoptions
+            const chartOptions: Chartist.PieChartOptions = {
+                width: "300px",
+                height: "300px",
                 donut: true,
-                donutWidth: "50%",
+                donutWidth: "40%",
+                //
+                /*
+                Padding of the chart drawing area to the container element
+                and labels as a number or padding object {top: 5, right: 5, bottom: 5, left: 5}
+                */
                 chartPadding: 0,
                 showLabel: true,
-                labelPosition: "outside"
+                //
+                /*
+                Label position offset from the standard position which is
+                half distance of the radius. This value can be either positive
+                or negative. Positive values will position the label away from the center.
+                */
+                labelOffset: 0,
+                //
+                /*
+                Label direction can be 'neutral', 'explode' or 'implode'.
+                The labels anchor will be positioned based on those settings
+                as well as the fact if the labels are on the right or left
+                side of the center of the chart. Usually explode is useful
+                when labels are positioned far away from the center.
+                */
+                labelDirection: 'neutral',
+                //
+                /*
+                This option can be set to 'inside', 'outside' or 'center'.
+                Positioned with 'inside' the labels will be placed on half
+                the distance of the radius to the border of the Pie by
+                respecting the 'labelOffset'. The 'outside' option will
+                place the labels at the border of the pie and 'center'
+                will place the labels in the absolute center point of the
+                chart. The 'center' option only makes sense in conjunction
+                with the 'labelOffset' option.
+                */
+                labelPosition: "center"
             };
 
-            new Chartist.Pie(div, data, options);
-
-
+            new Chartist.PieChart(chartContainer, chartData, chartOptions);
         });
-*/
+    }
 
+    private createLineChart() {
+
+        interface XYPoint {
+            x: number;
+            y: number;
+        }
+
+        interface LineChartSeriesData {
+            data: XYPoint[]
+        }
+
+        const lineChartDataForAllTeams: LineChartSeriesData[] =
+            this.teamArray.map(
+                team => ({
+                    data: team.statistics.dollarsAtEndOfEachRound.map(
+                        (value, index) => ({ x: index, y: value })
+                    )
+                })
+            );
+
+
+        const chartData: Chartist.LineChartData = {
+            series: lineChartDataForAllTeams
+        };
+
+        const chartOptions: Chartist.LineChartOptions = {
+            axisX: {
+                showGrid: false,
+                type: Chartist.AutoScaleAxis,
+                onlyInteger: true
+            },
+            axisY: {
+                showGrid: true,
+                type: Chartist.AutoScaleAxis,
+                onlyInteger: true,
+                labelInterpolationFnc: value => "$" + value.toLocaleString()
+            },
+            lineSmooth: false,
+            width: "1000px",
+            height: "500px"
+
+        };
+
+        new Chartist.LineChart(this.presentation.getDivForLineChart(), chartData, chartOptions);
 
     }
 
@@ -606,6 +698,10 @@ export class Operator {
         } else {
             return { type: CountdownOperation.ResumeExisting, countdownTimerToResume: this.countdownTimerForWaitForBuzzesState };
         }
+    }
+
+    public updateTeamDollarsAtEndOfRound(): void {
+        this.teamArray.forEach(t => t.updateDollarsAtEndOfRound());
     }
 
 

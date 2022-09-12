@@ -33,11 +33,11 @@ export interface IfTransition {
     condition: (arg0: KeyboardEvent) => boolean;// TODO why does this get a keyboard event??
     then: {
         destination: string;
-        onTransitionThen?: () => void;
+        onTransition?: () => void;
     };
     else: {
         destination: string;
-        onTransitionElse?: () => void;
+        onTransition?: () => void;
     };
 }
 

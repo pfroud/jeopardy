@@ -5,8 +5,10 @@
     <title>J presentation</title>
     <meta charset="UTF-8">
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../../bower_components/chartist/dist/chartist.min.css">
     <link rel="stylesheet" href="font/korinna/korinna.css">
     <link rel="stylesheet" href="font/swiss911/swiss911.css">
+    <link rel="stylesheet" href="scss/statisticsChart.scss">
     <link rel="stylesheet" href="scss/progressBarForPresentation.scss">
     <link rel="stylesheet" href="scss/presentation.scss">
 </head>
@@ -61,14 +63,44 @@
 
         <div class="presentation-slide" id="slide-clue-answer"></div>
 
-        <div class="presentation-slide" id="slide-game-end">
-            <p>Game over!</p>
+        <div class="presentation-slide" id="slide-gameEnd-team-ranking-list">
 
-            <div id="team-ranking">
-                <!-- generated at runtime -->
+            <h1>Game over!</h1>
+            <h2>Team ranking</h2>
+
+            <div id="team-ranking"></div>
+
+        </div>
+
+        <div class="presentation-slide" id="slide-gameEnd-pie-charts">
+
+            <h1>Game over!</h1>
+            <h2>Team buzz results</h2>
+
+            <div id="pie-charts"></div>
+
+            <div id="chart-legend">
+                <div class="legend-row" id="not-buzzed">
+                    <span class="color-swatch"></span> Not buzzed
+                </div>
+                <div class="legend-row" id="buzzed-then-answered-right">
+                    <span class="color-swatch"></span> Buzzed then answered right
+                </div>
+                <div class="legend-row" id="buzzed-then-answered-wrong-or-timed-out">
+                    <span class="color-swatch"></span> Buzzed then answered wrong or timed out
+                </div>
             </div>
+        </div>
 
-            <div id="charts"></div>
+        <div class="presentation-slide" id="slide-gameEnd-line-chart">
+
+            <h1>Game over!</h1>
+            <h2>Team buzz results</h2>
+
+            <div id="y-axis-label">Dollars</div>
+            <div id="line-chart"></div>
+            <div id="x-axis-label">Question number</div>
+
         </div>
 
     </main>

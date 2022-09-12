@@ -19,6 +19,13 @@ interface TeamDivs {
     };
 }
 
+interface TeamStatistics {
+    questionsNotBuzzed: number;
+    questionsBuzzedThenAnsweredRight: number;
+    questionsBuzzedThenAnsweredWrongOrTimedOut: number;
+    dollarsAtEndOfEachRound: number[]
+}
+
 export class Team {
     public readonly teamName: string;
 
@@ -49,16 +56,11 @@ export class Team {
     };
     public hasBuzzedForCurrentQuestion = false;
 
-    public statistics = {
-        // want to show a pie chart at the end of the game of the three numbers below
+    public statistics: TeamStatistics = {
         questionsNotBuzzed: 0,
         questionsBuzzedThenAnsweredRight: 0,
-        questionsBuzzedThenAnsweredWrongOrTimedOut: 0
-        /*
-         also want to show a chart of money over time.
-         the x axis will be the question number. the y axis will be how much 
-         money a team has. there will be a line for each team.
-         */
+        questionsBuzzedThenAnsweredWrongOrTimedOut: 0,
+        dollarsAtEndOfEachRound: []
     };
 
     constructor(teamIdx: number, presentationInstance: Presentation, settings: Settings, audioManager: AudioManager) {
@@ -334,6 +336,10 @@ export class Team {
         return this.state;
     }
 
+    public updateDollarsAtEndOfRound(): void {
+        this.statistics.dollarsAtEndOfEachRound.push(this.dollars);
+    }
+
 
 }
 
@@ -346,3 +352,9 @@ export enum TeamState {
     LOCKOUT = "lockout" //team buzzed while operator was reading the question
 }
 
+function getRandomIntInclusive(min_: number, max_: number): number {
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random#getting_a_random_integer_between_two_values_inclusive
+    const min = Math.ceil(min_);
+    const max = Math.floor(max_);
+    return Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive
+}
