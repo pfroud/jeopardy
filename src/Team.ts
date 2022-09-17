@@ -7,13 +7,13 @@ import { Settings } from "./Settings";
 interface TeamDivs {
     operator: {
         wrapper: HTMLDivElement;
-        dollars: HTMLDivElement;
+        money: HTMLDivElement;
         teamName: HTMLDivElement;
         state: HTMLDivElement;
     };
     presentation: {
         wrapper: HTMLDivElement;
-        dollars: HTMLDivElement;
+        money: HTMLDivElement;
         teamName: HTMLDivElement;
         buzzerShow: HTMLDivElement;
     };
@@ -23,18 +23,18 @@ interface TeamStatistics {
     questionsNotBuzzed: number;
     questionsBuzzedThenAnsweredRight: number;
     questionsBuzzedThenAnsweredWrongOrTimedOut: number;
-    dollarsAtEndOfEachRound: number[]
+    moneyAtEndOfEachRound: number[]
 }
 
 export interface TeamSavedInLocalStorage {
-    dollars: number;
+    money: number;
     statistics: TeamStatistics;
 }
 
 export class Team {
     public readonly teamName: string;
 
-    private dollars = 0;
+    private money = 0;
     private countdownDotsInPresentationWindow: HTMLTableElement;
     private readonly settings: Settings;
     private readonly audioManager: AudioManager;
@@ -48,13 +48,13 @@ export class Team {
     private readonly div: TeamDivs = {
         operator: {
             wrapper: null,
-            dollars: null,
+            money: null,
             teamName: null,
             state: null
         },
         presentation: {
             wrapper: null,
-            dollars: null,
+            money: null,
             teamName: null,
             buzzerShow: null
         }
@@ -65,7 +65,7 @@ export class Team {
         questionsNotBuzzed: 0,
         questionsBuzzedThenAnsweredRight: 0,
         questionsBuzzedThenAnsweredWrongOrTimedOut: 0,
-        dollarsAtEndOfEachRound: []
+        moneyAtEndOfEachRound: []
     };
 
     constructor(teamIdx: number, presentationInstance: Presentation, settings: Settings, audioManager: AudioManager) {
@@ -100,57 +100,57 @@ export class Team {
 
     public moneyAdd(amountAdd: number, animate = true): void {
         if (animate) {
-            this.animateDollarsChange(this.dollars + amountAdd);
+            this.animateMoneyChange(this.money + amountAdd);
         } else {
-            this.dollars += amountAdd;
-            this.updateDollarsDisplay();
+            this.money += amountAdd;
+            this.updateMoneyDisplay();
         }
 
     }
 
     public moneySubtract(amountSubtract: number, animate = true): void {
         if (animate) {
-            this.animateDollarsChange(this.dollars - amountSubtract);
+            this.animateMoneyChange(this.money - amountSubtract);
         } else {
-            this.dollars -= amountSubtract;
-            this.updateDollarsDisplay();
+            this.money -= amountSubtract;
+            this.updateMoneyDisplay();
         }
     }
 
-    public moneySet(newDollars: number, animate = true): void {
+    public moneySet(newMoney: number, animate = true): void {
         if (animate) {
-            this.animateDollarsChange(newDollars);
+            this.animateMoneyChange(newMoney);
 
         } else {
-            this.dollars = newDollars;
-            this.updateDollarsDisplay();
+            this.money = newMoney;
+            this.updateMoneyDisplay();
         }
     }
 
-    private animateDollarsChange(targetDollars: number): void {
+    private animateMoneyChange(targetMoney: number): void {
 
-        if (this.dollars === targetDollars) {
+        if (this.money === targetMoney) {
             return;
         }
 
         const DOLLAR_CHANGE_PER_STEP = 100;
         const DELAY_BETWEEN_STEPS_MS = 50;
-        const DIRECTION_MULTIPLIER = targetDollars > this.dollars ? 1 : -1;
+        const DIRECTION_MULTIPLIER = targetMoney > this.money ? 1 : -1;
 
         setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MS, this);
 
         function handleTimeout(instance: Team) {
-            const difference = Math.abs(targetDollars - instance.dollars);
+            const difference = Math.abs(targetMoney - instance.money);
 
-            // check why this is needed, some questions have $50 increments?
+            // teams could loose $50 if the guessing penalty is 0.5, for example
             if (difference >= DOLLAR_CHANGE_PER_STEP) {
-                instance.dollars += DIRECTION_MULTIPLIER * DOLLAR_CHANGE_PER_STEP;
+                instance.money += DIRECTION_MULTIPLIER * DOLLAR_CHANGE_PER_STEP;
             } else {
-                instance.dollars += DIRECTION_MULTIPLIER * difference;
+                instance.money += DIRECTION_MULTIPLIER * difference;
             }
 
-            instance.updateDollarsDisplay();
-            if (instance.dollars !== targetDollars) {
+            instance.updateMoneyDisplay();
+            if (instance.money !== targetMoney) {
                 setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MS, instance);
             }
 
@@ -165,9 +165,9 @@ export class Team {
         this.countdownTimer?.setPaused(isPaused);
     }
 
-    private updateDollarsDisplay(): void {
-        this.div.presentation.dollars.innerHTML = "$" + this.dollars.toLocaleString();
-        this.div.operator.dollars.innerHTML = "$" + this.dollars.toLocaleString();
+    private updateMoneyDisplay(): void {
+        this.div.presentation.money.innerHTML = "$" + this.money.toLocaleString();
+        this.div.operator.money.innerHTML = "$" + this.money.toLocaleString();
     }
 
     private createElementsInPresentationWindow(): void {
@@ -215,10 +215,10 @@ export class Team {
 
         divTeam.append(tableCountdownDots);
 
-        const divDollars = this.div.presentation.dollars = document.createElement("div");
-        divDollars.classList.add("team-dollars");
-        divDollars.innerHTML = "$" + this.dollars;
-        divTeam.append(divDollars);
+        const divMoney = this.div.presentation.money = document.createElement("div");
+        divMoney.classList.add("team-money");
+        divMoney.innerHTML = "$" + this.money;
+        divTeam.append(divMoney);
 
         const divName = this.div.presentation.teamName = document.createElement("div");
         divName.classList.add("team-name");
@@ -244,10 +244,10 @@ export class Team {
         divName.innerHTML = this.teamName;
         divTeam.append(divName);
 
-        const divDollars = this.div.operator.dollars = document.createElement("div");
-        divDollars.classList.add("team-dollars");
-        divDollars.innerHTML = "$" + this.dollars;
-        divTeam.append(divDollars);
+        const divMoney = this.div.operator.money = document.createElement("div");
+        divMoney.classList.add("team-money");
+        divMoney.innerHTML = "$" + this.money;
+        divTeam.append(divMoney);
 
         const divState = this.div.operator.state = document.createElement("div");
         divState.classList.add("team-state");
@@ -333,27 +333,27 @@ export class Team {
         return this.progressElementInOperatorWindow;
     }
 
-    public getDollars(): number {
-        return this.dollars;
+    public getMoney(): number {
+        return this.money;
     }
 
     public getState(): TeamState {
         return this.state;
     }
 
-    public updateDollarsAtEndOfRound(): void {
-        this.statistics.dollarsAtEndOfEachRound.push(this.dollars);
+    public updateMoneyAtEndOfRound(): void {
+        this.statistics.moneyAtEndOfEachRound.push(this.money);
     }
 
     public getObjectToSaveInLocalStorage(): TeamSavedInLocalStorage {
         return {
-            dollars: this.dollars,
+            money: this.money,
             statistics: this.statistics
         };
     }
 
     public loadFromLocalStorage(source: TeamSavedInLocalStorage): void {
-        this.moneySet(source.dollars, false);
+        this.moneySet(source.money, false);
         this.statistics = source.statistics;
     }
 

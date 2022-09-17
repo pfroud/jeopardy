@@ -23,8 +23,8 @@ export class Settings {
 
     public allowMultipleAnswersToSameQuestion = true;
 
-    // Stop the game when a team reaches this many dollars
-    public teamDollarsWhenGameShouldEnd = 10_000;
+    // Stop the game when a team reaches this much money
+    public teamMoneyWhenGameShouldEnd = 10_000;
 
     public gameTimeLimitMillisec = 10 * 60 * 1000;
 

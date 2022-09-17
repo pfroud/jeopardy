@@ -24,7 +24,7 @@
     <div id="paused" style="display:none">&#9612;&#9612; PAUSED</div>
 
     <main>
-        <input id="tab-setup" type="radio" name="tabs" k>
+        <input id="tab-setup" type="radio" name="tabs">
         <label for="tab-setup">Setup</label>
 
         <input id="tab-game" type="radio" name="tabs" checked>
@@ -86,36 +86,36 @@
 
             <div id="instructions">waiting for presentation window...</div>
 
-            <div id="clue" style="display:none">
+            <div id="clue-wrapper" style="display:none">
                 <table>
-                    <tr id="airdate">
+                    <tr id="tr-clue-airdate">
                         <td>Air date:</td>
                         <td>
-                            <div id="clue-airdate"></div>
+                            <div id="div-clue-airdate"></div>
                         </td>
                     </tr>
                     <tr>
                         <td>Category:</td>
                         <td>
-                            <div id="clue-category"></div>
+                            <div id="div-clue-category"></div>
                         </td>
                     </tr>
                     <tr>
                         <td>Value:</td>
                         <td>
-                            <div id="clue-dollars"></div>
+                            <div id="div-clue-value"></div>
                         </td>
                     </tr>
-                    <tr id="question">
+                    <tr id="tr-clue-question">
                         <td>Question:</td>
                         <td>
-                            <div id="clue-question"></div>
+                            <div id="div-clue-question"></div>
                         </td>
                     </tr>
-                    <tr id="answer" style="display:none">
+                    <tr id="tr-clue-answer" style="display:none">
                         <td>Answer:</td>
                         <td>
-                            <div id="clue-answer"></div>
+                            <div id="div-clue-answer"></div>
                         </td>
                     </tr>
                 </table>

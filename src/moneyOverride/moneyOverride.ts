@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const textInput = document.createElement("input");
         textInput.setAttribute("type", "text");
-        textInput.value = String(teamObj.getDollars());
+        textInput.value = String(teamObj.getMoney());
         textInput.addEventListener("input", function () {
             teamObj.moneySet(Number(textInput.value), false);
         });
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
             button.innerHTML = "-$" + dollarValue;
             button.addEventListener("click", () => {
                 teamObj.moneySubtract(dollarValue, false);
-                textInput.value = String(teamObj.getDollars());
+                textInput.value = String(teamObj.getMoney());
             });
             cell.appendChild(button);
         });
@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
             button.innerHTML = "+$" + dollarValue;
             button.addEventListener("click", () => {
                 teamObj.moneyAdd(dollarValue, false);
-                textInput.value = String(teamObj.getDollars());
+                textInput.value = String(teamObj.getMoney());
             });
             cell.appendChild(button);
         });

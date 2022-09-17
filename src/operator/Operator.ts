@@ -23,13 +23,13 @@ interface SavedGameInLocalStorage {
 
 export class Operator {
     public static teamCount = 8; //not readonly because it can change if we load a game from localStorage
-    static readonly localStorageKey = "jeopardy";
+    private static readonly localStorageKey = "jeopardy";
 
     private readonly audioManager: AudioManager;
     private readonly settings: Settings;
     private readonly divClueWrapper: HTMLDivElement;
     private readonly divClueQuestion: HTMLDivElement;
-    private readonly divClueDollars: HTMLDivElement;
+    private readonly divClueValue: HTMLDivElement;
     private readonly divClueCategory: HTMLDivElement;
     private readonly divClueAnswer: HTMLDivElement;
     private readonly divClueAirdate: HTMLDivElement;
@@ -54,16 +54,19 @@ export class Operator {
         this.audioManager = audioManager;
         this.settings = settings;
 
-        this.divClueWrapper = document.querySelector("div#clue");
-        this.divClueQuestion = document.querySelector("div#clue-question");
-        this.divClueDollars = document.querySelector("div#clue-dollars");
-        this.divClueCategory = document.querySelector("div#clue-category");
-        this.divClueAnswer = document.querySelector("div#clue-answer");
-        this.divClueAirdate = document.querySelector("div#clue-airdate");
-        this.trQuestion = document.querySelector("tr#question");
-        this.trAnswer = document.querySelector("tr#answer");
+        this.divClueWrapper = document.querySelector("div#clue-wrapper");
+        this.divClueQuestion = document.querySelector("div#div-clue-question");
+        this.divClueValue = document.querySelector("div#div-clue-value");
+        this.divClueCategory = document.querySelector("div#div-clue-category");
+        this.divClueAnswer = document.querySelector("div#div-clue-answer");
+        this.divClueAirdate = document.querySelector("div#div-clue-airdate");
+
+        this.trQuestion = document.querySelector("tr#tr-clue-question");
+        this.trAnswer = document.querySelector("tr#tr-clue-answer");
+
         this.divPaused = document.querySelector("div#paused");
         this.divInstructions = document.querySelector("div#instructions");
+
         this.buttonStartGame = document.querySelector("button#start-game");
         this.buttonSkipClue = document.querySelector("button#skip-clue");
 
@@ -218,7 +221,7 @@ export class Operator {
         if (this.gameTimer.getIsFinished()) {
             return true;
         } else {
-            return this.teamArray.some(teamObj => teamObj.getDollars() >= this.settings.teamDollarsWhenGameShouldEnd);
+            return this.teamArray.some(teamObj => teamObj.getMoney() >= this.settings.teamMoneyWhenGameShouldEnd);
         }
     }
 
@@ -267,7 +270,7 @@ export class Operator {
             */
             this.divClueWrapper.style.display = ""; //show
             this.divClueCategory.innerHTML = clueObj.category.title;
-            this.divClueDollars.innerHTML = "$" + clueObj.value;
+            this.divClueValue.innerHTML = "$" + clueObj.value;
             // example of what format the airdate is in: "2013-01-25T12:00:00.000Z
             this.divClueAirdate.innerHTML = (new Date(clueObj.airdate)).toDateString();
             this.trAnswer.style.display = "none";
@@ -302,7 +305,7 @@ export class Operator {
 
                     this.currentClueObj = clueObj;
                     showClueToOperator.call(this, clueObj);
-                    this.presentation.setClueObj(clueObj);
+                    this.presentation.setClue(clueObj);
                     // we don't actually need to return the clue object to the state machine
                     promiseResolveFunc();
                 } else {
@@ -395,7 +398,7 @@ export class Operator {
     public handleShowAnswer(): void {
 
         // only save the game if somebody has more than $0
-        if (this.teamArray.some(teamObj => teamObj.getDollars() > 0)) {
+        if (this.teamArray.some(teamObj => teamObj.getMoney() > 0)) {
             this.saveGame();
         }
 
@@ -469,12 +472,12 @@ export class Operator {
             tableRowTeamNumber.appendChild(cellTeamNumber);
         }
 
-        const tableRowTeamDollars = document.createElement("tr");
-        tableDetails.appendChild(tableRowTeamDollars);
+        const tableRowTeamMoney = document.createElement("tr");
+        tableDetails.appendChild(tableRowTeamMoney);
         for (let i = 0; i < parsedJson.teams.length; i++) {
-            const cellTeamDollars = document.createElement("td");
-            cellTeamDollars.innerHTML = "$" + parsedJson.teams[i].dollars;
-            tableRowTeamDollars.appendChild(cellTeamDollars);
+            const cellTeamMoney = document.createElement("td");
+            cellTeamMoney.innerHTML = "$" + parsedJson.teams[i].money;
+            tableRowTeamMoney.appendChild(cellTeamMoney);
         }
 
         document.querySelector("button#saved-game-load").addEventListener("click", () => {
@@ -525,7 +528,7 @@ export class Operator {
         const shallowCopy = this.teamArray.slice();
         function comparator(team1: Team, team2: Team) {
             //sort descending
-            return team2.getDollars() - team1.getDollars();
+            return team2.getMoney() - team1.getMoney();
         }
         shallowCopy.sort(comparator);
 
@@ -536,7 +539,7 @@ export class Operator {
             html.push(
                 "<tr>" +
                 "<td>" + teamObj.teamName + "</td>" +
-                "<td>$" + teamObj.getDollars().toLocaleString() + "</td>" +
+                "<td>$" + teamObj.getMoney().toLocaleString() + "</td>" +
                 "</tr>"
             );
         });
@@ -644,7 +647,7 @@ export class Operator {
         const lineChartDataForAllTeams: LineChartSeriesData[] =
             this.teamArray.map(
                 team => ({
-                    data: team.statistics.dollarsAtEndOfEachRound.map(
+                    data: team.statistics.moneyAtEndOfEachRound.map(
                         (value, index) => ({ x: index, y: value })
                     )
                 })
@@ -694,8 +697,8 @@ export class Operator {
         }
     }
 
-    public updateTeamDollarsAtEndOfRound(): void {
-        this.teamArray.forEach(t => t.updateDollarsAtEndOfRound());
+    public updateTeamMoneyAtEndOfRound(): void {
+        this.teamArray.forEach(t => t.updateMoneyAtEndOfRound());
     }
 
 

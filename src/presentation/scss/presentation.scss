@@ -1,7 +1,7 @@
 $height-header: 80px;
 $height-footer: 180px;
 
-@function big-shadow($count) {
+@function create-repeated-shadow($count) {
     $result: "";
     @for $i from 0 to $count {
         $size: ($i + 1) * 2 + 1;
@@ -12,19 +12,9 @@ $height-footer: 180px;
     }
     @return unquote($result);
 }
-$big-shadow: big-shadow(5);
-$slightly-smaller-shadow: big-shadow(4);
+$text-shadow-big: create-repeated-shadow(5);
 
-@function repeat($value, $count) {
-    // used to repeat drop-shadow filter
-    $result: "";
-    @for $i from 0 to $count {
-        $result: $result + $value + " ";
-    }
-    @return unquote($result);
-}
-
-$color-dollars: #e3a147;
+$color-money: #e3a147;
 
 body {
     height: 100vh;
@@ -81,16 +71,16 @@ header {
     font-family: swiss911;
     font-size: 60px;
     letter-spacing: 2px;
-    text-shadow: $big-shadow;
+    text-shadow: $text-shadow-big;
     padding-top: 5px;
 
-    div#category {
+    div#clue-category-in-header {
         text-transform: uppercase;
         display: inline-block;
     }
 
-    div#dollars {
-        color: $color-dollars;
+    div#clue-value-in-header {
+        color: $color-money;
         display: inline-block;
         position: absolute;
         right: 8px;
@@ -144,15 +134,15 @@ main {
             }
         }
 
-        &#slide-clue-category-and-dollars {
+        &#slide-clue-category-and-value {
             font-family: swiss911;
-            text-shadow: $big-shadow;
+            text-shadow: $text-shadow-big;
             font-size: 80px;
             text-align: center;
             text-transform: uppercase;
 
-            div#dollars-big {
-                color: $color-dollars;
+            div#clue-value-big {
+                color: $color-money;
             }
         }
 
@@ -161,19 +151,19 @@ main {
             font-family: korinna;
             font-size: 80px;
             text-transform: uppercase;
-            text-shadow: $big-shadow;
+            text-shadow: $text-shadow-big;
             word-spacing: 10px;
         }
 
         &#slide-clue-answer {
-            text-shadow: $slightly-smaller-shadow;
+            text-shadow: create-repeated-shadow(4);
             font-size: 60px;
         }
 
         &#slide-gameEnd-team-ranking-list {
             div#team-ranking {
                 font-size: 40px;
-                text-shadow: $big-shadow;
+                text-shadow: $text-shadow-big;
                 p {
                     text-align: center;
                 }
@@ -264,12 +254,12 @@ footer {
             font-weight: bold;
             color: black;
 
-            div.team-dollars {
+            div.team-money {
                 text-shadow: 2px 2px 0px lightgray;
             }
         }
 
-        div.team-dollars {
+        div.team-money {
             font-family: swiss911;
             font-size: 40px;
             text-shadow: 3px 3px 0px black;

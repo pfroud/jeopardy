@@ -30,8 +30,8 @@
 
     <header>
         <progress id="game-timer"></progress>
-        <div id="category">category</div>
-        <div id="dollars">$0000</div>
+        <div id="clue-category-in-header">category</div>
+        <div id="clue-value-in-header">$0000</div>
         <progress id="state-machine"></progress>
     </header>
 
@@ -46,17 +46,13 @@
             <img id="logo-jeopardy-shadow" src="img/j-logo.png" alt="Jeopardy logo shadow">
         </div>
 
-        <div class="presentation-slide" id="slide-buzzer-test">
-            <p>Test your buzzers!</p>
-        </div>
-
         <div class="presentation-slide" id="slide-spinner">
             <div id="spinner"></div>
         </div>
 
-        <div class="presentation-slide" id="slide-clue-category-and-dollars">
-            <div id="category-big"></div>
-            <div id="dollars-big"></div>
+        <div class="presentation-slide" id="slide-clue-category-and-value">
+            <div id="clue-category-big"></div>
+            <div id="clue-value-big"></div>
         </div>
 
         <div class="presentation-slide" id="slide-clue-question"></div>
@@ -97,7 +93,7 @@
             <h1>Game over!</h1>
             <h2>Team buzz results</h2>
 
-            <div id="y-axis-label">Dollars</div>
+            <div id="y-axis-label">Money</div>
             <div id="line-chart"></div>
             <div id="x-axis-label">Question number</div>
 

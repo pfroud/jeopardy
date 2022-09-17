@@ -25,14 +25,14 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 The clue object is only stored by the operator.
                 */
                 functionToGetPromise: operator.getClueFromJService.bind(operator),
-                destination: "showClueCategoryAndDollars"
+                destination: "showClueCategoryAndValue"
             }],
         }, {
             /*
             The category and dollar value are shown on the center of the presentation window for a fixed amount of time.
             */
-            name: "showClueCategoryAndDollars",
-            presentationSlideToShow: "slide-clue-category-and-dollars",
+            name: "showClueCategoryAndValue",
+            presentationSlideToShow: "slide-clue-category-and-value",
             transitions: [{
                 type: TransitionType.Timeout,
                 countdownTimerSource: { type: CountdownOperation.CreateNew, duration: settings.displayDurationCategoryMillisec },
@@ -126,7 +126,7 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 then: { destination: "gameEnd" },
                 else: {
                     destination: "getClueFromJService",
-                    onTransition: operator.updateTeamDollarsAtEndOfRound.bind(operator)
+                    onTransition: operator.updateTeamMoneyAtEndOfRound.bind(operator)
                 }
             }],
         }, {
