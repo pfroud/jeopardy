@@ -196,7 +196,7 @@ export class CountdownTimer {
             Here's a video from the official Jeopardy Youtube channel which shows how it works:
             https://www.youtube.com/watch?v=cGSDLZ5wqy8&t=10s
             
-            For some reason I call the rectangles "dots." "
+            For some reason I call the rectangles "dots."
 
             The dots are numbered 5 - 1 - 5:
             ┌───┬───┬───┬───┬───┬───┬───┬───┬───┐
@@ -287,6 +287,15 @@ export class CountdownTimer {
 
     public getIsFinished(): boolean {
         return this.isFinished;
+    }
+
+    public setRemainingMillisec(remainingMillisec: number): void {
+        this.remainingMillisec = remainingMillisec;
+        this.guiUpdateForInterval();
+        if (this.remainingMillisec <= 0) {
+            this.finish();
+        }
+
     }
 
 

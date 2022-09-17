@@ -26,6 +26,11 @@ interface TeamStatistics {
     dollarsAtEndOfEachRound: number[]
 }
 
+export interface TeamSavedInLocalStorage {
+    dollars: number;
+    statistics: TeamStatistics;
+}
+
 export class Team {
     public readonly teamName: string;
 
@@ -340,6 +345,18 @@ export class Team {
         this.statistics.dollarsAtEndOfEachRound.push(this.dollars);
     }
 
+    public getObjectToSaveInLocalStorage(): TeamSavedInLocalStorage {
+        return {
+            dollars: this.dollars,
+            statistics: this.statistics
+        };
+    }
+
+    public loadFromLocalStorage(source: TeamSavedInLocalStorage): void {
+        this.moneySet(source.dollars, false);
+        this.statistics = source.statistics;
+    }
+
 
 }
 
@@ -350,11 +367,4 @@ export enum TeamState {
     ANSWERING = "answering",
     ALREADY_ANSWERED = "already-answered", // the team tried answering the question but got it wrong
     LOCKOUT = "lockout" //team buzzed while operator was reading the question
-}
-
-function getRandomIntInclusive(min_: number, max_: number): number {
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random#getting_a_random_integer_between_two_values_inclusive
-    const min = Math.ceil(min_);
-    const max = Math.floor(max_);
-    return Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive
 }

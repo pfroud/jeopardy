@@ -1,4 +1,4 @@
-import { Team, TeamState } from "../Team";
+import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
 import { StateMachine } from "../stateMachine/StateMachine";
 import { AudioManager } from "./AudioManager";
 import { Settings } from "../Settings";
@@ -17,13 +17,13 @@ export interface Clue {
 
 interface SavedGameInLocalStorage {
     gameTimerRemainingMillisec: number,
-    teamDollars: number[]
+    teams: TeamSavedInLocalStorage[]
     // todo save the settings
 }
 
 export class Operator {
     public static teamCount = 8; //not readonly because it can change if we load a game from localStorage
-    static readonly localStorageKey = "jeopardy-teams";
+    static readonly localStorageKey = "jeopardy";
 
     private readonly audioManager: AudioManager;
     private readonly settings: Settings;
@@ -81,7 +81,7 @@ export class Operator {
         */
     }
 
-    private initGameTimer(millisec: number) {
+    private initGameTimer(millisec: number): void {
         this.gameTimer = new CountdownTimer(millisec);
         this.gameTimer.addProgressElement(document.querySelector("div#game-timer progress"));
         this.gameTimer.addTextDiv(document.querySelector("div#game-timer div#remaining-time-text"));
@@ -463,7 +463,7 @@ export class Operator {
 
         const tableRowTeamNumber = document.createElement("tr");
         tableDetails.appendChild(tableRowTeamNumber);
-        for (let i = 0; i < parsedJson.teamDollars.length; i++) {
+        for (let i = 0; i < parsedJson.teams.length; i++) {
             const cellTeamNumber = document.createElement("td");
             cellTeamNumber.innerHTML = `Team ${i + 1}`;
             tableRowTeamNumber.appendChild(cellTeamNumber);
@@ -471,10 +471,9 @@ export class Operator {
 
         const tableRowTeamDollars = document.createElement("tr");
         tableDetails.appendChild(tableRowTeamDollars);
-        for (let i = 0; i < parsedJson.teamDollars.length; i++) {
-            const savedTeam = parsedJson.teamDollars[i];
+        for (let i = 0; i < parsedJson.teams.length; i++) {
             const cellTeamDollars = document.createElement("td");
-            cellTeamDollars.innerHTML = "$" + savedTeam;
+            cellTeamDollars.innerHTML = "$" + parsedJson.teams[i].dollars;
             tableRowTeamDollars.appendChild(cellTeamDollars);
         }
 
@@ -496,7 +495,7 @@ export class Operator {
     private saveGame(): void {
         const objectToSave: SavedGameInLocalStorage = {
             gameTimerRemainingMillisec: this.gameTimer.getRemainingMillisec(),
-            teamDollars: this.teamArray.map(teamObj => teamObj.getDollars())
+            teams: this.teamArray.map(t => t.getObjectToSaveInLocalStorage())
         };
 
         window.localStorage.setItem(Operator.localStorageKey,
@@ -507,16 +506,11 @@ export class Operator {
 
     private loadGame(parsedJson: SavedGameInLocalStorage): void {
 
-        /*
-        This in imperfect, we really want to set the timer's max
-        value from settings and set the present value from the 
-        saved game.
-        */
-        this.initGameTimer(parsedJson.gameTimerRemainingMillisec);
+        this.gameTimer.setRemainingMillisec(parsedJson.gameTimerRemainingMillisec);
 
-        this.initTeams(parsedJson.teamDollars.length);
-        for (let i = 0; i < parsedJson.teamDollars.length; i++) {
-            this.teamArray[i].moneySet(parsedJson.teamDollars[i], false);
+        this.initTeams(parsedJson.teams.length);
+        for (let i = 0; i < parsedJson.teams.length; i++) {
+            this.teamArray[i].loadFromLocalStorage(parsedJson.teams[i]);
         }
     }
 
