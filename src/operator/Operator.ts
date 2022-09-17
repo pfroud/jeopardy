@@ -12,6 +12,7 @@ export interface Clue {
     question: string;
     value: number;
     airdate: string;
+    airdateParsed: Date;
     category: { title: string }
 }
 
@@ -271,8 +272,7 @@ export class Operator {
             this.divClueWrapper.style.display = ""; //show
             this.divClueCategory.innerHTML = clueObj.category.title;
             this.divClueValue.innerHTML = "$" + clueObj.value;
-            // example of what format the airdate is in: "2013-01-25T12:00:00.000Z
-            this.divClueAirdate.innerHTML = (new Date(clueObj.airdate)).toDateString();
+            this.divClueAirdate.innerHTML = clueObj.airdateParsed.getFullYear().toString();
             this.trAnswer.style.display = "none";
             this.divInstructions.innerHTML = "Read aloud the category and dollar value.";
         };
@@ -294,7 +294,7 @@ export class Operator {
                 }
 
                 const parsed = JSON.parse(xhr.response);
-                const clueObj = parsed[0];
+                const clueObj: Clue = parsed[0];
 
                 if (isClueValid(clueObj) && !doesQuestionHaveMultimedia(clueObj)) {
 
@@ -303,10 +303,14 @@ export class Operator {
                     clueObj.answer = clueObj.answer.replace(/\\/g, "");
                     clueObj.category.title = clueObj.category.title.replace(/\\/g, "");
 
+                    // example of what format the airdate is in: "2013-01-25T12:00:00.000Z"
+                    clueObj.airdateParsed = new Date(clueObj.airdate);
+
                     this.currentClueObj = clueObj;
                     showClueToOperator.call(this, clueObj);
                     this.presentation.setClue(clueObj);
-                    // we don't actually need to return the clue object to the state machine
+
+                    // we don't need to return the clue object to the state machine
                     promiseResolveFunc();
                 } else {
                     if (tryNum < maxTries) {

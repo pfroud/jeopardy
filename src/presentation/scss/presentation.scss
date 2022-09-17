@@ -15,6 +15,7 @@ $height-footer: 180px;
 $text-shadow-big: create-repeated-shadow(5);
 
 $color-money: #e3a147;
+$color-airdate: #8e99d8;
 
 body {
     height: 100vh;
@@ -73,15 +74,15 @@ header {
     letter-spacing: 2px;
     text-shadow: $text-shadow-big;
     padding-top: 5px;
+    text-transform: uppercase;
 
-    div#clue-category-in-header {
-        text-transform: uppercase;
-        display: inline-block;
+    span#clue-airdate-in-header {
+        color: $color-airdate;
+        font-size: 75%;
     }
 
-    div#clue-value-in-header {
+    span#clue-value-in-header {
         color: $color-money;
-        display: inline-block;
         position: absolute;
         right: 8px;
     }
@@ -143,6 +144,11 @@ main {
 
             div#clue-value-big {
                 color: $color-money;
+            }
+
+            div#clue-airdate-big {
+                color: $color-airdate;
+                font-size: 75%;
             }
         }
 

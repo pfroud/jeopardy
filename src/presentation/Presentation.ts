@@ -8,12 +8,14 @@ export class Presentation {
     public readonly slideNames: string[] = [];
 
     private readonly header: HTMLElement;
-    private readonly divClueCategoryInHeader: HTMLDivElement;
-    private readonly divClueMoneyInHeader: HTMLDivElement;
+    private readonly spanClueCategoryInHeader: HTMLSpanElement;
+    private readonly spanClueMoneyInHeader: HTMLSpanElement;
+    private readonly spanClueAirdateInHeader: HTMLSpanElement;
 
     private readonly divSlideClueQuestion: HTMLDivElement;
     private readonly divClueCategoryBig: HTMLDivElement;
     private readonly divClueValueBig: HTMLDivElement;
+    private readonly divClueAirdateBig: HTMLDivElement;
     private readonly divSlideClueAnswer: HTMLDivElement;
 
     private readonly divPaused: HTMLDivElement;
@@ -25,8 +27,9 @@ export class Presentation {
 
     constructor() {
         this.header = document.querySelector("header");
-        this.divClueCategoryInHeader = this.header.querySelector("div#clue-category-in-header");
-        this.divClueMoneyInHeader = this.header.querySelector("div#clue-value-in-header");
+        this.spanClueCategoryInHeader = this.header.querySelector("span#clue-category-in-header");
+        this.spanClueMoneyInHeader = this.header.querySelector("span#clue-value-in-header");
+        this.spanClueAirdateInHeader = this.header.querySelector("span#clue-airdate-in-header");
         this.progressElementForGameTimer = this.header.querySelector("progress#game-timer");
         this.progressElementForStateMachine = this.header.querySelector("progress#state-machine");
 
@@ -35,6 +38,7 @@ export class Presentation {
 
         this.divClueCategoryBig = document.querySelector("div#clue-category-big");
         this.divClueValueBig = document.querySelector("div#clue-value-big");
+        this.divClueAirdateBig = document.querySelector("div#clue-airdate-big");
 
         this.divPaused = document.querySelector("div#paused");
 
@@ -105,11 +109,13 @@ export class Presentation {
     }
 
     public setClue(clueObject: Clue): void {
-        this.divClueCategoryInHeader.innerHTML = clueObject.category.title;
-        this.divClueMoneyInHeader.innerHTML = "$" + clueObject.value;
+        this.spanClueCategoryInHeader.innerHTML = clueObject.category.title;
+        this.spanClueMoneyInHeader.innerHTML = "$" + clueObject.value;
+        this.spanClueAirdateInHeader.innerHTML = "(" + clueObject.airdateParsed.getFullYear() + ")";
 
         this.divClueCategoryBig.innerHTML = clueObject.category.title;
         this.divClueValueBig.innerHTML = "$" + clueObject.value;
+        this.divClueAirdateBig.innerHTML = "Airdate: " + clueObject.airdateParsed.getFullYear();
 
         this.divSlideClueQuestion.innerHTML = clueObject.question;
 
