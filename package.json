@@ -23,13 +23,10 @@
     "@types/node": "^18.7.16",
     "@typescript-eslint/eslint-plugin": "^4.28.0",
     "@typescript-eslint/parser": "^4.28.0",
-    "buffer": "^6.0.3",
     "eslint": "^7.29.0",
     "parcel": "^2.6.2",
-    "process": "^0.11.10",
     "sass": "^1.50.0",
-    "typescript": "^4.4.4",
-    "util": "^0.12.4"
+    "typescript": "^4.4.4"
   },
   "dependencies": {
     "chartist": "^1.1.2"
