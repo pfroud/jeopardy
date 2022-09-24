@@ -1,7 +1,11 @@
 {
     "files.exclude": {
         "node_modules": true,
-        "src/bower_components": true
+        "bower_components": true,
+        ".parcel-cache": true,
+        "dist": true,
+        "private": true,
+        "buzzers": true
     },
     "cSpell.words": [
         "aduh", //author of https://github.com/aduh95/viz.js
