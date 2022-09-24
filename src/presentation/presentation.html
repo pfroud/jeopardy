@@ -15,18 +15,7 @@
 
 <body>
     <script type="module" src="Presentation.ts"></script>
-    <script type="module">
-
-        const opener = window.opener;
-        window.addEventListener("error", function (errorObj) {
-            opener.console.error("ERROR FROM PRESENTATION WINDOW:");
-            opener.console.error(errorObj.error);
-        });
-
-        import { Presentation } from "./Presentation.ts";
-        var presentation;
-        document.addEventListener("DOMContentLoaded", () => presentation = new Presentation());
-    </script>
+    <script type="module" src="main.ts"></script>
 
     <header>
         <progress id="game-timer"></progress>
@@ -59,7 +48,11 @@
 
         <div class="presentation-slide" id="slide-clue-question"></div>
 
-        <div class="presentation-slide" id="slide-clue-answer"></div>
+        <div class="presentation-slide" id="slide-clue-answer">
+            Answer:
+            <p>
+            <div id="clue-answer-text"></div>
+        </div>
 
         <div class="presentation-slide" id="slide-gameEnd-team-ranking-list">
 

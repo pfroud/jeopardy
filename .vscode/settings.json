@@ -10,9 +10,11 @@
     "cSpell.words": [
         "aduh", //author of https://github.com/aduh95/viz.js
         "Airdate",
-        "datalabels",
         "Footswitch",
+        "Froud",
         "millisec",
-        "rarr" //html &rarr; right arrow
+        "rarr", //html &rarr; right arrow
+        "stylesheet",
+        "fontname"
     ]
 }

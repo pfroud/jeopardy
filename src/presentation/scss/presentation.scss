@@ -164,6 +164,10 @@ main {
         &#slide-clue-answer {
             text-shadow: create-repeated-shadow(4);
             font-size: 60px;
+
+            div#clue-answer-text {
+                font-weight: bold;
+            }
         }
 
         &#slide-gameEnd-team-ranking-list {

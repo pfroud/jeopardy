@@ -3,32 +3,37 @@ import { Team } from "../Team";
 
 document.addEventListener("DOMContentLoaded", function () {
     if (!window.opener) {
-        console.error("no window.opener");
-
+        document.body.innerText = "no window.opener";
         return;
     }
 
-    const teamArray: Team[] = ((window.opener as any).operator as Operator).getTeamArray();
-
-    //////////// populate the table //////////////
-    const table = document.querySelector("table tbody");
-    for (let teamIndex = 0; teamIndex < Operator.teamCount; teamIndex++) {
-        makeTableRow(teamIndex);
+    const operator = ((window.opener as any).operator as Operator);
+    if (!operator) {
+        document.body.innerText = "no window.opener.operator";
+        return;
     }
 
-    function makeTableRow(teamIndex: number): void {
+    const teamArray: Team[] = operator.getTeamArray();
+
+    const table = document.querySelector("table tbody");
+    for (let teamIndex = 0; teamIndex < Operator.teamCount; teamIndex++) {
+        createTableRow(teamIndex);
+    }
+
+    function createTableRow(teamIndex: number): void {
         const teamObj = teamArray[teamIndex];
         const dollarValues = [1000, 800, 600, 500, 400, 300, 200, 100, 50];
 
         const tableRow = document.createElement("tr");
         table.appendChild(tableRow);
 
-        // cell in first column contains the team name
+        // create text showing the team name
         const tdTeamName = document.createElement("td");
         tdTeamName.classList.add("team-name");
         tdTeamName.innerHTML = teamObj.teamName;
         tableRow.appendChild(tdTeamName);
 
+        // create text input field
         const textInput = document.createElement("input");
         textInput.setAttribute("type", "text");
         textInput.value = String(teamObj.getMoney());
@@ -51,13 +56,12 @@ document.addEventListener("DOMContentLoaded", function () {
             cell.appendChild(button);
         });
 
-        // cell to show the current dollar amount
+        // add text input field to the table
         const tdPresentValue = document.createElement("td");
         tdPresentValue.classList.add("present-value");
         tdPresentValue.append(document.createTextNode("$"));
         tdPresentValue.appendChild(textInput);
         tableRow.appendChild(tdPresentValue);
-
 
         // create buttons to add money
         dollarValues.reverse();
@@ -76,8 +80,5 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
     }
-
-
-
 
 });

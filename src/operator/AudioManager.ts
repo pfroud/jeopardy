@@ -6,12 +6,12 @@ export class AudioManager {
     private readonly audio: AudioElements;
 
     /*
-    Three low-pitch beeps happens in TWO situations:
+    In the Jeopardy TV show, three low-pitch beeps happens in TWO situations:
         (1) Someone buzzes but does not answer within five seconds.
         (2) Time runs out with no buzzes.
     Source video: https://www.youtube.com/watch?v=cGSDLZ5wqy8
 
-    Right now my sounds are slightly different. In situation (1), 
+    I am doing the sounds slightly differently. In situation (1), 
     I'm playing the same sound that plays when someone answers wrong.
 
     Eight high-pitch beeps, short pause, eight high-pitch beeps

@@ -1,9 +1,8 @@
-import { StateMachine } from "./StateMachine";
 import { CountdownOperation, StateMachineState, TransitionType } from "./stateInterfaces";
 import { Operator } from "../operator/Operator";
 import { Settings } from "../Settings";
 
-export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: Operator, settings: Settings): StateMachineState[] {
+export function getStatesForJeopardyGame(operator: Operator, settings: Settings): StateMachineState[] {
 
     return [
         {
@@ -35,7 +34,10 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             presentationSlideToShow: "slide-clue-category-and-value",
             transitions: [{
                 type: TransitionType.Timeout,
-                countdownTimerSource: { type: CountdownOperation.CreateNew, duration: settings.displayDurationCategoryMillisec },
+                countdownTimerSource: {
+                    type: CountdownOperation.CreateNew,
+                    duration: settings.displayDurationCategoryMillisec
+                },
                 destination: "showClueQuestion",
                 /*
                 Don't put this as onEnter of the showClueQuestion state because it does
@@ -95,7 +97,10 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
                 destination: "answerWrongOrTimeout"
             }, {
                 type: TransitionType.Timeout,
-                countdownTimerSource: { type: CountdownOperation.CreateNew, duration: settings.timeoutWaitForAnswerMillisec },
+                countdownTimerSource: {
+                    type: CountdownOperation.CreateNew,
+                    duration: settings.timeoutWaitForAnswerMillisec
+                },
                 countdownTimerShowDots: true,
                 destination: "answerWrongOrTimeout"
             }],
@@ -115,7 +120,10 @@ export function getStatesForJeopardyGame(stateMachine: StateMachine, operator: O
             presentationSlideToShow: "slide-clue-answer",
             transitions: [{
                 type: TransitionType.Timeout,
-                countdownTimerSource: { type: CountdownOperation.CreateNew, duration: settings.displayDurationAnswerMillisec },
+                countdownTimerSource: {
+                    type: CountdownOperation.CreateNew,
+                    duration: settings.displayDurationAnswerMillisec
+                },
                 destination: "checkGameEnd"
             }],
         }, {

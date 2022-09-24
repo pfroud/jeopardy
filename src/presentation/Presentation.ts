@@ -5,9 +5,9 @@ interface Slides {
 }
 
 export class Presentation {
-    public readonly slideNames: string[] = [];
+    public readonly allSlideNames: Set<string>;
 
-    private readonly header: HTMLElement;
+    private readonly header: HTMLElement; // there's no HTMLHeaderElement
     private readonly spanClueCategoryInHeader: HTMLSpanElement;
     private readonly spanClueMoneyInHeader: HTMLSpanElement;
     private readonly spanClueAirdateInHeader: HTMLSpanElement;
@@ -16,14 +16,14 @@ export class Presentation {
     private readonly divClueCategoryBig: HTMLDivElement;
     private readonly divClueValueBig: HTMLDivElement;
     private readonly divClueAirdateBig: HTMLDivElement;
-    private readonly divSlideClueAnswer: HTMLDivElement;
+    private readonly divSlideClueAnswerText: HTMLDivElement;
 
     private readonly divPaused: HTMLDivElement;
     private readonly footer: HTMLElement;
     private readonly progressElementForStateMachine: HTMLProgressElement;
     private readonly progressElementForGameTimer: HTMLProgressElement;
-    private readonly slideDivs: Slides = {};
-    private visibleSlide?: HTMLDivElement;
+    private readonly allSlideDivs: Slides = {};
+    private visibleSlideDiv?: HTMLDivElement;
 
     constructor() {
         this.header = document.querySelector("header");
@@ -34,11 +34,13 @@ export class Presentation {
         this.progressElementForStateMachine = this.header.querySelector("progress#state-machine");
 
         this.divSlideClueQuestion = document.querySelector("div#slide-clue-question");
-        this.divSlideClueAnswer = document.querySelector("div#slide-clue-answer");
+        this.divSlideClueAnswerText = document.querySelector("div#slide-clue-answer div#clue-answer-text");
 
         this.divClueCategoryBig = document.querySelector("div#clue-category-big");
         this.divClueValueBig = document.querySelector("div#clue-value-big");
         this.divClueAirdateBig = document.querySelector("div#clue-airdate-big");
+
+        this.allSlideNames = new Set<string>();
 
         this.divPaused = document.querySelector("div#paused");
 
@@ -74,11 +76,11 @@ export class Presentation {
         // select divs where the id property starts with "slide-"
         document.querySelectorAll<HTMLDivElement>('div[id ^= "slide-"')
             .forEach(div => {
-                this.slideNames.push(div.id);
-                this.slideDivs[div.id] = div;
+                this.allSlideNames.add(div.id);
+                this.allSlideDivs[div.id] = div;
             });
-        Object.freeze(this.slideNames);
-        Object.freeze(this.slideDivs);
+        Object.freeze(this.allSlideNames);
+        Object.freeze(this.allSlideDivs);
 
     }
 
@@ -91,20 +93,20 @@ export class Presentation {
     }
 
     public showSlide(slideName: string): void {
-        if (this.slideNames.includes(slideName)) {
-            if (this.visibleSlide) {
+        if (this.allSlideNames.has(slideName)) {
+            if (this.visibleSlideDiv) {
                 /*
                 The display style is set to "none" in the CSS file.
                 When we remove the inline style, which was set to "block",
                 the slide is hidden.
                 */
-                this.visibleSlide.style.display = "";
+                this.visibleSlideDiv.style.display = "";
             }
-            const targetSlide = this.slideDivs[slideName];
+            const targetSlide: HTMLDivElement = this.allSlideDivs[slideName];
             targetSlide.style.display = "block";
-            this.visibleSlide = targetSlide;
+            this.visibleSlideDiv = targetSlide;
         } else {
-            throw new RangeError(`slide name "${slideName}" not in known slides: ${Object.keys(this.slideDivs)}`);
+            throw new RangeError(`slide name "${slideName}" not in known slides: ${Object.keys(this.allSlideDivs)}`);
         }
     }
 
@@ -119,11 +121,11 @@ export class Presentation {
 
         this.divSlideClueQuestion.innerHTML = clueObject.question;
 
-        this.divSlideClueAnswer.innerHTML = `Answer:<p><div style="font-weight:bold">${clueObject.answer}</div>`;
+        this.divSlideClueAnswerText.innerHTML = clueObject.answer;
     }
 
     public fitClueQuestionToScreen(): void {
-        // remove font-size in the inline style property on the div, which may have been set by previous call to this function
+        // remove font-size in the inline style property on the div, which may have been set by a previous call to this function
         this.divSlideClueQuestion.style.fontSize = "";
 
         const heightOfMain = document.querySelector("main").clientHeight;

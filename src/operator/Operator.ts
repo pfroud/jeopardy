@@ -42,7 +42,7 @@ export class Operator {
     private readonly buttonSkipClue: HTMLButtonElement;
     private gameTimer: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
     private teamArray: Team[];
-    private currentClueObj: Clue;
+    private currentClue: Clue;
     private presentation: Presentation;
     private isPaused = false;
     private stateMachine: StateMachine;
@@ -114,14 +114,14 @@ export class Operator {
         Show a small picture of the footswitch used for the buzzers
         so people can verify their buzzers are working.
         */
-        const teamNumbers: string[] =
-            new Array(Operator.teamCount).fill(1).map(
-                (elem, index) => String(index + 1)
-            );
+        const teamNumbers = new Set<string>();
+        for (let i = 0; i < Operator.teamCount; i++) {
+            teamNumbers.add(String(i + 1));
+        }
 
         window.addEventListener("keydown", keyboardEvent => {
             const keyboardKey = keyboardEvent.key;
-            if (teamNumbers.includes(keyboardKey)) {
+            if (teamNumbers.has(keyboardKey)) {
                 const teamIndex = Number(keyboardKey) - 1;
                 const teamObj = this.teamArray[teamIndex];
                 teamObj.showKeyDown();
@@ -129,7 +129,7 @@ export class Operator {
         });
         window.addEventListener("keyup", keyboardEvent => {
             const keyboardKey = keyboardEvent.key;
-            if (teamNumbers.includes(keyboardKey)) {
+            if (teamNumbers.has(keyboardKey)) {
                 const teamIndex = Number(keyboardKey) - 1;
                 const teamObj = this.teamArray[teamIndex];
                 teamObj.showKeyUp();
@@ -147,11 +147,11 @@ export class Operator {
     }
 
     public handleAnswerCorrect(): void {
-        this.teamPresentlyAnswering.handleAnswerCorrect(this.currentClueObj);
+        this.teamPresentlyAnswering.handleAnswerCorrect(this.currentClue);
     }
 
     public handleAnswerWrongOrTimeout(): void {
-        this.teamPresentlyAnswering.handleAnswerIncorrectOrAnswerTimeout(this.currentClueObj);
+        this.teamPresentlyAnswering.handleAnswerIncorrectOrAnswerTimeout(this.currentClue);
     }
 
     private initMouseListeners(): void {
@@ -170,7 +170,7 @@ export class Operator {
         );
     }
 
-    private startGame() {
+    private startGame(): void {
         this.stateMachine.manualTrigger("startGame");
         this.buttonStartGame.setAttribute("disabled", "disabled");
         this.gameTimer.start();
@@ -185,11 +185,6 @@ export class Operator {
     }
 
     private initTeams(teamCount: number): void {
-        if (!this.presentation) {
-            console.warn("can't init teams because no Presentation instance!");
-            return;
-        }
-
         this.teamArray = new Array(teamCount);
         document.querySelector("footer").innerHTML = "";
         this.presentation.clearFooter();
@@ -204,7 +199,8 @@ export class Operator {
     }
 
     public handleBuzzerPress(keyboardEvent: KeyboardEvent): void {
-        const teamIndex = Number(keyboardEvent.key) - 1;
+        const teamNumber = Number(keyboardEvent.key);
+        const teamIndex = teamNumber - 1;
         const teamObj = this.teamArray[teamIndex];
 
         this.teamPresentlyAnswering = teamObj;
@@ -219,15 +215,13 @@ export class Operator {
     }
 
     public shouldGameEnd(): boolean {
-        if (this.gameTimer.getIsFinished()) {
-            return true;
-        } else {
-            return this.teamArray.some(teamObj => teamObj.getMoney() >= this.settings.teamMoneyWhenGameShouldEnd);
-        }
+        return this.gameTimer.getIsFinished() ||
+            this.teamArray.some(teamObj => teamObj.getMoney() >= this.settings.teamMoneyWhenGameShouldEnd);
     }
 
     public handleLockout(keyboardEvent: KeyboardEvent): void {
-        const teamIndex = Number(keyboardEvent.key) - 1;
+        const teamNumber = Number(keyboardEvent.key);
+        const teamIndex = teamNumber - 1;
         const teamObj = this.teamArray[teamIndex];
         teamObj.canBeLockedOut() && teamObj.startLockout();
     }
@@ -239,7 +233,7 @@ export class Operator {
         function isClueValid(clueObj: Clue): boolean {
             return clueObj.value !== null &&
                 clueObj.value > 0 &&
-                clueObj.question != null &&
+                clueObj.question !== null &&
                 clueObj.question.length > 0 &&
                 clueObj.question !== "=" &&
                 clueObj.answer.length > 0 &&
@@ -248,28 +242,23 @@ export class Operator {
                 clueObj.category.title !== "=";
         }
 
-        function doesQuestionHaveMultimedia(clueObj: Clue): boolean {
+        function doesClueQuestionHaveMultimedia(clueObj: Clue): boolean {
             /*
             Some Jeopardy clues have audio or video, which are shown or played on the 
             TV show. The J Archive does not have the audio or video, so we need to
             skip those clues.
             */
-            const questionStr = clueObj.question.toLowerCase();
-            const terms = ["seen here", "heard here"];
-            for (let i = 0; i < terms.length; i++) {
-                if (questionStr.includes(terms[i])) {
-                    return true;
-                }
-            }
-            return false;
+            const clueQuestion = clueObj.question.toLowerCase();
+            const termsForMultimedia = ["seen here", "heard here"];
+            return termsForMultimedia.some(term => clueQuestion.includes(term));
         }
 
         const showClueToOperator = (clueObj: Clue) => {
             /*
-            This function only shows the air date, category, and dollar value to the operator.
+            This function only shows the airdate, category, and dollar value to the operator.
             The state machine will show the clue question after a timeout.
             */
-            this.divClueWrapper.style.display = ""; //show
+            this.divClueWrapper.style.display = ""; //show it by removing "display=none"
             this.divClueCategory.innerHTML = clueObj.category.title;
             this.divClueValue.innerHTML = "$" + clueObj.value;
             this.divClueAirdate.innerHTML = clueObj.airdateParsed.getFullYear().toString();
@@ -289,14 +278,14 @@ export class Operator {
             xhr.open("GET", "http://jservice.io/api/random");
             xhr.addEventListener("load", () => {
 
-                if (xhr.status != 200) {
+                if (xhr.status !== 200) {
                     alert(`Error ${xhr.status}: ${xhr.statusText}`);
                 }
 
-                const parsed = JSON.parse(xhr.response);
-                const clueObj: Clue = parsed[0];
+                const parsedJson = JSON.parse(xhr.response);
+                const clueObj: Clue = parsedJson[0];
 
-                if (isClueValid(clueObj) && !doesQuestionHaveMultimedia(clueObj)) {
+                if (isClueValid(clueObj) && !doesClueQuestionHaveMultimedia(clueObj)) {
 
                     // remove backslashes
                     clueObj.question = clueObj.question.replace(/\\/g, "");
@@ -306,7 +295,7 @@ export class Operator {
                     // example of what format the airdate is in: "2013-01-25T12:00:00.000Z"
                     clueObj.airdateParsed = new Date(clueObj.airdate);
 
-                    this.currentClueObj = clueObj;
+                    this.currentClue = clueObj;
                     showClueToOperator.call(this, clueObj);
                     this.presentation.setClue(clueObj);
 
@@ -357,8 +346,8 @@ export class Operator {
 
         this.divInstructions.innerHTML = "Read the question out loud. Buzzers open when you press space.";
 
-        this.divClueQuestion.innerHTML = getClueQuestionHtmlWithSubjectInBold(this.currentClueObj);
-        this.trQuestion.style.display = "";//show
+        this.divClueQuestion.innerHTML = getClueQuestionHtmlWithSubjectInBold(this.currentClue);
+        this.trQuestion.style.display = ""; //show it by removing "display=none"
         this.trAnswer.style.display = "none";
 
         this.buttonSkipClue.removeAttribute("disabled");
@@ -367,8 +356,9 @@ export class Operator {
             /*
             The person reading the question out loud should emphasize the subject
             of the question. Look for words that are probably the subject and make them bold.
+            \b means word boundary.
             */
-            const regex = /\b((this)|(these)|(her)|(his)|(she)|(he)|(here))\b/i; // \b is a word boundary
+            const regex = /\b((this)|(these)|(her)|(his)|(she)|(he)|(here))\b/i;
             const result = regex.exec(clueObj.question);
 
             if (result === null) {
@@ -388,8 +378,8 @@ export class Operator {
 
     public handleDoneReadingClueQuestion(): void {
         this.audioManager.play("doneReadingClueQuestion");
-        this.trAnswer.style.display = ""; //show answer to operator
-        this.divClueAnswer.innerHTML = this.currentClueObj.answer;
+        this.trAnswer.style.display = ""; //show it by removing "display=none"
+        this.divClueAnswer.innerHTML = this.currentClue.answer;
         this.divInstructions.innerHTML = "Wait for people to answer.";
         this.setAllTeamsState(TeamState.CAN_ANSWER);
         this.buttonSkipClue.setAttribute("disabled", "disabled");
@@ -413,9 +403,7 @@ export class Operator {
             if (!teamObj.hasBuzzedForCurrentQuestion) {
                 teamObj.statistics.questionsNotBuzzed++;
             }
-
         });
-
 
     }
 
@@ -424,8 +412,8 @@ export class Operator {
     }
 
     public canTeamBuzz(keyboardEvent: KeyboardEvent): boolean {
-        // press keyboard key one for team index zero
-        const teamIndex = Number(keyboardEvent.key) - 1;
+        const teamNumber = Number(keyboardEvent.key);
+        const teamIndex = teamNumber - 1;
         return this.teamArray[teamIndex].canBuzz();
     }
 
@@ -524,14 +512,13 @@ export class Operator {
     public handleGameEnd(): void {
         this.gameTimer.pause();
 
-        this.audioManager.play("roundEnd").then(
-            () => this.audioManager.play("musicGameEnd")
-        );
+        // First play the eight high-pitched beeps sound, then play the closing music
+        this.audioManager.play("roundEnd")
+            .then(() => this.audioManager.play("musicGameEnd"));
 
-        // sort teams by how much money they have
+        // sort teams by money descending
         const shallowCopy = this.teamArray.slice();
         function comparator(team1: Team, team2: Team) {
-            //sort descending
             return team2.getMoney() - team1.getMoney();
         }
         shallowCopy.sort(comparator);
@@ -695,9 +682,15 @@ export class Operator {
     public getCountdownTimerSource(): CountdownTimerSource {
         if (this.resetDurationForWaitForBuzzState) {
             this.resetDurationForWaitForBuzzState = false;
-            return { type: CountdownOperation.CreateNew, duration: this.settings.timeoutWaitForBuzzesMillisec };
+            return {
+                type: CountdownOperation.CreateNew,
+                duration: this.settings.timeoutWaitForBuzzesMillisec
+            };
         } else {
-            return { type: CountdownOperation.ResumeExisting, countdownTimerToResume: this.countdownTimerForWaitForBuzzesState };
+            return {
+                type: CountdownOperation.ResumeExisting,
+                countdownTimerToResume: this.countdownTimerForWaitForBuzzesState
+            };
         }
     }
 

@@ -5,9 +5,7 @@ import { Presentation } from "../presentation/Presentation";
 import { CountdownTimer } from "../CountdownTimer";
 import { getStatesForJeopardyGame } from "./statesForJeopardyGame";
 import { StateMachineState, StateMachineTransition, TimeoutTransition, TransitionType, CountdownTimerSource, CountdownOperation } from "./stateInterfaces";
-import { generateDotFileForGraphviz } from "./generateDotFileForGraphviz";
 import { GraphvizViewer } from "../graphvizViewer/GraphvizViewer";
-
 
 
 interface StateMap {
@@ -22,7 +20,6 @@ export class StateMachine {
     private readonly DEBUG = false;
     private readonly OPEN_GRAPHVIZ_VIEWER = false;
     private readonly operator: Operator;
-    private readonly settings: Settings;
     private readonly audioManager: AudioManager;
     private readonly presentation: Presentation;
     private readonly operatorWindowCountdownProgress: HTMLProgressElement;
@@ -37,7 +34,6 @@ export class StateMachine {
     constructor(settings: Settings, operator: Operator, presentation: Presentation, audioManager: AudioManager) {
         this.operator = operator;
         this.presentation = presentation;
-        this.settings = settings;
         this.audioManager = audioManager;
 
         this.operatorWindowCountdownProgress = document.querySelector("div#state-machine-viz progress");
@@ -46,7 +42,7 @@ export class StateMachine {
 
         window.addEventListener("keydown", keyboardEvent => this.handleKeyboardEvent(keyboardEvent));
 
-        this.allStates = getStatesForJeopardyGame(this, operator, settings);
+        this.allStates = getStatesForJeopardyGame(operator, settings);
         this.parseAndValidateStates();
 
         this.presentState = this.stateMap["idle"];
@@ -62,7 +58,7 @@ export class StateMachine {
     }
 
     public handleGraphvizViewerReady(graphvizViewer: GraphvizViewer): void {
-        graphvizViewer.updateGraphviz(null, this.presentState.name);
+        graphvizViewer.updateTrail(null, this.presentState.name);
         this.graphvizViewer = graphvizViewer;
     }
 
@@ -116,20 +112,21 @@ export class StateMachine {
 
         switch (countdownTimerSource.type) {
             case CountdownOperation.CreateNew: {
-                const durationMs = countdownTimerSource.duration;
+                const durationMillisec = countdownTimerSource.duration;
 
                 if (this.DEBUG) {
-                    console.log(`Starting countdown timer with duration ${durationMs} millisec`);
+                    console.log(`Starting countdown timer with duration ${durationMillisec} millisec`);
                 }
-                this.countdownTimer = new CountdownTimer(durationMs, this.audioManager);
+                this.countdownTimer = new CountdownTimer(durationMillisec, this.audioManager);
 
 
                 /*
                 The showDots boolean is now used for a special case.
                 Once a team has buzzed and we're waiting for them to answer, we want some special stuff to happen:
-                - in the presentation window: the state machine uses a timeout transition, but instead of showing progress like normal
-                    we want to show it on the nine countdown dots.
-                    - in the operator window: create or use a second <progress> element, instead of using the same one that shows
+                - In the presentation window: the state machine uses a timeout transition, but instead of showing a
+                    progress bar like what would normally happen for a timeout transition, we want to show it on
+                    the nine countdown dots.
+                - In the operator window: use a second <progress> element, instead of using the same one that shows
                     how much time is left for teams to buzz in.
                 */
                 if (timeoutTransitionObj.countdownTimerShowDots) {
@@ -144,9 +141,7 @@ export class StateMachine {
                 }
 
                 this.countdownTimer.onFinished = () => {
-                    if (timeoutTransitionObj.onTransition) {
-                        timeoutTransitionObj.onTransition();
-                    }
+                    timeoutTransitionObj.onTransition?.();
                     this.goToState(timeoutTransitionObj.destination);
                 };
 
@@ -204,7 +199,7 @@ export class StateMachine {
         this.presentState = this.stateMap[destStateName];
         this.operatorWindowDivStateName.innerHTML = destStateName;
         if (this.graphvizViewer) {
-            this.graphvizViewer.updateGraphviz(previousState.name, this.presentState.name);
+            this.graphvizViewer.updateTrail(previousState.name, this.presentState.name);
         }
 
         const transitionArray = this.presentState.transitions;
@@ -213,7 +208,7 @@ export class StateMachine {
         ////////////////////////// Handle showPresentationSlide ///////////////////////////
         ///////////////////////////////////////////////////////////////////////////////////
         if (this.presentState.presentationSlideToShow) {
-            if (this.presentation.slideNames.includes(this.presentState.presentationSlideToShow)) {
+            if (this.presentation.allSlideNames.has(this.presentState.presentationSlideToShow)) {
                 if (this.DEBUG) {
                     console.log(`Showing presentation slide "${this.presentState.presentationSlideToShow}"`);
                 }
@@ -246,6 +241,7 @@ export class StateMachine {
                 }
                 this.startCountdownTimer(transitionObj, keyboardEvent);
                 this.operatorWindowDivStateName.innerHTML = destStateName + " &rarr; " + transitionObj.destination;
+                // We could support multiple timeout transitions, although I have no need to
                 break;
             }
         }
@@ -253,6 +249,7 @@ export class StateMachine {
         //////////////////////////////////////////////////////////////
         //////////////// Handle promise transition ///////////////////
         //////////////////////////////////////////////////////////////
+        // Search for the first promise transition.
         for (let i = 0; i < transitionArray.length; i++) {
             const transitionObj = transitionArray[i];
             if (transitionObj.type === TransitionType.Promise) {
@@ -280,7 +277,7 @@ export class StateMachine {
         ////////////////////////////////////////////////////////////////
         /////////////////////// Handle if transition ///////////////////
         ////////////////////////////////////////////////////////////////
-
+        // Search for the first if transition.
         for (let i = 0; i < transitionArray.length; i++) {
             const transitionObj = transitionArray[i];
             if (transitionObj.type === TransitionType.If) {
@@ -307,6 +304,7 @@ export class StateMachine {
                     this.goToState(transitionObj.else.destination, keyboardEvent);
                 }
             }
+            // We could support multiple if transitions, although I have no need to
             break;
         }
 
@@ -316,12 +314,12 @@ export class StateMachine {
 
     private parseAndValidateStates(): void {
 
-        // Pass one of two: populate the stateMap; validate the slides.
+        // Pass one of two: populate the stateMap; validate the slide names are available.
         this.allStates.forEach((stateObj: StateMachineState) => {
             this.stateMap[stateObj.name] = stateObj;
 
             if (stateObj.presentationSlideToShow &&
-                !this.presentation.slideNames.includes(stateObj.presentationSlideToShow)) {
+                !this.presentation.allSlideNames.has(stateObj.presentationSlideToShow)) {
                 console.warn(`state "${stateObj.name}": showSlide: unknown slide "${stateObj.presentationSlideToShow}"`);
             }
 
@@ -334,6 +332,7 @@ export class StateMachine {
 
             stateObj.transitions.forEach((transitionObj: StateMachineTransition, transitionIndex: number) => {
 
+                // verify all the destination states exist
                 if (transitionObj.type !== TransitionType.If) {
                     if (!(transitionObj.destination in this.stateMap)) {
                         printWarning(stateObj.name, transitionIndex,
@@ -343,7 +342,7 @@ export class StateMachine {
 
                 switch (transitionObj.type) {
                     case TransitionType.Keyboard: {
-                        const keyboardKeys = transitionObj.keyboardKeys;
+                        const keyboardKeys: string = transitionObj.keyboardKeys;
 
                         // Make sure each keyboard key is not used in multiple transitions from this state.
                         for (let i = 0; i < keyboardKeys.length; i++) {

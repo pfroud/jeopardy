@@ -46,8 +46,8 @@ export class CountdownTimer {
         this.isPaused ? this.resume() : this.pause();
     }
 
-    public setPaused(setPaused_: boolean): void {
-        if (setPaused_) {
+    public setPaused(newPaused: boolean): void {
+        if (newPaused) {
             this.pause();
         } else {
             this.resume();
@@ -60,8 +60,8 @@ export class CountdownTimer {
             this.isPaused = true;
             this.guiUpdatePaused();
 
-            const presentTS = Date.now();
-            const elapsedMillisecSinceLastInterval = presentTS - this.timestampOfLastInterval;
+            const presentTimestamp = Date.now();
+            const elapsedMillisecSinceLastInterval = presentTimestamp - this.timestampOfLastInterval;
             this.remainingMillisec -= elapsedMillisecSinceLastInterval;
 
             // update the gui as if a tick from setInterval() happened
@@ -122,15 +122,13 @@ export class CountdownTimer {
                 progressElement.setAttribute("max", String(this.maxMillisec));
                 progressElement.setAttribute("value", String(this.maxMillisec));
             });
-            if (this.dotsTables) {
-                this.dotsTables.forEach(tableElement => {
-                    const tds = tableElement.querySelectorAll("td");
-                    if (tds.length !== 9) {
-                        console.warn(`found ${tds.length} dots <td> element(s), expected exactly 9`);
-                    }
-                    tds.forEach(td => td.classList.add("active"));
-                });
-            }
+            this.dotsTables.forEach(tableElement => {
+                const tds = tableElement.querySelectorAll("td");
+                if (tds.length !== 9) {
+                    console.warn(`found ${tds.length} dots <td> element(s), expected exactly 9`);
+                }
+                tds.forEach(td => td.classList.add("active"));
+            });
             this.textDivs.forEach(divElement => divElement.innerHTML = (this.maxMillisec / 1000).toFixed(1));
             /////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -143,10 +141,10 @@ export class CountdownTimer {
     }
 
     private handleInterval(): void {
-        const presentTS = Date.now(); //unix epoch
-        const elapsedMillisecSinceLastInterval = presentTS - this.timestampOfLastInterval;
+        const presentTimestamp = Date.now(); //unix epoch
+        const elapsedMillisecSinceLastInterval = presentTimestamp - this.timestampOfLastInterval;
         this.remainingMillisec -= elapsedMillisecSinceLastInterval;
-        this.timestampOfLastInterval = presentTS;
+        this.timestampOfLastInterval = presentTimestamp;
 
         let logLine: string;
         if (this.DEBUG) {
@@ -176,16 +174,16 @@ export class CountdownTimer {
 
     private guiUpdateForInterval(): void {
 
-        let textToSet: string;
+        let newText: string;
         const remainingSeconds = this.remainingMillisec / 1000;
         if (this.remainingMillisec > 60 * 1000) {
             const date = new Date(this.remainingMillisec);
-            textToSet = date.getMinutes() + " min " + date.getSeconds() + " sec";
+            newText = date.getMinutes() + " min " + date.getSeconds() + " sec";
         } else {
-            textToSet = remainingSeconds.toFixed(1) + " sec";
+            newText = remainingSeconds.toFixed(1) + " sec";
         }
 
-        this.textDivs.forEach(elem => elem.innerHTML = textToSet);
+        this.textDivs.forEach(elem => elem.innerHTML = newText);
 
         this.progressElements.forEach(elem => elem.setAttribute("value", String(this.remainingMillisec)));
 

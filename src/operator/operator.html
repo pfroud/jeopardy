@@ -33,7 +33,6 @@
         <input id="tab-settings" type="radio" name="tabs">
         <label for="tab-settings">Settings</label>
 
-
         <!-- ====================================================================== -->
         <div class="tab-content" id="content-setup">
 
@@ -66,7 +65,6 @@
                 <audio id="music-game-end" preload="auto" src="../sound/music-closing.mp3" controls
                     style="width:100%"></audio>
 
-
         </div>
 
 
@@ -84,12 +82,12 @@
             <button id="start-game" disabled>Start game</button> &emsp;
             <button id="skip-clue" disabled>Skip clue</button>
 
-            <div id="instructions">waiting for presentation window...</div>
+            <div id="instructions">Waiting for presentation window...</div>
 
             <div id="clue-wrapper" style="display:none">
                 <table>
                     <tr id="tr-clue-airdate">
-                        <td>Air date:</td>
+                        <td>Airdate:</td>
                         <td>
                             <div id="div-clue-airdate"></div>
                         </td>
@@ -140,19 +138,19 @@
             <table id="table-settings">
                 <tr>
                     <td>How long to show the category before showing the clue:</td>
-                    <td><input type="number" id="display-duration-category"> ms</td>
+                    <td><input type="number" id="display-duration-category"> millisec</td>
                 </tr>
                 <tr>
                     <td>How long to show the question answer:</td>
-                    <td><input type="number" id="display-duration-answer"> ms</td>
+                    <td><input type="number" id="display-duration-answer"> millisec</td>
                 </tr>
                 <tr>
                     <td>How long you have to buzz in once the question has been read:</td>
-                    <td><input type="number" id="timeout-wait-for-buzzes"> ms</td>
+                    <td><input type="number" id="timeout-wait-for-buzzes"> millisec</td>
                 </tr>
                 <tr>
                     <td>How long you have to answer once you buzz in:</td>
-                    <td><input type="number" id="timeout-answer"> ms</td>
+                    <td><input type="number" id="timeout-answer"> millisec</td>
                 </tr>
             </table>
 
@@ -177,7 +175,7 @@
 
 
     <footer>
-        <!-- Everything is created at runtime -->
+        <!-- Contents of the footer is created at runtime -->
     </footer>
 
 

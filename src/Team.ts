@@ -134,10 +134,10 @@ export class Team {
         }
 
         const DOLLAR_CHANGE_PER_STEP = 100;
-        const DELAY_BETWEEN_STEPS_MS = 50;
+        const DELAY_BETWEEN_STEPS_MILLISEC = 50;
         const DIRECTION_MULTIPLIER = targetMoney > this.money ? 1 : -1;
 
-        setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MS, this);
+        setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MILLISEC, this);
 
         function handleTimeout(instance: Team) {
             const difference = Math.abs(targetMoney - instance.money);
@@ -151,7 +151,7 @@ export class Team {
 
             instance.updateMoneyDisplay();
             if (instance.money !== targetMoney) {
-                setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MS, instance);
+                setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MILLISEC, instance);
             }
 
         }
@@ -182,12 +182,10 @@ export class Team {
 
         const imgSwitchClosed = document.createElement("img");
         imgSwitchClosed.setAttribute("src", "img/switch-closed.svg");
-        imgSwitchClosed.setAttribute("attr", "switch closed");
         imgSwitchClosed.classList.add("buzzer-pressed");
 
         const imgSwitchOpened = document.createElement("img");
         imgSwitchOpened.setAttribute("src", "img/switch-opened.svg");
-        imgSwitchOpened.setAttribute("attr", "switch opened");
         imgSwitchOpened.classList.add("buzzer-not-pressed");
 
         divBuzzerDisplay.append(imgSwitchClosed);
@@ -289,9 +287,8 @@ export class Team {
         this.setState(TeamState.LOCKOUT);
 
         const countdownShowCategory = this.countdownTimer = new CountdownTimer(this.settings.durationLockoutMillisec);
-        // todo would be nice to show progress element on display and presentation. need to change CountdownTimer to allow that
         countdownShowCategory.addProgressElement(this.progressElementInPresentationWindow);
-        this.progressElementInPresentationWindow.style.display = "";//show
+        this.progressElementInPresentationWindow.style.display = ""; //show it by removing "display=none"
         countdownShowCategory.onFinished = () => this.endLockout();
         countdownShowCategory.start();
 
@@ -307,7 +304,7 @@ export class Team {
     public startAnswer(): void {
         this.setState(TeamState.ANSWERING);
         this.countdownDotsInPresentationWindow.querySelector("td").classList.add("active");
-        this.progressElementInOperatorWindow.style.display = "";//show
+        this.progressElementInOperatorWindow.style.display = ""; //show it by removing "display=none"
     }
 
     public stopAnswer(): void {
