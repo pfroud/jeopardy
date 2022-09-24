@@ -2,9 +2,9 @@
     "recommendations": [
         "dbaeumer.vscode-eslint",
         "streetsidesoftware.code-spell-checker",
-        "amodio.tsl-problem-matcher",
         "adamwalzer.scss-lint",
         "sibiraj-s.vscode-scss-formatter",
-        "VisualStudioExptTeam.vscodeintellicode"
+        "visualstudioexptteam.vscodeintellicode",
+        "nick-lvov-dev.typescript-explicit-types"
     ]
 }
