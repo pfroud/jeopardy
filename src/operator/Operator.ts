@@ -162,7 +162,7 @@ export class Operator {
         this.buttonSkipClue.addEventListener("click", () => this.skipClue());
 
         document.querySelector("a#aMoneyOverride").addEventListener("click", () =>
-            window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney", "popup"));
+            window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney", "popup,fullscreen"));
 
 
         document.querySelector("a#aGenerateGraphviz").addEventListener("click", () =>
