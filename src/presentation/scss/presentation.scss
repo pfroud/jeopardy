@@ -186,52 +186,6 @@ main {
                 }
             }
         }
-
-        &#slide-gameEnd-pie-charts {
-            div#pie-charts {
-                // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr 1fr;
-
-                div.team-pie-chart {
-                    padding: 20px;
-                    position: relative;
-
-                    div.chart-title {
-                        // https://stackoverflow.com/a/23703655
-                        position: absolute;
-                        top: 50%;
-                        left: 50%;
-                        transform: translateX(-50%) translateY(-50%);
-                    }
-                }
-            }
-
-            div#chart-legend {
-                margin-top: 50px;
-
-                div.legend-row {
-                    height: 30px;
-
-                    span.color-swatch {
-                        display: inline-block;
-                        width: 20px;
-                        height: 20px;
-                        vertical-align: middle;
-                    }
-
-                    &#not-buzzed span.color-swatch {
-                        background-color: gray;
-                    }
-                    &#buzzed-then-answered-right span.color-swatch {
-                        background-color: green;
-                    }
-                    &#buzzed-then-answered-wrong-or-timed-out span.color-swatch {
-                        background-color: red;
-                    }
-                }
-            }
-        }
     }
 }
 

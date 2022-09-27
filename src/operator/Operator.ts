@@ -567,24 +567,30 @@ export class Operator {
             chartContainer.appendChild(title);
 
             const chartData: Chartist.PieChartData = {
-                series: [
-                    {
-                        value: teamObj.statistics.questionsNotBuzzed,
-                        className: "not-buzzed"
-                    }, {
-                        value: teamObj.statistics.questionsBuzzedThenAnsweredRight,
-                        className: "buzzed-then-answered-right"
-                    }, {
-                        value: teamObj.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut,
-                        className: "buzzed-then-answered-wrong-or-timed-out"
-                    }
-                ]
+                series: []
             };
+
+            const seriesToAdd = [{
+                value: teamObj.statistics.questionsNotBuzzed,
+                className: "not-buzzed"
+            }, {
+                value: teamObj.statistics.questionsBuzzedThenAnsweredRight,
+                className: "buzzed-then-answered-right"
+            }, {
+                value: teamObj.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut,
+                className: "buzzed-then-answered-wrong-or-timed-out"
+            }];
+
+            seriesToAdd.forEach(candidate => { if (candidate.value > 0) chartData.series.push(candidate) });
+
+            if (chartData.series.length == 0) {
+                return;
+            }
 
             // https://gionkunz.github.io/chartist-js/api-documentation.html#chartistpie-declaration-defaultoptions
             const chartOptions: Chartist.PieChartOptions = {
-                width: "300px",
-                height: "300px",
+                width: "200px",
+                height: "200px",
                 donut: true,
                 donutWidth: "40%",
                 //
