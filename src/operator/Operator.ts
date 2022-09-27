@@ -23,7 +23,7 @@ interface SavedGameInLocalStorage {
 }
 
 export class Operator {
-    public static teamCount = 8; //not readonly because it can change if we load a game from localStorage
+    public static teamCount = 5; //not readonly because it can change if we load a game from localStorage
     private static readonly localStorageKey = "jeopardy";
 
     private readonly audioManager: AudioManager;
@@ -507,6 +507,10 @@ export class Operator {
         for (let i = 0; i < parsedJson.teams.length; i++) {
             this.teamArray[i].loadFromLocalStorage(parsedJson.teams[i]);
         }
+
+        if (this.shouldGameEnd()) {
+            this.stateMachine.goToState("gameEnd");
+        }
     }
 
     public handleGameEnd(): void {
@@ -632,12 +636,14 @@ export class Operator {
         }
 
         interface LineChartSeriesData {
+            className: string;
             data: XYPoint[]
         }
 
         const lineChartDataForAllTeams: LineChartSeriesData[] =
             this.teamArray.map(
-                team => ({
+                (team, index) => ({
+                    className: `team-${index + 1}`,
                     data: team.statistics.moneyAtEndOfEachRound.map(
                         (value, index) => ({ x: index, y: value })
                     )

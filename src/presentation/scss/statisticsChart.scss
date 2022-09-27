@@ -1,5 +1,7 @@
 /*
-This stylesheet gets added with the Chartist stylesheet
+This stylesheet gets added with the Chartist stylesheet:
+"bower_components/chartist/dist/scss/chartist.scss"
+or
 "bower_components/chartist/dist/chartist.min.css"
 */
 
@@ -41,6 +43,32 @@ div#slide-gameEnd-line-chart {
         }
         g.ct-labels span {
             color: white;
+        }
+
+        g.ct-series {
+            path.ct-line {
+                fill: none;
+                stroke-width: 4px;
+            }
+
+            line.ct-point {
+                stroke-width: 10px;
+                stroke-linecap: round;
+            }
+
+            $series-colors: red, orange, green, gray;
+            $team-count: 8;
+
+            @for $i from 0 to $team-count {
+                &.team-#{$i + 1} {
+                    stroke: nth($series-colors, ($i % length($series-colors)) + 1);
+
+                    @if $i >= length($series-colors) {
+                        stroke-dasharray: 5;
+                        stroke-linecap: butt;
+                    }
+                }
+            }
         }
     }
 }
