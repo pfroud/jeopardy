@@ -50,7 +50,7 @@ div.presentation-slide#slide-gameEnd-pie-charts {
     div#pie-chart-legend {
         margin-top: 50px;
 
-        div.pie-legend-row {
+        div.pie-chart-legend-row {
             height: 30px;
 
             span.color-swatch {
@@ -74,8 +74,38 @@ div.presentation-slide#slide-gameEnd-pie-charts {
 }
 
 div#slide-gameEnd-line-chart {
+    g.ct-series {
+        $series-colors: red, orange, green, gray;
+        $team-count: 8;
+
+        @for $i from 0 to $team-count {
+            &.team-#{$i + 1} {
+                stroke: nth($series-colors, ($i % length($series-colors)) + 1);
+
+                @if $i >= length($series-colors) {
+                    stroke-dasharray: 5;
+                    stroke-linecap: butt;
+                }
+            }
+        }
+    }
+
+    div#line-chart {
+        display: inline-block;
+        vertical-align: middle;
+
+        svg.ct-chart-line {
+            g.ct-grids line {
+                stroke: white;
+            }
+            g.ct-labels span {
+                color: white;
+            }
+        }
+    }
+
     div#y-axis-label {
-        transform: translate(-20px, 250px) rotate(-90deg);
+        transform: rotate(-90deg);
         display: inline-block;
     }
 
@@ -83,38 +113,18 @@ div#slide-gameEnd-line-chart {
         text-align: center;
     }
 
-    svg.ct-chart-line {
-        g.ct-grids line {
-            stroke: white;
+    div#line-chart-legend {
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 30px;
+
+        div.line-chart-legend-row {
+            margin-bottom: 20px;
         }
-        g.ct-labels span {
-            color: white;
-        }
 
-        g.ct-series {
-            path.ct-line {
-                fill: none;
-                stroke-width: 4px;
-            }
-
-            line.ct-point {
-                stroke-width: 10px;
-                stroke-linecap: round;
-            }
-
-            $series-colors: red, orange, green, gray;
-            $team-count: 8;
-
-            @for $i from 0 to $team-count {
-                &.team-#{$i + 1} {
-                    stroke: nth($series-colors, ($i % length($series-colors)) + 1);
-
-                    @if $i >= length($series-colors) {
-                        stroke-dasharray: 5;
-                        stroke-linecap: butt;
-                    }
-                }
-            }
+        svg {
+            vertical-align: middle;
+            margin-right: 10px;
         }
     }
 }

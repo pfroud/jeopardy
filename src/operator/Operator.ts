@@ -561,10 +561,10 @@ export class Operator {
             chartContainer.className = "team-pie-chart";
             divForPieCharts.appendChild(chartContainer);
 
-            const title = document.createElement("div");
-            title.className = "chart-title";
-            title.innerText = teamObj.teamName;
-            chartContainer.appendChild(title);
+            const chartTitleDiv = document.createElement("div");
+            chartTitleDiv.className = "chart-title";
+            chartTitleDiv.innerText = teamObj.teamName;
+            chartContainer.appendChild(chartTitleDiv);
 
             const chartData: Chartist.PieChartData = {
                 series: []
@@ -674,12 +674,51 @@ export class Operator {
                 labelInterpolationFnc: value => "$" + value.toLocaleString()
             },
             lineSmooth: false,
-            width: "1000px",
+            width: "900px",
             height: "500px"
 
         };
 
         new Chartist.LineChart(this.presentation.getDivForLineChart(), chartData, chartOptions);
+
+        // create legend
+        const legendContainer = this.presentation.getDivForLineChartLegend();
+        for (let i = 0; i < Operator.teamCount; i++) {
+
+            const legendRow = document.createElement("div");
+            legendRow.className = "line-chart-legend-row";
+
+            const svgWidth = 50;
+            const svgHeight = 20;
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.classList.add("ct-chart-line");
+            svg.setAttribute("width", svgWidth + "px");
+            svg.setAttribute("height", svgHeight + "px");
+            legendRow.appendChild(svg);
+
+            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            group.classList.add("ct-series");
+            group.classList.add(`team-${i + 1}`);
+            svg.appendChild(group);
+
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.classList.add("ct-line");
+            path.setAttribute("d", `M0,${svgHeight / 2} L${svgWidth},${svgHeight / 2}`);
+            group.appendChild(path);
+
+            const point = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            point.classList.add("ct-point");
+            point.setAttribute("x1", String(svgWidth / 2));
+            point.setAttribute("y1", String(svgHeight / 2));
+            point.setAttribute("x2", String(svgWidth / 2));
+            point.setAttribute("y2", String(svgHeight / 2));
+            group.appendChild(point);
+
+            legendRow.append(`Team ${i + 1}`);
+
+            legendContainer.appendChild(legendRow);
+
+        }
 
     }
 

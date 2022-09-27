@@ -155,6 +155,10 @@ export class Presentation {
         return document.querySelector("div#slide-gameEnd-line-chart div#line-chart");
     }
 
+    public getDivForLineChartLegend(): HTMLDivElement {
+        return document.querySelector("div#slide-gameEnd-line-chart div#line-chart-legend");
+    }
+
     public hideHeaderAndFooter(): void {
         document.body.className = "hide-header-and-footer";
     }
