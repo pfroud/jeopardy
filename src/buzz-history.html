@@ -10,10 +10,12 @@
     <script type="module" src="buzzHistoryForClue.ts"></script>
     <script type="module">
         import { createDiagram, exampleBuzzHistory } from "./buzzHistoryForClue";
-        createDiagram(document.querySelector("div"), exampleBuzzHistory);
+        document.addEventListener("DOMContentLoaded", function () {
+            createDiagram(document.querySelector("svg"), exampleBuzzHistory);
+        });
     </script>
 
-    <div></div>
+    <svg style="border: 1px solid black"></svg>
 
 </body>
 
