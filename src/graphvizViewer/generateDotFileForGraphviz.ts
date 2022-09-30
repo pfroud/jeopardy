@@ -1,9 +1,17 @@
-import { StateMachineState, StateMachineTransition, TransitionType } from "./stateInterfaces";
+import { StateMachineState, StateMachineTransition, TransitionType } from "../stateMachine/stateInterfaces";
 
-
-export function generateDotFileForGraphviz(stateArray: StateMachineState[]): string {
-
-    // TODO need to add onExit and onEnter functions!!!!
+/**
+ * Convert state machine states into a string of the Graphviz graph description language.
+ * The language is called DOT which is difficult to include in function names.
+ * See https://graphviz.org/doc/info/lang.html
+ * 
+ * "dot" is also the name of the Graphviz executable to draw directed graphs.
+ * See https://graphviz.org/docs/layouts/dot/
+ * 
+ * @param stateArray the state machine states to convert into Graphviz
+ * @returns a DOT language string
+ */
+export function stateMachineToGraphviz(stateArray: StateMachineState[]): string {
 
     const dotFileLines: string[] = [];
     dotFileLines.push('digraph jeopardy {');

@@ -1,6 +1,6 @@
 import Viz from "@aduh95/viz.js";
 import { Operator } from "../operator/Operator";
-import { generateDotFileForGraphviz } from "../stateMachine/generateDotFileForGraphviz";
+import { stateMachineToGraphviz } from "./generateDotFileForGraphviz";
 import { GraphvizViewer } from "./GraphvizViewer";
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -22,10 +22,9 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // todo rename this method
-    const dotFileString = generateDotFileForGraphviz(stateMachine.getAllStates());
+    const graphvizLanguageString = stateMachineToGraphviz(stateMachine.getAllStates());
 
-    async function generateSvgFromDotFile(): Promise<string> {
+    async function getSvg(): Promise<string> {
         // from https://github.com/aduh95/viz.js#using-a-bundler
         const viz = new Viz({
             worker: new Worker(
@@ -33,10 +32,10 @@ window.addEventListener('DOMContentLoaded', () => {
                 { type: "module" }
             )
         });
-        return viz.renderString(dotFileString);
+        return viz.renderString(graphvizLanguageString);
     }
 
-    generateSvgFromDotFile()
+    getSvg()
         .then((svgString) => {
             document.body.innerHTML = svgString;
 
