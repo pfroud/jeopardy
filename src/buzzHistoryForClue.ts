@@ -10,39 +10,54 @@ export interface BuzzHistoryForClue {
     */
     records: BuzzHistoryRecord[];
     timestampWhenClueQuestionFinishedReading: number;
+    lockoutDurationMillisec: number
 }
 
 export interface BuzzHistoryRecord {
     timestamp: number;
     teamNumber: number;
-    // result: BuzzResult;
+    result: BuzzResult;
     note?: string;
 }
 
-export enum BuzzResult {
+type BuzzResult = BuzzResultTooEarly | BuzzResultTooLate | BuzzResultStartAnswer
+
+interface BuzzResultTooEarly {
+    type: BuzzResultEnum.TOO_EARLY;
+}
+interface BuzzResultTooLate {
+    type: BuzzResultEnum.TOO_LATE;
+}
+interface BuzzResultStartAnswer {
+    type: BuzzResultEnum.START_ANSWERING;
+    answeredCorrectly: boolean;
+    endTimestamp: number;
+}
+
+export enum BuzzResultEnum {
     TOO_EARLY = "too early",
-    TOO_LATE_DO_NOTHING = "too late",
+    TOO_LATE = "too late",
     START_ANSWERING = "start answering"
 }
 
 export const exampleBuzzHistory: BuzzHistoryForClue = {
     clue: null,
     records: [
-        { timestamp: 1664501695729, teamNumber: 1, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
-        { timestamp: 1664501695930, teamNumber: 1, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
-        { timestamp: 1664501696039, teamNumber: 1, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
-        { timestamp: 1664501696151, teamNumber: 1, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
-        { timestamp: 1664501696267, teamNumber: 1, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
-        { timestamp: 1664501696375, teamNumber: 1, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
-        { timestamp: 1664501696502, teamNumber: 1, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
-        { timestamp: 1664501696636, teamNumber: 1, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
-        { timestamp: 1664501696778, teamNumber: 1, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
-        { timestamp: 1664501696908, teamNumber: 1, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
-        { timestamp: 1664501697078, teamNumber: 2, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
-        { timestamp: 1664501697079, teamNumber: 2, note: 'Operator.handleBuzzerPress()' },
-        { timestamp: 1664501700134, teamNumber: 3, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' }
+        { timestamp: 1664501695729, teamNumber: 1, result: { type: BuzzResultEnum.TOO_EARLY }, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
+        { timestamp: 1664501695930, teamNumber: 1, result: { type: BuzzResultEnum.TOO_EARLY }, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
+        { timestamp: 1664501696039, teamNumber: 1, result: { type: BuzzResultEnum.TOO_EARLY }, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
+        { timestamp: 1664501696151, teamNumber: 1, result: { type: BuzzResultEnum.TOO_EARLY }, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
+        { timestamp: 1664501696267, teamNumber: 1, result: { type: BuzzResultEnum.TOO_EARLY }, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
+        { timestamp: 1664501696375, teamNumber: 1, result: { type: BuzzResultEnum.TOO_EARLY }, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
+        { timestamp: 1664501696502, teamNumber: 1, result: { type: BuzzResultEnum.TOO_EARLY }, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
+        { timestamp: 1664501696636, teamNumber: 1, result: { type: BuzzResultEnum.TOO_EARLY }, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
+        { timestamp: 1664501696778, teamNumber: 1, result: { type: BuzzResultEnum.TOO_EARLY }, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
+        { timestamp: 1664501696908, teamNumber: 1, result: { type: BuzzResultEnum.TOO_EARLY }, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' },
+        { timestamp: 1664501697079, teamNumber: 2, result: { type: BuzzResultEnum.START_ANSWERING, answeredCorrectly: true, endTimestamp: 1664501698079 }, note: 'Operator.handleBuzzerPress()' },
+        { timestamp: 1664501700134, teamNumber: 3, result: { type: BuzzResultEnum.TOO_LATE }, note: 'Operator.initBuzzerFootswitchIconDisplay() keydown' }
     ],
-    timestampWhenClueQuestionFinishedReading: 1664501696893
+    timestampWhenClueQuestionFinishedReading: 1664501696893,
+    lockoutDurationMillisec: 250
 };
 
 export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue): void {
@@ -53,11 +68,12 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
     const contentWidth = svgWidth - margin - margin;
     const contentHeight = svgHeight - margin - margin;
 
-    const xAxisSpaceMillisec = 2000;
+    const xAxisSpaceMillisec = 1500;
     const timestampDoneReading = history.timestampWhenClueQuestionFinishedReading;
 
-    const rowHeight = 50;
+    const rowHeight = 100;
     const dotRadius = 5;
+    const barHeight = 10;
 
     const svg = d3.select(_svg_)
         .attr("width", svgWidth)
@@ -114,12 +130,51 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
         .attr("stroke", "black")
         .attr("stroke-width", 1);
 
+    let y = 5;
     history.records.forEach(record => {
-        rowsArray[record.teamNumber].append("circle")
+
+
+        const group = rowsArray[record.teamNumber];
+        group.append("circle")
             .attr("cx", scale(record.timestamp))
-            .attr("cy", rowHeight / 2)
+            .attr("cy", y)
             .attr("r", dotRadius)
-            ;
+            .attr("fill", "#000000aa")
+            .attr("stroke-width", 0);
+
+
+        switch (record.result.type) {
+
+            case BuzzResultEnum.TOO_EARLY:
+                group.append("rect")
+                    .attr("x", scale(record.timestamp))
+                    .attr("y", y - (barHeight / 2))
+                    .attr("width", scale(history.lockoutDurationMillisec) - scale(0))
+                    .attr("height", barHeight)
+                    .attr("fill", "#ff000066")
+                    .attr("stroke", "black")
+                    .attr("stroke-width", 1);
+
+                break;
+            case BuzzResultEnum.TOO_LATE:
+                break;
+            case BuzzResultEnum.START_ANSWERING:
+
+                group.append("rect")
+                    .attr("x", scale(record.timestamp))
+                    .attr("y", rowHeight / 2)
+                    .attr("width", scale(record.result.endTimestamp))
+                    .attr("height", barHeight)
+                    .attr("fill", record.result.answeredCorrectly ? "green" : "orange")
+                    .attr("stroke", "black")
+                    .attr("stroke-width", 1);
+
+
+                break;
+
+        }
+        y += 10;
+
 
     });
 
