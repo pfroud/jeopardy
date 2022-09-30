@@ -390,4 +390,8 @@ export class StateMachine {
         return this.allStates;
     }
 
+    public getPresentState(): StateMachineState {
+        return this.presentState;
+    }
+
 }

@@ -6,6 +6,7 @@ import { Presentation } from "../presentation/Presentation";
 import { CountdownTimer } from "../CountdownTimer";
 import { CountdownOperation, CountdownTimerSource } from "../stateMachine/stateInterfaces";
 import { createLineChart, createPieCharts } from "./statisticsCharts";
+import { BuzzHistoryForClue, BuzzResult } from "../buzzHistoryForClue";
 
 export interface Clue {
     answer: string;
@@ -50,6 +51,8 @@ export class Operator {
 
     private countdownTimerForWaitForBuzzesState: CountdownTimer;
     private resetDurationForWaitForBuzzState = true;
+
+    private buzzHistory: BuzzHistoryForClue;
 
     constructor(audioManager: AudioManager, settings: Settings) {
         this.audioManager = audioManager;
@@ -125,6 +128,13 @@ export class Operator {
                 const teamIndex = Number(keyboardKey) - 1;
                 const teamObj = this.teamArray[teamIndex];
                 teamObj.showKeyDown();
+
+                this.buzzHistory.records.push({
+                    timestamp: Date.now(),
+                    teamNumber: teamIndex + 1,
+                    note: "Operator.initBuzzerFootswitchIconDisplay() keydown"
+                });
+
             }
         });
         window.addEventListener("keyup", keyboardEvent => {
@@ -212,6 +222,12 @@ export class Operator {
         this.divInstructions.innerHTML = "Did they answer correctly? y / n";
 
         this.saveCountdownTimerForWaitForBuzzesState();
+
+        this.buzzHistory.records.push({
+            timestamp: Date.now(),
+            teamNumber: teamNumber,
+            note: "Operator.handleBuzzerPress()"
+        });
     }
 
     public shouldGameEnd(): boolean {
@@ -374,6 +390,15 @@ export class Operator {
             }
         }
 
+
+        this.buzzHistory = {
+            clue: this.currentClue,
+            records: [],
+            timestampWhenClueQuestionFinishedReading: -1
+        }
+
+
+
     }
 
     public handleDoneReadingClueQuestion(): void {
@@ -387,6 +412,8 @@ export class Operator {
         this.resetDurationForWaitForBuzzesState();
 
         this.teamArray.forEach(teamObj => teamObj.hasBuzzedForCurrentQuestion = false);
+
+        this.buzzHistory.timestampWhenClueQuestionFinishedReading = Date.now();
     }
 
     public handleShowAnswer(): void {
@@ -404,6 +431,8 @@ export class Operator {
                 teamObj.statistics.questionsNotBuzzed++;
             }
         });
+
+        console.log(this.buzzHistory);
 
     }
 
