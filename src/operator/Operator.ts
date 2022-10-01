@@ -6,7 +6,7 @@ import { Presentation } from "../presentation/Presentation";
 import { CountdownTimer } from "../CountdownTimer";
 import { CountdownOperation, CountdownTimerSource } from "../stateMachine/stateInterfaces";
 import { createLineChart, createPieCharts } from "./statisticsCharts";
-import { BuzzHistoryForClue, BuzzResult } from "../buzzHistoryForClue";
+import { BuzzHistoryForClue, BuzzResultEnum, BuzzResult } from "../buzz-history/buzzHistoryForClue";
 
 export interface Clue {
     answer: string;
@@ -129,10 +129,33 @@ export class Operator {
                 const teamObj = this.teamArray[teamIndex];
                 teamObj.showKeyDown();
 
+                let result: BuzzResult;
+                switch (teamObj.getState()) {
+                    case TeamState.CAN_ANSWER:
+                        result = {
+                            type: BuzzResultEnum.START_ANSWERING,
+                            answeredCorrectly: true,
+                            endTimestamp: Date.now()
+                        };
+                        break;
+                    case TeamState.OPERATOR_IS_READING_QUESTION:
+                        result = {
+                            type: BuzzResultEnum.TOO_EARLY,
+                        };
+                        break;
+                    default:
+                        result = {
+                            type: BuzzResultEnum.IGNORE,
+                            reason: teamObj.getState()
+                        };
+                        break;
+                }
+
                 this.buzzHistory.records.push({
                     timestamp: Date.now(),
                     teamNumber: teamIndex + 1,
-                    note: "Operator.initBuzzerFootswitchIconDisplay() keydown"
+                    source: "Operator.initBuzzerFootswitchIconDisplay() keydown",
+                    result: result
                 });
 
             }
@@ -223,11 +246,18 @@ export class Operator {
 
         this.saveCountdownTimerForWaitForBuzzesState();
 
+        /*
         this.buzzHistory.records.push({
             timestamp: Date.now(),
             teamNumber: teamNumber,
-            note: "Operator.handleBuzzerPress()"
+            source: "Operator.handleBuzzerPress()",
+            result: {
+                type: BuzzResultEnum.START_ANSWERING,
+                answeredCorrectly: true,
+                endTimestamp: Date.now()
+            }
         });
+        */
     }
 
     public shouldGameEnd(): boolean {
@@ -358,7 +388,7 @@ export class Operator {
         The clue question is already being shown in the presentation because
         the state machine changes the slide.
         */
-        this.setAllTeamsState(TeamState.READING_QUESTION);
+        this.setAllTeamsState(TeamState.OPERATOR_IS_READING_QUESTION);
 
         this.divInstructions.innerHTML = "Read the question out loud. Buzzers open when you press space.";
 
@@ -393,6 +423,7 @@ export class Operator {
 
         this.buzzHistory = {
             clue: this.currentClue,
+            lockoutDurationMillisec: this.settings.durationLockoutMillisec,
             records: [],
             timestampWhenClueQuestionFinishedReading: -1
         }
@@ -432,7 +463,24 @@ export class Operator {
             }
         });
 
-        console.log(this.buzzHistory);
+        console.log(
+            JSON.stringify(
+                this.buzzHistory,
+                (key, value) => {
+                    if (key === "clue") {
+                        return null;
+                    } else if (value === BuzzResultEnum.TOO_EARLY) {
+                        return "BuzzResultEnum.TOO_EARLY";
+                    } else if (value === BuzzResultEnum.START_ANSWERING) {
+                        return "BuzzResultEnum.START_ANSWERING";
+                    } else if (value === BuzzResultEnum.IGNORE) {
+                        return "BuzzResultEnum.IGNORE";
+                    } else {
+                        return value;
+                    }
+                },
+                2)
+        );
 
     }
 

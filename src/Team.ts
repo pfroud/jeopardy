@@ -279,7 +279,7 @@ export class Team {
     }
 
     public canBeLockedOut(): boolean {
-        return this.state === TeamState.READING_QUESTION;
+        return this.state === TeamState.OPERATOR_IS_READING_QUESTION;
     }
 
     public startLockout(): void {
@@ -359,7 +359,7 @@ export class Team {
 
 export enum TeamState {
     BUZZERS_OFF = "buzzers-off", // game has not started
-    READING_QUESTION = "reading-question", //operator is reading the question out loud
+    OPERATOR_IS_READING_QUESTION = "operator-is-reading-question", //operator is reading the question out loud
     CAN_ANSWER = "can-answer", //operator is done reading the question
     ANSWERING = "answering",
     ALREADY_ANSWERED = "already-answered", // the team tried answering the question but got it wrong
