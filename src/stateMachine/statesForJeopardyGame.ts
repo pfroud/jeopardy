@@ -139,7 +139,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             }],
         }, {
             name: "gameEnd",
-            presentationSlideToShow: "slide-gameEnd-line-chart",
+            presentationSlideToShow: "slide-gameEnd-team-ranking-table",
             onEnter: operator.handleGameEnd.bind(operator),
             transitions: [{
                 type: TransitionType.ManualTrigger,

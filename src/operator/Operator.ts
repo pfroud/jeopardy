@@ -168,6 +168,12 @@ export class Operator {
         document.querySelector("a#aGenerateGraphviz").addEventListener("click", () =>
             window.open("../graphvizViewer/graphvizViewer.html", "windowGraphvizViewer", "popup")
         );
+
+        const GameEndControls = document.querySelector("div#game-end-controls");
+        GameEndControls.querySelector("button#show-team-ranking-table").addEventListener("click", () => this.presentation.showSlide("slide-gameEnd-team-ranking-table"));
+        GameEndControls.querySelector("button#show-money-over-time-line-chart").addEventListener("click", () => this.presentation.showSlide("slide-gameEnd-line-chart"));
+        GameEndControls.querySelector("button#show-buzz-results-pie-charts").addEventListener("click", () => this.presentation.showSlide("slide-gameEnd-pie-charts"));
+
     }
 
     private startGame(): void {
@@ -520,6 +526,15 @@ export class Operator {
         this.audioManager.play("roundEnd")
             .then(() => this.audioManager.play("musicGameEnd"));
 
+        document.querySelector<HTMLDivElement>("div#game-end-controls").style.display = "block";
+
+        this.createTeamRankingTable();
+        this.presentation.hideHeaderAndFooter();
+        createPieCharts(this.presentation.getDivForPieCharts(), this.teamArray);
+        createLineChart(this.presentation.getDivForLineChart(), this.presentation.getDivForLineChartLegend(), this.teamArray);
+    }
+
+    private createTeamRankingTable() {
         // sort teams by money descending
         const shallowCopy = this.teamArray.slice();
         function comparator(team1: Team, team2: Team) {
@@ -542,18 +557,7 @@ export class Operator {
         html.push("</tbody></table>");
 
         this.presentation.setTeamRankingHtml(html.join(""));
-        this.presentation.hideHeaderAndFooter();
-
-
-        this.createStatisticsCharts();
     }
-
-    private createStatisticsCharts() {
-        createPieCharts(this.presentation.getDivForPieCharts(), this.teamArray);
-        createLineChart(this.presentation.getDivForLineChart(), this.presentation.getDivForLineChartLegend(), this.teamArray);
-    }
-
-
 
     private resetDurationForWaitForBuzzesState(): void {
         this.resetDurationForWaitForBuzzState = true;

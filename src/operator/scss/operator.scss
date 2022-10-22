@@ -66,6 +66,12 @@ main {
                     }
                 }
             }
+
+            div#game-end-controls {
+                display: none;
+                margin-top: 30px;
+                margin-bottom: 40px;
+            }
         }
         //////////////////////////////////////////
         &.content-settings {

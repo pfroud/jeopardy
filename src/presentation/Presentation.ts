@@ -144,7 +144,7 @@ export class Presentation {
     }
 
     public setTeamRankingHtml(htmlString: string): void {
-        document.querySelector("div#slide-gameEnd-team-ranking-list div#team-ranking").innerHTML = htmlString;
+        document.querySelector("div#slide-gameEnd-team-ranking-table div#team-ranking").innerHTML = htmlString;
     }
 
     public getDivForPieCharts(): HTMLDivElement {

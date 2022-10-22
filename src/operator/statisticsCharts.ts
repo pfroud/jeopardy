@@ -130,7 +130,7 @@ export function createLineChart(divForLineChart: HTMLDivElement, legendContainer
     new Chartist.LineChart(divForLineChart, chartData, chartOptions);
 
     // create legend
-    for (let i = 0; i < Operator.teamCount; i++) {
+    for (let i = 0; i < teams.length; i++) {
 
         const legendRow = document.createElement("div");
         legendRow.className = "line-chart-legend-row";
@@ -161,7 +161,7 @@ export function createLineChart(divForLineChart: HTMLDivElement, legendContainer
         point.setAttribute("y2", String(svgHeight / 2));
         group.appendChild(point);
 
-        legendRow.append(`Team ${i + 1}`);
+        legendRow.append(teams[i].teamName);
 
         legendContainer.appendChild(legendRow);
 
