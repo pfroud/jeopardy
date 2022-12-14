@@ -123,3 +123,27 @@ footer {
         }
     }
 }
+
+aside#special-category-overlay {
+    position: absolute;
+    background-color: lightyellow;
+    border-radius: 20px;
+    padding: 50px;
+    border: 1px solid yellow;
+    filter: drop-shadow(3px 3px 3px gray);
+    width: 800px;
+    height: 400px;
+
+    div#info-icon {
+        border: 10px solid blue;
+        border-radius: 50%;
+        display: inline-block;
+        width: 100px;
+        height: 100px;
+        text-align: center;
+        font-weight: bold;
+        color: blue;
+        font-size: 80px;
+        font-family: monospace;
+    }
+}
