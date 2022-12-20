@@ -253,7 +253,7 @@ export class Operator {
         */
     }
 
-    private setclue(clue: Clue): void {
+    private setClue(clue: Clue): void {
         this.currentClue = clue;
         this.showClueToOperator(clue);
         this.presentation.setClue(clue);
@@ -284,7 +284,7 @@ export class Operator {
 
                 if (clue.isValid() && !clue.hasMultimedia()) {
 
-                    this.setclue(clue);
+                    this.setClue(clue);
 
                     // we don't need to return the clue object to the state machine
                     promiseResolveFunc();
@@ -323,10 +323,6 @@ export class Operator {
         this.presentation.fitClueQuestionToScreen();
     }
 
-    public isSpecialCategory(): boolean {
-        return true;
-    }
-
     public showMessageForSpecialCategory(): void {
 
     }
@@ -345,34 +341,11 @@ export class Operator {
 
         this.divInstructions.innerHTML = "Read the question out loud. Buzzers open when you press space.";
 
-        this.divClueQuestion.innerHTML = getClueQuestionHtmlWithSubjectInBold(this.currentClue);
+        this.divClueQuestion.innerHTML = this.currentClue.getQuestionHtmlWithSubjectInBold();
         this.trQuestion.style.display = ""; //show it by removing "display=none"
         this.trAnswer.style.display = "none";
 
         this.buttonSkipClue.removeAttribute("disabled");
-
-        function getClueQuestionHtmlWithSubjectInBold(clue: Clue): string {
-            /*
-            The person reading the question out loud should emphasize the subject
-            of the question. Look for words that are probably the subject and make them bold.
-            \b means word boundary.
-            */
-            const regex = /\b((this)|(these)|(her)|(his)|(she)|(he)|(here))\b/i;
-            const result = regex.exec(clue.question);
-
-            if (result === null) {
-                // didn't find any words to make bold
-                return clue.question;
-            } else {
-                const startIndex = result.index;
-                const foundWord = result[0];
-
-                return clue.question.substring(0, startIndex)
-                    + '<span class="clue-keyword">' + foundWord + '</span>'
-                    + clue.question.substring(startIndex + foundWord.length);
-            }
-        }
-
     }
 
     public handleDoneReadingClueQuestion(): void {
@@ -551,8 +524,6 @@ export class Operator {
         createPieCharts(this.presentation.getDivForPieCharts(), this.teamArray);
         createLineChart(this.presentation.getDivForLineChart(), this.presentation.getDivForLineChartLegend(), this.teamArray);
     }
-
-
 
     private resetDurationForWaitForBuzzesState(): void {
         this.resetDurationForWaitForBuzzState = true;

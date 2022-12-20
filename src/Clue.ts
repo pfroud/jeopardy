@@ -27,6 +27,28 @@ export class Clue {
         }
     }
 
+    public getQuestionHtmlWithSubjectInBold(): string {
+        /*
+        The person reading the question out loud should emphasize the subject
+        of the question. Look for words that are probably the subject and make them bold.
+        \b means word boundary.
+        */
+        const regex = /\b((this)|(these)|(her)|(his)|(she)|(he)|(here))\b/i;
+        const result = regex.exec(this.question);
+
+        if (result === null) {
+            // didn't find any words to make bold
+            return this.question;
+        } else {
+            const startIndex = result.index;
+            const foundWord = result[0];
+
+            return this.question.substring(0, startIndex)
+                + '<span class="clue-keyword">' + foundWord + '</span>'
+                + this.question.substring(startIndex + foundWord.length);
+        }
+    }
+
     public isValid(): boolean {
         return this.value !== null &&
             this.value > 0 &&
