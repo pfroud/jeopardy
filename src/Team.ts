@@ -81,18 +81,18 @@ export class Team {
         this.setState(TeamState.BUZZERS_OFF);
     }
 
-    public handleAnswerCorrect(clueObj: Clue): void {
+    public handleAnswerCorrect(clue: Clue): void {
         this.stopAnswer();
         this.audioManager.play("answerCorrect");
-        this.moneyAdd(clueObj.value);
+        this.moneyAdd(clue.value);
         this.statistics.questionsBuzzedThenAnsweredRight++;
         this.hasBuzzedForCurrentQuestion = true;
     }
 
-    public handleAnswerIncorrectOrAnswerTimeout(clueObj: Clue): void {
+    public handleAnswerIncorrectOrAnswerTimeout(clue: Clue): void {
         this.stopAnswer();
         this.audioManager.play("answerIncorrectOrAnswerTimeout");
-        this.moneySubtract(clueObj.value * this.settings.wrongAnswerPenaltyMultiplier);
+        this.moneySubtract(clue.value * this.settings.wrongAnswerPenaltyMultiplier);
         this.setState(this.settings.allowMultipleAnswersToSameQuestion ? TeamState.CAN_ANSWER : TeamState.ALREADY_ANSWERED);
         this.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut++;
         this.hasBuzzedForCurrentQuestion = true;

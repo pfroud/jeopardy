@@ -220,15 +220,15 @@ export class Operator {
     }
 
 
-    private showClueToOperator = (clueObj: Clue) => {
+    private showClueToOperator(clue: Clue) {
         /*
         This function only shows the airdate, category, and dollar value to the operator.
         The state machine will show the clue question after a timeout.
         */
         this.divClueWrapper.style.display = ""; //show it by removing "display=none"
-        this.divClueCategory.innerHTML = clueObj.category.title;
-        this.divClueValue.innerHTML = "$" + clueObj.value;
-        this.divClueAirdate.innerHTML = clueObj.airdateParsed.getFullYear().toString();
+        this.divClueCategory.innerHTML = clue.category.title;
+        this.divClueValue.innerHTML = "$" + clue.value;
+        this.divClueAirdate.innerHTML = clue.airdateParsed.getFullYear().toString();
         this.trAnswer.style.display = "none";
         this.divInstructions.innerHTML = "Read aloud the category and dollar value.";
     };
@@ -253,10 +253,10 @@ export class Operator {
         */
     }
 
-    private setClueObj(clueObj: Clue): void {
-        this.currentClue = clueObj;
-        this.showClueToOperator(clueObj);
-        this.presentation.setClue(clueObj);
+    private setclue(clue: Clue): void {
+        this.currentClue = clue;
+        this.showClueToOperator(clue);
+        this.presentation.setClue(clue);
     }
 
 
@@ -280,11 +280,11 @@ export class Operator {
                     alert(`Error ${xhr.status}: ${xhr.statusText}`);
                 }
 
-                const clueObj = new Clue(xhr.response);
+                const clue = new Clue(xhr.response);
 
-                if (clueObj.isValid() && !clueObj.hasMultimedia()) {
+                if (clue.isValid() && !clue.hasMultimedia()) {
 
-                    this.setClueObj(clueObj);
+                    this.setclue(clue);
 
                     // we don't need to return the clue object to the state machine
                     promiseResolveFunc();
@@ -351,25 +351,25 @@ export class Operator {
 
         this.buttonSkipClue.removeAttribute("disabled");
 
-        function getClueQuestionHtmlWithSubjectInBold(clueObj: Clue): string {
+        function getClueQuestionHtmlWithSubjectInBold(clue: Clue): string {
             /*
             The person reading the question out loud should emphasize the subject
             of the question. Look for words that are probably the subject and make them bold.
             \b means word boundary.
             */
             const regex = /\b((this)|(these)|(her)|(his)|(she)|(he)|(here))\b/i;
-            const result = regex.exec(clueObj.question);
+            const result = regex.exec(clue.question);
 
             if (result === null) {
                 // didn't find any words to make bold
-                return clueObj.question;
+                return clue.question;
             } else {
                 const startIndex = result.index;
                 const foundWord = result[0];
 
-                return clueObj.question.substring(0, startIndex)
+                return clue.question.substring(0, startIndex)
                     + '<span class="clue-keyword">' + foundWord + '</span>'
-                    + clueObj.question.substring(startIndex + foundWord.length);
+                    + clue.question.substring(startIndex + foundWord.length);
             }
         }
 

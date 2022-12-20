@@ -111,18 +111,18 @@ export class Presentation {
         }
     }
 
-    public setClue(clueObject: Clue): void {
-        this.spanClueCategoryInHeader.innerHTML = clueObject.category.title;
-        this.spanClueMoneyInHeader.innerHTML = "$" + clueObject.value;
-        this.spanClueAirdateInHeader.innerHTML = "(" + clueObject.airdateParsed.getFullYear() + ")";
+    public setClue(clue: Clue): void {
+        this.spanClueCategoryInHeader.innerHTML = clue.category.title;
+        this.spanClueMoneyInHeader.innerHTML = "$" + clue.value;
+        this.spanClueAirdateInHeader.innerHTML = "(" + clue.airdateParsed.getFullYear() + ")";
 
-        this.divClueCategoryBig.innerHTML = clueObject.category.title;
-        this.divClueValueBig.innerHTML = "$" + clueObject.value;
-        this.divClueAirdateBig.innerHTML = "Airdate: " + clueObject.airdateParsed.getFullYear();
+        this.divClueCategoryBig.innerHTML = clue.category.title;
+        this.divClueValueBig.innerHTML = "$" + clue.value;
+        this.divClueAirdateBig.innerHTML = "Airdate: " + clue.airdateParsed.getFullYear();
 
-        this.divSlideClueQuestion.innerHTML = clueObject.question;
+        this.divSlideClueQuestion.innerHTML = clue.question;
 
-        this.divSlideClueAnswerText.innerHTML = clueObject.answer;
+        this.divSlideClueAnswerText.innerHTML = clue.answer;
     }
 
     public fitClueQuestionToScreen(): void {
