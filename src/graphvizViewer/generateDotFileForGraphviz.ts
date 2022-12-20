@@ -1,4 +1,4 @@
-import { StateMachineState, StateMachineTransition, TransitionType } from "../stateMachine/stateInterfaces";
+import { CountdownTimerSource, CountdownOperation, StateMachineState, StateMachineTransition, TransitionType } from "../stateMachine/stateInterfaces";
 
 /**
  * Convert state machine states into a string of the Graphviz graph description language.
@@ -66,7 +66,27 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     break;
                 }
                 case TransitionType.Timeout: {
-                    let transitionLabel = transition.type.toString() + ": " + transition.countdownTimerSource;
+                    let transitionLabel = transition.type.toString() + ": ";
+
+                    let countdownTimerSource: CountdownTimerSource;
+                    if (typeof transition.countdownTimerSource === "function") {
+                        countdownTimerSource = transition.countdownTimerSource();
+                    } else {
+                        countdownTimerSource = transition.countdownTimerSource;
+                    }
+
+                    switch (countdownTimerSource.type) {
+                        case CountdownOperation.CreateNewTimer:
+                            transitionLabel += countdownTimerSource.duration + "ms";
+                            break;
+                        case CountdownOperation.ResumeExistingTimer:
+                            transitionLabel += "resume";
+                            break;
+                        default:
+                            throw new Error("unknown CountdownOperation ");
+                    }
+
+
 
                     if (transition.guardCondition) {
                         transitionLabel += ` [${transition.guardCondition.name.replace("bound ", "")}] `;

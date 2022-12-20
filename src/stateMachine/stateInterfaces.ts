@@ -60,15 +60,15 @@ export interface TimeoutTransition {
 
 // https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions
 export enum CountdownOperation {
-    CreateNew,
-    ResumeExisting
+    CreateNewTimer = "new",
+    ResumeExistingTimer = "resume"
 }
 export interface CreateNewCountdownTimer {
-    type: CountdownOperation.CreateNew;
+    type: CountdownOperation.CreateNewTimer;
     duration: number;
 }
 export interface ResumeExistingCountdownTimer {
-    type: CountdownOperation.ResumeExisting;
+    type: CountdownOperation.ResumeExistingTimer;
     countdownTimerToResume: CountdownTimer;
 }
 export type CountdownTimerSource = CreateNewCountdownTimer | ResumeExistingCountdownTimer;

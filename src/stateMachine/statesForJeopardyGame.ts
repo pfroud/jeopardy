@@ -35,7 +35,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             transitions: [{
                 type: TransitionType.Timeout,
                 countdownTimerSource: {
-                    type: CountdownOperation.CreateNew,
+                    type: CountdownOperation.CreateNewTimer,
                     duration: settings.displayDurationCategoryMillisec
                 },
                 destination: "showClueQuestion",
@@ -98,7 +98,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             }, {
                 type: TransitionType.Timeout,
                 countdownTimerSource: {
-                    type: CountdownOperation.CreateNew,
+                    type: CountdownOperation.CreateNewTimer,
                     duration: settings.timeoutWaitForAnswerMillisec
                 },
                 countdownTimerShowDots: true,
@@ -121,7 +121,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             transitions: [{
                 type: TransitionType.Timeout,
                 countdownTimerSource: {
-                    type: CountdownOperation.CreateNew,
+                    type: CountdownOperation.CreateNewTimer,
                     duration: settings.displayDurationAnswerMillisec
                 },
                 destination: "checkGameEnd"

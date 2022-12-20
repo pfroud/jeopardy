@@ -567,12 +567,12 @@ export class Operator {
         if (this.resetDurationForWaitForBuzzState) {
             this.resetDurationForWaitForBuzzState = false;
             return {
-                type: CountdownOperation.CreateNew,
+                type: CountdownOperation.CreateNewTimer,
                 duration: this.settings.timeoutWaitForBuzzesMillisec
             };
         } else {
             return {
-                type: CountdownOperation.ResumeExisting,
+                type: CountdownOperation.ResumeExistingTimer,
                 countdownTimerToResume: this.countdownTimerForWaitForBuzzesState
             };
         }

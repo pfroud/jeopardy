@@ -111,7 +111,7 @@ export class StateMachine {
         }
 
         switch (countdownTimerSource.type) {
-            case CountdownOperation.CreateNew: {
+            case CountdownOperation.CreateNewTimer: {
                 const durationMillisec = countdownTimerSource.duration;
 
                 if (this.DEBUG) {
@@ -148,7 +148,7 @@ export class StateMachine {
                 this.countdownTimer.start();
                 break;
             }
-            case CountdownOperation.ResumeExisting:
+            case CountdownOperation.ResumeExistingTimer:
                 this.countdownTimer = countdownTimerSource.countdownTimerToResume;
                 this.countdownTimer.resume();
                 break;
