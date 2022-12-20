@@ -33,6 +33,8 @@ export class Operator {
     private readonly divInstructions: HTMLDivElement;
     private readonly buttonStartGame: HTMLButtonElement;
     private readonly buttonSkipClue: HTMLButtonElement;
+    private readonly specialCategoryPrompt: HTMLDivElement;
+    private readonly specialCategoryOverlay: HTMLDivElement;
     private gameTimer: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
     private teamArray: Team[];
     private currentClue: Clue;
@@ -63,6 +65,9 @@ export class Operator {
 
         this.buttonStartGame = document.querySelector("button#start-game");
         this.buttonSkipClue = document.querySelector("button#skip-clue");
+
+        this.specialCategoryPrompt = document.querySelector("div#special-category-prompt");
+        this.specialCategoryOverlay = document.querySelector("div#special-category-overlay");
 
         this.initPauseKeyboardListener();
         this.initMouseListeners();
@@ -233,34 +238,41 @@ export class Operator {
         this.divInstructions.innerHTML = "Read aloud the category and dollar value.";
     };
 
-    private showSpecialCategory(specialCategory: SpecialCategory) {
-        /*
-        we need to:
-        1. ask the operator if they want to show a special category
-            - if the operator inputs yes:
-                1. pause the game.
-                2. show an overlay window thing.
-                3. figure out a way for the operator to signal that everyone is done reading the overlay.
-                4. when the signal is given, unpause the game and hide the overlay window.
-            - if the operator inputs no:
-                1. dismiss the question.
-
-        Code to write:
-         - keyboard listener for operator to interact with special categories stuff.
-         - I think i will need more a few state machine states.
-         - a small popup on the operator to show before opening the full overlay.
-
-        */
-    }
-
     private setClue(clue: Clue): void {
         this.currentClue = clue;
         this.showClueToOperator(clue);
         this.presentation.setClue(clue);
+
+        if (clue.category.isSpecialCategory) {
+            this.showSpecialCategoryPrompt();
+        }
     }
 
+    public isCurrentClueSpecialCategory(): boolean {
+        return this.currentClue.category.isSpecialCategory;
+    }
 
     public getClueFromJService(): Promise<void> {
+        const promiseExecutor = (
+            resolveFunc: () => void,
+            rejectFunc: (rejectReason: Error) => void
+        ) => {
+            this.buttonStartGame.blur();
+            this.trQuestion.style.display = "none";
+            this.divInstructions.innerHTML = "Loading clue...";
+
+            this.setClue(
+                new Clue(
+                    '[{"id":25876,"answer":"the booster","question":"The first stage of a rocket","value":600,"airdate":"2016-04-20T19:00:00.000Z","created_at":"2022-07-27T22:54:33.633Z","updated_at":"2022-07-27T22:54:33.633Z","category_id":4710,"game_id":5255,"invalid_count":null,"category":{"id":4710,"title":"spacecraft\\" types","created_at":"2022-07-27T22:54:33.521Z","updated_at":"2022-07-27T22:54:33.521Z","clues_count":5}}]'
+                )
+            );
+            resolveFunc();
+
+        };
+        return new Promise<void>(promiseExecutor);
+    }
+
+    public __getClueFromJService__(): Promise<void> {
 
         this.resetDurationForWaitForBuzzesState();
 
@@ -323,12 +335,40 @@ export class Operator {
         this.presentation.fitClueQuestionToScreen();
     }
 
-    public showMessageForSpecialCategory(): void {
-
+    public showSpecialCategoryPrompt(): void {
+        this.specialCategoryPrompt.style.display = "block";
     }
 
-    public hideMessageForSpecialCategory(): void {
+    public hideSpecialCategoryPrompt(): void {
+        this.specialCategoryPrompt.style.display = "none";
+        this.gameTimer.resume();
+    }
 
+    public showSpecialCategoryOverlay(): void {
+        this.hideSpecialCategoryPrompt();
+        this.gameTimer.pause();
+
+        const specialCategory = this.currentClue.category.specialCategory;
+        this.specialCategoryOverlay.querySelector("#special-category-description").innerHTML = specialCategory.description;
+        if (specialCategory.example) {
+            this.specialCategoryOverlay.querySelector("#special-category-example-category").innerHTML = specialCategory.example.category;
+            this.specialCategoryOverlay.querySelector("#special-category-example-question").innerHTML = specialCategory.example.question;
+            this.specialCategoryOverlay.querySelector("#special-category-example-answer").innerHTML = specialCategory.example.answer;
+        }
+
+        this.specialCategoryOverlay.style.display = "block";
+
+        /*
+        The countdown timer from the previous state  needs to be totally stopped
+        and removed when we enter the state.
+        Right now, when you un-pause, the timer from showClueCategoryAndValue to showClueQuestion
+        keeps going.
+        */
+    }
+
+    public hideSpecialCategoryOverlay(): void {
+        this.specialCategoryOverlay.style.display = "none";
+        this.setPaused(false);
     }
 
     public handleShowClueQuestion(): void {

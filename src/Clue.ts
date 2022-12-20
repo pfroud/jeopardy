@@ -7,12 +7,13 @@ export class Clue {
     public readonly value: number;
     public readonly airdateParsed: Date;
     public readonly category: {
-        title: string,
+        title: string;
+        isSpecialCategory: boolean;
         specialCategory: SpecialCategory | null;
     }
 
     constructor(xhrResponse: string) {
-        const parsedJson = JSON.parse(xhrResponse);
+        const parsedJson = JSON.parse(xhrResponse)[0];
 
         this.answer = parsedJson.answer.replace(/\\/g, "");
         this.question = parsedJson.question.replace(/\\/g, "");
@@ -22,9 +23,12 @@ export class Clue {
         this.airdateParsed = new Date(parsedJson.airdate);
 
         this.category = {
-            title: parsedJson.title.replace(/\\/g, ""),
-            specialCategory: this.getSpecialCategory()
+            title: parsedJson.category.title.replace(/\\/g, ""),
+            isSpecialCategory: undefined,
+            specialCategory: undefined
         }
+
+        this.checkSpecialCategory();
     }
 
     public getQuestionHtmlWithSubjectInBold(): string {
@@ -72,15 +76,17 @@ export class Clue {
         return termsForMultimedia.some(term => question.includes(term));
     }
 
-    private getSpecialCategory(): SpecialCategory | null {
+    private checkSpecialCategory(): void {
         // search for the first one which matches
         for (let i = 0; i < specialCategories.length; i++) {
-            const specialCategory = specialCategories[i];
-            if (specialCategory.categoryNameMatches.test(this.answer)) {
-                return specialCategory;
+            if (specialCategories[i].categoryTitleMatches.test(this.category.title)) {
+                this.category.isSpecialCategory = true;
+                this.category.specialCategory = specialCategories[i];
+                return;
             }
         }
-        return null;
+        this.category.isSpecialCategory = false;
+        this.category.specialCategory = null;
     };
 
 

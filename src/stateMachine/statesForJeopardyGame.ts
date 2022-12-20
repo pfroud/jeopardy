@@ -44,7 +44,21 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 a bunch of stuff and would get called every time lockout happens
                 */
                 onTransition: operator.handleShowClueQuestion.bind(operator)
+            }, {
+                type: TransitionType.Keyboard,
+                keyboardKeys: " ", //space
+                destination: "showMessageForSpecialCategory",
+                guardCondition: operator.isCurrentClueSpecialCategory.bind(operator)
             }],
+        }, {
+            name: "showMessageForSpecialCategory",
+            onEnter: operator.showSpecialCategoryOverlay.bind(operator),
+            onExit: operator.hideSpecialCategoryOverlay.bind(operator),
+            transitions: [{
+                type: TransitionType.Keyboard,
+                keyboardKeys: " ", //space
+                destination: "showClueCategoryAndValue"
+            }]
         }, {
             /*
             The clue question is shown on center of the presentation window. The person operating the

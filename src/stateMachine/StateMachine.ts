@@ -179,7 +179,14 @@ export class StateMachine {
             throw new RangeError(`can't go to state named "${destStateName}", state not found`);
         }
 
-        this.countdownTimer?.pause();
+        // if (destStateName === "showMessageForSpecialCategory") {
+        // debugger;
+        // }
+
+        if (this.countdownTimer) {
+            this.countdownTimer.pause();
+            this.countdownTimer = null;
+        }
 
         if (this.DEBUG) {
             console.group(`changing states: ${this.presentState.name} --> ${destStateName}`);
@@ -195,6 +202,9 @@ export class StateMachine {
             this.presentState.onExit();
         }
 
+        ////////////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////// Change the state ///////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////
         const previousState = this.presentState;
         this.presentState = this.stateMap[destStateName];
         this.operatorWindowDivStateName.innerHTML = destStateName;
@@ -232,6 +242,7 @@ export class StateMachine {
         //////////////////////////////////////////////////////////////////////
         ///////////////////// Start countdown timer if needed ////////////////
         //////////////////////////////////////////////////////////////////////
+        let foundCountdownTimer = false;
         // Search for the first timeout transition.
         for (let i = 0; i < transitionArray.length; i++) {
             const transitionObj = transitionArray[i];
@@ -242,8 +253,19 @@ export class StateMachine {
                 this.startCountdownTimer(transitionObj, keyboardEvent);
                 this.operatorWindowDivStateName.innerHTML = destStateName + " &rarr; " + transitionObj.destination;
                 // We could support multiple timeout transitions, although I have no need to
+                foundCountdownTimer = true;
                 break;
             }
+        }
+        if (!foundCountdownTimer) {
+            // remove text on the right which shows time left
+            this.operatorWindowCountdownText.innerHTML = "";
+
+            // remove green bar in operator window
+            this.operatorWindowCountdownProgress.setAttribute("value", "0");
+
+            // remove red bar in presentation window
+            this.presentation.getProgressElementForStateMachine().setAttribute("value", "0");
         }
 
         //////////////////////////////////////////////////////////////

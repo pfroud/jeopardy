@@ -6,7 +6,6 @@ export class CountdownTimer {
     public onStart?: () => void;
     public onPause?: () => void;
     public onResume?: () => void;
-    public onReset?: () => void;
     public onFinished?: () => void;
     public onTick?: () => void;
 
