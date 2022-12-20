@@ -1,6 +1,6 @@
+import { Clue } from "./Clue";
 import { CountdownTimer } from "./CountdownTimer";
 import { AudioManager } from "./operator/AudioManager";
-import { Clue } from "./operator/Operator";
 import { Presentation } from "./presentation/Presentation";
 import { Settings } from "./Settings";
 

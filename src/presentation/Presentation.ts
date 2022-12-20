@@ -1,4 +1,5 @@
-import { Clue, Operator } from "../operator/Operator";
+import { Operator } from "../operator/Operator";
+import { Clue } from "../Clue";
 
 interface Slides {
     [slideName: string]: HTMLDivElement;

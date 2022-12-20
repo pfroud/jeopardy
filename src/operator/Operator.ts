@@ -6,15 +6,8 @@ import { Presentation } from "../presentation/Presentation";
 import { CountdownTimer } from "../CountdownTimer";
 import { CountdownOperation, CountdownTimerSource } from "../stateMachine/stateInterfaces";
 import { createLineChart, createPieCharts } from "./statisticsCharts";
-
-export interface Clue {
-    answer: string;
-    question: string;
-    value: number;
-    airdate: string;
-    airdateParsed: Date;
-    category: { title: string }
-}
+import { specialCategories, SpecialCategory } from "./specialCategories";
+import { Clue } from "../Clue";
 
 interface SavedGameInLocalStorage {
     gameTimerRemainingMillisec: number,
@@ -226,45 +219,50 @@ export class Operator {
         teamObj.canBeLockedOut() && teamObj.startLockout();
     }
 
+
+    private showClueToOperator = (clueObj: Clue) => {
+        /*
+        This function only shows the airdate, category, and dollar value to the operator.
+        The state machine will show the clue question after a timeout.
+        */
+        this.divClueWrapper.style.display = ""; //show it by removing "display=none"
+        this.divClueCategory.innerHTML = clueObj.category.title;
+        this.divClueValue.innerHTML = "$" + clueObj.value;
+        this.divClueAirdate.innerHTML = clueObj.airdateParsed.getFullYear().toString();
+        this.trAnswer.style.display = "none";
+        this.divInstructions.innerHTML = "Read aloud the category and dollar value.";
+    };
+
+    private showSpecialCategory(specialCategory: SpecialCategory) {
+        /*
+        we need to:
+        1. ask the operator if they want to show a special category
+            - if the operator inputs yes:
+                1. pause the game.
+                2. show an overlay window thing.
+                3. figure out a way for the operator to signal that everyone is done reading the overlay.
+                4. when the signal is given, unpause the game and hide the overlay window.
+            - if the operator inputs no:
+                1. dismiss the question.
+
+        Code to write:
+         - keyboard listener for operator to interact with special categories stuff.
+         - I think i will need more a few state machine states.
+         - a small popup on the operator to show before opening the full overlay.
+
+        */
+    }
+
+    private setClueObj(clueObj: Clue): void {
+        this.currentClue = clueObj;
+        this.showClueToOperator(clueObj);
+        this.presentation.setClue(clueObj);
+    }
+
+
     public getClueFromJService(): Promise<void> {
 
         this.resetDurationForWaitForBuzzesState();
-
-        function isClueValid(clueObj: Clue): boolean {
-            return clueObj.value !== null &&
-                clueObj.value > 0 &&
-                clueObj.question !== null &&
-                clueObj.question.length > 0 &&
-                clueObj.question !== "=" &&
-                clueObj.answer.length > 0 &&
-                clueObj.category !== null &&
-                clueObj.category.title.length > 0 &&
-                clueObj.category.title !== "=";
-        }
-
-        function doesClueQuestionHaveMultimedia(clueObj: Clue): boolean {
-            /*
-            Some Jeopardy clues have audio or video, which are shown or played on the 
-            TV show. The J Archive does not have the audio or video, so we need to
-            skip those clues.
-            */
-            const clueQuestion = clueObj.question.toLowerCase();
-            const termsForMultimedia = ["seen here", "heard here"];
-            return termsForMultimedia.some(term => clueQuestion.includes(term));
-        }
-
-        const showClueToOperator = (clueObj: Clue) => {
-            /*
-            This function only shows the airdate, category, and dollar value to the operator.
-            The state machine will show the clue question after a timeout.
-            */
-            this.divClueWrapper.style.display = ""; //show it by removing "display=none"
-            this.divClueCategory.innerHTML = clueObj.category.title;
-            this.divClueValue.innerHTML = "$" + clueObj.value;
-            this.divClueAirdate.innerHTML = clueObj.airdateParsed.getFullYear().toString();
-            this.trAnswer.style.display = "none";
-            this.divInstructions.innerHTML = "Read aloud the category and dollar value.";
-        };
 
         // Use a recursive helper function so we can do retries.
         const fetchClueHelper = (
@@ -282,22 +280,11 @@ export class Operator {
                     alert(`Error ${xhr.status}: ${xhr.statusText}`);
                 }
 
-                const parsedJson = JSON.parse(xhr.response);
-                const clueObj: Clue = parsedJson[0];
+                const clueObj = new Clue(xhr.response);
 
-                if (isClueValid(clueObj) && !doesClueQuestionHaveMultimedia(clueObj)) {
+                if (clueObj.isValid() && !clueObj.hasMultimedia()) {
 
-                    // remove backslashes
-                    clueObj.question = clueObj.question.replace(/\\/g, "");
-                    clueObj.answer = clueObj.answer.replace(/\\/g, "");
-                    clueObj.category.title = clueObj.category.title.replace(/\\/g, "");
-
-                    // example of what format the airdate is in: "2013-01-25T12:00:00.000Z"
-                    clueObj.airdateParsed = new Date(clueObj.airdate);
-
-                    this.currentClue = clueObj;
-                    showClueToOperator.call(this, clueObj);
-                    this.presentation.setClue(clueObj);
+                    this.setClueObj(clueObj);
 
                     // we don't need to return the clue object to the state machine
                     promiseResolveFunc();
@@ -334,6 +321,18 @@ export class Operator {
 
     public fitClueQuestionToScreenInOperatorWindow(): void {
         this.presentation.fitClueQuestionToScreen();
+    }
+
+    public isSpecialCategory(): boolean {
+        return true;
+    }
+
+    public showMessageForSpecialCategory(): void {
+
+    }
+
+    public hideMessageForSpecialCategory(): void {
+
     }
 
     public handleShowClueQuestion(): void {
