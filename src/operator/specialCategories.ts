@@ -1,9 +1,9 @@
-// https://list.fandom.com/wiki/Jeopardy!_recurring_categories
-
 /*
 Some categories have special rules or need special explanation.
+This list is from:
+https://list.fandom.com/wiki/Jeopardy!_recurring_categories
 */
-interface SpecialCategory {
+export interface SpecialCategory {
     categoryNameMatches: RegExp;
     description: string;
     example?: {
@@ -14,9 +14,9 @@ interface SpecialCategory {
     alreadyShowedTheMessageInThisGame?: boolean;
 }
 
-export const specialCategories = new Set<SpecialCategory>([
+export const specialCategories: SpecialCategory[] = [
     {
-        categoryNameMatches: /\"|“|”/,
+        categoryNameMatches: /\"|“|”/,  // match quotation mark and curly quotes
         description: "The correct answer contains the letter(s) in quotes.",
         example: {
             category: "\"AFTER\" CLASS",
@@ -40,25 +40,14 @@ export const specialCategories = new Set<SpecialCategory>([
             answer: "Quad"
         }
     }, {
-        categoryNameMatches: /WORDS IN/i, //might also be "WORDS FROM", but searching j-archive 
+        categoryNameMatches: /WORDS IN/i,
         description: "The correct answer can be formed from the word in the category title. Not in order, do not need to use all of them.",
         example: {
             category: "WORDS IN SEPTEMBER",
             question: "Neil Armstrong famously took a small one.",
             answer: "Step"
         }
-    },
-    /*{
-        categoryNameMatches: /WORDS FROM/i,
-        description: "The correct response can be formed from the ",
-        example: {
-            category: "WORDS FROM PLANETS",
-            question: "A song from the eighth planet.",
-            answer: "Tune [neptune is the eighth planet]"
-        }
-    },
-    */
-    {
+    }, {
         categoryNameMatches: /BEFORE (AND)|& AFTER/i,
         description: "The first and second parts of the correct answer share a word in common.",
         example: {
@@ -158,4 +147,4 @@ export const specialCategories = new Set<SpecialCategory>([
         categoryNameMatches: /(POTPOURRI)|(HODGEPODGE)|(GOULASH)|(LEFTOVERS)/i,
         description: "It can be anything."
     }
-]);
+];
