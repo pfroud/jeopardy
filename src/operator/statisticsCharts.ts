@@ -2,7 +2,9 @@ import * as Chartist from "chartist";
 import { Team } from "../Team";
 import { Operator } from "./Operator";
 
-export function createPieCharts(divForPieCharts: HTMLDivElement, teams: Team[]): void {
+export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElement, teams: Team[]): void {
+
+    const questionCount = operator.getQuestionCount();
 
     teams.forEach(team => {
         const chartContainer = document.createElement("div");
@@ -28,7 +30,7 @@ export function createPieCharts(divForPieCharts: HTMLDivElement, teams: Team[]):
             value: team.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut,
             className: "buzzed-then-answered-wrong-or-timed-out"
         }];
-
+        // only add if non-zero
         seriesToAdd.forEach(candidate => { if (candidate.value > 0) chartData.series.push(candidate) });
 
         if (chartData.series.length == 0) {
@@ -78,7 +80,18 @@ export function createPieCharts(divForPieCharts: HTMLDivElement, teams: Team[]):
             labelPosition: "center"
         };
 
-        new Chartist.PieChart(chartContainer, chartData, chartOptions);
+        const pieChart = new Chartist.PieChart(chartContainer, chartData, chartOptions);
+
+        /*
+        If any of the series fills the entire pie chart, Chartist puts the label in the center
+        of the chart, but we already put our own label for "Team #" in the center.
+        */
+        const needToManuallyMoveLabel = seriesToAdd.map(obj => obj.value).some(n => n == questionCount);
+        if (needToManuallyMoveLabel) {
+            pieChart.on("created", () =>
+                chartContainer.querySelector("svg text").setAttribute("dy", "20")
+            );
+        }
     });
 }
 
@@ -129,7 +142,7 @@ export function createLineChart(divForLineChart: HTMLDivElement, legendContainer
 
     new Chartist.LineChart(divForLineChart, chartData, chartOptions);
 
-    // create legend
+    // create legend. plugins not supported in chartist version one
     for (let i = 0; i < teams.length; i++) {
 
         const legendRow = document.createElement("div");

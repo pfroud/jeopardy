@@ -40,6 +40,7 @@ export class Operator {
     private isPaused = false;
     private stateMachine: StateMachine;
     private teamPresentlyAnswering: Team;
+    private questionCount = 0;
 
     constructor(audioManager: AudioManager, settings: Settings) {
         this.audioManager = audioManager;
@@ -414,6 +415,8 @@ export class Operator {
             }
         });
 
+        this.questionCount++;
+
     }
 
     public setAllTeamsState(targetState: TeamState, endLockout = false): void {
@@ -573,6 +576,10 @@ export class Operator {
 
     public getTeamArray(): Team[] {
         return this.teamArray;
+    }
+
+    public getQuestionCount(): number {
+        return this.questionCount;
     }
 
 }
