@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function createTableRow(teamIndex: number): void {
-        const teamObj = teamArray[teamIndex];
+        const team = teamArray[teamIndex];
         const dollarValues = [1000, 800, 600, 500, 400, 300, 200, 100, 50];
 
         const tableRow = document.createElement("tr");
@@ -30,15 +30,15 @@ document.addEventListener("DOMContentLoaded", function () {
         // create text showing the team name
         const tdTeamName = document.createElement("td");
         tdTeamName.classList.add("team-name");
-        tdTeamName.innerHTML = teamObj.teamName;
+        tdTeamName.innerHTML = team.teamName;
         tableRow.appendChild(tdTeamName);
 
         // create text input field
         const textInput = document.createElement("input");
         textInput.setAttribute("type", "text");
-        textInput.value = String(teamObj.getMoney());
+        textInput.value = String(team.getMoney());
         textInput.addEventListener("input", function () {
-            teamObj.moneySet(Number(textInput.value), false);
+            team.moneySet(Number(textInput.value), false);
         });
 
         // create buttons to subtract money
@@ -50,8 +50,8 @@ document.addEventListener("DOMContentLoaded", function () {
             button.classList.add("money-change");
             button.innerHTML = "-$" + dollarValue;
             button.addEventListener("click", () => {
-                teamObj.moneySubtract(dollarValue, false);
-                textInput.value = String(teamObj.getMoney());
+                team.moneySubtract(dollarValue, false);
+                textInput.value = String(team.getMoney());
             });
             cell.appendChild(button);
         });
@@ -73,8 +73,8 @@ document.addEventListener("DOMContentLoaded", function () {
             button.classList.add("money-change");
             button.innerHTML = "+$" + dollarValue;
             button.addEventListener("click", () => {
-                teamObj.moneyAdd(dollarValue, false);
-                textInput.value = String(teamObj.getMoney());
+                team.moneyAdd(dollarValue, false);
+                textInput.value = String(team.getMoney());
             });
             cell.appendChild(button);
         });

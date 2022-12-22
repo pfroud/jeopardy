@@ -1,13 +1,11 @@
-import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
-import { StateMachine } from "../stateMachine/StateMachine";
-import { AudioManager } from "./AudioManager";
-import { Settings } from "../Settings";
-import { Presentation } from "../presentation/Presentation";
-import { CountdownTimer } from "../CountdownTimer";
-import { CountdownOperation, CountdownTimerSource } from "../stateMachine/stateInterfaces";
-import { createLineChart, createPieCharts } from "./statisticsCharts";
-import { specialCategories, SpecialCategory } from "./specialCategories";
 import { Clue } from "../Clue";
+import { CountdownTimer } from "../CountdownTimer";
+import { Presentation } from "../presentation/Presentation";
+import { Settings } from "../Settings";
+import { StateMachine } from "../stateMachine/StateMachine";
+import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
+import { AudioManager } from "./AudioManager";
+import { createLineChart, createPieCharts } from "./statisticsCharts";
 
 interface SavedGameInLocalStorage {
     gameTimerRemainingMillisec: number,
@@ -37,14 +35,11 @@ export class Operator {
     private readonly specialCategoryOverlay: HTMLDivElement;
     private gameTimer: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
     private teamArray: Team[];
-    private currentClue: Clue;
+    private presentClue: Clue;
     private presentation: Presentation;
     private isPaused = false;
     private stateMachine: StateMachine;
     private teamPresentlyAnswering: Team;
-
-    private countdownTimerForWaitForBuzzesState: CountdownTimer;
-    private resetDurationForWaitForBuzzState = true;
 
     constructor(audioManager: AudioManager, settings: Settings) {
         this.audioManager = audioManager;
@@ -121,16 +116,16 @@ export class Operator {
             const keyboardKey = keyboardEvent.key;
             if (teamNumbers.has(keyboardKey)) {
                 const teamIndex = Number(keyboardKey) - 1;
-                const teamObj = this.teamArray[teamIndex];
-                teamObj.showKeyDown();
+                const team = this.teamArray[teamIndex];
+                team.showKeyDown();
             }
         });
         window.addEventListener("keyup", keyboardEvent => {
             const keyboardKey = keyboardEvent.key;
             if (teamNumbers.has(keyboardKey)) {
                 const teamIndex = Number(keyboardKey) - 1;
-                const teamObj = this.teamArray[teamIndex];
-                teamObj.showKeyUp();
+                const team = this.teamArray[teamIndex];
+                team.showKeyUp();
             }
         });
 
@@ -145,11 +140,11 @@ export class Operator {
     }
 
     public handleAnswerCorrect(): void {
-        this.teamPresentlyAnswering.handleAnswerCorrect(this.currentClue);
+        this.teamPresentlyAnswering.handleAnswerCorrect(this.presentClue);
     }
 
     public handleAnswerWrongOrTimeout(): void {
-        this.teamPresentlyAnswering.handleAnswerIncorrectOrAnswerTimeout(this.currentClue);
+        this.teamPresentlyAnswering.handleAnswerIncorrectOrAnswerTimeout(this.presentClue);
     }
 
     private initMouseListeners(): void {
@@ -199,29 +194,27 @@ export class Operator {
     public handleBuzzerPress(keyboardEvent: KeyboardEvent): void {
         const teamNumber = Number(keyboardEvent.key);
         const teamIndex = teamNumber - 1;
-        const teamObj = this.teamArray[teamIndex];
+        const team = this.teamArray[teamIndex];
 
-        this.teamPresentlyAnswering = teamObj;
+        this.teamPresentlyAnswering = team;
 
         this.audioManager.play("teamBuzz");
 
-        teamObj.startAnswer();
+        team.startAnswer();
 
         this.divInstructions.innerHTML = "Did they answer correctly? y / n";
-
-        this.saveCountdownTimerForWaitForBuzzesState();
     }
 
     public shouldGameEnd(): boolean {
         return this.gameTimer.getIsFinished() ||
-            this.teamArray.some(teamObj => teamObj.getMoney() >= this.settings.teamMoneyWhenGameShouldEnd);
+            this.teamArray.some(team => team.getMoney() >= this.settings.teamMoneyWhenGameShouldEnd);
     }
 
     public handleLockout(keyboardEvent: KeyboardEvent): void {
         const teamNumber = Number(keyboardEvent.key);
         const teamIndex = teamNumber - 1;
-        const teamObj = this.teamArray[teamIndex];
-        teamObj.canBeLockedOut() && teamObj.startLockout();
+        const team = this.teamArray[teamIndex];
+        team.canBeLockedOut() && team.startLockout();
     }
 
 
@@ -239,7 +232,7 @@ export class Operator {
     };
 
     private setClue(clue: Clue): void {
-        this.currentClue = clue;
+        this.presentClue = clue;
         this.showClueToOperator(clue);
         this.presentation.setClue(clue);
 
@@ -249,10 +242,13 @@ export class Operator {
     }
 
     public isCurrentClueSpecialCategory(): boolean {
-        return this.currentClue.category.isSpecialCategory;
+        return this.presentClue.category.isSpecialCategory;
     }
 
     public getClueFromJService(): Promise<void> {
+
+        this.stateMachine.resetTimerForState("showClueCategoryAndValue");
+
         const promiseExecutor = (
             resolveFunc: () => void,
             rejectFunc: (rejectReason: Error) => void
@@ -273,8 +269,6 @@ export class Operator {
     }
 
     public __getClueFromJService__(): Promise<void> {
-
-        this.resetDurationForWaitForBuzzesState();
 
         // Use a recursive helper function so we can do retries.
         const fetchClueHelper = (
@@ -348,7 +342,7 @@ export class Operator {
         this.hideSpecialCategoryPrompt();
         this.gameTimer.pause();
 
-        const specialCategory = this.currentClue.category.specialCategory;
+        const specialCategory = this.presentClue.category.specialCategory;
         this.specialCategoryOverlay.querySelector("#special-category-description").innerHTML = specialCategory.description;
         if (specialCategory.example) {
             this.specialCategoryOverlay.querySelector("#special-category-example-category").innerHTML = specialCategory.example.category;
@@ -381,56 +375,62 @@ export class Operator {
 
         this.divInstructions.innerHTML = "Read the question out loud. Buzzers open when you press space.";
 
-        this.divClueQuestion.innerHTML = this.currentClue.getQuestionHtmlWithSubjectInBold();
+        this.divClueQuestion.innerHTML = this.presentClue.getQuestionHtmlWithSubjectInBold();
         this.trQuestion.style.display = ""; //show it by removing "display=none"
         this.trAnswer.style.display = "none";
 
         this.buttonSkipClue.removeAttribute("disabled");
+
+        this.hideSpecialCategoryPrompt();
     }
 
     public handleDoneReadingClueQuestion(): void {
         this.audioManager.play("doneReadingClueQuestion");
         this.trAnswer.style.display = ""; //show it by removing "display=none"
-        this.divClueAnswer.innerHTML = this.currentClue.answer;
+        this.divClueAnswer.innerHTML = this.presentClue.answer;
         this.divInstructions.innerHTML = "Wait for people to answer.";
         this.setAllTeamsState(TeamState.CAN_ANSWER);
         this.buttonSkipClue.setAttribute("disabled", "disabled");
 
-        this.resetDurationForWaitForBuzzesState();
+        this.stateMachine.resetTimerForState("waitForBuzzes");
 
-        this.teamArray.forEach(teamObj => teamObj.hasBuzzedForCurrentQuestion = false);
+        this.teamArray.forEach(team => team.hasBuzzedForCurrentQuestion = false);
     }
 
     public handleShowAnswer(): void {
 
         // only save the game if somebody has more than $0
-        if (this.teamArray.some(teamObj => teamObj.getMoney() > 0)) {
+        if (this.teamArray.some(team => team.getMoney() > 0)) {
             this.saveGame();
         }
 
         this.setAllTeamsState(TeamState.BUZZERS_OFF);
         this.divInstructions.innerHTML = "Let people read the answer.";
 
-        this.teamArray.forEach(teamObj => {
-            if (!teamObj.hasBuzzedForCurrentQuestion) {
-                teamObj.statistics.questionsNotBuzzed++;
+        this.teamArray.forEach(team => {
+            if (!team.hasBuzzedForCurrentQuestion) {
+                team.statistics.questionsNotBuzzed++;
             }
         });
 
     }
 
     public setAllTeamsState(targetState: TeamState, endLockout = false): void {
-        this.teamArray.forEach(teamObj => teamObj.setState(targetState, endLockout));
+        this.teamArray.forEach(team => team.setState(targetState, endLockout));
     }
 
     public canTeamBuzz(keyboardEvent: KeyboardEvent): boolean {
         const teamNumber = Number(keyboardEvent.key);
         const teamIndex = teamNumber - 1;
-        return this.teamArray[teamIndex].canBuzz();
+        if (teamIndex > Operator.teamCount - 1) {
+            return false;
+        } else {
+            return this.teamArray[teamIndex].canBuzz();
+        }
     }
 
     public haveAllTeamsAnswered(): boolean {
-        return this.teamArray.every(teamObj => teamObj.getState() === TeamState.ALREADY_ANSWERED);
+        return this.teamArray.every(team => team.getState() === TeamState.ALREADY_ANSWERED);
     }
 
     public togglePaused(): void {
@@ -442,7 +442,7 @@ export class Operator {
         this.divPaused.style.display = isPaused ? "" : "none";
         this.stateMachine.setPaused(isPaused);
         this.gameTimer.setPaused(isPaused);
-        this.teamArray.forEach(teamObj => teamObj.setPaused(isPaused));
+        this.teamArray.forEach(team => team.setPaused(isPaused));
         this.presentation.setPaused(isPaused);
     }
 
@@ -495,8 +495,6 @@ export class Operator {
             }
         });
         document.querySelector("button#saved-game-dismiss").addEventListener("click", () => divSavedGame.style.display = "none");
-
-
     }
 
     private saveGame(): void {
@@ -542,11 +540,11 @@ export class Operator {
         const html: string[] = [];
         html.push("<table><tbody>");
 
-        shallowCopy.forEach(teamObj => {
+        shallowCopy.forEach(team => {
             html.push(
                 "<tr>" +
-                "<td>" + teamObj.teamName + "</td>" +
-                "<td>$" + teamObj.getMoney().toLocaleString() + "</td>" +
+                "<td>" + team.teamName + "</td>" +
+                "<td>$" + team.getMoney().toLocaleString() + "</td>" +
                 "</tr>"
             );
         });
@@ -565,28 +563,6 @@ export class Operator {
         createLineChart(this.presentation.getDivForLineChart(), this.presentation.getDivForLineChartLegend(), this.teamArray);
     }
 
-    private resetDurationForWaitForBuzzesState(): void {
-        this.resetDurationForWaitForBuzzState = true;
-    }
-
-    public saveCountdownTimerForWaitForBuzzesState(): void {
-        this.countdownTimerForWaitForBuzzesState = this.stateMachine.getCountdownTimer();
-    }
-
-    public getCountdownTimerSource(): CountdownTimerSource {
-        if (this.resetDurationForWaitForBuzzState) {
-            this.resetDurationForWaitForBuzzState = false;
-            return {
-                type: CountdownOperation.CreateNewTimer,
-                duration: this.settings.timeoutWaitForBuzzesMillisec
-            };
-        } else {
-            return {
-                type: CountdownOperation.ResumeExistingTimer,
-                countdownTimerToResume: this.countdownTimerForWaitForBuzzesState
-            };
-        }
-    }
 
     public updateTeamMoneyAtEndOfRound(): void {
         this.teamArray.forEach(t => t.updateMoneyAtEndOfRound());

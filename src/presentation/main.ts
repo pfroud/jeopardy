@@ -8,9 +8,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Show errors from the presentation window in the operator window
-    window.addEventListener("error", function (errorObj) {
+    window.addEventListener("error", function (error) {
         window.opener.console.error("ERROR FROM PRESENTATION WINDOW:");
-        window.opener.console.error(errorObj.error);
+        window.opener.console.error(error.error);
     });
 
     // Add global variable so we can access the presentation instance in the web browser debugger.
