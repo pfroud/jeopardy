@@ -1,4 +1,3 @@
-import { CountdownTimer } from "../CountdownTimer";
 
 export interface StateMachineState {
     name: string;
@@ -10,8 +9,8 @@ export interface StateMachineState {
 
 export type StateMachineTransition = ManualTransition | IfTransition | PromiseTransition | TimeoutTransition | KeyboardTransition;
 
-// need to specify string values for enum so it appears in graphviz dot file
 export enum TransitionType {
+    // need to specify string values for enum so it appears in graphviz dot file
     ManualTrigger = "manualTrigger",
     If = "if",
     Promise = "promise",
@@ -52,26 +51,18 @@ export interface PromiseTransition {
 export interface TimeoutTransition {
     type: TransitionType.Timeout;
     destination: string;
-    countdownTimerShowDots?: boolean;
-    countdownTimerSource: CountdownTimerSource | (() => CountdownTimerSource);
+    behavior: CountdownBehavior;
+    initialDuration: number;
+    isWaitingForTeamToAnswerAfterBuzz?: boolean;
     onTransition?: () => void; //called when time runs out
     guardCondition?: () => boolean;
 }
 
-// https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions
-export enum CountdownOperation {
-    CreateNew,
-    ResumeExisting
+export enum CountdownBehavior {
+    // need to specify string values for enum so it appears in graphviz dot file
+    ResetTimerEveryTimeYouEnterTheState = "new",
+    ContinueTimerUntilManuallyReset = "continue"
 }
-export interface CreateNewCountdownTimer {
-    type: CountdownOperation.CreateNew;
-    duration: number;
-}
-export interface ResumeExistingCountdownTimer {
-    type: CountdownOperation.ResumeExisting;
-    countdownTimerToResume: CountdownTimer;
-}
-export type CountdownTimerSource = CreateNewCountdownTimer | ResumeExistingCountdownTimer;
 
 
 export interface KeyboardTransition {

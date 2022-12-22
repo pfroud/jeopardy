@@ -4,14 +4,14 @@ import { Operator } from "./Operator";
 
 export function createPieCharts(divForPieCharts: HTMLDivElement, teams: Team[]): void {
 
-    teams.forEach(teamObj => {
+    teams.forEach(team => {
         const chartContainer = document.createElement("div");
         chartContainer.className = "team-pie-chart";
         divForPieCharts.appendChild(chartContainer);
 
         const chartTitleDiv = document.createElement("div");
         chartTitleDiv.className = "chart-title";
-        chartTitleDiv.innerText = teamObj.teamName;
+        chartTitleDiv.innerText = team.teamName;
         chartContainer.appendChild(chartTitleDiv);
 
         const chartData: Chartist.PieChartData = {
@@ -19,13 +19,13 @@ export function createPieCharts(divForPieCharts: HTMLDivElement, teams: Team[]):
         };
 
         const seriesToAdd = [{
-            value: teamObj.statistics.questionsNotBuzzed,
+            value: team.statistics.questionsNotBuzzed,
             className: "not-buzzed"
         }, {
-            value: teamObj.statistics.questionsBuzzedThenAnsweredRight,
+            value: team.statistics.questionsBuzzedThenAnsweredRight,
             className: "buzzed-then-answered-right"
         }, {
-            value: teamObj.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut,
+            value: team.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut,
             className: "buzzed-then-answered-wrong-or-timed-out"
         }];
 

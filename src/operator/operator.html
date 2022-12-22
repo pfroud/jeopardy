@@ -15,6 +15,20 @@
 
     <div id="paused" style="display:none">&#9612;&#9612; PAUSED</div>
 
+
+    <div id="special-category-overlay" style="display:none">
+        <div id="info-icon">i</div>
+        Special category!
+        <div id="special-category-description"></div>
+        Example:
+        <div id="special-category-example">
+            Category: <span id="special-category-example-category"></span><br>
+            Question: <span id="special-category-example-question"></span><br>
+            Answer: <span id="special-category-example-answer"></span>
+        </div>
+    </div>
+
+
     <main>
         <input id="tab-setup" type="radio" name="tabs">
         <label for="tab-setup">Setup</label>
@@ -118,6 +132,14 @@
                 <button id="show-buzz-results-pie-charts">Show pie charts of buzz results</button>
             </div>
 
+            <div id="special-category-prompt" style="display:none">
+                Press space to show information about this special category
+            </div>
+
+            <br>
+            <div id="state-machine-all-countdown-timers"></div>
+            <br>
+
             <div id="state-machine-viz">
                 <hr>
                 Current state:<br>
@@ -125,6 +147,10 @@
                 <div id="state-name">not initialized...</div>
                 <div id="remaining-time-text"></div>
             </div>
+
+
+
+        </div>
 
 
         </div>
