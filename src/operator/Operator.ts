@@ -408,6 +408,7 @@ export class Operator {
         this.divInstructions.innerHTML = "Let people read the answer.";
 
         this.teamArray.forEach(team => {
+            team.updateMoneyAtEndOfRound();
             if (!team.hasBuzzedForCurrentQuestion) {
                 team.statistics.questionsNotBuzzed++;
             }

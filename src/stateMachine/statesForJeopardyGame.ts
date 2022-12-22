@@ -140,10 +140,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 type: TransitionType.If,
                 condition: operator.shouldGameEnd.bind(operator),
                 then: { destination: "gameEnd" },
-                else: {
-                    destination: "getClueFromJService",
-                    onTransition: operator.updateTeamMoneyAtEndOfRound.bind(operator)
-                }
+                else: { destination: "getClueFromJService" }
             }],
         }, {
             name: "gameEnd",
