@@ -24,7 +24,6 @@ export class StateMachine {
     private readonly DEBUG = false;
     private readonly OPEN_GRAPHVIZ_VIEWER = false;
     private readonly operator: Operator;
-    private readonly audioManager: AudioManager;
     private readonly presentation: Presentation;
     private readonly operatorWindowCountdownProgress: HTMLProgressElement;
     private readonly operatorWindowCountdownText: HTMLDivElement;
@@ -36,10 +35,9 @@ export class StateMachine {
     private graphvizViewer: GraphvizViewer;
     private presentState: StateMachineState;
 
-    constructor(settings: Settings, operator: Operator, presentation: Presentation, audioManager: AudioManager) {
+    constructor(settings: Settings, operator: Operator, presentation: Presentation) {
         this.operator = operator;
         this.presentation = presentation;
-        this.audioManager = audioManager;
 
         this.operatorWindowCountdownProgress = document.querySelector("div#state-machine-viz progress");
         this.operatorWindowCountdownText = document.querySelector("div#state-machine-viz div#remaining-time-text");
@@ -50,7 +48,7 @@ export class StateMachine {
         window.addEventListener("keydown", keyboardEvent => this.handleKeyboardEvent(keyboardEvent));
 
         this.allStates = getStatesForJeopardyGame(operator, settings);
-        this.parseAndValidateStates();
+        this.validateStates();
 
         this.presentState = this.stateMap["idle"];
 
@@ -139,7 +137,7 @@ export class StateMachine {
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////
-        /////////////////// Handle onExit function of the state we're leaving //////////////////
+        /////////////////// Call onExit function of the state we're leaving //////////////////
         ////////////////////////////////////////////////////////////////////////////////////////
         if (this.presentState.onExit) {
             if (this.DEBUG) {
@@ -158,10 +156,9 @@ export class StateMachine {
             this.graphvizViewer.updateTrail(previousState.name, this.presentState.name);
         }
 
-        const transitionArray = this.presentState.transitions;
 
         ///////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////// Handle showPresentationSlide ///////////////////////////
+        ////////////////////////// Change presentation slide ///////////////////////////
         ///////////////////////////////////////////////////////////////////////////////////
         if (this.presentState.presentationSlideToShow) {
             if (this.presentation.allSlideNames.has(this.presentState.presentationSlideToShow)) {
@@ -175,7 +172,7 @@ export class StateMachine {
         }
 
         ///////////////////////////////////////////////////////////////////////////////
-        /////////////////////////// Handle onEnter function ///////////////////////////
+        /////////////////////////// Call onEnter function ///////////////////////////
         ///////////////////////////////////////////////////////////////////////////////
         if (this.presentState.onEnter) {
             if (this.DEBUG) {
@@ -186,8 +183,9 @@ export class StateMachine {
 
 
         //////////////////////////////////////////////////////////////////////
-        ///////////////////// Start countdown timer if needed ////////////////
+        ///////////////////// Start countdown timer ///////// ////////////////
         //////////////////////////////////////////////////////////////////////
+        const transitionArray = this.presentState.transitions;
         let foundCountdownTimer = false;
         // Search for the first timeout transition.
         for (let i = 0; i < transitionArray.length; i++) {
@@ -203,6 +201,14 @@ export class StateMachine {
                     countdownTimer.reset();
                 }
 
+                /*
+                Once a team has buzzed and we're waiting for them to answer, we want some special stuff to happen:
+                - In the presentation window: the state machine uses a timeout transition, but instead of showing a
+                    progress bar like what would normally happen for a timeout transition, we want to show it on
+                    the nine countdown dots.
+                - In the operator window: use a second <progress> element, instead of using the same one that shows
+                    how much time is left for teams to buzz in.
+                */
                 if (transition.isWaitingForTeamToAnswerAfterBuzz) {
                     const teamIndex = Number(keyboardEvent.key) - 1;
                     const team = this.operator.getTeam(teamIndex);
@@ -216,7 +222,6 @@ export class StateMachine {
                 }
 
                 countdownTimer.startOrResume();
-
 
                 this.operatorWindowDivStateName.innerHTML = destinationStateName + " &rarr; " + transition.destination;
                 // We could support multiple timeout transitions, although I have no need to
@@ -273,7 +278,7 @@ export class StateMachine {
                 if (this.DEBUG) {
                     console.log(`Transition type if: the condition function is ${transition.condition.name}`);
                 }
-                if (transition.condition(keyboardEvent)) {
+                if (transition.condition()) {
                     if (transition.then.onTransition) {
                         if (this.DEBUG) {
                             console.log(`Running the then.onTransition function of ${this.presentState}: ${transition.then.onTransition.name}`);
@@ -301,7 +306,7 @@ export class StateMachine {
 
     }
 
-    private createCountdownTimer(timeoutTransition: TimeoutTransition): CountdownTimer {
+    private createCountdownTimerForTransition(timeoutTransition: TimeoutTransition): CountdownTimer {
 
         const countdownTimer = new CountdownTimer(timeoutTransition.initialDuration);
 
@@ -329,9 +334,9 @@ export class StateMachine {
 
     }
 
-    private parseAndValidateStates(): void {
+    private validateStates(): void {
 
-        // Pass one of two: populate the stateMap; validate the slide names are available.
+        // Pass one of two: populate the stateMap, and validate the presentation slide names are available.
         this.allStates.forEach((state: StateMachineState) => {
             this.stateMap[state.name] = state;
 
@@ -342,7 +347,7 @@ export class StateMachine {
 
         }, this);
 
-        // Pass two of two - validate all the transitions.
+        // Pass two of two: validate all the transitions, and create countdown timers for timeout transitions.
         this.allStates.forEach((state: StateMachineState) => {
 
             const keyboardKeysUsedInTransitionsFromThisState: KeyboardKeysUsed = {};
@@ -360,9 +365,8 @@ export class StateMachine {
                 }
 
                 switch (transition.type) {
-
                     case TransitionType.Keyboard: {
-                        // Verify each keyboard key is not used in multiple transitions from this state.
+                        // Verify each keyboard key is not used in multiple transitions leaving this state.
                         const keyboardKeys: string = transition.keyboardKeys;
                         for (let i = 0; i < keyboardKeys.length; i++) {
                             const key = keyboardKeys.charAt(i);
@@ -389,21 +393,23 @@ export class StateMachine {
                         }
                         break;
                     }
+
                     // Initialize countdown timers for all timeout transitions.
                     case TransitionType.Timeout: {
 
                         if (stateHasTimeoutTransition) {
                             printWarning(state.name, transitionIndex,
-                                "multiple timeout transitions not supported");
+                                "multiple timeout transitions leaving a state is not supported (because the countdownTimerForState map uses the state name as the key)");
                         }
 
-                        let newCountdownTimer = this.createCountdownTimer(transition);
+                        let countdownTimer = this.createCountdownTimerForTransition(transition);
 
+                        // create a progress element in the operator page - probably only needed for debugging
                         const wrapper = document.createElement("div");
                         wrapper.innerText = `(${transition.behavior}) ${state.name} --> ${transition.destination} `;
-                        this.countdownTimerForState[state.name] = newCountdownTimer;
+                        this.countdownTimerForState[state.name] = countdownTimer;
                         const progressElement = document.createElement("progress");
-                        newCountdownTimer.addProgressElement(progressElement);
+                        countdownTimer.addProgressElement(progressElement);
                         wrapper.appendChild(progressElement);
                         this.divAllCountdownTimers.appendChild(wrapper);
 
@@ -420,10 +426,6 @@ export class StateMachine {
 
         }, this);
 
-    }
-
-    public getCountdownTimerForState(state: StateMachineState): CountdownTimer {
-        return this.countdownTimerForState[state.name];
     }
 
     public getAllStates(): StateMachineState[] {

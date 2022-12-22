@@ -82,6 +82,9 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 onTransition: operator.handleLockout.bind(operator)
             }],
         }, {
+            /*
+            The operator has finished reading the clue question, people can buzz in now.
+            */
             name: "waitForBuzzes",
             transitions: [{
                 type: TransitionType.Keyboard,
@@ -96,8 +99,11 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 onTransition: operator.playSoundQuestionTimeout.bind(operator)
             }],
         }, {
+            /*
+            A team has pressed the buzzer.
+            */
             name: "waitForTeamAnswer",
-            onEnter: operator.handleBuzzerPress.bind(operator), // TODO I want to move this to the transition but it takes a keyboard event???
+            onEnter: operator.handleBuzzerPress.bind(operator),
             transitions: [{
                 type: TransitionType.Keyboard,
                 keyboardKeys: "y",

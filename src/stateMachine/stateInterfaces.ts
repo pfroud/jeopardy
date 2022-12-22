@@ -2,7 +2,7 @@
 export interface StateMachineState {
     name: string;
     presentationSlideToShow?: string;
-    onEnter?: (keyboardEvent?: KeyboardEvent) => void;// TODO why does this get a keyboard event??
+    onEnter?: (keyboardEvent?: KeyboardEvent) => void; //keyboard event is used for Operator.handleBuzzerPress()
     onExit?: () => void;
     transitions: StateMachineTransition[];
 }
@@ -29,7 +29,7 @@ export interface ManualTransition {
 
 export interface IfTransition {
     type: TransitionType.If;
-    condition: (arg0: KeyboardEvent) => boolean;// TODO why does this get a keyboard event??
+    condition: () => boolean;
     then: {
         destination: string;
         onTransition?: () => void;

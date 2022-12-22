@@ -24,7 +24,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const graphvizLanguageString = stateMachineToGraphviz(stateMachine.getAllStates());
 
-    async function getSvg(): Promise<string> {
+    async function getSvgString(): Promise<string> {
         // from https://github.com/aduh95/viz.js#using-a-bundler
         const viz = new Viz({
             worker: new Worker(
@@ -35,10 +35,11 @@ window.addEventListener('DOMContentLoaded', () => {
         return viz.renderString(graphvizLanguageString);
     }
 
-    getSvg()
+    getSvgString()
         .then((svgString) => {
             document.body.innerHTML = svgString;
 
+            // the body will now contain an <svg> tag
             const svgElement = document.querySelector("svg");
             svgElement.style.width = "100%";
             const graphvizViewer = new GraphvizViewer(svgElement);

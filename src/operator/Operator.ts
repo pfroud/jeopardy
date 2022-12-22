@@ -86,7 +86,7 @@ export class Operator {
 
     public handlePresentationReady(presentationInstanceFromOtherWindow: Presentation): void {
         /* 
-        This method gets called from Presentation instance in the other window.
+        This method gets called from the Presentation instance in the other window.
         */
         window.focus();
         this.presentation = presentationInstanceFromOtherWindow;
@@ -96,7 +96,7 @@ export class Operator {
 
         this.gameTimer.addProgressElement(this.presentation.getProgressElementForGameTimer());
 
-        this.stateMachine = new StateMachine(this.settings, this, this.presentation, this.audioManager);
+        this.stateMachine = new StateMachine(this.settings, this, this.presentation);
 
         this.buttonStartGame.removeAttribute("disabled");
         this.divInstructions.innerHTML = "Ready. Click the button to start the game.";
@@ -155,7 +155,7 @@ export class Operator {
         this.buttonSkipClue.addEventListener("click", () => this.skipClue());
 
         document.querySelector("a#aMoneyOverride").addEventListener("click", () =>
-            window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney", "popup,fullscreen"));
+            window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney"));
 
 
         document.querySelector("a#aGenerateGraphviz").addEventListener("click", () =>
@@ -527,6 +527,8 @@ export class Operator {
     public handleGameEnd(): void {
         this.gameTimer.pause();
 
+        this.divInstructions.innerHTML = "Game over";
+
         // First play the eight high-pitched beeps sound, then play the closing music
         this.audioManager.play("roundEnd")
             .then(() => this.audioManager.play("musicGameEnd"));
@@ -535,7 +537,7 @@ export class Operator {
 
         this.createTeamRankingTable();
         this.presentation.hideHeaderAndFooter();
-        createPieCharts(this.presentation.getDivForPieCharts(), this.teamArray);
+        createPieCharts(this, this.presentation.getDivForPieCharts(), this.teamArray);
         createLineChart(this.presentation.getDivForLineChart(), this.presentation.getDivForLineChartLegend(), this.teamArray);
     }
 
@@ -562,11 +564,6 @@ export class Operator {
         html.push("</tbody></table>");
 
         this.presentation.setTeamRankingHtml(html.join(""));
-    }
-
-
-    public updateTeamMoneyAtEndOfRound(): void {
-        this.teamArray.forEach(t => t.updateMoneyAtEndOfRound());
     }
 
 
