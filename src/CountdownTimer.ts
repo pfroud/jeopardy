@@ -42,6 +42,35 @@ export class CountdownTimer {
         }
     }
 
+    public reset(): void {
+
+        this.remainingMillisec = this.maxMillisec;
+
+        this.setPaused(false);
+        this.guiUpdatePaused();
+
+        if (!isNaN(this.intervalID)) {
+            clearInterval(this.intervalID);
+        }
+
+        this.timestampOfLastInterval = NaN;
+        this.intervalID = NaN;
+
+        this.isStarted = false;
+        this.isFinished = false;
+
+        this.progressElements.forEach(progressElement => {
+            progressElement.setAttribute("max", String(this.maxMillisec));
+            progressElement.setAttribute("value", String(this.maxMillisec));
+        });
+        this.dotsTables.forEach(tableElement =>
+            tableElement.querySelectorAll("td").forEach(td => td.classList.remove("active"))
+        );
+        this.textDivs.forEach(divElement => divElement.innerHTML = "Reset");
+
+        this.onReset?.();
+    }
+
     public togglePaused(): void {
         this.isPaused ? this.resume() : this.pause();
     }
@@ -51,6 +80,14 @@ export class CountdownTimer {
             this.pause();
         } else {
             this.resume();
+        }
+    }
+
+    public startOrResume() {
+        if (this.isStarted) {
+            this.resume();
+        } else {
+            this.start();
         }
     }
 

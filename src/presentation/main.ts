@@ -8,11 +8,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Show errors from the presentation window in the operator window
-    window.addEventListener("error", function (errorObj) {
+    window.addEventListener("error", function (error) {
         // suppress error TS2339 "property 'console' does not exist on type 'Window'"
         const castOpener = window.opener as (Window & typeof globalThis);
         castOpener.console.error("ERROR FROM PRESENTATION WINDOW:");
-        castOpener.console.error(errorObj.error);
+        castOpener.console.error(error.error);
     });
 
     // Add global variable so we can access the presentation instance in the web browser debugger.

@@ -1,6 +1,6 @@
-import { CountdownOperation, StateMachineState, TransitionType } from "./stateInterfaces";
 import { Operator } from "../operator/Operator";
 import { Settings } from "../Settings";
+import { CountdownBehavior, StateMachineState, TransitionType } from "./stateInterfaces";
 
 export function getStatesForJeopardyGame(operator: Operator, settings: Settings): StateMachineState[] {
 
@@ -34,17 +34,29 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             presentationSlideToShow: "slide-clue-category-and-value",
             transitions: [{
                 type: TransitionType.Timeout,
-                countdownTimerSource: {
-                    type: CountdownOperation.CreateNew,
-                    duration: settings.displayDurationCategoryMillisec
-                },
+                initialDuration: settings.displayDurationCategoryMillisec,
+                behavior: CountdownBehavior.ContinueTimerUntilManuallyReset,
                 destination: "showClueQuestion",
                 /*
                 Don't put this as onEnter of the showClueQuestion state because it does
                 a bunch of stuff and would get called every time lockout happens
                 */
                 onTransition: operator.handleShowClueQuestion.bind(operator)
+            }, {
+                type: TransitionType.Keyboard,
+                keyboardKeys: " ", //space
+                destination: "showMessageForSpecialCategory",
+                guardCondition: operator.isCurrentClueSpecialCategory.bind(operator)
             }],
+        }, {
+            name: "showMessageForSpecialCategory",
+            onEnter: operator.showSpecialCategoryOverlay.bind(operator),
+            onExit: operator.hideSpecialCategoryOverlay.bind(operator),
+            transitions: [{
+                type: TransitionType.Keyboard,
+                keyboardKeys: " ", //space
+                destination: "showClueCategoryAndValue"
+            }]
         }, {
             /*
             The clue question is shown on center of the presentation window. The person operating the
@@ -75,12 +87,12 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 type: TransitionType.Keyboard,
                 keyboardKeys: "123456789",
                 destination: "waitForTeamAnswer",
-                onTransition: operator.saveCountdownTimerForWaitForBuzzesState.bind(operator),
                 guardCondition: operator.canTeamBuzz.bind(operator)
             }, {
                 type: TransitionType.Timeout,
                 destination: "showAnswer",
-                countdownTimerSource: operator.getCountdownTimerSource.bind(operator),
+                initialDuration: settings.timeoutWaitForBuzzesMillisec,
+                behavior: CountdownBehavior.ContinueTimerUntilManuallyReset,
                 onTransition: operator.playSoundQuestionTimeout.bind(operator)
             }],
         }, {
@@ -97,11 +109,9 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 destination: "answerWrongOrTimeout"
             }, {
                 type: TransitionType.Timeout,
-                countdownTimerSource: {
-                    type: CountdownOperation.CreateNew,
-                    duration: settings.timeoutWaitForAnswerMillisec
-                },
-                countdownTimerShowDots: true,
+                initialDuration: settings.timeoutWaitForAnswerMillisec,
+                behavior: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
+                isWaitingForTeamToAnswerAfterBuzz: true,
                 destination: "answerWrongOrTimeout"
             }],
         },
@@ -120,10 +130,8 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             presentationSlideToShow: "slide-clue-answer",
             transitions: [{
                 type: TransitionType.Timeout,
-                countdownTimerSource: {
-                    type: CountdownOperation.CreateNew,
-                    duration: settings.displayDurationAnswerMillisec
-                },
+                initialDuration: settings.displayDurationAnswerMillisec,
+                behavior: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
                 destination: "checkGameEnd"
             }],
         }, {
