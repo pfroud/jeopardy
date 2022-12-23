@@ -82,7 +82,7 @@ export class Operator {
     private initGameTimer(millisec: number): void {
         this.gameTimer = new CountdownTimer(millisec);
         this.gameTimer.addProgressElement(document.querySelector("div#game-timer progress"));
-        this.gameTimer.addTextDiv(document.querySelector("div#game-timer div#remaining-time-text"));
+        this.gameTimer.addTextElement(document.querySelector("div#game-timer div.remaining-time-text"));
     }
 
     public handlePresentationReady(presentationInstanceFromOtherWindow: Presentation): void {
@@ -149,8 +149,6 @@ export class Operator {
     }
 
     private initMouseListeners(): void {
-        document.querySelector("button#go-to-jeopardy-logo").addEventListener("click", () => this.presentation.showSlide("slide-jeopardy-logo"));
-
         this.buttonStartGame.addEventListener("click", () => this.startGame());
 
         this.buttonSkipClue.addEventListener("click", () => this.skipClue());
@@ -459,14 +457,18 @@ export class Operator {
     }
 
     private lookForSavedGame(): void {
-        const divSavedGame = document.querySelector<HTMLDivElement>("div#saved-game-prompt");
+
+        const divMessage = document.querySelector<HTMLDivElement>("div#saved-game-message");
+
+        const divSavedGame = document.querySelector<HTMLDivElement>("div#tab-content-saved-game");
 
         const rawLocalStorageResult = window.localStorage.getItem(Operator.localStorageKey);
         if (rawLocalStorageResult === null) {
-            // no saved game found
-            divSavedGame.style.display = "none";
+            divMessage.innerHTML = "No saved game found in localStorage.";
             return;
         }
+
+        divMessage.innerHTML = "Found a saved game:";
 
         const parsedJson: SavedGameInLocalStorage = JSON.parse(rawLocalStorageResult);
 
@@ -498,7 +500,6 @@ export class Operator {
                 divSavedGame.style.display = "none";
             }
         });
-        document.querySelector("button#saved-game-dismiss").addEventListener("click", () => divSavedGame.style.display = "none");
     }
 
     private saveGame(): void {

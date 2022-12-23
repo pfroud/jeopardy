@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
+    window.opener.addEventListener("unload", () => close());
+
     const operator = ((window.opener as any).operator as Operator);
     if (!operator) {
         document.body.innerText = "no window.opener.operator";

@@ -40,10 +40,11 @@ input[type="radio"] {
         }
     }
 
-    &#tab-setup:checked ~ div#content-setup,
-    &#tab-game:checked ~ div#content-game,
-    &#tab-admin:checked ~ div#content-admin,
-    &#tab-settings:checked ~ div#content-settings {
+    &#tab-music:checked ~ div#tab-content-music,
+    &#tab-play:checked ~ div#tab-content-play,
+    &#tab-developer:checked ~ div#tab-content-developer,
+    &#tab-load-game:checked ~ div#tab-content-load-game,
+    &#tab-game-settings:checked ~ div#tab-content-game-settings {
         display: block;
     }
 }

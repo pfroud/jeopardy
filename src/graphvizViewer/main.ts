@@ -10,6 +10,8 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    window.opener.addEventListener("unload", () => close());
+
     const operator = ((window.opener as any).operator as Operator);
     if (!operator) {
         document.body.innerText = "no window.opener.operator";
@@ -41,7 +43,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
             // the body will now contain an <svg> tag
             const svgElement = document.querySelector("svg");
-            svgElement.style.width = "100%";
+            svgElement.setAttribute("width", "100%");
+            svgElement.removeAttribute("height");
             const graphvizViewer = new GraphvizViewer(svgElement);
             stateMachine.handleGraphvizViewerReady(graphvizViewer);
 

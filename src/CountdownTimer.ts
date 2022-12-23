@@ -14,7 +14,7 @@ export class CountdownTimer {
     private static readonly desiredFrameRateHz = 30;
     private readonly updateIntervalMillisec = 1000 / CountdownTimer.desiredFrameRateHz;
     private readonly audioManager: AudioManager;
-    private readonly textDivs = new Set<HTMLDivElement>();
+    private readonly textElements = new Set<HTMLElement>();
     private readonly progressElements = new Set<HTMLProgressElement>();
     private readonly dotsTables = new Set<HTMLTableElement>();
     private remainingMillisec: number;
@@ -66,7 +66,7 @@ export class CountdownTimer {
         this.dotsTables.forEach(tableElement =>
             tableElement.querySelectorAll("td").forEach(td => td.classList.remove("active"))
         );
-        this.textDivs.forEach(divElement => divElement.innerHTML = "Reset");
+        this.textElements.forEach(divElement => divElement.innerHTML = "Reset");
 
         this.onReset?.();
     }
@@ -139,7 +139,7 @@ export class CountdownTimer {
 
     private guiUpdatePaused(): void {
         this.progressElements.forEach(elem => elem.classList.toggle("paused", this.isPaused));
-        this.textDivs.forEach(elem => elem.classList.toggle("paused", this.isPaused));
+        this.textElements.forEach(elem => elem.classList.toggle("paused", this.isPaused));
         this.dotsTables?.forEach(e => e.classList.toggle("paused", this.isPaused));
     }
 
@@ -166,7 +166,7 @@ export class CountdownTimer {
                 }
                 tds.forEach(td => td.classList.add("active"));
             });
-            this.textDivs.forEach(divElement => divElement.innerHTML = (this.maxMillisec / 1000).toFixed(1));
+            this.textElements.forEach(divElement => divElement.innerHTML = (this.maxMillisec / 1000).toFixed(1));
             /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -220,7 +220,7 @@ export class CountdownTimer {
             newText = remainingSeconds.toFixed(1) + " sec";
         }
 
-        this.textDivs.forEach(elem => elem.innerHTML = newText);
+        this.textElements.forEach(elem => elem.innerHTML = newText);
 
         this.progressElements.forEach(elem => elem.setAttribute("value", String(this.remainingMillisec)));
 
@@ -287,18 +287,18 @@ export class CountdownTimer {
             console.log("CountdownTimer: finished.");
         }
         this.isFinished = true;
-        this.textDivs.forEach(elem => elem.innerHTML = "done");
+        this.textElements.forEach(elem => elem.innerHTML = "done");
         this.dotsTables?.forEach(table => table.querySelectorAll("td").forEach(td => td.classList.remove("active")));
         clearInterval(this.intervalID);
 
         this.onFinished?.();
     }
 
-    public addTextDiv(textDiv: HTMLDivElement): void {
-        if (!textDiv) {
-            throw new Error("trying to add falsey text div");
+    public addTextElement(textElement: HTMLElement): void {
+        if (!textElement) {
+            throw new Error("trying to add falsey text element");
         }
-        this.textDivs.add(textDiv);
+        this.textElements.add(textElement);
     }
 
     public addProgressElement(progressElement: HTMLProgressElement): void {

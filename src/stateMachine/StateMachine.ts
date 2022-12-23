@@ -1,6 +1,5 @@
 import { CountdownTimer } from "../CountdownTimer";
 import { GraphvizViewer } from "../graphvizViewer/GraphvizViewer";
-import { AudioManager } from "../operator/AudioManager";
 import { Operator } from "../operator/Operator";
 import { Presentation } from "../presentation/Presentation";
 import { Settings } from "../Settings";
@@ -31,7 +30,7 @@ export class StateMachine {
     private readonly stateMap: StateMap = {};
     private readonly countdownTimerForState: CountdownTimerForState = {};
     private readonly allStates: StateMachineState[];
-    private readonly divAllCountdownTimers: HTMLDivElement;
+    private readonly tableOfAllCountdownTimers: HTMLTableElement;
     private graphvizViewer: GraphvizViewer;
     private presentState: StateMachineState;
 
@@ -40,10 +39,10 @@ export class StateMachine {
         this.presentation = presentation;
 
         this.operatorWindowCountdownProgress = document.querySelector("div#state-machine-viz progress");
-        this.operatorWindowCountdownText = document.querySelector("div#state-machine-viz div#remaining-time-text");
+        this.operatorWindowCountdownText = document.querySelector("div#state-machine-viz div.remaining-time-text");
         this.operatorWindowDivStateName = document.querySelector("div#state-machine-viz div#state-name");
 
-        this.divAllCountdownTimers = document.querySelector("div#state-machine-all-countdown-timers");
+        this.tableOfAllCountdownTimers = document.querySelector("table#state-machine-all-countdown-timers");
 
         window.addEventListener("keydown", keyboardEvent => this.handleKeyboardEvent(keyboardEvent));
 
@@ -324,7 +323,7 @@ export class StateMachine {
             how much time is left for teams to buzz in.
         */
         if (!timeoutTransition.isWaitingForTeamToAnswerAfterBuzz) {
-            countdownTimer.addTextDiv(this.operatorWindowCountdownText);
+            countdownTimer.addTextElement(this.operatorWindowCountdownText);
             countdownTimer.addProgressElement(this.presentation.getProgressElementForStateMachine());
             countdownTimer.addProgressElement(this.operatorWindowCountdownProgress);
         }
@@ -405,14 +404,26 @@ export class StateMachine {
                         let countdownTimer = this.createCountdownTimerForTransition(transition);
 
                         // create a progress element in the operator page - probably only needed for debugging
-                        const wrapper = document.createElement("div");
-                        wrapper.innerText = `(${transition.behavior}) ${state.name} --> ${transition.destination} `;
                         this.countdownTimerForState[state.name] = countdownTimer;
-                        const progressElement = document.createElement("progress");
-                        countdownTimer.addProgressElement(progressElement);
-                        wrapper.appendChild(progressElement);
-                        this.divAllCountdownTimers.appendChild(wrapper);
+                        const tr = document.createElement("tr");
 
+                        const tdStateLabel = document.createElement("td")
+                        tdStateLabel.innerText = `(${transition.behavior}) ${state.name} --> ${transition.destination} `;
+                        tr.appendChild(tdStateLabel);
+
+                        const tdProgressElement = document.createElement("td");
+                        const progressElement = document.createElement("progress");
+                        progressElement.setAttribute("value", "0");
+                        countdownTimer.addProgressElement(progressElement);
+                        tdProgressElement.appendChild(progressElement);
+                        tr.appendChild(tdProgressElement);
+
+                        const tdRemainingTimeText = document.createElement("td");
+                        countdownTimer.addTextElement(tdRemainingTimeText);
+                        tr.appendChild(tdRemainingTimeText);
+
+
+                        this.tableOfAllCountdownTimers.appendChild(tr);
                         stateHasTimeoutTransition = true;
                         break;
                     }

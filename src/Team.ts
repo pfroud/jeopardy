@@ -9,7 +9,6 @@ interface TeamDivs {
         wrapper: HTMLDivElement;
         money: HTMLDivElement;
         teamName: HTMLDivElement;
-        state: HTMLDivElement;
     };
     presentation: {
         wrapper: HTMLDivElement;
@@ -49,8 +48,7 @@ export class Team {
         operator: {
             wrapper: null,
             money: null,
-            teamName: null,
-            state: null
+            teamName: null
         },
         presentation: {
             wrapper: null,
@@ -247,11 +245,6 @@ export class Team {
         divMoney.innerHTML = "$" + this.money;
         divTeam.append(divMoney);
 
-        const divState = this.div.operator.state = document.createElement("div");
-        divState.classList.add("team-state");
-        divState.innerHTML = this.state;
-        divTeam.append(divState);
-
         const progress = this.progressElementInOperatorWindow = document.createElement("progress");
         progress.style.display = "none";
         divTeam.append(progress);
@@ -269,7 +262,6 @@ export class Team {
             this.state = targetState;
             this.div.operator.wrapper.setAttribute("data-team-state", targetState);
             this.div.presentation.wrapper.setAttribute("data-team-state", targetState);
-            this.div.operator.state.innerHTML = this.state;
 
             if (this.countdownTimer) {
                 this.countdownTimer.pause();
