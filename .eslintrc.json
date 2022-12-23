@@ -7,18 +7,26 @@
     },
     //
     // https://eslint.org/docs/user-guide/configuring/configuration-files#extending-configuration-files
+    // https://typescript-eslint.io/docs/linting/configs
     "extends": [
         "eslint:recommended",
-        "plugin:@typescript-eslint/recommended"
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "plugin:@typescript-eslint/strict"
     ],
     //
     // https://eslint.org/docs/user-guide/configuring/plugins#specifying-parser
     "parser": "@typescript-eslint/parser",
     //
     // https://eslint.org/docs/user-guide/configuring/language-options#specifying-parser-options
+    // https://typescript-eslint.io/docs/linting/typed-linting/
     "parserOptions": {
         "ecmaVersion": 12,
-        "sourceType": "module"
+        "sourceType": "module",
+        "tsconfigRootDir": "__dirname",
+        "project": [
+            "./tsconfig.json"
+        ]
     },
     //
     // https://eslint.org/docs/user-guide/configuring/plugins
@@ -40,7 +48,22 @@
         "prefer-promise-reject-errors": "error", // https://eslint.org/docs/rules/prefer-promise-reject-errors
         "semi": "warn", //semicolon https://eslint.org/docs/rules/semi
         "no-empty": "warn", // https://eslint.org/docs/rules/no-empty
+        "no-template-curly-in-string": "warn", // https://eslint.org/docs/latest/rules/no-template-curly-in-string
+        "array-callback-return": "warn", // https://eslint.org/docs/latest/rules/array-callback-return
+        "no-promise-executor-return": "warn", // https://eslint.org/docs/latest/rules/no-promise-executor-return
+        "eqeqeq": "warn", // https://eslint.org/docs/latest/rules/eqeqeq
+        "@typescript-eslint/explicit-member-accessibility": "warn", // https://typescript-eslint.io/rules/explicit-member-accessibility/
+        "@typescript-eslint/explicit-function-return-type": "warn", // https://typescript-eslint.io/rules/explicit-function-return-type/
+        "@typescript-eslint/no-require-imports": "warn", // https://typescript-eslint.io/rules/no-require-imports/
+        "@typescript-eslint/prefer-readonly": "warn", // https://typescript-eslint.io/rules/prefer-readonly/
+        //
         /*
+        I actually want to use the explicit any type to set globals
+        https: //typescript-eslint.io/rules/no-explicit-any/
+        */
+        "@typescript-eslint/no-explicit-any": "off",
+        //
+        /*  
         Turn off the no-shadow rule in ESLint then turn it on for TSLint,
         otherwise it will flag every enum as "already declared in the upper scope".
         https://stackoverflow.com/a/64745652
