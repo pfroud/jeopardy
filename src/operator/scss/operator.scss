@@ -18,16 +18,19 @@ main {
     }
 
     div.tab-content {
+
         ////////////////////////////////////////////////////////////////
         &#tab-content-load-game {
             table#saved-game-details {
                 border-collapse: collapse;
+
                 td {
                     border: 1px solid black;
                     padding: 5px 10px 5px 10px;
                 }
             }
         }
+
         ////////////////////////////////////////////////////////////////
         &#tab-content-play {
             div#instructions {
@@ -42,6 +45,14 @@ main {
                 span.clue-keyword {
                     font-weight: bold;
                 }
+            }
+
+            div#special-category-prompt {
+                background-color: yellow;
+                padding: 10px;
+                margin-top: 10px;
+                border: 1px solid #a8b115;
+                border-radius: 5px;
             }
 
             div#state-machine-viz,
@@ -73,6 +84,7 @@ main {
                 margin-bottom: 40px;
             }
         }
+
         ////////////////////////////////////////////////////////////////
         &.content-game-settings {
             table#table-settings {
@@ -86,6 +98,7 @@ main {
                 }
             }
         }
+
         ////////////////////////////////////////////////////////////////
     }
 }
@@ -128,29 +141,5 @@ footer {
             padding-left: 5px;
             padding-right: 5px;
         }
-    }
-}
-
-div#special-category-overlay {
-    position: absolute;
-    background-color: lightyellow;
-    border-radius: 20px;
-    padding: 50px;
-    border: 1px solid yellow;
-    filter: drop-shadow(3px 3px 3px gray);
-    width: 300px;
-    height: 100px;
-
-    div#info-icon {
-        border: 10px solid blue;
-        border-radius: 50%;
-        display: inline-block;
-        width: 100px;
-        height: 100px;
-        text-align: center;
-        font-weight: bold;
-        color: blue;
-        font-size: 80px;
-        font-family: monospace;
     }
 }

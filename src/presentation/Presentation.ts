@@ -1,5 +1,6 @@
 import { Operator } from "../operator/Operator";
 import { Clue } from "../Clue";
+import { SpecialCategory } from "../operator/specialCategories";
 
 interface Slides {
     [slideName: string]: HTMLDivElement;
@@ -18,6 +19,9 @@ export class Presentation {
     private readonly divClueValueBig: HTMLDivElement;
     private readonly divClueAirdateBig: HTMLDivElement;
     private readonly divSlideClueAnswerText: HTMLDivElement;
+
+    private readonly divSpecialCategoryBackdrop: HTMLDivElement;
+    private readonly divSpecialCategoryPopup: HTMLDivElement;
 
     private readonly divPaused: HTMLDivElement;
     private readonly footer: HTMLElement;
@@ -40,6 +44,9 @@ export class Presentation {
         this.divClueCategoryBig = document.querySelector("div#clue-category-big");
         this.divClueValueBig = document.querySelector("div#clue-value-big");
         this.divClueAirdateBig = document.querySelector("div#clue-airdate-big");
+
+        this.divSpecialCategoryBackdrop = document.querySelector("div#special-category-backdrop")
+        this.divSpecialCategoryPopup = document.querySelector("div#special-category-popup")
 
         this.allSlideNames = new Set<string>();
 
@@ -170,6 +177,25 @@ export class Presentation {
 
     public appendTeamDivToFooter(divForTeam: HTMLDivElement): void {
         this.footer.append(divForTeam);
+    }
+
+    public showSpecialCategoryPopup(specialCategory: SpecialCategory): void {
+
+        this.divSpecialCategoryPopup.querySelector("#special-category-title").innerHTML = specialCategory.displayName;
+        this.divSpecialCategoryPopup.querySelector("#special-category-description").innerHTML = specialCategory.description;
+        if (specialCategory.example) {
+            this.divSpecialCategoryPopup.querySelector("#special-category-example-category").innerHTML = specialCategory.example.category;
+            this.divSpecialCategoryPopup.querySelector("#special-category-example-question").innerHTML = specialCategory.example.question;
+            this.divSpecialCategoryPopup.querySelector("#special-category-example-answer").innerHTML = specialCategory.example.answer;
+        }
+
+        this.divSpecialCategoryBackdrop.className = "blurred";
+        this.divSpecialCategoryPopup.setAttribute("data-popup-location", "center");
+    }
+
+    public hideSpecialCategoryPopup(): void {
+        this.divSpecialCategoryBackdrop.className = "not-blurred";
+        this.divSpecialCategoryPopup.setAttribute("data-popup-location", "offscreen-left");
     }
 
 }

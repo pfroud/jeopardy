@@ -4,6 +4,7 @@ This list is from:
 https://list.fandom.com/wiki/Jeopardy!_recurring_categories
 */
 export interface SpecialCategory {
+    displayName: string;
     categoryTitleMatches: RegExp;
     description: string;
     example?: {
@@ -16,6 +17,7 @@ export interface SpecialCategory {
 
 export const specialCategories: SpecialCategory[] = [
     {
+        displayName: "Categories with quotation marks",
         categoryTitleMatches: /\"|“|”/,  // match quotation mark and curly quotes
         description: "The correct answer contains the letter(s) in quotes.",
         example: {
@@ -24,6 +26,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Aftershock"
         }
     }, {
+        displayName: "Crossword clue categories",
         categoryTitleMatches: /CROSSWORD CLUE/i,
         description: "The category gives the first letter of the correct answer. The clue gives the number of letters in the correct answer.",
         example: {
@@ -32,6 +35,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Hades"
         }
     }, {
+        displayName: "\"File under\" categories",
         categoryTitleMatches: /FILE UNDER/i,
         description: "The correct answer starts with the given letter.",
         example: {
@@ -40,6 +44,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Quad"
         }
     }, {
+        displayName: "\"Words in\" categories",
         categoryTitleMatches: /WORDS IN/i,
         description: "The correct answer can be formed from the word in the category title. Not in order, do not need to use all of them.",
         example: {
@@ -48,6 +53,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Step"
         }
     }, {
+        displayName: "Before-and-after categories",
         categoryTitleMatches: /BEFORE (AND)|& AFTER/i,
         description: "The first and second parts of the correct answer share a word in common.",
         example: {
@@ -56,6 +62,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Waiting room service [waiting room + room service]"
         }
     }, {
+        displayName: "J-portmanteau categories",
         categoryTitleMatches: /JEOPORTMANTEAU/i,
         description: "The correct answer is an artificial portmanteau.",
         example: {
@@ -64,6 +71,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Teepeekaboo [teepee + peekaboo]"
         }
     }, {
+        displayName: "\"Stupid answer\" categories",
         categoryTitleMatches: /STUPID ANSWER/i,
         description: "The correct answer appears in the question.",
         example: {
@@ -72,6 +80,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Desert"
         }
     }, {
+        displayName: "Spelling categories",
         categoryTitleMatches: /SPELLING/i,
         description: "You have to spell out the answer.",
         example: {
@@ -80,6 +89,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "M-E-D-I-T-E-R-R-A-N-E-A-N"
         }
     }, {
+        displayName: "\"Common bonds\" categories",
         categoryTitleMatches: /COMMON BOND/i,
         description: "The correct answer is the connection between the given items.",
         example: {
@@ -88,6 +98,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Things you kick"
         }
     }, {
+        displayName: "\"Name's the same\" categories",
         categoryTitleMatches: /NAME.S THE SAME/i, //allow curly apostrophe
         description: "The names share the first or last word.",
         example: {
@@ -96,6 +107,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Clark"
         }
     }, {
+        displayName: "\"Get your facts straight\" categories",
         categoryTitleMatches: /GET YOUR FACTS STRAIGHT/i,
         description: "Clues in this category present information about two similar-sounding names, one of which is stated in the clue and the other of which is the correct response.",
         example: {
@@ -104,6 +116,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Supine"
         }
     }, {
+        displayName: "\"Also a ...\" categories",
         categoryTitleMatches: /ALSO A/i,
         description: "The correct response is also an unrelated thing.",
         example: {
@@ -112,6 +125,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Class"
         }
     }, {
+        displayName: "\"sounds like...\" categories",
         categoryTitleMatches: /SOUNDS LIKE/i,
         description: "The correct response sounds like an unrelated thing or person.",
         example: {
@@ -120,6 +134,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Hull"
         }
     }, {
+        displayName: "\"Rhyme time\" categories",
         categoryTitleMatches: /RHYME TIME/i,
         description: "The correct response contains two rhyming words.",
         example: {
@@ -128,6 +143,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Camel enamel"
         }
     }, {
+        displayName: "\"Quasi-related pairs\" categories",
         categoryTitleMatches: /QUASI.RELATED PAIRS/i, //allow hyphen or any type of dash
         description: "The clue describes two unrelated people or things whose names are shared by a well-known pair.",
         example: {
@@ -136,6 +152,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "proctor & gamble"
         }
     }, {
+        displayName: "Potent potables",
         categoryTitleMatches: /POTENT POTABLE/i,
         description: "The correct answer is an alcoholic drink.",
         example: {
@@ -144,6 +161,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Rum"
         }
     }, {
+        displayName: "Homophone categories",
         categoryTitleMatches: /HOMOPHON/i, //match "homophone" or "homophonic"
         description: "Words that are pronounced the same but have different meaning. (May also have different spelling.)",
         example: {
@@ -152,6 +170,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "ore / oar"
         }
     }, {
+        displayName: "Potpourri, hodgepodge, goulash, leftovers",
         categoryTitleMatches: /(POTPOURRI)|(HODGEPODGE)|(GOULASH)|(LEFTOVERS)/i,
         description: "It can be anything."
     }

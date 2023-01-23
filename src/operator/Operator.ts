@@ -5,6 +5,7 @@ import { Settings } from "../Settings";
 import { StateMachine } from "../stateMachine/StateMachine";
 import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
 import { AudioManager } from "./AudioManager";
+import { SpecialCategory } from "./specialCategories";
 import { createLineChart, createPieCharts } from "./statisticsCharts";
 
 interface SavedGameInLocalStorage {
@@ -32,7 +33,8 @@ export class Operator {
     private readonly buttonStartGame: HTMLButtonElement;
     private readonly buttonSkipClue: HTMLButtonElement;
     private readonly specialCategoryPrompt: HTMLDivElement;
-    private readonly specialCategoryOverlay: HTMLDivElement;
+    private readonly specialCategoryTitle: HTMLSpanElement;
+    private readonly specialCategoryPopup: HTMLDivElement;
     private gameTimer: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
     private teamArray: Team[];
     private presentClue: Clue;
@@ -63,7 +65,9 @@ export class Operator {
         this.buttonSkipClue = document.querySelector("button#skip-clue");
 
         this.specialCategoryPrompt = document.querySelector("div#special-category-prompt");
-        this.specialCategoryOverlay = document.querySelector("div#special-category-overlay");
+        this.specialCategoryTitle = this.specialCategoryPrompt.querySelector("span#special-category-title");
+
+        this.specialCategoryPopup = document.querySelector("div#special-category-popup");
 
         this.initPauseKeyboardListener();
         this.initMouseListeners();
@@ -100,7 +104,9 @@ export class Operator {
         this.stateMachine = new StateMachine(this.settings, this, this.presentation);
 
         this.buttonStartGame.removeAttribute("disabled");
+        this.buttonStartGame.focus();
         this.divInstructions.innerHTML = "Ready. Click the button to start the game.";
+
     }
 
     private initBuzzerFootswitchIconDisplay(): void {
@@ -335,6 +341,7 @@ export class Operator {
     }
 
     public showSpecialCategoryPrompt(): void {
+        this.specialCategoryTitle.innerHTML = this.presentClue.category.specialCategory.displayName;
         this.specialCategoryPrompt.style.display = "block";
     }
 
@@ -344,23 +351,26 @@ export class Operator {
     }
 
     public showSpecialCategoryOverlay(): void {
-        this.hideSpecialCategoryPrompt();
         this.gameTimer.pause();
 
+        this.presentation.showSpecialCategoryPopup(this.presentClue.category.specialCategory);
+
         const specialCategory = this.presentClue.category.specialCategory;
-        this.specialCategoryOverlay.querySelector("#special-category-description").innerHTML = specialCategory.description;
+        this.specialCategoryPopup.querySelector("#special-category-title").innerHTML = specialCategory.displayName;
+        this.specialCategoryPopup.querySelector("#special-category-description").innerHTML = specialCategory.description;
         if (specialCategory.example) {
-            this.specialCategoryOverlay.querySelector("#special-category-example-category").innerHTML = specialCategory.example.category;
-            this.specialCategoryOverlay.querySelector("#special-category-example-question").innerHTML = specialCategory.example.question;
-            this.specialCategoryOverlay.querySelector("#special-category-example-answer").innerHTML = specialCategory.example.answer;
+            this.specialCategoryPopup.querySelector("#special-category-example-category").innerHTML = specialCategory.example.category;
+            this.specialCategoryPopup.querySelector("#special-category-example-question").innerHTML = specialCategory.example.question;
+            this.specialCategoryPopup.querySelector("#special-category-example-answer").innerHTML = specialCategory.example.answer;
         }
 
-        this.specialCategoryOverlay.style.display = "block";
+        this.specialCategoryPopup.style.display = "block";
 
     }
 
     public hideSpecialCategoryOverlay(): void {
-        this.specialCategoryOverlay.style.display = "none";
+        this.specialCategoryPopup.style.display = "none";
+        this.presentation.hideSpecialCategoryPopup();
         this.setPaused(false);
     }
 

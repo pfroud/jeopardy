@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="font/swiss911/swiss911.css">
     <link rel="stylesheet" href="scss/statisticsChart.scss">
     <link rel="stylesheet" href="scss/progressBarForPresentation.scss">
+    <link rel="stylesheet" href="scss/specialCategoriesForPresentation.scss">
     <link rel="stylesheet" href="scss/presentation.scss">
 </head>
 
@@ -27,6 +28,33 @@
     <div id="paused" style="display:none">
         <!-- https://stackoverflow.com/a/22885848 -->
         &#9612;&#9612; PAUSED
+    </div>
+
+    <div id="special-category-backdrop"></div>
+    <div id="special-category-popup" data-is-transform-transition-enabled="true" data-popup-location="offscreen-left">
+        <div id="info-icon">i</div>
+        <span id="special-category-title"></span>
+
+        <p id="special-category-description"></p>
+
+        <p>Example:</p>
+
+        <div id="special-category-example-wrapper">
+            <table id="special-category-example-table">
+                <tr>
+                    <td>
+                        Category:<br>
+                        Question:<br>
+                        Answer:<br>
+                    </td>
+                    <td>
+                        <span id="special-category-example-category"></span><br>
+                        <span id="special-category-example-question"></span><br>
+                        <span id="special-category-example-answer"></span>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
 
     <main>
