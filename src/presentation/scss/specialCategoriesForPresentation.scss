@@ -31,11 +31,11 @@ div#special-category-popup {
     z-index: 2;
     transition: transform 1s ease;
 
-    &[data-popup-location="center"] {
+    &.visible-centered {
         transform: translate(-50%, -50%);
     }
 
-    &[data-popup-location="offscreen-left"] {
+    &.offscreen-left {
         transform: translate(-200%, -50%);
     }
 

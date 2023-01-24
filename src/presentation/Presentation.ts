@@ -190,12 +190,12 @@ export class Presentation {
         }
 
         this.divSpecialCategoryBackdrop.className = "blurred";
-        this.divSpecialCategoryPopup.setAttribute("data-popup-location", "center");
+        this.divSpecialCategoryPopup.className = "visible-centered";
     }
 
     public hideSpecialCategoryPopup(): void {
         this.divSpecialCategoryBackdrop.className = "not-blurred";
-        this.divSpecialCategoryPopup.setAttribute("data-popup-location", "offscreen-left");
+        this.divSpecialCategoryPopup.className = "offscreen-left";
     }
 
 }
