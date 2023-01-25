@@ -1,5 +1,5 @@
 import { CountdownTimer } from "../CountdownTimer";
-import { GraphvizViewer } from "../graphvizViewer/GraphvizViewer";
+import { StateMachineViewer } from "../stateMachineViewer/StateMachineViewer";
 import { Operator } from "../operator/Operator";
 import { Presentation } from "../presentation/Presentation";
 import { Settings } from "../Settings";
@@ -9,7 +9,6 @@ import { getStatesForJeopardyGame } from "./statesForJeopardyGame";
 
 export class StateMachine {
     private readonly DEBUG = false;
-    private readonly OPEN_GRAPHVIZ_VIEWER = false;
     private readonly operator: Operator;
     private readonly presentation: Presentation;
     private readonly operatorWindowCountdownProgress: HTMLProgressElement;
@@ -19,7 +18,7 @@ export class StateMachine {
     private readonly countdownTimerLeavingState: { [stateName: string]: CountdownTimer } = {};
     private readonly allStates: StateMachineState[];
     private readonly tableOfAllCountdownTimers: HTMLTableElement;
-    private graphvizViewer: GraphvizViewer;
+    private stateMachineViewer: StateMachineViewer;
     private presentState: StateMachineState;
 
     constructor(settings: Settings, operator: Operator, presentation: Presentation) {
@@ -38,20 +37,11 @@ export class StateMachine {
         this.validateStates();
 
         this.presentState = this.stateMap["idle"];
-
-        if (this.OPEN_GRAPHVIZ_VIEWER) {
-            this.openGraphvizViewerWindow();
-        }
-
-    }
-    private openGraphvizViewerWindow(): void {
-        window.open("../graphvizViewer/graphvizViewer.html", "graphvizViewer");
-        // The graphviz viewer window will call StateMachine.handleGraphvizViewerReady().
     }
 
-    public handleGraphvizViewerReady(graphvizViewer: GraphvizViewer): void {
-        graphvizViewer.updateTrail(null, this.presentState.name);
-        this.graphvizViewer = graphvizViewer;
+    public handleStateMachineViewerReady(stateMachineViewer: StateMachineViewer): void {
+        stateMachineViewer.updateTrail(null, this.presentState.name);
+        this.stateMachineViewer = stateMachineViewer;
     }
 
     private handleKeyboardEvent(keyboardEvent: KeyboardEvent): void {
@@ -139,8 +129,8 @@ export class StateMachine {
         const previousState = this.presentState;
         this.presentState = this.stateMap[destinationStateName];
         this.operatorWindowDivStateName.innerHTML = destinationStateName;
-        if (this.graphvizViewer) {
-            this.graphvizViewer.updateTrail(previousState.name, this.presentState.name);
+        if (this.stateMachineViewer) {
+            this.stateMachineViewer.updateTrail(previousState.name, this.presentState.name);
         }
 
 

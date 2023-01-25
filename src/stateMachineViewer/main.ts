@@ -1,7 +1,7 @@
 import Viz from "@aduh95/viz.js";
 import { Operator } from "../operator/Operator";
 import { stateMachineToGraphviz } from "./generateDotFileForGraphviz";
-import { GraphvizViewer } from "./GraphvizViewer";
+import { StateMachineViewer } from "./StateMachineViewer";
 
 window.addEventListener('DOMContentLoaded', () => {
 
@@ -45,8 +45,8 @@ window.addEventListener('DOMContentLoaded', () => {
             const svgElement = document.querySelector("svg");
             svgElement.setAttribute("width", "100%");
             svgElement.removeAttribute("height");
-            const graphvizViewer = new GraphvizViewer(svgElement);
-            stateMachine.handleGraphvizViewerReady(graphvizViewer);
+            const stateMachineViewer = new StateMachineViewer(svgElement);
+            stateMachine.handleStateMachineViewerReady(stateMachineViewer);
 
         })
         .catch((error) => {

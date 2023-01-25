@@ -1,12 +1,4 @@
-private/
-src/presentation/img/reference
 node_modules/
-*.js
-!*.config.js
-*.js.map
-buzzers/
-*.css
-*.css.map
-bower_components
+bower_components/
 .parcel-cache/
 dist/

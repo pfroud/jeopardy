@@ -164,8 +164,8 @@ export class Operator {
             window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney"));
 
 
-        document.querySelector("a#aGenerateGraphviz").addEventListener("click", () =>
-            window.open("../graphvizViewer/graphvizViewer.html", "windowGraphvizViewer", "popup")
+        document.querySelector("a#aOpenStateMachineViewer").addEventListener("click", () =>
+            window.open("../stateMachineViewer", "windowStateMachineViewer", "popup")
         );
 
         const GameEndControls = document.querySelector("div#game-end-controls");
