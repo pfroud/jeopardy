@@ -4,16 +4,26 @@ import { AudioManager } from "./operator/AudioManager";
 import { Presentation } from "./presentation/Presentation";
 import { Settings } from "./Settings";
 
-interface TeamStatistics {
+interface Statistics {
     questionsNotBuzzed: number;
     questionsBuzzedThenAnsweredRight: number;
     questionsBuzzedThenAnsweredWrongOrTimedOut: number;
     moneyAtEndOfEachRound: number[]
 }
 
+export type TeamState =
+    "buzzers-off" | // game has not started
+    "reading-question" | //operator is reading the question out loud
+    "can-answer" | //operator is done reading the question
+    "answering" |
+    "already-answered" | // the team tried answering the question but got it wrong
+    "lockout" //team buzzed while operator was reading the question
+    ;
+
+
 export interface TeamSavedInLocalStorage {
     money: number;
-    statistics: TeamStatistics;
+    statistics: Statistics;
 }
 
 export class Team {
@@ -25,6 +35,7 @@ export class Team {
     private readonly audioManager: AudioManager;
     private readonly presentationInstance: Presentation;
     private readonly teamIdx: number;
+    /** One countdown timer used to keep track of all timing for this Team */
     private countdownTimer: CountdownTimer;
     private state: TeamState;
     private stateBeforeLockout: TeamState;
@@ -57,7 +68,7 @@ export class Team {
         };
     public hasBuzzedForCurrentQuestion = false;
 
-    public statistics: TeamStatistics = {
+    public statistics: Statistics = {
         questionsNotBuzzed: 0,
         questionsBuzzedThenAnsweredRight: 0,
         questionsBuzzedThenAnsweredWrongOrTimedOut: 0,
@@ -74,7 +85,7 @@ export class Team {
         this.createElementsInOperatorWindow();
         this.createElementsInPresentationWindow();
 
-        this.setState(TeamState.BUZZERS_OFF);
+        this.setState("buzzers-off");
     }
 
     public handleAnswerCorrect(clue: Clue): void {
@@ -89,7 +100,7 @@ export class Team {
         this.stopAnswer();
         this.audioManager.play("answerIncorrectOrAnswerTimeout");
         this.moneySubtract(clue.value * this.settings.wrongAnswerPenaltyMultiplier);
-        this.setState(this.settings.allowMultipleAnswersToSameQuestion ? TeamState.CAN_ANSWER : TeamState.ALREADY_ANSWERED);
+        this.setState(this.settings.allowMultipleAnswersToSameQuestion ? "can-answer" : "already-answered");
         this.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut++;
         this.hasBuzzedForCurrentQuestion = true;
     }
@@ -154,7 +165,7 @@ export class Team {
     }
 
     public canBuzz(): boolean {
-        return this.state === TeamState.CAN_ANSWER;
+        return this.state === "can-answer";
     }
 
     public setPaused(isPaused: boolean): void {
@@ -254,7 +265,7 @@ export class Team {
 
     public setState(targetState: TeamState, endLockout = false): void {
         // TODO talk about why the endLockout boolean is needed
-        if (this.state === TeamState.LOCKOUT && !endLockout) {
+        if (this.state === "lockout" && !endLockout) {
             this.stateBeforeLockout = targetState;
         } else {
             this.state = targetState;
@@ -269,12 +280,12 @@ export class Team {
     }
 
     public canBeLockedOut(): boolean {
-        return this.state === TeamState.READING_QUESTION;
+        return this.state === "reading-question";
     }
 
     public startLockout(): void {
         this.stateBeforeLockout = this.state;
-        this.setState(TeamState.LOCKOUT);
+        this.setState("lockout");
 
         const countdownShowCategory = this.countdownTimer = new CountdownTimer(this.settings.durationLockoutMillisec);
         countdownShowCategory.addProgressElement(this.progressElementInPresentationWindow);
@@ -292,7 +303,7 @@ export class Team {
     }
 
     public startAnswer(): void {
-        this.setState(TeamState.ANSWERING);
+        this.setState("answering");
         this.countdownDotsInPresentationWindow.querySelector("td").classList.add("active");
         this.progressElementInOperatorWindow.style.display = ""; //show it by removing "display=none"
     }
@@ -345,13 +356,4 @@ export class Team {
     }
 
 
-}
-
-export enum TeamState {
-    BUZZERS_OFF = "buzzers-off", // game has not started
-    READING_QUESTION = "reading-question", //operator is reading the question out loud
-    CAN_ANSWER = "can-answer", //operator is done reading the question
-    ANSWERING = "answering",
-    ALREADY_ANSWERED = "already-answered", // the team tried answering the question but got it wrong
-    LOCKOUT = "lockout" //team buzzed while operator was reading the question
 }

@@ -1,6 +1,6 @@
 import { Operator } from "../operator/Operator";
 import { Settings } from "../Settings";
-import { CountdownBehavior, StateMachineState, TransitionType } from "./stateInterfaces";
+import { CountdownBehavior, StateMachineState } from "./stateInterfaces";
 
 export function getStatesForJeopardyGame(operator: Operator, settings: Settings): StateMachineState[] {
 
@@ -9,7 +9,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             name: "idle",
             presentationSlideToShow: "slide-jeopardy-logo",
             transitions: [{
-                type: TransitionType.ManualTrigger,
+                type: "manualTrigger",
                 triggerName: "startGame",
                 destination: "getClueFromJService"
             }],
@@ -17,7 +17,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             name: "getClueFromJService",
             presentationSlideToShow: "slide-spinner",
             transitions: [{
-                type: TransitionType.Promise,
+                type: "promise",
                 /*
                 The promise only tells the state machine when to go to the next state.
                 The promise does NOT pass the clue object to the state machine.
@@ -33,7 +33,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             name: "showClueCategoryAndValue",
             presentationSlideToShow: "slide-clue-category-and-value",
             transitions: [{
-                type: TransitionType.Timeout,
+                type: "timeout",
                 initialDuration: settings.displayDurationCategoryMillisec,
                 behavior: CountdownBehavior.ContinueTimerUntilManuallyReset,
                 destination: "showClueQuestion",
@@ -43,7 +43,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 */
                 onTransition: operator.handleShowClueQuestion.bind(operator)
             }, {
-                type: TransitionType.Keyboard,
+                type: "keyboard",
                 keyboardKeys: " ", //space
                 destination: "showMessageForSpecialCategory",
                 guardCondition: operator.isCurrentClueSpecialCategory.bind(operator)
@@ -53,7 +53,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             onEnter: operator.showSpecialCategoryOverlay.bind(operator),
             onExit: operator.hideSpecialCategoryOverlay.bind(operator),
             transitions: [{
-                type: TransitionType.Keyboard,
+                type: "keyboard",
                 keyboardKeys: " ", //space
                 destination: "showClueCategoryAndValue"
             }]
@@ -67,7 +67,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             presentationSlideToShow: "slide-clue-question",
             onEnter: operator.fitClueQuestionToScreenInOperatorWindow.bind(operator),
             transitions: [{
-                type: TransitionType.Keyboard,
+                type: "keyboard",
                 keyboardKeys: " ", //space
                 destination: "waitForBuzzes",
                 /*
@@ -76,7 +76,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 */
                 onTransition: operator.handleDoneReadingClueQuestion.bind(operator)
             }, {
-                type: TransitionType.Keyboard,
+                type: "keyboard",
                 keyboardKeys: "123456789",
                 destination: "showClueQuestion",
                 onTransition: operator.handleLockout.bind(operator)
@@ -87,12 +87,12 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             */
             name: "waitForBuzzes",
             transitions: [{
-                type: TransitionType.Keyboard,
+                type: "keyboard",
                 keyboardKeys: "123456789",
                 destination: "waitForTeamAnswer",
                 guardCondition: operator.canTeamBuzz.bind(operator)
             }, {
-                type: TransitionType.Timeout,
+                type: "timeout",
                 destination: "showAnswer",
                 initialDuration: settings.timeoutWaitForBuzzesMillisec,
                 behavior: CountdownBehavior.ContinueTimerUntilManuallyReset,
@@ -105,16 +105,16 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             name: "waitForTeamAnswer",
             onEnter: operator.handleBuzzerPress.bind(operator),
             transitions: [{
-                type: TransitionType.Keyboard,
+                type: "keyboard",
                 keyboardKeys: "y",
                 destination: "showAnswer",
                 onTransition: operator.handleAnswerCorrect.bind(operator)
             }, {
-                type: TransitionType.Keyboard,
+                type: "keyboard",
                 keyboardKeys: "n",
                 destination: "answerWrongOrTimeout"
             }, {
-                type: TransitionType.Timeout,
+                type: "timeout",
                 initialDuration: settings.timeoutWaitForAnswerMillisec,
                 behavior: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
                 isWaitingForTeamToAnswerAfterBuzz: true,
@@ -125,7 +125,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             name: "answerWrongOrTimeout",
             onEnter: operator.handleAnswerWrongOrTimeout.bind(operator),
             transitions: [{
-                type: TransitionType.If,
+                type: "if",
                 condition: operator.haveAllTeamsAnswered.bind(operator),
                 then: { destination: "showAnswer" },
                 else: { destination: "waitForBuzzes" }
@@ -135,7 +135,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             onEnter: operator.handleShowAnswer.bind(operator),
             presentationSlideToShow: "slide-clue-answer",
             transitions: [{
-                type: TransitionType.Timeout,
+                type: "timeout",
                 initialDuration: settings.displayDurationAnswerMillisec,
                 behavior: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
                 destination: "checkGameEnd"
@@ -143,7 +143,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
         }, {
             name: "checkGameEnd",
             transitions: [{
-                type: TransitionType.If,
+                type: "if",
                 condition: operator.shouldGameEnd.bind(operator),
                 then: { destination: "gameEnd" },
                 else: { destination: "getClueFromJService" }
@@ -153,7 +153,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             presentationSlideToShow: "slide-gameEnd-team-ranking-table",
             onEnter: operator.handleGameEnd.bind(operator),
             transitions: [{
-                type: TransitionType.ManualTrigger,
+                type: "manualTrigger",
                 triggerName: "reset",
                 destination: "idle"
             }],

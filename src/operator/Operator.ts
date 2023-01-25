@@ -183,7 +183,7 @@ export class Operator {
 
 
     public skipClue(): void {
-        this.setAllTeamsState(TeamState.BUZZERS_OFF, true); // the second argument is endLockout
+        this.setAllTeamsState("buzzers-off", true); // the second argument is endLockout
         this.buttonSkipClue.setAttribute("disabled", "disabled");
         this.buttonSkipClue.blur();
         this.stateMachine.goToState("getClueFromJService");
@@ -238,7 +238,7 @@ export class Operator {
         this.divClueWrapper.style.display = ""; //show it by removing "display=none"
         this.divClueCategory.innerHTML = clue.category.title;
         this.divClueValue.innerHTML = "$" + clue.value;
-        this.divClueAirdate.innerHTML = clue.airdateParsed.getFullYear().toString();
+        this.divClueAirdate.innerHTML = clue.airdate.getFullYear().toString();
         this.trAnswer.style.display = "none";
         this.divInstructions.innerHTML = "Read aloud the category and dollar value.";
     };
@@ -381,7 +381,7 @@ export class Operator {
         The clue question is already being shown in the presentation because
         the state machine changes the slide.
         */
-        this.setAllTeamsState(TeamState.READING_QUESTION);
+        this.setAllTeamsState("reading-question");
 
         this.divInstructions.innerHTML = "Read the question out loud. Buzzers open when you press space.";
 
@@ -399,7 +399,7 @@ export class Operator {
         this.trAnswer.style.display = ""; //show it by removing "display=none"
         this.divClueAnswer.innerHTML = this.presentClue.answer;
         this.divInstructions.innerHTML = "Wait for people to answer.";
-        this.setAllTeamsState(TeamState.CAN_ANSWER);
+        this.setAllTeamsState("can-answer");
         this.buttonSkipClue.setAttribute("disabled", "disabled");
 
         this.stateMachine.getCountdownTimerForState("waitForBuzzes").reset();
@@ -417,7 +417,7 @@ export class Operator {
         this.stateMachine.getCountdownTimerForState("waitForBuzzes").showProgressBarFinished();
         this.stateMachine.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
 
-        this.setAllTeamsState(TeamState.BUZZERS_OFF);
+        this.setAllTeamsState("buzzers-off");
         this.divInstructions.innerHTML = "Let people read the answer.";
 
         this.teamArray.forEach(team => {
@@ -451,7 +451,7 @@ export class Operator {
             return false;
         } else {
             // each team only gets one try to answer a question
-            return this.teamArray.every(team => team.getState() === TeamState.ALREADY_ANSWERED);
+            return this.teamArray.every(team => team.getState() === "already-answered");
         }
     }
 

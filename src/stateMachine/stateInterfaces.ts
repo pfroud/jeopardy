@@ -9,17 +9,8 @@ export interface StateMachineState {
 
 export type StateMachineTransition = ManualTransition | IfTransition | PromiseTransition | TimeoutTransition | KeyboardTransition;
 
-export enum TransitionType {
-    // need to specify string values for enum so it appears in graphviz dot file
-    ManualTrigger = "manualTrigger",
-    If = "if",
-    Promise = "promise",
-    Timeout = "timeout",
-    Keyboard = "keyboard"
-}
-
 export interface ManualTransition {
-    type: TransitionType.ManualTrigger;
+    type: "manualTrigger";
     triggerName: string;
     destination: string;
     onTransition?: () => void;
@@ -28,7 +19,7 @@ export interface ManualTransition {
 
 
 export interface IfTransition {
-    type: TransitionType.If;
+    type: "if";
     condition: () => boolean;
     then: {
         destination: string;
@@ -42,14 +33,14 @@ export interface IfTransition {
 
 
 export interface PromiseTransition {
-    type: TransitionType.Promise;
+    type: "promise";
     functionToGetPromise: () => Promise<void>;
     destination: string;
     guardCondition?: () => boolean;
 }
 
 export interface TimeoutTransition {
-    type: TransitionType.Timeout;
+    type: "timeout";
     destination: string;
     behavior: CountdownBehavior;
     initialDuration: number;
@@ -66,7 +57,7 @@ export enum CountdownBehavior {
 
 
 export interface KeyboardTransition {
-    type: TransitionType.Keyboard;
+    type: "keyboard";
     keyboardKeys: string;
     destination: string;
     onTransition?: (keyboardEvent: KeyboardEvent) => void;

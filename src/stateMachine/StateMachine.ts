@@ -3,7 +3,7 @@ import { GraphvizViewer } from "../graphvizViewer/GraphvizViewer";
 import { Operator } from "../operator/Operator";
 import { Presentation } from "../presentation/Presentation";
 import { Settings } from "../Settings";
-import { CountdownBehavior, StateMachineState, StateMachineTransition, TimeoutTransition, TransitionType } from "./stateInterfaces";
+import { CountdownBehavior, StateMachineState, StateMachineTransition, TimeoutTransition } from "./stateInterfaces";
 import { getStatesForJeopardyGame } from "./statesForJeopardyGame";
 
 
@@ -65,7 +65,7 @@ export class StateMachine {
             // Search for the first transition with a keyboard transition for the key pressed.
             for (let i = 0; i < this.presentState.transitions.length; i++) {
                 const transition = this.presentState.transitions[i];
-                if (transition.type === TransitionType.Keyboard && transition.keyboardKeys.includes(keyboardEvent.key)) {
+                if (transition.type === "keyboard" && transition.keyboardKeys.includes(keyboardEvent.key)) {
 
                     if (transition.guardCondition && !transition.guardCondition(keyboardEvent)) {
                         continue;
@@ -98,7 +98,7 @@ export class StateMachine {
         // Search for the first transition which has a matching manual trigger.
         for (let i = 0; i < this.presentState.transitions.length; i++) {
             const transition = this.presentState.transitions[i];
-            if (transition.type === TransitionType.ManualTrigger && transition.triggerName === triggerName) {
+            if (transition.type === "manualTrigger" && transition.triggerName === triggerName) {
                 if (transition.guardCondition && !transition.guardCondition()) {
                     continue;
                 }
@@ -177,7 +177,7 @@ export class StateMachine {
         // Search for the first timeout transition.
         for (let i = 0; i < transitionArray.length; i++) {
             const transition = transitionArray[i];
-            if (transition.type === TransitionType.Timeout) {
+            if (transition.type === "timeout") {
                 if (transition.guardCondition && !transition.guardCondition()) {
                     continue;
                 }
@@ -233,7 +233,7 @@ export class StateMachine {
         // Search for the first promise transition.
         for (let i = 0; i < transitionArray.length; i++) {
             const transition = transitionArray[i];
-            if (transition.type === TransitionType.Promise) {
+            if (transition.type === "promise") {
                 if (transition.guardCondition && !transition.guardCondition()) {
                     continue;
                 }
@@ -261,7 +261,7 @@ export class StateMachine {
         // Search for the first if transition.
         for (let i = 0; i < transitionArray.length; i++) {
             const transition = transitionArray[i];
-            if (transition.type === TransitionType.If) {
+            if (transition.type === "if") {
                 if (this.DEBUG) {
                     console.log(`Transition type if: the condition function is ${transition.condition.name}`);
                 }
@@ -344,7 +344,7 @@ export class StateMachine {
             state.transitions.forEach((transition: StateMachineTransition, transitionIndex: number) => {
 
                 // Verify all the destination states exist.
-                if (transition.type !== TransitionType.If) {
+                if (transition.type !== "if") {
                     if (!(transition.destination in this.stateMap)) {
                         printWarning(state.name, transitionIndex,
                             `unknown destination state "${transition.destination}"`);
@@ -352,7 +352,7 @@ export class StateMachine {
                 }
 
                 switch (transition.type) {
-                    case TransitionType.Keyboard: {
+                    case "keyboard": {
                         // Verify each keyboard key is not used in multiple transitions leaving this state.
                         const keyboardKeys: string = transition.keyboardKeys;
                         for (let i = 0; i < keyboardKeys.length; i++) {
@@ -368,7 +368,7 @@ export class StateMachine {
                         break;
                     }
 
-                    case TransitionType.If: {
+                    case "if": {
                         // Verify destination states exist.
                         if (!(transition.then.destination in this.stateMap)) {
                             printWarning(state.name, transitionIndex,
@@ -382,7 +382,7 @@ export class StateMachine {
                     }
 
                     // Initialize countdown timers for all timeout transitions.
-                    case TransitionType.Timeout: {
+                    case "timeout": {
 
                         if (stateHasTimeoutTransition) {
                             printWarning(state.name, transitionIndex,

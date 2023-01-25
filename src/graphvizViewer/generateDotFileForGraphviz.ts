@@ -1,4 +1,4 @@
-import { StateMachineState, StateMachineTransition, TransitionType } from "../stateMachine/stateInterfaces";
+import { StateMachineState, StateMachineTransition } from "../stateMachine/stateInterfaces";
 
 /**
  * Convert state machine states into a string of the Graphviz graph description language.
@@ -34,7 +34,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
 
 
             switch (transition.type) {
-                case TransitionType.Keyboard: {
+                case "keyboard": {
                     let transitionLabel = "keyboard: ";
                     if (transition.keyboardKeys === " ") {
                         transitionLabel += "space";
@@ -56,7 +56,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     break;
 
                 }
-                case TransitionType.Promise: {
+                case "promise": {
                     let transitionLabel = transition.type.toString();
                     if (transition.guardCondition) {
                         transitionLabel += ` [${transition.guardCondition.name.replace("bound ", "")}] `;
@@ -65,7 +65,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
                 }
-                case TransitionType.Timeout: {
+                case "timeout": {
                     let transitionLabel = transition.type.toString() + ": ";
 
                     transitionLabel += transition.behavior + " " + transition.initialDuration + "ms";
@@ -82,7 +82,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
                 }
-                case TransitionType.ManualTrigger: {
+                case "manualTrigger": {
                     let transitionLabel = transition.type.toString() + ': \\"' + transition.triggerName.replace("manualTrigger_", "") + '\\"';
                     if (transition.guardCondition) {
                         transitionLabel += ` [${transition.guardCondition.name.replace("bound ", "")}] `;
@@ -96,7 +96,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     break;
                 }
 
-                case TransitionType.If: {
+                case "if": {
                     const condition = transition.condition.name.replace("bound ", "");
 
                     let labelThen = "if(" + condition + ")";

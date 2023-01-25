@@ -2,14 +2,18 @@ import { specialCategories, SpecialCategory } from "./operator/specialCategories
 
 export class Clue {
 
-    public readonly answer: string;
+    /** Prase read aloud by the host */
     public readonly question: string;
+
+    /** Correct response from a player to get money */
+    public readonly answer: string;
+
     public readonly value: number;
-    public readonly airdateParsed: Date;
+    public readonly airdate: Date;
     public readonly category: {
         title: string;
         isSpecialCategory: boolean;
-        specialCategory: SpecialCategory | null;
+        specialCategory?: SpecialCategory;
     }
 
     constructor(xhrResponse: string) {
@@ -20,7 +24,7 @@ export class Clue {
         this.value = parsedJson.value;
 
         // example of what format the airdate is in: "2013-01-25T12:00:00.000Z"
-        this.airdateParsed = new Date(parsedJson.airdate);
+        this.airdate = new Date(parsedJson.airdate);
 
         this.category = {
             title: parsedJson.category.title.replace(/\\/g, ""),

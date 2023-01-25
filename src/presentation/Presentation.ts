@@ -117,11 +117,11 @@ export class Presentation {
     public setClue(clue: Clue): void {
         this.spanClueCategoryInHeader.innerHTML = clue.category.title;
         this.spanClueMoneyInHeader.innerHTML = "$" + clue.value;
-        this.spanClueAirdateInHeader.innerHTML = "(" + clue.airdateParsed.getFullYear() + ")";
+        this.spanClueAirdateInHeader.innerHTML = "(" + clue.airdate.getFullYear() + ")";
 
         this.divClueCategoryBig.innerHTML = clue.category.title;
         this.divClueValueBig.innerHTML = "$" + clue.value;
-        this.divClueAirdateBig.innerHTML = "Airdate: " + clue.airdateParsed.getFullYear();
+        this.divClueAirdateBig.innerHTML = "Airdate: " + clue.airdate.getFullYear();
 
         this.divSlideClueQuestion.innerHTML = clue.question;
 
