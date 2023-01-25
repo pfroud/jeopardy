@@ -2,10 +2,6 @@ import { Operator } from "../operator/Operator";
 import { Clue } from "../Clue";
 import { SpecialCategory } from "../operator/specialCategories";
 
-interface Slides {
-    [slideName: string]: HTMLDivElement;
-}
-
 export class Presentation {
     public readonly allSlideNames: Set<string>;
 
@@ -27,7 +23,7 @@ export class Presentation {
     private readonly footer: HTMLElement;
     private readonly progressElementForStateMachine: HTMLProgressElement;
     private readonly progressElementForGameTimer: HTMLProgressElement;
-    private readonly allSlideDivs: Slides = {};
+    private readonly allSlideDivs: { [slideName: string]: HTMLDivElement } = {};
     private visibleSlideDiv?: HTMLDivElement;
 
     constructor() {

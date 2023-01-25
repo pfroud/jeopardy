@@ -7,18 +7,6 @@ import { CountdownBehavior, StateMachineState, StateMachineTransition, TimeoutTr
 import { getStatesForJeopardyGame } from "./statesForJeopardyGame";
 
 
-interface StateMap {
-    [stateName: string]: StateMachineState;
-}
-
-interface CountdownTimerLeavingState {
-    [stateName: string]: CountdownTimer;
-}
-
-interface KeyboardKeysUsed {
-    [keyboardKey: string]: number;
-}
-
 export class StateMachine {
     private readonly DEBUG = false;
     private readonly OPEN_GRAPHVIZ_VIEWER = false;
@@ -27,8 +15,8 @@ export class StateMachine {
     private readonly operatorWindowCountdownProgress: HTMLProgressElement;
     private readonly operatorWindowCountdownText: HTMLDivElement;
     private readonly operatorWindowDivStateName: HTMLDivElement;
-    private readonly stateMap: StateMap = {};
-    private readonly countdownTimerLeavingState: CountdownTimerLeavingState = {};
+    private readonly stateMap: { [stateName: string]: StateMachineState } = {};
+    private readonly countdownTimerLeavingState: { [stateName: string]: CountdownTimer } = {};
     private readonly allStates: StateMachineState[];
     private readonly tableOfAllCountdownTimers: HTMLTableElement;
     private graphvizViewer: GraphvizViewer;
@@ -349,7 +337,7 @@ export class StateMachine {
         // Pass two of two: validate all the transitions, and create countdown timers for timeout transitions.
         this.allStates.forEach((state: StateMachineState) => {
 
-            const keyboardKeysUsedInTransitionsFromThisState: KeyboardKeysUsed = {};
+            const keyboardKeysUsedInTransitionsFromThisState: { [keyboardKey: string]: number } = {};
 
             let stateHasTimeoutTransition = false;
 

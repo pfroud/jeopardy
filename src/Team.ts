@@ -4,20 +4,6 @@ import { AudioManager } from "./operator/AudioManager";
 import { Presentation } from "./presentation/Presentation";
 import { Settings } from "./Settings";
 
-interface TeamDivs {
-    operator: {
-        wrapper: HTMLDivElement;
-        money: HTMLDivElement;
-        teamName: HTMLDivElement;
-    };
-    presentation: {
-        wrapper: HTMLDivElement;
-        money: HTMLDivElement;
-        teamName: HTMLDivElement;
-        buzzerShow: HTMLDivElement;
-    };
-}
-
 interface TeamStatistics {
     questionsNotBuzzed: number;
     questionsBuzzedThenAnsweredRight: number;
@@ -44,19 +30,31 @@ export class Team {
     private stateBeforeLockout: TeamState;
     private progressElementInPresentationWindow: HTMLProgressElement;
     private progressElementInOperatorWindow: HTMLProgressElement;
-    private readonly div: TeamDivs = {
+    private readonly div: {
         operator: {
-            wrapper: null,
-            money: null,
-            teamName: null
-        },
+            wrapper: HTMLDivElement;
+            money: HTMLDivElement;
+            teamName: HTMLDivElement;
+        };
         presentation: {
-            wrapper: null,
-            money: null,
-            teamName: null,
-            buzzerShow: null
-        }
-    };
+            wrapper: HTMLDivElement;
+            money: HTMLDivElement;
+            teamName: HTMLDivElement;
+            buzzerShow: HTMLDivElement;
+        };
+    } = {
+            operator: {
+                wrapper: null,
+                money: null,
+                teamName: null
+            },
+            presentation: {
+                wrapper: null,
+                money: null,
+                teamName: null,
+                buzzerShow: null
+            }
+        };
     public hasBuzzedForCurrentQuestion = false;
 
     public statistics: TeamStatistics = {
