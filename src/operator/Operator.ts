@@ -152,6 +152,7 @@ export class Operator {
 
     public handleAnswerWrongOrTimeout(): void {
         this.teamPresentlyAnswering.handleAnswerIncorrectOrAnswerTimeout(this.presentClue);
+        this.stateMachine.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
     }
 
     private initMouseListeners(): void {
@@ -258,7 +259,7 @@ export class Operator {
 
     public getClueFromJService(): Promise<void> {
 
-        this.stateMachine.resetTimerForState("showClueCategoryAndValue");
+        this.stateMachine.getCountdownTimerForState("showClueCategoryAndValue").reset();
 
         const promiseExecutor = (
             resolveFunc: () => void,
@@ -401,7 +402,7 @@ export class Operator {
         this.setAllTeamsState(TeamState.CAN_ANSWER);
         this.buttonSkipClue.setAttribute("disabled", "disabled");
 
-        this.stateMachine.resetTimerForState("waitForBuzzes");
+        this.stateMachine.getCountdownTimerForState("waitForBuzzes").reset();
 
         this.teamArray.forEach(team => team.hasBuzzedForCurrentQuestion = false);
     }
@@ -412,6 +413,9 @@ export class Operator {
         if (this.teamArray.some(team => team.getMoney() > 0)) {
             this.saveGame();
         }
+
+        this.stateMachine.getCountdownTimerForState("waitForBuzzes").showProgressBarFinished();
+        this.stateMachine.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
 
         this.setAllTeamsState(TeamState.BUZZERS_OFF);
         this.divInstructions.innerHTML = "Let people read the answer.";
@@ -442,7 +446,13 @@ export class Operator {
     }
 
     public haveAllTeamsAnswered(): boolean {
-        return this.teamArray.every(team => team.getState() === TeamState.ALREADY_ANSWERED);
+        if (this.settings.allowMultipleAnswersToSameQuestion) {
+            // allow teams to keep answering until time runs out
+            return false;
+        } else {
+            // each team only gets one try to answer a question
+            return this.teamArray.every(team => team.getState() === TeamState.ALREADY_ANSWERED);
+        }
     }
 
     public togglePaused(): void {

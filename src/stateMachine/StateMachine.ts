@@ -11,7 +11,7 @@ interface StateMap {
     [stateName: string]: StateMachineState;
 }
 
-interface CountdownTimerForState {
+interface CountdownTimerLeavingState {
     [stateName: string]: CountdownTimer;
 }
 
@@ -28,7 +28,7 @@ export class StateMachine {
     private readonly operatorWindowCountdownText: HTMLDivElement;
     private readonly operatorWindowDivStateName: HTMLDivElement;
     private readonly stateMap: StateMap = {};
-    private readonly countdownTimerForState: CountdownTimerForState = {};
+    private readonly countdownTimerLeavingState: CountdownTimerLeavingState = {};
     private readonly allStates: StateMachineState[];
     private readonly tableOfAllCountdownTimers: HTMLTableElement;
     private graphvizViewer: GraphvizViewer;
@@ -102,7 +102,7 @@ export class StateMachine {
     }
 
     public setPaused(isPaused: boolean): void {
-        this.countdownTimerForState[this.presentState.name]?.setPaused(isPaused);
+        this.countdownTimerLeavingState[this.presentState.name]?.setPaused(isPaused);
     }
 
 
@@ -129,7 +129,7 @@ export class StateMachine {
             throw new RangeError(`can't go to state named "${destinationStateName}", state not found`);
         }
 
-        this.countdownTimerForState[this.presentState.name]?.pause();
+        this.countdownTimerLeavingState[this.presentState.name]?.pause();
 
         if (this.DEBUG) {
             console.group(`changing states: ${this.presentState.name} --> ${destinationStateName}`);
@@ -194,7 +194,7 @@ export class StateMachine {
                     continue;
                 }
 
-                const countdownTimer = this.countdownTimerForState[this.presentState.name];
+                const countdownTimer = this.countdownTimerLeavingState[this.presentState.name];
 
                 if (transition.behavior == CountdownBehavior.ResetTimerEveryTimeYouEnterTheState) {
                     countdownTimer.reset();
@@ -404,11 +404,11 @@ export class StateMachine {
                         let countdownTimer = this.createCountdownTimerForTransition(transition);
 
                         // create a progress element in the operator page - probably only needed for debugging
-                        this.countdownTimerForState[state.name] = countdownTimer;
+                        this.countdownTimerLeavingState[state.name] = countdownTimer;
                         const tr = document.createElement("tr");
 
                         const tdStateLabel = document.createElement("td")
-                        tdStateLabel.innerText = `(${transition.behavior}) ${state.name} --> ${transition.destination} `;
+                        tdStateLabel.innerHTML = `(${transition.behavior}) ${state.name} &rarr; ${transition.destination} `;
                         tr.appendChild(tdStateLabel);
 
                         const tdProgressElement = document.createElement("td");
@@ -443,8 +443,8 @@ export class StateMachine {
         return this.allStates;
     }
 
-    public resetTimerForState(stateName: string): void {
-        this.countdownTimerForState[stateName].reset();
+    public getCountdownTimerForState(stateName: string): CountdownTimer {
+        return this.countdownTimerLeavingState[stateName];
     }
 
 }

@@ -333,5 +333,10 @@ export class CountdownTimer {
 
     }
 
+    public showProgressBarFinished(): void {
+        this.progressElements.forEach(progress => progress.setAttribute("value", "0"));
+        this.textElements.forEach(textElem => textElem.innerHTML = "");
+    }
+
 
 }
