@@ -3,9 +3,7 @@
         "node_modules": true,
         "bower_components": true,
         ".parcel-cache": true,
-        "dist": true,
-        "private": true,
-        "buzzers": true
+        "dist": true
     },
     "cSpell.words": [
         "aduh", //author of https://github.com/aduh95/viz.js

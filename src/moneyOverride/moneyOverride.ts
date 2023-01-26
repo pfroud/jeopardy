@@ -3,7 +3,7 @@ import { Team } from "../Team";
 
 document.addEventListener("DOMContentLoaded", function () {
     if (!window.opener) {
-        document.body.innerText = "no window.opener";
+        document.body.innerHTML = "no window.opener";
         return;
     }
 
@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const operator = ((window.opener as any).operator as Operator);
     if (!operator) {
-        document.body.innerText = "no window.opener.operator";
+        document.body.innerHTML = "no window.opener.operator";
         return;
     }
 

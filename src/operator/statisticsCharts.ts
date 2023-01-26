@@ -37,7 +37,10 @@ export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElem
             return;
         }
 
-        // https://gionkunz.github.io/chartist-js/api-documentation.html#chartistpie-declaration-defaultoptions
+        /*
+        https://gionkunz.github.io/chartist-js/api-documentation.html#chartistpie-declaration-defaultoptions
+        You have to find the section called "declaration defaultOptions" and click the "show code" button!!
+         */
         const chartOptions: Chartist.PieChartOptions = {
             width: "200px",
             height: "200px",
@@ -84,7 +87,8 @@ export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElem
 
         /*
         If any of the series fills the entire pie chart, Chartist puts the label in the center
-        of the chart, but we already put our own label for "Team #" in the center.
+        of the chart, but we already put our own label for "Team #" in the center. In that 
+        case we will manually move the Chartist label.
         */
         const needToManuallyMoveLabel = seriesToAdd.map(obj => obj.value).some(n => n == questionCount);
         if (needToManuallyMoveLabel) {
@@ -109,10 +113,10 @@ export function createLineChart(divForLineChart: HTMLDivElement, legendContainer
 
     const lineChartDataForAllTeams: LineChartSeriesData[] =
         teams.map(
-            (team, index) => ({
-                className: `team-${index + 1}`,
+            (team, teamIndex) => ({
+                className: `team-${teamIndex + 1}`,
                 data: team.statistics.moneyAtEndOfEachRound.map(
-                    (value, index) => ({ x: index, y: value })
+                    (money, moneyIndex) => ({ x: moneyIndex, y: money })
                 )
             })
         );
@@ -122,6 +126,10 @@ export function createLineChart(divForLineChart: HTMLDivElement, legendContainer
         series: lineChartDataForAllTeams
     };
 
+    /*
+    https://gionkunz.github.io/chartist-js/api-documentation.html#chartistline-declaration-defaultoptions
+    You have to find the section called "declaration defaultOptions" and click the "show code" button!!
+    */
     const chartOptions: Chartist.LineChartOptions = {
         axisX: {
             showGrid: false,
@@ -142,7 +150,11 @@ export function createLineChart(divForLineChart: HTMLDivElement, legendContainer
 
     new Chartist.LineChart(divForLineChart, chartData, chartOptions);
 
-    // create legend. plugins not supported in chartist version one
+    /*
+     We need to create the legend by hand.
+     There is a package called chartist-plugin-legend but 
+     plugins are not yet supported in chartist v1 (only v0.x).
+     */
     for (let i = 0; i < teams.length; i++) {
 
         const legendRow = document.createElement("div");

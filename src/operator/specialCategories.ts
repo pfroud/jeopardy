@@ -17,7 +17,7 @@ export interface SpecialCategory {
 
 export const specialCategories: SpecialCategory[] = [
     {
-        displayName: "Categories with quotation marks",
+        displayName: "Quotation-mark categories",
         categoryTitleMatches: /\"|“|”/,  // match quotation mark and curly quotes
         description: "The correct answer contains the letter(s) in quotes.",
         example: {
@@ -125,7 +125,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Class"
         }
     }, {
-        displayName: "\"sounds like...\" categories",
+        displayName: "\"Sounds like...\" categories",
         categoryTitleMatches: /SOUNDS LIKE/i,
         description: "The correct response sounds like an unrelated thing or person.",
         example: {
@@ -134,7 +134,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Hull"
         }
     }, {
-        displayName: "\"Rhyme time\" categories",
+        displayName: "Rhyme time",
         categoryTitleMatches: /RHYME TIME/i,
         description: "The correct response contains two rhyming words.",
         example: {
@@ -143,7 +143,7 @@ export const specialCategories: SpecialCategory[] = [
             answer: "Camel enamel"
         }
     }, {
-        displayName: "\"Quasi-related pairs\" categories",
+        displayName: "Quasi-related pairs",
         categoryTitleMatches: /QUASI.RELATED PAIRS/i, //allow hyphen or any type of dash
         description: "The clue describes two unrelated people or things whose names are shared by a well-known pair.",
         example: {

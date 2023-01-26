@@ -15,6 +15,10 @@ export class StateMachine {
     private readonly operatorWindowCountdownText: HTMLDivElement;
     private readonly operatorWindowDivStateName: HTMLDivElement;
     private readonly stateMap: { [stateName: string]: StateMachineState } = {};
+    /**
+     * Keep track of countdown timer going out of the state. In other words
+     * it is the countdown timer that starts when you enter the state.
+     */
     private readonly countdownTimerLeavingState: { [stateName: string]: CountdownTimer } = {};
     private readonly allStates: StateMachineState[];
     private readonly tableOfAllCountdownTimers: HTMLTableElement;
@@ -47,6 +51,11 @@ export class StateMachine {
     private handleKeyboardEvent(keyboardEvent: KeyboardEvent): void {
         if (document.activeElement?.tagName === "INPUT") {
             // Don't do anything if the cursor is in a <input> field.
+            return;
+        }
+
+        if (keyboardEvent.key.length != 1) {
+            // ignore non-printable characters https://stackoverflow.com/a/38802011/7376577
             return;
         }
 
@@ -114,7 +123,7 @@ export class StateMachine {
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////
-        /////////////////// Call onExit function of the state we're leaving //////////////////
+        /////////////////// Call onExit function of the state we're leaving ////////////////////
         ////////////////////////////////////////////////////////////////////////////////////////
         if (this.presentState.onExit) {
             if (this.DEBUG) {
@@ -135,7 +144,7 @@ export class StateMachine {
 
 
         ///////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////// Change presentation slide ///////////////////////////
+        ////////////////////////// Change presentation slide //////////////////////////////
         ///////////////////////////////////////////////////////////////////////////////////
         if (this.presentState.presentationSlideToShow) {
             if (this.presentation.allSlideNames.has(this.presentState.presentationSlideToShow)) {
@@ -149,7 +158,7 @@ export class StateMachine {
         }
 
         ///////////////////////////////////////////////////////////////////////////////
-        /////////////////////////// Call onEnter function ///////////////////////////
+        /////////////////////////// Call onEnter function /////////////////////////////
         ///////////////////////////////////////////////////////////////////////////////
         if (this.presentState.onEnter) {
             if (this.DEBUG) {

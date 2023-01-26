@@ -3,7 +3,7 @@ import { Clue } from "../Clue";
 import { SpecialCategory } from "../operator/specialCategories";
 
 export class Presentation {
-    public readonly allSlideNames: Set<string>;
+    public readonly allSlideNames = new Set<string>();
 
     private readonly header: HTMLElement; // there's no HTMLHeaderElement
     private readonly spanClueCategoryInHeader: HTMLSpanElement;
@@ -26,7 +26,7 @@ export class Presentation {
     private readonly allSlideDivs: { [slideName: string]: HTMLDivElement } = {};
     private visibleSlideDiv?: HTMLDivElement;
 
-    constructor() {
+    constructor(operator: Operator) {
         this.header = document.querySelector("header");
         this.spanClueCategoryInHeader = this.header.querySelector("span#clue-category-in-header");
         this.spanClueMoneyInHeader = this.header.querySelector("span#clue-value-in-header");
@@ -44,35 +44,15 @@ export class Presentation {
         this.divSpecialCategoryBackdrop = document.querySelector("div#special-category-backdrop")
         this.divSpecialCategoryPopup = document.querySelector("div#special-category-popup")
 
-        this.allSlideNames = new Set<string>();
-
         this.divPaused = document.querySelector("div#paused");
 
         this.footer = document.querySelector("footer");
 
         this.initSlides();
 
-        if (window.opener) {
-            if ((window.opener as any).operator) {
-                this.showSlide("slide-jeopardy-logo");
-                ((window.opener as any).operator as Operator).handlePresentationReady(this);
-            } else {
-                this.createErrorOverlay("window.opener.operator is null");
-            }
-        } else {
-            this.createErrorOverlay("window.opener is null");
-        }
-    }
+        this.showSlide("slide-jeopardy-logo");
+        operator.handlePresentationReady(this);
 
-    private createErrorOverlay(message: string) {
-        const errorDiv = document.createElement("div");
-        errorDiv.innerHTML = message;
-        errorDiv.style.backgroundColor = "red";
-        errorDiv.style.position = "absolute";
-        errorDiv.style.fontSize = "60px";
-        errorDiv.style.top = "20px";
-        errorDiv.style.padding = "5px 10px";
-        document.body.appendChild(errorDiv);
     }
 
     private initSlides(): void {

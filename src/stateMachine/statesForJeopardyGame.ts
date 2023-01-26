@@ -28,7 +28,8 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             }],
         }, {
             /*
-            The category and dollar value are shown on the center of the presentation window for a fixed amount of time.
+            The category and dollar value are shown on in big text the center of the
+            presentation window for a fixed amount of time.
             */
             name: "showClueCategoryAndValue",
             presentationSlideToShow: "slide-clue-category-and-value",
@@ -49,6 +50,10 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 guardCondition: operator.isCurrentClueSpecialCategory.bind(operator)
             }],
         }, {
+            /*
+            The game is paused to display an information message about a Jeopardy category
+            with special meaning (quotation marks, before & after, etc).
+            */
             name: "showMessageForSpecialCategory",
             onEnter: operator.showSpecialCategoryOverlay.bind(operator),
             onExit: operator.hideSpecialCategoryOverlay.bind(operator),
@@ -83,7 +88,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             }],
         }, {
             /*
-            The operator has finished reading the clue question, people can buzz in now.
+            The operator has finished reading the clue question, people can press the buzzer now.
             */
             name: "waitForBuzzes",
             transitions: [{
@@ -100,7 +105,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             }],
         }, {
             /*
-            A team has pressed the buzzer.
+            A team has pressed the buzzer, now we are waiting for them to say their answer.
             */
             name: "waitForTeamAnswer",
             onEnter: operator.handleBuzzerPress.bind(operator),

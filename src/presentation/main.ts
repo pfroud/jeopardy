@@ -1,12 +1,20 @@
+import { Operator } from "../operator/Operator";
 import { Presentation } from "./Presentation";
 
 document.addEventListener("DOMContentLoaded", function () {
 
     if (!window.opener) {
-        document.body.innerText = "no window.opener";
+        document.body.innerHTML = "no window.opener";
         return;
     }
 
+    const operator = ((window.opener as any).operator as Operator);
+    if (!operator) {
+        document.body.innerHTML = "no window.opener.operator";
+        return;
+    }
+
+    // close the presentation window if the operator window closes
     window.opener.addEventListener("unload", () => close());
 
     // Show errors from the presentation window in the operator window
@@ -18,6 +26,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Add global variable so we can access the presentation instance in the web browser debugger.
-    (window as any).presentation = new Presentation();
+    (window as any).presentation = new Presentation(operator);
 
 });

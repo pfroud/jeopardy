@@ -26,8 +26,14 @@ export class CountdownTimer {
     private isPaused = false;
 
     constructor(durationMillisec: number, audioManager?: AudioManager) {
-        if (!Number.isInteger(durationMillisec) || !isFinite(durationMillisec) || isNaN(durationMillisec)) {
+        if (!Number.isInteger(durationMillisec)) {
             throw new TypeError("duration must be an integer: " + durationMillisec);
+        }
+        if (!isFinite(durationMillisec)) {
+            throw new TypeError("duration must be finite: " + durationMillisec);
+        }
+        if (isNaN(durationMillisec)) {
+            throw new TypeError("duration cannot be NaN: " + durationMillisec);
         }
         if (durationMillisec < 1) {
             throw new RangeError("duration cannot be less than one:" + durationMillisec);
@@ -272,7 +278,11 @@ export class CountdownTimer {
                 this.dotsTables.forEach(table => {
                     table.querySelectorAll(`td[data-countdown="${dotsToDeactivate}"]`).forEach(td => td.classList.remove("active"));
                     if (dotsToDeactivate !== 6 && dotsToDeactivate !== 1) {
-                        // TODO kind of weird to call the audioManager from in here. should move it into an onTick function.
+                        /*
+                        It is weird to be calling the audioManager from inside a function which claims to be a GUI
+                        update (audio is not graphical). Turns out it's nontrivial to figure out when one second
+                        has passed so I am leaving it in here.
+                        */
                         this.audioManager?.play("tick");
                     }
                 });
@@ -333,9 +343,16 @@ export class CountdownTimer {
 
     }
 
+    /**
+     * This function is used for the state machine transition visualizer.
+     * If a timeout transition is paused and will never finish before getting
+     * reset, I want the green bar to go away.
+     */
     public showProgressBarFinished(): void {
-        this.progressElements.forEach(progress => progress.setAttribute("value", "0"));
-        this.textElements.forEach(textElem => textElem.innerHTML = "");
+        if (!this.isFinished) {
+            this.progressElements.forEach(progress => progress.setAttribute("value", "0"));
+            this.textElements.forEach(textElem => textElem.innerHTML = "");
+        }
     }
 
 

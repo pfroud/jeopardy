@@ -6,7 +6,7 @@ import { StateMachineViewer } from "./StateMachineViewer";
 window.addEventListener('DOMContentLoaded', () => {
 
     if (!window.opener) {
-        document.body.innerText = "no window.opener";
+        document.body.innerHTML = "no window.opener";
         return;
     }
 
@@ -14,13 +14,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const operator = ((window.opener as any).operator as Operator);
     if (!operator) {
-        document.body.innerText = "no window.opener.operator";
+        document.body.innerHTML = "no window.opener.operator";
         return;
     }
 
     const stateMachine = operator.getStateMachine();
     if (!stateMachine) {
-        document.body.innerText = "no window.opener.operator.stateMachine";
+        document.body.innerHTML = "no window.opener.operator.stateMachine";
         return;
     }
 

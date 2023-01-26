@@ -168,10 +168,10 @@ export class Operator {
             window.open("../stateMachineViewer", "windowStateMachineViewer", "popup")
         );
 
-        const GameEndControls = document.querySelector("div#game-end-controls");
-        GameEndControls.querySelector("button#show-team-ranking-table").addEventListener("click", () => this.presentation.showSlide("slide-gameEnd-team-ranking-table"));
-        GameEndControls.querySelector("button#show-money-over-time-line-chart").addEventListener("click", () => this.presentation.showSlide("slide-gameEnd-line-chart"));
-        GameEndControls.querySelector("button#show-buzz-results-pie-charts").addEventListener("click", () => this.presentation.showSlide("slide-gameEnd-pie-charts"));
+        const gameEndControls = document.querySelector("div#game-end-controls");
+        gameEndControls.querySelector("button#show-team-ranking-table").addEventListener("click", () => this.presentation.showSlide("slide-gameEnd-team-ranking-table"));
+        gameEndControls.querySelector("button#show-money-over-time-line-chart").addEventListener("click", () => this.presentation.showSlide("slide-gameEnd-line-chart"));
+        gameEndControls.querySelector("button#show-buzz-results-pie-charts").addEventListener("click", () => this.presentation.showSlide("slide-gameEnd-pie-charts"));
 
     }
 
@@ -243,7 +243,7 @@ export class Operator {
         this.divInstructions.innerHTML = "Read aloud the category and dollar value.";
     };
 
-    private setClue(clue: Clue): void {
+    private setPresentClue(clue: Clue): void {
         this.presentClue = clue;
         this.showClueToOperator(clue);
         this.presentation.setClue(clue);
@@ -269,7 +269,7 @@ export class Operator {
             this.trQuestion.style.display = "none";
             this.divInstructions.innerHTML = "Loading clue...";
 
-            this.setClue(
+            this.setPresentClue(
                 new Clue(
                     '[{"id":25876,"answer":"the booster","question":"The first stage of a rocket","value":600,"airdate":"2016-04-20T19:00:00.000Z","created_at":"2022-07-27T22:54:33.633Z","updated_at":"2022-07-27T22:54:33.633Z","category_id":4710,"game_id":5255,"invalid_count":null,"category":{"id":4710,"title":"spacecraft\\" types","created_at":"2022-07-27T22:54:33.521Z","updated_at":"2022-07-27T22:54:33.521Z","clues_count":5}}]'
                 )
@@ -302,7 +302,7 @@ export class Operator {
 
                 if (clue.isValid() && !clue.hasMultimedia()) {
 
-                    this.setClue(clue);
+                    this.setPresentClue(clue);
 
                     // we don't need to return the clue object to the state machine
                     promiseResolveFunc();
