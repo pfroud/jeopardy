@@ -7,77 +7,71 @@
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="scss/tabs.scss">
     <link rel="stylesheet" href="scss/progressBarForOperator.scss">
+    <link rel="stylesheet" href="scss/specialCategoriesForOperator.scss">
     <link rel="stylesheet" href="scss/operator.scss">
 </head>
 
 <body>
-    <script type="module" src="../CountdownTimer.ts"></script>
-    <script type="module" src="../Team.ts"></script>
-    <script type="module" src="../Settings.ts"></script>
-    <script type="module" src="../stateMachine/statesForJeopardyGame.ts"></script>
-    <script type="module" src="../stateMachine/StateMachine.ts"></script>
-    <script type="module" src="AudioManager.ts"></script>
-    <script type="module" src="Operator.ts"></script>
     <script type="module" src="main.ts"></script>
-
 
     <div id="paused" style="display:none">&#9612;&#9612; PAUSED</div>
 
-    <main>
-        <input id="tab-setup" type="radio" name="tabs">
-        <label for="tab-setup">Setup</label>
+    <div id="special-category-popup" style="display:none">
+        <div id="info-icon">i</div>
+        <span id="special-category-title"></span>
 
-        <input id="tab-game" type="radio" name="tabs" checked>
-        <label for="tab-game">Game</label>
+        <p id="special-category-description"></p>
 
-        <input id="tab-settings" type="radio" name="tabs">
-        <label for="tab-settings">Settings</label>
+        <p>Example:</p>
 
-        <!-- ====================================================================== -->
-        <div class="tab-content" id="content-setup">
-
-            <div id="saved-game-prompt">
-                Found a saved game:
-
-                <table id="saved-game-details">
-                    <tbody></tbody>
-                </table>
-                <br>
-                <button id="saved-game-load">Load game</button>&nbsp;
-                <button id="saved-game-dismiss">Dismiss</button>&nbsp;
-                <button id="saved-game-delete">Delete</button>
-
-            </div>
-
-
-            <p><button id="go-to-jeopardy-logo">Go to Jeopardy logo</button></p>
-
-            <p><a href="#" id="aMoneyOverride">Override money...</a></p>
-
-            <p><a href="#" id="aGenerateGraphviz">Generate Graphviz...</a></p>
-
-            <p>
-                Opening music:<br>
-                <audio id="music-game-start" preload="auto" src="../sound/music-opening.mp3" controls loop
-                    style="width:100%"></audio>
-            <p>
-                Closing music:<br>
-                <audio id="music-game-end" preload="auto" src="../sound/music-closing.mp3" controls
-                    style="width:100%"></audio>
-
+        <!-- Add wrapper because border-radius does not work on <table> element -->
+        <div id="special-category-example-wrapper">
+            <table id="special-category-example-table">
+                <tr>
+                    <td>
+                        Category:<br>
+                        Question:<br>
+                        Answer:<br>
+                    </td>
+                    <td>
+                        <span id="special-category-example-category"></span><br>
+                        <span id="special-category-example-question"></span><br>
+                        <span id="special-category-example-answer"></span>
+                    </td>
+                </tr>
+            </table>
         </div>
+        <br>
+        <p>Press space to close this popup.</p>
+    </div>
 
 
-        <!-- ====================================================================== -->
-        <div class="tab-content" id="content-game">
+    <main>
+        <input id="tab-play" type="radio" name="tabs" checked>
+        <label for="tab-play">Play</label>
+
+        <input id="tab-load-game" type="radio" name="tabs">
+        <label for="tab-load-game">Load game</label>
+
+        <input id="tab-music" type="radio" name="tabs">
+        <label for="tab-music">Music</label>
+
+        <input id="tab-game-settings" type="radio" name="tabs">
+        <label for="tab-game-settings">Game settings</label>
+
+        <input id="tab-developer" type="radio" name="tabs">
+        <label for="tab-developer">Developer</label>
+
+        <!-- ================================================================================================== -->
+        <div class="tab-content" id="tab-content-play">
 
             <div id="game-timer">
-                Game timer:<br>
                 <progress></progress>
-                <div id="remaining-time-text"></div>
+                <div class="label-on-progress">Game timer</div>
+                <div class="remaining-time-text"></div>
             </div>
 
-            <br><br>
+            <br>
 
             <button id="start-game" disabled>Start game</button> &emsp;
             <button id="skip-clue" disabled>Skip clue</button>
@@ -119,21 +113,57 @@
                 </table>
             </div>
 
-
-            <div id="state-machine-viz">
-                <hr>
-                Current state:<br>
-                <progress></progress>
-                <div id="state-name">not initialized...</div>
-                <div id="remaining-time-text"></div>
+            <div id="game-end-controls">
+                Click these buttons to change what's showing in the presentation window:<br>
+                <button id="show-team-ranking-table">Show team ranking table</button>&ensp;
+                <button id="show-money-over-time-line-chart">Show line chart of money over time</button>&ensp;
+                <button id="show-buzz-results-pie-charts">Show pie charts of buzz results</button>
             </div>
 
+            <div id="special-category-prompt" style="display:none">
+                Press space to show information about
+                <span id="special-category-title"></span>
+            </div>
+
+            <br>
+            <table id="state-machine-all-countdown-timers"></table>
+            <br>
+
+            <hr>
+            Current state:<br>
+            <div id="state-machine-viz">
+                <progress></progress>
+                <div class="label-on-progress" id="state-name">not initialized...</div>
+                <div class="remaining-time-text"></div>
+            </div>
+
+            <br><br>
+            <a href="#" id="aMoneyOverride">Override money...</a>
 
         </div>
-
-
-        <!-- ====================================================================== -->
-        <div class="tab-content" id="content-settings">
+        <!-- ================================================================================================== -->
+        <div class="tab-content" id="tab-content-load-game">
+            <div id="saved-game-message"></div>
+            <br>
+            <table id="saved-game-details">
+                <tbody></tbody>
+            </table>
+            <br>
+            <button id="saved-game-load">Load game</button>&nbsp;
+            <button id="saved-game-delete">Delete</button>
+        </div>
+        <!-- ================================================================================================== -->
+        <div class="tab-content" id="tab-content-music">
+            Opening music:<br>
+            <audio id="music-game-start" preload="auto" src="../sound/music-opening.mp3" controls loop
+                style="width:100%"></audio>
+            <p>
+                Closing music:<br>
+                <audio id="music-game-end" preload="auto" src="../sound/music-closing.mp3" controls
+                    style="width:100%"></audio>
+        </div>
+        <!-- ================================================================================================== -->
+        <div class="tab-content" id="tab-content-game-settings">
 
             <table id="table-settings">
                 <tr>
@@ -159,6 +189,10 @@
 
             <p><button id="saveSettings">Save settings</button></p>
 
+        </div>
+        <!-- ================================================================================================== -->
+        <div class="tab-content" id="tab-content-developer">
+            <a href="#" id="aOpenStateMachineViewer">Open state machine visualizer...</a>
         </div>
 
     </main>

@@ -14,7 +14,7 @@ export class CountdownTimer {
     private static readonly desiredFrameRateHz = 30;
     private readonly updateIntervalMillisec = 1000 / CountdownTimer.desiredFrameRateHz;
     private readonly audioManager: AudioManager;
-    private readonly textDivs = new Set<HTMLDivElement>();
+    private readonly textElements = new Set<HTMLElement>();
     private readonly progressElements = new Set<HTMLProgressElement>();
     private readonly dotsTables = new Set<HTMLTableElement>();
     private remainingMillisec: number;
@@ -26,8 +26,14 @@ export class CountdownTimer {
     private isPaused = false;
 
     constructor(durationMillisec: number, audioManager?: AudioManager) {
-        if (!Number.isInteger(durationMillisec) || !isFinite(durationMillisec) || isNaN(durationMillisec)) {
+        if (!Number.isInteger(durationMillisec)) {
             throw new TypeError("duration must be an integer: " + durationMillisec);
+        }
+        if (!isFinite(durationMillisec)) {
+            throw new TypeError("duration must be finite: " + durationMillisec);
+        }
+        if (isNaN(durationMillisec)) {
+            throw new TypeError("duration cannot be NaN: " + durationMillisec);
         }
         if (durationMillisec < 1) {
             throw new RangeError("duration cannot be less than one:" + durationMillisec);
@@ -42,6 +48,35 @@ export class CountdownTimer {
         }
     }
 
+    public reset(): void {
+
+        this.remainingMillisec = this.maxMillisec;
+
+        this.setPaused(false);
+        this.guiUpdatePaused();
+
+        if (!isNaN(this.intervalID)) {
+            clearInterval(this.intervalID);
+        }
+
+        this.timestampOfLastInterval = NaN;
+        this.intervalID = NaN;
+
+        this.isStarted = false;
+        this.isFinished = false;
+
+        this.progressElements.forEach(progressElement => {
+            progressElement.setAttribute("max", String(this.maxMillisec));
+            progressElement.setAttribute("value", String(this.maxMillisec));
+        });
+        this.dotsTables.forEach(tableElement =>
+            tableElement.querySelectorAll("td").forEach(td => td.classList.remove("active"))
+        );
+        this.textElements.forEach(divElement => divElement.innerHTML = "Reset");
+
+        this.onReset?.();
+    }
+
     public togglePaused(): void {
         this.isPaused ? this.resume() : this.pause();
     }
@@ -51,6 +86,14 @@ export class CountdownTimer {
             this.pause();
         } else {
             this.resume();
+        }
+    }
+
+    public startOrResume() {
+        if (this.isStarted) {
+            this.resume();
+        } else {
+            this.start();
         }
     }
 
@@ -102,7 +145,7 @@ export class CountdownTimer {
 
     private guiUpdatePaused(): void {
         this.progressElements.forEach(elem => elem.classList.toggle("paused", this.isPaused));
-        this.textDivs.forEach(elem => elem.classList.toggle("paused", this.isPaused));
+        this.textElements.forEach(elem => elem.classList.toggle("paused", this.isPaused));
         this.dotsTables?.forEach(e => e.classList.toggle("paused", this.isPaused));
     }
 
@@ -129,7 +172,7 @@ export class CountdownTimer {
                 }
                 tds.forEach(td => td.classList.add("active"));
             });
-            this.textDivs.forEach(divElement => divElement.innerHTML = (this.maxMillisec / 1000).toFixed(1));
+            this.textElements.forEach(divElement => divElement.innerHTML = (this.maxMillisec / 1000).toFixed(1));
             /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -183,7 +226,7 @@ export class CountdownTimer {
             newText = remainingSeconds.toFixed(1) + " sec";
         }
 
-        this.textDivs.forEach(elem => elem.innerHTML = newText);
+        this.textElements.forEach(elem => elem.innerHTML = newText);
 
         this.progressElements.forEach(elem => elem.setAttribute("value", String(this.remainingMillisec)));
 
@@ -235,7 +278,11 @@ export class CountdownTimer {
                 this.dotsTables.forEach(table => {
                     table.querySelectorAll(`td[data-countdown="${dotsToDeactivate}"]`).forEach(td => td.classList.remove("active"));
                     if (dotsToDeactivate !== 6 && dotsToDeactivate !== 1) {
-                        // TODO kind of weird to call the audioManager from in here. should move it into an onTick function.
+                        /*
+                        It is weird to be calling the audioManager from inside a function which claims to be a GUI
+                        update (audio is not graphical). Turns out it's nontrivial to figure out when one second
+                        has passed so I am leaving it in here.
+                        */
                         this.audioManager?.play("tick");
                     }
                 });
@@ -250,18 +297,18 @@ export class CountdownTimer {
             console.log("CountdownTimer: finished.");
         }
         this.isFinished = true;
-        this.textDivs.forEach(elem => elem.innerHTML = "done");
+        this.textElements.forEach(elem => elem.innerHTML = "done");
         this.dotsTables?.forEach(table => table.querySelectorAll("td").forEach(td => td.classList.remove("active")));
         clearInterval(this.intervalID);
 
         this.onFinished?.();
     }
 
-    public addTextDiv(textDiv: HTMLDivElement): void {
-        if (!textDiv) {
-            throw new Error("trying to add falsey text div");
+    public addTextElement(textElement: HTMLElement): void {
+        if (!textElement) {
+            throw new Error("trying to add falsey text element");
         }
-        this.textDivs.add(textDiv);
+        this.textElements.add(textElement);
     }
 
     public addProgressElement(progressElement: HTMLProgressElement): void {
@@ -294,6 +341,18 @@ export class CountdownTimer {
             this.finish();
         }
 
+    }
+
+    /**
+     * This function is used for the state machine transition visualizer.
+     * If a timeout transition is paused and will never finish before getting
+     * reset, I want the green bar to go away.
+     */
+    public showProgressBarFinished(): void {
+        if (!this.isFinished) {
+            this.progressElements.forEach(progress => progress.setAttribute("value", "0"));
+            this.textElements.forEach(textElem => textElem.innerHTML = "");
+        }
     }
 
 

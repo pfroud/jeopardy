@@ -1,11 +1,9 @@
-import { Clue, Operator } from "../operator/Operator";
-
-interface Slides {
-    [slideName: string]: HTMLDivElement;
-}
+import { Operator } from "../operator/Operator";
+import { Clue } from "../Clue";
+import { SpecialCategory } from "../operator/specialCategories";
 
 export class Presentation {
-    public readonly allSlideNames: Set<string>;
+    public readonly allSlideNames = new Set<string>();
 
     private readonly header: HTMLElement; // there's no HTMLHeaderElement
     private readonly spanClueCategoryInHeader: HTMLSpanElement;
@@ -18,14 +16,17 @@ export class Presentation {
     private readonly divClueAirdateBig: HTMLDivElement;
     private readonly divSlideClueAnswerText: HTMLDivElement;
 
+    private readonly divSpecialCategoryBackdrop: HTMLDivElement;
+    private readonly divSpecialCategoryPopup: HTMLDivElement;
+
     private readonly divPaused: HTMLDivElement;
     private readonly footer: HTMLElement;
     private readonly progressElementForStateMachine: HTMLProgressElement;
     private readonly progressElementForGameTimer: HTMLProgressElement;
-    private readonly allSlideDivs: Slides = {};
+    private readonly allSlideDivs: { [slideName: string]: HTMLDivElement } = {};
     private visibleSlideDiv?: HTMLDivElement;
 
-    constructor() {
+    constructor(operator: Operator) {
         this.header = document.querySelector("header");
         this.spanClueCategoryInHeader = this.header.querySelector("span#clue-category-in-header");
         this.spanClueMoneyInHeader = this.header.querySelector("span#clue-value-in-header");
@@ -40,7 +41,8 @@ export class Presentation {
         this.divClueValueBig = document.querySelector("div#clue-value-big");
         this.divClueAirdateBig = document.querySelector("div#clue-airdate-big");
 
-        this.allSlideNames = new Set<string>();
+        this.divSpecialCategoryBackdrop = document.querySelector("div#special-category-backdrop")
+        this.divSpecialCategoryPopup = document.querySelector("div#special-category-popup")
 
         this.divPaused = document.querySelector("div#paused");
 
@@ -48,27 +50,9 @@ export class Presentation {
 
         this.initSlides();
 
-        if (window.opener) {
-            if ((window.opener as any).operator) {
-                this.showSlide("slide-jeopardy-logo");
-                ((window.opener as any).operator as Operator).handlePresentationReady(this);
-            } else {
-                this.createErrorOverlay("window.opener.operator is null");
-            }
-        } else {
-            this.createErrorOverlay("window.opener is null");
-        }
-    }
+        this.showSlide("slide-jeopardy-logo");
+        operator.handlePresentationReady(this);
 
-    private createErrorOverlay(message: string) {
-        const errorDiv = document.createElement("div");
-        errorDiv.innerHTML = message;
-        errorDiv.style.backgroundColor = "red";
-        errorDiv.style.position = "absolute";
-        errorDiv.style.fontSize = "60px";
-        errorDiv.style.top = "20px";
-        errorDiv.style.padding = "5px 10px";
-        document.body.appendChild(errorDiv);
     }
 
     private initSlides(): void {
@@ -110,18 +94,18 @@ export class Presentation {
         }
     }
 
-    public setClue(clueObject: Clue): void {
-        this.spanClueCategoryInHeader.innerHTML = clueObject.category.title;
-        this.spanClueMoneyInHeader.innerHTML = "$" + clueObject.value;
-        this.spanClueAirdateInHeader.innerHTML = "(" + clueObject.airdateParsed.getFullYear() + ")";
+    public setClue(clue: Clue): void {
+        this.spanClueCategoryInHeader.innerHTML = clue.category.title;
+        this.spanClueMoneyInHeader.innerHTML = "$" + clue.value;
+        this.spanClueAirdateInHeader.innerHTML = "(" + clue.airdate.getFullYear() + ")";
 
-        this.divClueCategoryBig.innerHTML = clueObject.category.title;
-        this.divClueValueBig.innerHTML = "$" + clueObject.value;
-        this.divClueAirdateBig.innerHTML = "Airdate: " + clueObject.airdateParsed.getFullYear();
+        this.divClueCategoryBig.innerHTML = clue.category.title;
+        this.divClueValueBig.innerHTML = "$" + clue.value;
+        this.divClueAirdateBig.innerHTML = "Airdate: " + clue.airdate.getFullYear();
 
-        this.divSlideClueQuestion.innerHTML = clueObject.question;
+        this.divSlideClueQuestion.innerHTML = clue.question;
 
-        this.divSlideClueAnswerText.innerHTML = clueObject.answer;
+        this.divSlideClueAnswerText.innerHTML = clue.answer;
     }
 
     public fitClueQuestionToScreen(): void {
@@ -144,7 +128,7 @@ export class Presentation {
     }
 
     public setTeamRankingHtml(htmlString: string): void {
-        document.querySelector("div#slide-gameEnd-team-ranking-list div#team-ranking").innerHTML = htmlString;
+        document.querySelector("div#slide-gameEnd-team-ranking-table div#team-ranking").innerHTML = htmlString;
     }
 
     public getDivForPieCharts(): HTMLDivElement {
@@ -169,6 +153,25 @@ export class Presentation {
 
     public appendTeamDivToFooter(divForTeam: HTMLDivElement): void {
         this.footer.append(divForTeam);
+    }
+
+    public showSpecialCategoryPopup(specialCategory: SpecialCategory): void {
+
+        this.divSpecialCategoryPopup.querySelector("#special-category-title").innerHTML = specialCategory.displayName;
+        this.divSpecialCategoryPopup.querySelector("#special-category-description").innerHTML = specialCategory.description;
+        if (specialCategory.example) {
+            this.divSpecialCategoryPopup.querySelector("#special-category-example-category").innerHTML = specialCategory.example.category;
+            this.divSpecialCategoryPopup.querySelector("#special-category-example-question").innerHTML = specialCategory.example.question;
+            this.divSpecialCategoryPopup.querySelector("#special-category-example-answer").innerHTML = specialCategory.example.answer;
+        }
+
+        this.divSpecialCategoryBackdrop.className = "blurred";
+        this.divSpecialCategoryPopup.className = "visible-centered";
+    }
+
+    public hideSpecialCategoryPopup(): void {
+        this.divSpecialCategoryBackdrop.className = "not-blurred";
+        this.divSpecialCategoryPopup.className = "offscreen-left";
     }
 
 }

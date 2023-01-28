@@ -1,6 +1,6 @@
-import { CountdownOperation, StateMachineState, TransitionType } from "./stateInterfaces";
 import { Operator } from "../operator/Operator";
 import { Settings } from "../Settings";
+import { CountdownBehavior, StateMachineState } from "./stateInterfaces";
 
 export function getStatesForJeopardyGame(operator: Operator, settings: Settings): StateMachineState[] {
 
@@ -9,7 +9,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             name: "idle",
             presentationSlideToShow: "slide-jeopardy-logo",
             transitions: [{
-                type: TransitionType.ManualTrigger,
+                type: "manualTrigger",
                 triggerName: "startGame",
                 destination: "getClueFromJService"
             }],
@@ -17,7 +17,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             name: "getClueFromJService",
             presentationSlideToShow: "slide-spinner",
             transitions: [{
-                type: TransitionType.Promise,
+                type: "promise",
                 /*
                 The promise only tells the state machine when to go to the next state.
                 The promise does NOT pass the clue object to the state machine.
@@ -28,23 +28,40 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             }],
         }, {
             /*
-            The category and dollar value are shown on the center of the presentation window for a fixed amount of time.
+            The category and dollar value are shown on in big text the center of the
+            presentation window for a fixed amount of time.
             */
             name: "showClueCategoryAndValue",
             presentationSlideToShow: "slide-clue-category-and-value",
             transitions: [{
-                type: TransitionType.Timeout,
-                countdownTimerSource: {
-                    type: CountdownOperation.CreateNew,
-                    duration: settings.displayDurationCategoryMillisec
-                },
+                type: "timeout",
+                initialDuration: settings.displayDurationCategoryMillisec,
+                behavior: CountdownBehavior.ContinueTimerUntilManuallyReset,
                 destination: "showClueQuestion",
                 /*
                 Don't put this as onEnter of the showClueQuestion state because it does
                 a bunch of stuff and would get called every time lockout happens
                 */
                 onTransition: operator.handleShowClueQuestion.bind(operator)
+            }, {
+                type: "keyboard",
+                keyboardKeys: " ", //space
+                destination: "showMessageForSpecialCategory",
+                guardCondition: operator.isCurrentClueSpecialCategory.bind(operator)
             }],
+        }, {
+            /*
+            The game is paused to display an information message about a Jeopardy category
+            with special meaning (quotation marks, before & after, etc).
+            */
+            name: "showMessageForSpecialCategory",
+            onEnter: operator.showSpecialCategoryOverlay.bind(operator),
+            onExit: operator.hideSpecialCategoryOverlay.bind(operator),
+            transitions: [{
+                type: "keyboard",
+                keyboardKeys: " ", //space
+                destination: "showClueCategoryAndValue"
+            }]
         }, {
             /*
             The clue question is shown on center of the presentation window. The person operating the
@@ -55,7 +72,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             presentationSlideToShow: "slide-clue-question",
             onEnter: operator.fitClueQuestionToScreenInOperatorWindow.bind(operator),
             transitions: [{
-                type: TransitionType.Keyboard,
+                type: "keyboard",
                 keyboardKeys: " ", //space
                 destination: "waitForBuzzes",
                 /*
@@ -64,44 +81,48 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 */
                 onTransition: operator.handleDoneReadingClueQuestion.bind(operator)
             }, {
-                type: TransitionType.Keyboard,
+                type: "keyboard",
                 keyboardKeys: "123456789",
                 destination: "showClueQuestion",
                 onTransition: operator.handleLockout.bind(operator)
             }],
         }, {
+            /*
+            The operator has finished reading the clue question, people can press the buzzer now.
+            */
             name: "waitForBuzzes",
             transitions: [{
-                type: TransitionType.Keyboard,
+                type: "keyboard",
                 keyboardKeys: "123456789",
                 destination: "waitForTeamAnswer",
-                onTransition: operator.saveCountdownTimerForWaitForBuzzesState.bind(operator),
                 guardCondition: operator.canTeamBuzz.bind(operator)
             }, {
-                type: TransitionType.Timeout,
+                type: "timeout",
                 destination: "showAnswer",
-                countdownTimerSource: operator.getCountdownTimerSource.bind(operator),
+                initialDuration: settings.timeoutWaitForBuzzesMillisec,
+                behavior: CountdownBehavior.ContinueTimerUntilManuallyReset,
                 onTransition: operator.playSoundQuestionTimeout.bind(operator)
             }],
         }, {
+            /*
+            A team has pressed the buzzer, now we are waiting for them to say their answer.
+            */
             name: "waitForTeamAnswer",
-            onEnter: operator.handleBuzzerPress.bind(operator), // TODO I want to move this to the transition but it takes a keyboard event???
+            onEnter: operator.handleBuzzerPress.bind(operator),
             transitions: [{
-                type: TransitionType.Keyboard,
+                type: "keyboard",
                 keyboardKeys: "y",
                 destination: "showAnswer",
                 onTransition: operator.handleAnswerCorrect.bind(operator)
             }, {
-                type: TransitionType.Keyboard,
+                type: "keyboard",
                 keyboardKeys: "n",
                 destination: "answerWrongOrTimeout"
             }, {
-                type: TransitionType.Timeout,
-                countdownTimerSource: {
-                    type: CountdownOperation.CreateNew,
-                    duration: settings.timeoutWaitForAnswerMillisec
-                },
-                countdownTimerShowDots: true,
+                type: "timeout",
+                initialDuration: settings.timeoutWaitForAnswerMillisec,
+                behavior: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
+                isWaitingForTeamToAnswerAfterBuzz: true,
                 destination: "answerWrongOrTimeout"
             }],
         },
@@ -109,7 +130,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             name: "answerWrongOrTimeout",
             onEnter: operator.handleAnswerWrongOrTimeout.bind(operator),
             transitions: [{
-                type: TransitionType.If,
+                type: "if",
                 condition: operator.haveAllTeamsAnswered.bind(operator),
                 then: { destination: "showAnswer" },
                 else: { destination: "waitForBuzzes" }
@@ -119,30 +140,25 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             onEnter: operator.handleShowAnswer.bind(operator),
             presentationSlideToShow: "slide-clue-answer",
             transitions: [{
-                type: TransitionType.Timeout,
-                countdownTimerSource: {
-                    type: CountdownOperation.CreateNew,
-                    duration: settings.displayDurationAnswerMillisec
-                },
+                type: "timeout",
+                initialDuration: settings.displayDurationAnswerMillisec,
+                behavior: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
                 destination: "checkGameEnd"
             }],
         }, {
             name: "checkGameEnd",
             transitions: [{
-                type: TransitionType.If,
+                type: "if",
                 condition: operator.shouldGameEnd.bind(operator),
                 then: { destination: "gameEnd" },
-                else: {
-                    destination: "getClueFromJService",
-                    onTransition: operator.updateTeamMoneyAtEndOfRound.bind(operator)
-                }
+                else: { destination: "getClueFromJService" }
             }],
         }, {
             name: "gameEnd",
-            presentationSlideToShow: "slide-gameEnd-line-chart",
+            presentationSlideToShow: "slide-gameEnd-team-ranking-table",
             onEnter: operator.handleGameEnd.bind(operator),
             transitions: [{
-                type: TransitionType.ManualTrigger,
+                type: "manualTrigger",
                 triggerName: "reset",
                 destination: "idle"
             }],

@@ -1,21 +1,13 @@
-import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
-import { StateMachine } from "../stateMachine/StateMachine";
-import { AudioManager } from "./AudioManager";
-import { Settings } from "../Settings";
-import { Presentation } from "../presentation/Presentation";
+import { Clue } from "../Clue";
 import { CountdownTimer } from "../CountdownTimer";
-import { CountdownOperation, CountdownTimerSource } from "../stateMachine/stateInterfaces";
+import { Presentation } from "../presentation/Presentation";
+import { Settings } from "../Settings";
+import { StateMachine } from "../stateMachine/StateMachine";
+import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
+import { AudioManager } from "./AudioManager";
+import { SpecialCategory } from "./specialCategories";
 import { createLineChart, createPieCharts } from "./statisticsCharts";
 import { BuzzHistoryForClue, BuzzResultEnum, BuzzResult } from "../buzz-history/buzzHistoryForClue";
-
-export interface Clue {
-    answer: string;
-    question: string;
-    value: number;
-    airdate: string;
-    airdateParsed: Date;
-    category: { title: string }
-}
 
 interface SavedGameInLocalStorage {
     gameTimerRemainingMillisec: number,
@@ -41,16 +33,17 @@ export class Operator {
     private readonly divInstructions: HTMLDivElement;
     private readonly buttonStartGame: HTMLButtonElement;
     private readonly buttonSkipClue: HTMLButtonElement;
+    private readonly specialCategoryPrompt: HTMLDivElement;
+    private readonly specialCategoryTitle: HTMLSpanElement;
+    private readonly specialCategoryPopup: HTMLDivElement;
     private gameTimer: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
     private teamArray: Team[];
-    private currentClue: Clue;
+    private presentClue: Clue;
     private presentation: Presentation;
     private isPaused = false;
     private stateMachine: StateMachine;
     private teamPresentlyAnswering: Team;
-
-    private countdownTimerForWaitForBuzzesState: CountdownTimer;
-    private resetDurationForWaitForBuzzState = true;
+    private questionCount = 0;
 
     private buzzHistory: BuzzHistoryForClue;
 
@@ -74,6 +67,11 @@ export class Operator {
         this.buttonStartGame = document.querySelector("button#start-game");
         this.buttonSkipClue = document.querySelector("button#skip-clue");
 
+        this.specialCategoryPrompt = document.querySelector("div#special-category-prompt");
+        this.specialCategoryTitle = this.specialCategoryPrompt.querySelector("span#special-category-title");
+
+        this.specialCategoryPopup = document.querySelector("div#special-category-popup");
+
         this.initPauseKeyboardListener();
         this.initMouseListeners();
         this.lookForSavedGame();
@@ -91,12 +89,12 @@ export class Operator {
     private initGameTimer(millisec: number): void {
         this.gameTimer = new CountdownTimer(millisec);
         this.gameTimer.addProgressElement(document.querySelector("div#game-timer progress"));
-        this.gameTimer.addTextDiv(document.querySelector("div#game-timer div#remaining-time-text"));
+        this.gameTimer.addTextElement(document.querySelector("div#game-timer div.remaining-time-text"));
     }
 
     public handlePresentationReady(presentationInstanceFromOtherWindow: Presentation): void {
         /* 
-        This method gets called from Presentation instance in the other window.
+        This method gets called from the Presentation instance in the other window.
         */
         window.focus();
         this.presentation = presentationInstanceFromOtherWindow;
@@ -106,10 +104,12 @@ export class Operator {
 
         this.gameTimer.addProgressElement(this.presentation.getProgressElementForGameTimer());
 
-        this.stateMachine = new StateMachine(this.settings, this, this.presentation, this.audioManager);
+        this.stateMachine = new StateMachine(this.settings, this, this.presentation);
 
         this.buttonStartGame.removeAttribute("disabled");
+        this.buttonStartGame.focus();
         this.divInstructions.innerHTML = "Ready. Click the button to start the game.";
+
     }
 
     private initBuzzerFootswitchIconDisplay(): void {
@@ -131,14 +131,14 @@ export class Operator {
 
                 let result: BuzzResult;
                 switch (teamObj.getState()) {
-                    case TeamState.CAN_ANSWER:
+                    case "can-answer":
                         result = {
                             type: BuzzResultEnum.START_ANSWERING,
                             answeredCorrectly: true,
                             endTimestamp: Date.now()
                         };
                         break;
-                    case TeamState.OPERATOR_IS_READING_QUESTION:
+                    case "reading-question":
                         result = {
                             type: BuzzResultEnum.TOO_EARLY,
                         };
@@ -164,8 +164,8 @@ export class Operator {
             const keyboardKey = keyboardEvent.key;
             if (teamNumbers.has(keyboardKey)) {
                 const teamIndex = Number(keyboardKey) - 1;
-                const teamObj = this.teamArray[teamIndex];
-                teamObj.showKeyUp();
+                const team = this.teamArray[teamIndex];
+                team.showKeyUp();
             }
         });
 
@@ -180,27 +180,32 @@ export class Operator {
     }
 
     public handleAnswerCorrect(): void {
-        this.teamPresentlyAnswering.handleAnswerCorrect(this.currentClue);
+        this.teamPresentlyAnswering.handleAnswerCorrect(this.presentClue);
     }
 
     public handleAnswerWrongOrTimeout(): void {
-        this.teamPresentlyAnswering.handleAnswerIncorrectOrAnswerTimeout(this.currentClue);
+        this.teamPresentlyAnswering.handleAnswerIncorrectOrAnswerTimeout(this.presentClue);
+        this.stateMachine.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
     }
 
     private initMouseListeners(): void {
-        document.querySelector("button#go-to-jeopardy-logo").addEventListener("click", () => this.presentation.showSlide("slide-jeopardy-logo"));
-
         this.buttonStartGame.addEventListener("click", () => this.startGame());
 
         this.buttonSkipClue.addEventListener("click", () => this.skipClue());
 
         document.querySelector("a#aMoneyOverride").addEventListener("click", () =>
-            window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney", "popup,fullscreen"));
+            window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney"));
 
 
-        document.querySelector("a#aGenerateGraphviz").addEventListener("click", () =>
-            window.open("../graphvizViewer/graphvizViewer.html", "windowGraphvizViewer", "popup")
+        document.querySelector("a#aOpenStateMachineViewer").addEventListener("click", () =>
+            window.open("../stateMachineViewer", "windowStateMachineViewer", "popup")
         );
+
+        const gameEndControls = document.querySelector("div#game-end-controls");
+        gameEndControls.querySelector("button#show-team-ranking-table").addEventListener("click", () => this.presentation.showSlide("slide-gameEnd-team-ranking-table"));
+        gameEndControls.querySelector("button#show-money-over-time-line-chart").addEventListener("click", () => this.presentation.showSlide("slide-gameEnd-line-chart"));
+        gameEndControls.querySelector("button#show-buzz-results-pie-charts").addEventListener("click", () => this.presentation.showSlide("slide-gameEnd-pie-charts"));
+
     }
 
     private startGame(): void {
@@ -211,7 +216,7 @@ export class Operator {
 
 
     public skipClue(): void {
-        this.setAllTeamsState(TeamState.BUZZERS_OFF, true); // the second argument is endLockout
+        this.setAllTeamsState("buzzers-off", true); // the second argument is endLockout
         this.buttonSkipClue.setAttribute("disabled", "disabled");
         this.buttonSkipClue.blur();
         this.stateMachine.goToState("getClueFromJService");
@@ -234,17 +239,15 @@ export class Operator {
     public handleBuzzerPress(keyboardEvent: KeyboardEvent): void {
         const teamNumber = Number(keyboardEvent.key);
         const teamIndex = teamNumber - 1;
-        const teamObj = this.teamArray[teamIndex];
+        const team = this.teamArray[teamIndex];
 
-        this.teamPresentlyAnswering = teamObj;
+        this.teamPresentlyAnswering = team;
 
         this.audioManager.play("teamBuzz");
 
-        teamObj.startAnswer();
+        team.startAnswer();
 
         this.divInstructions.innerHTML = "Did they answer correctly? y / n";
-
-        this.saveCountdownTimerForWaitForBuzzesState();
 
         /*
         this.buzzHistory.records.push({
@@ -262,55 +265,68 @@ export class Operator {
 
     public shouldGameEnd(): boolean {
         return this.gameTimer.getIsFinished() ||
-            this.teamArray.some(teamObj => teamObj.getMoney() >= this.settings.teamMoneyWhenGameShouldEnd);
+            this.teamArray.some(team => team.getMoney() >= this.settings.teamMoneyWhenGameShouldEnd);
     }
 
     public handleLockout(keyboardEvent: KeyboardEvent): void {
         const teamNumber = Number(keyboardEvent.key);
         const teamIndex = teamNumber - 1;
-        const teamObj = this.teamArray[teamIndex];
-        teamObj.canBeLockedOut() && teamObj.startLockout();
+        const team = this.teamArray[teamIndex];
+        team.canBeLockedOut() && team.startLockout();
+    }
+
+
+    private showClueToOperator(clue: Clue) {
+        /*
+        This function only shows the airdate, category, and dollar value to the operator.
+        The state machine will show the clue question after a timeout.
+        */
+        this.divClueWrapper.style.display = ""; //show it by removing "display=none"
+        this.divClueCategory.innerHTML = clue.category.title;
+        this.divClueValue.innerHTML = "$" + clue.value;
+        this.divClueAirdate.innerHTML = clue.airdate.getFullYear().toString();
+        this.trAnswer.style.display = "none";
+        this.divInstructions.innerHTML = "Read aloud the category and dollar value.";
+    };
+
+    private setPresentClue(clue: Clue): void {
+        this.presentClue = clue;
+        this.showClueToOperator(clue);
+        this.presentation.setClue(clue);
+
+        if (clue.category.isSpecialCategory) {
+            this.showSpecialCategoryPrompt();
+        }
+    }
+
+    public isCurrentClueSpecialCategory(): boolean {
+        return this.presentClue.category.isSpecialCategory;
     }
 
     public getClueFromJService(): Promise<void> {
 
-        this.resetDurationForWaitForBuzzesState();
+        this.stateMachine.getCountdownTimerForState("showClueCategoryAndValue").reset();
 
-        function isClueValid(clueObj: Clue): boolean {
-            return clueObj.value !== null &&
-                clueObj.value > 0 &&
-                clueObj.question !== null &&
-                clueObj.question.length > 0 &&
-                clueObj.question !== "=" &&
-                clueObj.answer.length > 0 &&
-                clueObj.category !== null &&
-                clueObj.category.title.length > 0 &&
-                clueObj.category.title !== "=";
-        }
+        const promiseExecutor = (
+            resolveFunc: () => void,
+            rejectFunc: (rejectReason: Error) => void
+        ) => {
+            this.buttonStartGame.blur();
+            this.trQuestion.style.display = "none";
+            this.divInstructions.innerHTML = "Loading clue...";
 
-        function doesClueQuestionHaveMultimedia(clueObj: Clue): boolean {
-            /*
-            Some Jeopardy clues have audio or video, which are shown or played on the 
-            TV show. The J Archive does not have the audio or video, so we need to
-            skip those clues.
-            */
-            const clueQuestion = clueObj.question.toLowerCase();
-            const termsForMultimedia = ["seen here", "heard here"];
-            return termsForMultimedia.some(term => clueQuestion.includes(term));
-        }
+            this.setPresentClue(
+                new Clue(
+                    '[{"id":25876,"answer":"the booster","question":"The first stage of a rocket","value":600,"airdate":"2016-04-20T19:00:00.000Z","created_at":"2022-07-27T22:54:33.633Z","updated_at":"2022-07-27T22:54:33.633Z","category_id":4710,"game_id":5255,"invalid_count":null,"category":{"id":4710,"title":"spacecraft\\" types","created_at":"2022-07-27T22:54:33.521Z","updated_at":"2022-07-27T22:54:33.521Z","clues_count":5}}]'
+                )
+            );
+            resolveFunc();
 
-        const showClueToOperator = (clueObj: Clue) => {
-            /*
-            This function only shows the airdate, category, and dollar value to the operator.
-            The state machine will show the clue question after a timeout.
-            */
-            this.divClueWrapper.style.display = ""; //show it by removing "display=none"
-            this.divClueCategory.innerHTML = clueObj.category.title;
-            this.divClueValue.innerHTML = "$" + clueObj.value;
-            this.divClueAirdate.innerHTML = clueObj.airdateParsed.getFullYear().toString();
-            this.trAnswer.style.display = "none";
-            this.divInstructions.innerHTML = "Read aloud the category and dollar value.";
         };
+        return new Promise<void>(promiseExecutor);
+    }
+
+    public __getClueFromJService__(): Promise<void> {
 
         // Use a recursive helper function so we can do retries.
         const fetchClueHelper = (
@@ -328,22 +344,11 @@ export class Operator {
                     alert(`Error ${xhr.status}: ${xhr.statusText}`);
                 }
 
-                const parsedJson = JSON.parse(xhr.response);
-                const clueObj: Clue = parsedJson[0];
+                const clue = new Clue(xhr.response);
 
-                if (isClueValid(clueObj) && !doesClueQuestionHaveMultimedia(clueObj)) {
+                if (clue.isValid() && !clue.hasMultimedia()) {
 
-                    // remove backslashes
-                    clueObj.question = clueObj.question.replace(/\\/g, "");
-                    clueObj.answer = clueObj.answer.replace(/\\/g, "");
-                    clueObj.category.title = clueObj.category.title.replace(/\\/g, "");
-
-                    // example of what format the airdate is in: "2013-01-25T12:00:00.000Z"
-                    clueObj.airdateParsed = new Date(clueObj.airdate);
-
-                    this.currentClue = clueObj;
-                    showClueToOperator.call(this, clueObj);
-                    this.presentation.setClue(clueObj);
+                    this.setPresentClue(clue);
 
                     // we don't need to return the clue object to the state machine
                     promiseResolveFunc();
@@ -382,84 +387,97 @@ export class Operator {
         this.presentation.fitClueQuestionToScreen();
     }
 
+    public showSpecialCategoryPrompt(): void {
+        this.specialCategoryTitle.innerHTML = this.presentClue.category.specialCategory.displayName;
+        this.specialCategoryPrompt.style.display = "block";
+    }
+
+    public hideSpecialCategoryPrompt(): void {
+        this.specialCategoryPrompt.style.display = "none";
+        this.gameTimer.resume();
+    }
+
+    public showSpecialCategoryOverlay(): void {
+        this.gameTimer.pause();
+
+        this.presentation.showSpecialCategoryPopup(this.presentClue.category.specialCategory);
+
+        const specialCategory = this.presentClue.category.specialCategory;
+        this.specialCategoryPopup.querySelector("#special-category-title").innerHTML = specialCategory.displayName;
+        this.specialCategoryPopup.querySelector("#special-category-description").innerHTML = specialCategory.description;
+        if (specialCategory.example) {
+            this.specialCategoryPopup.querySelector("#special-category-example-category").innerHTML = specialCategory.example.category;
+            this.specialCategoryPopup.querySelector("#special-category-example-question").innerHTML = specialCategory.example.question;
+            this.specialCategoryPopup.querySelector("#special-category-example-answer").innerHTML = specialCategory.example.answer;
+        }
+
+        this.specialCategoryPopup.style.display = "block";
+
+    }
+
+    public hideSpecialCategoryOverlay(): void {
+        this.specialCategoryPopup.style.display = "none";
+        this.presentation.hideSpecialCategoryPopup();
+        this.setPaused(false);
+    }
+
     public handleShowClueQuestion(): void {
         /*
         This method mostly is about showing the clue question to the operator.
         The clue question is already being shown in the presentation because
         the state machine changes the slide.
         */
-        this.setAllTeamsState(TeamState.OPERATOR_IS_READING_QUESTION);
+        this.setAllTeamsState("reading-question");
 
         this.divInstructions.innerHTML = "Read the question out loud. Buzzers open when you press space.";
 
-        this.divClueQuestion.innerHTML = getClueQuestionHtmlWithSubjectInBold(this.currentClue);
+        this.divClueQuestion.innerHTML = this.presentClue.getQuestionHtmlWithSubjectInBold();
         this.trQuestion.style.display = ""; //show it by removing "display=none"
         this.trAnswer.style.display = "none";
 
         this.buttonSkipClue.removeAttribute("disabled");
 
-        function getClueQuestionHtmlWithSubjectInBold(clueObj: Clue): string {
-            /*
-            The person reading the question out loud should emphasize the subject
-            of the question. Look for words that are probably the subject and make them bold.
-            \b means word boundary.
-            */
-            const regex = /\b((this)|(these)|(her)|(his)|(she)|(he)|(here))\b/i;
-            const result = regex.exec(clueObj.question);
-
-            if (result === null) {
-                // didn't find any words to make bold
-                return clueObj.question;
-            } else {
-                const startIndex = result.index;
-                const foundWord = result[0];
-
-                return clueObj.question.substring(0, startIndex)
-                    + '<span class="clue-keyword">' + foundWord + '</span>'
-                    + clueObj.question.substring(startIndex + foundWord.length);
-            }
-        }
-
-
         this.buzzHistory = {
-            clue: this.currentClue,
+            clue: this.presentClue,
             lockoutDurationMillisec: this.settings.durationLockoutMillisec,
             records: [],
             timestampWhenClueQuestionFinishedReading: -1
         }
 
-
-
+        this.hideSpecialCategoryPrompt();
     }
 
     public handleDoneReadingClueQuestion(): void {
         this.audioManager.play("doneReadingClueQuestion");
         this.trAnswer.style.display = ""; //show it by removing "display=none"
-        this.divClueAnswer.innerHTML = this.currentClue.answer;
+        this.divClueAnswer.innerHTML = this.presentClue.answer;
         this.divInstructions.innerHTML = "Wait for people to answer.";
-        this.setAllTeamsState(TeamState.CAN_ANSWER);
+        this.setAllTeamsState("can-answer");
         this.buttonSkipClue.setAttribute("disabled", "disabled");
 
-        this.resetDurationForWaitForBuzzesState();
+        this.stateMachine.getCountdownTimerForState("waitForBuzzes").reset();
 
-        this.teamArray.forEach(teamObj => teamObj.hasBuzzedForCurrentQuestion = false);
-
+        this.teamArray.forEach(team => team.hasBuzzedForCurrentQuestion = false);
         this.buzzHistory.timestampWhenClueQuestionFinishedReading = Date.now();
     }
 
     public handleShowAnswer(): void {
 
         // only save the game if somebody has more than $0
-        if (this.teamArray.some(teamObj => teamObj.getMoney() > 0)) {
+        if (this.teamArray.some(team => team.getMoney() > 0)) {
             this.saveGame();
         }
 
-        this.setAllTeamsState(TeamState.BUZZERS_OFF);
+        this.stateMachine.getCountdownTimerForState("waitForBuzzes").showProgressBarFinished();
+        this.stateMachine.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
+
+        this.setAllTeamsState("buzzers-off");
         this.divInstructions.innerHTML = "Let people read the answer.";
 
-        this.teamArray.forEach(teamObj => {
-            if (!teamObj.hasBuzzedForCurrentQuestion) {
-                teamObj.statistics.questionsNotBuzzed++;
+        this.teamArray.forEach(team => {
+            team.updateMoneyAtEndOfRound();
+            if (!team.hasBuzzedForCurrentQuestion) {
+                team.statistics.questionsNotBuzzed++;
             }
         });
 
@@ -481,21 +499,32 @@ export class Operator {
                 },
                 2)
         );
+        this.questionCount++;
 
     }
 
     public setAllTeamsState(targetState: TeamState, endLockout = false): void {
-        this.teamArray.forEach(teamObj => teamObj.setState(targetState, endLockout));
+        this.teamArray.forEach(team => team.setState(targetState, endLockout));
     }
 
     public canTeamBuzz(keyboardEvent: KeyboardEvent): boolean {
         const teamNumber = Number(keyboardEvent.key);
         const teamIndex = teamNumber - 1;
-        return this.teamArray[teamIndex].canBuzz();
+        if (teamIndex > Operator.teamCount - 1) {
+            return false;
+        } else {
+            return this.teamArray[teamIndex].canBuzz();
+        }
     }
 
     public haveAllTeamsAnswered(): boolean {
-        return this.teamArray.every(teamObj => teamObj.getState() === TeamState.ALREADY_ANSWERED);
+        if (this.settings.allowMultipleAnswersToSameQuestion) {
+            // allow teams to keep answering until time runs out
+            return false;
+        } else {
+            // each team only gets one try to answer a question
+            return this.teamArray.every(team => team.getState() === "already-answered");
+        }
     }
 
     public togglePaused(): void {
@@ -507,7 +536,7 @@ export class Operator {
         this.divPaused.style.display = isPaused ? "" : "none";
         this.stateMachine.setPaused(isPaused);
         this.gameTimer.setPaused(isPaused);
-        this.teamArray.forEach(teamObj => teamObj.setPaused(isPaused));
+        this.teamArray.forEach(team => team.setPaused(isPaused));
         this.presentation.setPaused(isPaused);
     }
 
@@ -520,14 +549,18 @@ export class Operator {
     }
 
     private lookForSavedGame(): void {
-        const divSavedGame = document.querySelector<HTMLDivElement>("div#saved-game-prompt");
+
+        const divMessage = document.querySelector<HTMLDivElement>("div#saved-game-message");
+
+        const divSavedGame = document.querySelector<HTMLDivElement>("div#tab-content-saved-game");
 
         const rawLocalStorageResult = window.localStorage.getItem(Operator.localStorageKey);
         if (rawLocalStorageResult === null) {
-            // no saved game found
-            divSavedGame.style.display = "none";
+            divMessage.innerHTML = "No saved game found in localStorage.";
             return;
         }
+
+        divMessage.innerHTML = "Found a saved game:";
 
         const parsedJson: SavedGameInLocalStorage = JSON.parse(rawLocalStorageResult);
 
@@ -559,9 +592,6 @@ export class Operator {
                 divSavedGame.style.display = "none";
             }
         });
-        document.querySelector("button#saved-game-dismiss").addEventListener("click", () => divSavedGame.style.display = "none");
-
-
     }
 
     private saveGame(): void {
@@ -593,10 +623,21 @@ export class Operator {
     public handleGameEnd(): void {
         this.gameTimer.pause();
 
+        this.divInstructions.innerHTML = "Game over";
+
         // First play the eight high-pitched beeps sound, then play the closing music
         this.audioManager.play("roundEnd")
             .then(() => this.audioManager.play("musicGameEnd"));
 
+        document.querySelector<HTMLDivElement>("div#game-end-controls").style.display = "block";
+
+        this.createTeamRankingTable();
+        this.presentation.hideHeaderAndFooter();
+        createPieCharts(this, this.presentation.getDivForPieCharts(), this.teamArray);
+        createLineChart(this.presentation.getDivForLineChart(), this.presentation.getDivForLineChartLegend(), this.teamArray);
+    }
+
+    private createTeamRankingTable() {
         // sort teams by money descending
         const shallowCopy = this.teamArray.slice();
         function comparator(team1: Team, team2: Team) {
@@ -607,11 +648,11 @@ export class Operator {
         const html: string[] = [];
         html.push("<table><tbody>");
 
-        shallowCopy.forEach(teamObj => {
+        shallowCopy.forEach(team => {
             html.push(
                 "<tr>" +
-                "<td>" + teamObj.teamName + "</td>" +
-                "<td>$" + teamObj.getMoney().toLocaleString() + "</td>" +
+                "<td>" + team.teamName + "</td>" +
+                "<td>$" + team.getMoney().toLocaleString() + "</td>" +
                 "</tr>"
             );
         });
@@ -619,44 +660,6 @@ export class Operator {
         html.push("</tbody></table>");
 
         this.presentation.setTeamRankingHtml(html.join(""));
-        this.presentation.hideHeaderAndFooter();
-
-
-        this.createStatisticsCharts();
-    }
-
-    private createStatisticsCharts() {
-        createPieCharts(this.presentation.getDivForPieCharts(), this.teamArray);
-        createLineChart(this.presentation.getDivForLineChart(), this.presentation.getDivForLineChartLegend(), this.teamArray);
-    }
-
-
-
-    private resetDurationForWaitForBuzzesState(): void {
-        this.resetDurationForWaitForBuzzState = true;
-    }
-
-    public saveCountdownTimerForWaitForBuzzesState(): void {
-        this.countdownTimerForWaitForBuzzesState = this.stateMachine.getCountdownTimer();
-    }
-
-    public getCountdownTimerSource(): CountdownTimerSource {
-        if (this.resetDurationForWaitForBuzzState) {
-            this.resetDurationForWaitForBuzzState = false;
-            return {
-                type: CountdownOperation.CreateNew,
-                duration: this.settings.timeoutWaitForBuzzesMillisec
-            };
-        } else {
-            return {
-                type: CountdownOperation.ResumeExisting,
-                countdownTimerToResume: this.countdownTimerForWaitForBuzzesState
-            };
-        }
-    }
-
-    public updateTeamMoneyAtEndOfRound(): void {
-        this.teamArray.forEach(t => t.updateMoneyAtEndOfRound());
     }
 
 
@@ -666,6 +669,10 @@ export class Operator {
 
     public getTeamArray(): Team[] {
         return this.teamArray;
+    }
+
+    public getQuestionCount(): number {
+        return this.questionCount;
     }
 
 }

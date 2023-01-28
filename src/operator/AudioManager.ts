@@ -1,9 +1,5 @@
-interface AudioElements {
-    [name: string]: HTMLAudioElement;
-}
-
 export class AudioManager {
-    private readonly audio: AudioElements;
+    private readonly audioElements: { [name: string]: HTMLAudioElement };
 
     /*
     In the Jeopardy TV show, three low-pitch beeps happens in TWO situations:
@@ -21,7 +17,7 @@ export class AudioManager {
     */
 
     constructor() {
-        this.audio = {
+        this.audioElements = {
             answerCorrect: document.querySelector<HTMLAudioElement>("audio#answer-correct"),
             answerIncorrectOrAnswerTimeout: document.querySelector<HTMLAudioElement>("audio#answer-incorrect"),
             questionTimeout: document.querySelector<HTMLAudioElement>("audio#question-timeout"),
@@ -32,7 +28,7 @@ export class AudioManager {
             musicGameStart: document.querySelector<HTMLAudioElement>("audio#music-game-start"),
             doneReadingClueQuestion: document.querySelector<HTMLAudioElement>("audio#done-reading-clue-question")
         };
-        Object.freeze(this.audio);
+        Object.freeze(this.audioElements);
     }
 
     public play(audioName: string): Promise<void> {
@@ -43,7 +39,7 @@ export class AudioManager {
         - You might also want to go to Site Settings (chrome://settings/content)
           and set 'Sound' to 'Allow' for this domain.
         */
-        const audio = this.audio[audioName];
+        const audio = this.audioElements[audioName];
         if (!audio) {
             console.warn(`can't play audio with name "${audioName}", not found`);
             return null;

@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { Clue } from "../operator/Operator";
+import { Clue } from "../Clue";
 
 export interface BuzzHistoryForClue {
 

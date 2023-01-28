@@ -1,31 +1,32 @@
 import Viz from "@aduh95/viz.js";
 import { Operator } from "../operator/Operator";
-import { generateDotFileForGraphviz } from "../stateMachine/generateDotFileForGraphviz";
-import { GraphvizViewer } from "./GraphvizViewer";
+import { stateMachineToGraphviz } from "./generateDotFileForGraphviz";
+import { StateMachineViewer } from "./StateMachineViewer";
 
 window.addEventListener('DOMContentLoaded', () => {
 
     if (!window.opener) {
-        document.body.innerText = "no window.opener";
+        document.body.innerHTML = "no window.opener";
         return;
     }
 
+    window.opener.addEventListener("unload", () => close());
+
     const operator = ((window.opener as any).operator as Operator);
     if (!operator) {
-        document.body.innerText = "no window.opener.operator";
+        document.body.innerHTML = "no window.opener.operator";
         return;
     }
 
     const stateMachine = operator.getStateMachine();
     if (!stateMachine) {
-        document.body.innerText = "no window.opener.operator.stateMachine";
+        document.body.innerHTML = "no window.opener.operator.stateMachine";
         return;
     }
 
-    // todo rename this method
-    const dotFileString = generateDotFileForGraphviz(stateMachine.getAllStates());
+    const graphvizLanguageString = stateMachineToGraphviz(stateMachine.getAllStates());
 
-    async function generateSvgFromDotFile(): Promise<string> {
+    async function getSvgString(): Promise<string> {
         // from https://github.com/aduh95/viz.js#using-a-bundler
         const viz = new Viz({
             worker: new Worker(
@@ -33,17 +34,19 @@ window.addEventListener('DOMContentLoaded', () => {
                 { type: "module" }
             )
         });
-        return viz.renderString(dotFileString);
+        return viz.renderString(graphvizLanguageString);
     }
 
-    generateSvgFromDotFile()
+    getSvgString()
         .then((svgString) => {
             document.body.innerHTML = svgString;
 
+            // the body will now contain an <svg> tag
             const svgElement = document.querySelector("svg");
-            svgElement.style.width = "100%";
-            const graphvizViewer = new GraphvizViewer(svgElement);
-            stateMachine.handleGraphvizViewerReady(graphvizViewer);
+            svgElement.setAttribute("width", "100%");
+            svgElement.removeAttribute("height");
+            const stateMachineViewer = new StateMachineViewer(svgElement);
+            stateMachine.handleStateMachineViewerReady(stateMachineViewer);
 
         })
         .catch((error) => {

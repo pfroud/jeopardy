@@ -1,9 +1,17 @@
-import { StateMachineState, StateMachineTransition, TransitionType } from "./stateInterfaces";
+import { StateMachineState, StateMachineTransition } from "../stateMachine/stateInterfaces";
 
-
-export function generateDotFileForGraphviz(stateArray: StateMachineState[]): string {
-
-    // TODO need to add onExit and onEnter functions!!!!
+/**
+ * Convert state machine states into a string of the Graphviz graph description language.
+ * The language is called DOT which is difficult to include in function names.
+ * See https://graphviz.org/doc/info/lang.html
+ * 
+ * "dot" is also the name of the Graphviz executable to draw directed graphs.
+ * See https://graphviz.org/docs/layouts/dot/
+ * 
+ * @param stateArray the state machine states to convert into Graphviz
+ * @returns a DOT language string
+ */
+export function stateMachineToGraphviz(stateArray: StateMachineState[]): string {
 
     const dotFileLines: string[] = [];
     dotFileLines.push('digraph jeopardy {');
@@ -26,7 +34,7 @@ export function generateDotFileForGraphviz(stateArray: StateMachineState[]): str
 
 
             switch (transition.type) {
-                case TransitionType.Keyboard: {
+                case "keyboard": {
                     let transitionLabel = "keyboard: ";
                     if (transition.keyboardKeys === " ") {
                         transitionLabel += "space";
@@ -48,7 +56,7 @@ export function generateDotFileForGraphviz(stateArray: StateMachineState[]): str
                     break;
 
                 }
-                case TransitionType.Promise: {
+                case "promise": {
                     let transitionLabel = transition.type.toString();
                     if (transition.guardCondition) {
                         transitionLabel += ` [${transition.guardCondition.name.replace("bound ", "")}] `;
@@ -57,8 +65,10 @@ export function generateDotFileForGraphviz(stateArray: StateMachineState[]): str
                     dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
                 }
-                case TransitionType.Timeout: {
-                    let transitionLabel = transition.type.toString() + ": " + transition.countdownTimerSource;
+                case "timeout": {
+                    let transitionLabel = transition.type.toString() + ": ";
+
+                    transitionLabel += transition.behavior + " " + transition.initialDuration + "ms";
 
                     if (transition.guardCondition) {
                         transitionLabel += ` [${transition.guardCondition.name.replace("bound ", "")}] `;
@@ -72,7 +82,7 @@ export function generateDotFileForGraphviz(stateArray: StateMachineState[]): str
                     dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
                 }
-                case TransitionType.ManualTrigger: {
+                case "manualTrigger": {
                     let transitionLabel = transition.type.toString() + ': \\"' + transition.triggerName.replace("manualTrigger_", "") + '\\"';
                     if (transition.guardCondition) {
                         transitionLabel += ` [${transition.guardCondition.name.replace("bound ", "")}] `;
@@ -86,7 +96,7 @@ export function generateDotFileForGraphviz(stateArray: StateMachineState[]): str
                     break;
                 }
 
-                case TransitionType.If: {
+                case "if": {
                     const condition = transition.condition.name.replace("bound ", "");
 
                     let labelThen = "if(" + condition + ")";

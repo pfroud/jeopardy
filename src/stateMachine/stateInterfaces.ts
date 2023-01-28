@@ -1,26 +1,16 @@
-import { CountdownTimer } from "../CountdownTimer";
 
 export interface StateMachineState {
     name: string;
     presentationSlideToShow?: string;
-    onEnter?: (keyboardEvent?: KeyboardEvent) => void;// TODO why does this get a keyboard event??
+    onEnter?: (keyboardEvent?: KeyboardEvent) => void; //keyboard event is used for Operator.handleBuzzerPress()
     onExit?: () => void;
     transitions: StateMachineTransition[];
 }
 
 export type StateMachineTransition = ManualTransition | IfTransition | PromiseTransition | TimeoutTransition | KeyboardTransition;
 
-// need to specify string values for enum so it appears in graphviz dot file
-export enum TransitionType {
-    ManualTrigger = "manualTrigger",
-    If = "if",
-    Promise = "promise",
-    Timeout = "timeout",
-    Keyboard = "keyboard"
-}
-
 export interface ManualTransition {
-    type: TransitionType.ManualTrigger;
+    type: "manualTrigger";
     triggerName: string;
     destination: string;
     onTransition?: () => void;
@@ -29,8 +19,8 @@ export interface ManualTransition {
 
 
 export interface IfTransition {
-    type: TransitionType.If;
-    condition: (arg0: KeyboardEvent) => boolean;// TODO why does this get a keyboard event??
+    type: "if";
+    condition: () => boolean;
     then: {
         destination: string;
         onTransition?: () => void;
@@ -43,39 +33,31 @@ export interface IfTransition {
 
 
 export interface PromiseTransition {
-    type: TransitionType.Promise;
+    type: "promise";
     functionToGetPromise: () => Promise<void>;
     destination: string;
     guardCondition?: () => boolean;
 }
 
 export interface TimeoutTransition {
-    type: TransitionType.Timeout;
+    type: "timeout";
     destination: string;
-    countdownTimerShowDots?: boolean;
-    countdownTimerSource: CountdownTimerSource | (() => CountdownTimerSource);
+    behavior: CountdownBehavior;
+    initialDuration: number;
+    isWaitingForTeamToAnswerAfterBuzz?: boolean;
     onTransition?: () => void; //called when time runs out
     guardCondition?: () => boolean;
 }
 
-// https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions
-export enum CountdownOperation {
-    CreateNew,
-    ResumeExisting
+export enum CountdownBehavior {
+    // need to specify string values for enum so it appears in graphviz dot file
+    ResetTimerEveryTimeYouEnterTheState = "new",
+    ContinueTimerUntilManuallyReset = "continue"
 }
-export interface CreateNewCountdownTimer {
-    type: CountdownOperation.CreateNew;
-    duration: number;
-}
-export interface ResumeExistingCountdownTimer {
-    type: CountdownOperation.ResumeExisting;
-    countdownTimerToResume: CountdownTimer;
-}
-export type CountdownTimerSource = CreateNewCountdownTimer | ResumeExistingCountdownTimer;
 
 
 export interface KeyboardTransition {
-    type: TransitionType.Keyboard;
+    type: "keyboard";
     keyboardKeys: string;
     destination: string;
     onTransition?: (keyboardEvent: KeyboardEvent) => void;

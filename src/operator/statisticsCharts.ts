@@ -2,16 +2,18 @@ import * as Chartist from "chartist";
 import { Team } from "../Team";
 import { Operator } from "./Operator";
 
-export function createPieCharts(divForPieCharts: HTMLDivElement, teams: Team[]): void {
+export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElement, teams: Team[]): void {
 
-    teams.forEach(teamObj => {
+    const questionCount = operator.getQuestionCount();
+
+    teams.forEach(team => {
         const chartContainer = document.createElement("div");
         chartContainer.className = "team-pie-chart";
         divForPieCharts.appendChild(chartContainer);
 
         const chartTitleDiv = document.createElement("div");
         chartTitleDiv.className = "chart-title";
-        chartTitleDiv.innerText = teamObj.teamName;
+        chartTitleDiv.innerText = team.teamName;
         chartContainer.appendChild(chartTitleDiv);
 
         const chartData: Chartist.PieChartData = {
@@ -19,23 +21,26 @@ export function createPieCharts(divForPieCharts: HTMLDivElement, teams: Team[]):
         };
 
         const seriesToAdd = [{
-            value: teamObj.statistics.questionsNotBuzzed,
+            value: team.statistics.questionsNotBuzzed,
             className: "not-buzzed"
         }, {
-            value: teamObj.statistics.questionsBuzzedThenAnsweredRight,
+            value: team.statistics.questionsBuzzedThenAnsweredRight,
             className: "buzzed-then-answered-right"
         }, {
-            value: teamObj.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut,
+            value: team.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut,
             className: "buzzed-then-answered-wrong-or-timed-out"
         }];
-
+        // only add if non-zero
         seriesToAdd.forEach(candidate => { if (candidate.value > 0) chartData.series.push(candidate) });
 
         if (chartData.series.length == 0) {
             return;
         }
 
-        // https://gionkunz.github.io/chartist-js/api-documentation.html#chartistpie-declaration-defaultoptions
+        /*
+        https://gionkunz.github.io/chartist-js/api-documentation.html#chartistpie-declaration-defaultoptions
+        You have to find the section called "declaration defaultOptions" and click the "show code" button!!
+         */
         const chartOptions: Chartist.PieChartOptions = {
             width: "200px",
             height: "200px",
@@ -78,7 +83,19 @@ export function createPieCharts(divForPieCharts: HTMLDivElement, teams: Team[]):
             labelPosition: "center"
         };
 
-        new Chartist.PieChart(chartContainer, chartData, chartOptions);
+        const pieChart = new Chartist.PieChart(chartContainer, chartData, chartOptions);
+
+        /*
+        If any of the series fills the entire pie chart, Chartist puts the label in the center
+        of the chart, but we already put our own label for "Team #" in the center. In that 
+        case we will manually move the Chartist label.
+        */
+        const needToManuallyMoveLabel = seriesToAdd.map(obj => obj.value).some(n => n == questionCount);
+        if (needToManuallyMoveLabel) {
+            pieChart.on("created", () =>
+                chartContainer.querySelector("svg text").setAttribute("dy", "20")
+            );
+        }
     });
 }
 
@@ -96,10 +113,10 @@ export function createLineChart(divForLineChart: HTMLDivElement, legendContainer
 
     const lineChartDataForAllTeams: LineChartSeriesData[] =
         teams.map(
-            (team, index) => ({
-                className: `team-${index + 1}`,
+            (team, teamIndex) => ({
+                className: `team-${teamIndex + 1}`,
                 data: team.statistics.moneyAtEndOfEachRound.map(
-                    (value, index) => ({ x: index, y: value })
+                    (money, moneyIndex) => ({ x: moneyIndex, y: money })
                 )
             })
         );
@@ -109,6 +126,10 @@ export function createLineChart(divForLineChart: HTMLDivElement, legendContainer
         series: lineChartDataForAllTeams
     };
 
+    /*
+    https://gionkunz.github.io/chartist-js/api-documentation.html#chartistline-declaration-defaultoptions
+    You have to find the section called "declaration defaultOptions" and click the "show code" button!!
+    */
     const chartOptions: Chartist.LineChartOptions = {
         axisX: {
             showGrid: false,
@@ -129,8 +150,12 @@ export function createLineChart(divForLineChart: HTMLDivElement, legendContainer
 
     new Chartist.LineChart(divForLineChart, chartData, chartOptions);
 
-    // create legend
-    for (let i = 0; i < Operator.teamCount; i++) {
+    /*
+     We need to create the legend by hand.
+     There is a package called chartist-plugin-legend but 
+     plugins are not yet supported in chartist v1 (only v0.x).
+     */
+    for (let i = 0; i < teams.length; i++) {
 
         const legendRow = document.createElement("div");
         legendRow.className = "line-chart-legend-row";
@@ -161,7 +186,7 @@ export function createLineChart(divForLineChart: HTMLDivElement, legendContainer
         point.setAttribute("y2", String(svgHeight / 2));
         group.appendChild(point);
 
-        legendRow.append(`Team ${i + 1}`);
+        legendRow.append(teams[i].teamName);
 
         legendContainer.appendChild(legendRow);
 

@@ -10,11 +10,11 @@
     <link rel="stylesheet" href="font/swiss911/swiss911.css">
     <link rel="stylesheet" href="scss/statisticsChart.scss">
     <link rel="stylesheet" href="scss/progressBarForPresentation.scss">
+    <link rel="stylesheet" href="scss/specialCategoriesForPresentation.scss">
     <link rel="stylesheet" href="scss/presentation.scss">
 </head>
 
 <body>
-    <script type="module" src="Presentation.ts"></script>
     <script type="module" src="main.ts"></script>
 
     <header>
@@ -30,17 +30,57 @@
         &#9612;&#9612; PAUSED
     </div>
 
+    <!-- Blurs everything behind the special category popup
+        using CSS backdrop-filter -->
+    <div id="special-category-backdrop"></div>
+
+    <div id="special-category-popup" class="offscreen-left">
+        <div id="info-icon">i</div>
+        <span id="special-category-title"></span>
+
+        <p id="special-category-description"></p>
+
+        <p>Example:</p>
+
+        <!-- Add wrapper because border-radius does not work on <table> element -->
+        <div id="special-category-example-wrapper">
+            <table id="special-category-example-table">
+                <tr>
+                    <td>
+                        Category:<br>
+                        Question:<br>
+                        Answer:<br>
+                    </td>
+                    <td>
+                        <span id="special-category-example-category"></span><br>
+                        <span id="special-category-example-question"></span><br>
+                        <span id="special-category-example-answer"></span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
     <main>
+        <!--
+            The presentation uses a slideshow metaphor. There is always exactly one
+            slide visible at a time.
+        -->
         <div class="presentation-slide" id="slide-jeopardy-logo">
             <img id="logo-jeopardy" src="img/j-logo.png" alt="Jeopardy logo">
+            <!-- The same image becomes its own shadow using a bunch of CSS -->
             <img id="logo-jeopardy-shadow" src="img/j-logo.png" alt="Jeopardy logo shadow">
         </div>
 
         <div class="presentation-slide" id="slide-spinner">
+            <!-- Visible when we are loading a question from jService -->
             <div id="spinner"></div>
         </div>
 
         <div class="presentation-slide" id="slide-clue-category-and-value">
+            <!-- This slide shows info about the upcoming question in big text
+                centered on the screen. It will then continue to be visible in
+                the header. -->
             <div id="clue-category-big"></div>
             <div id="clue-value-big"></div>
             <div id="clue-airdate-big"></div>
@@ -54,22 +94,16 @@
             <div id="clue-answer-text"></div>
         </div>
 
-        <div class="presentation-slide" id="slide-gameEnd-team-ranking-list">
-
+        <div class="presentation-slide" id="slide-gameEnd-team-ranking-table">
             <h1>Game over!</h1>
             <h2>Team ranking</h2>
-
             <div id="team-ranking"></div>
-
         </div>
 
         <div class="presentation-slide" id="slide-gameEnd-pie-charts">
-
             <h1>Game over!</h1>
-            <h2>Team buzz results</h2>
-
+            <h2>Buzz results</h2>
             <div id="pie-charts"></div>
-
             <div id="pie-chart-legend">
                 <div class="pie-chart-legend-row" id="not-buzzed">
                     <span class="color-swatch"></span> Not buzzed
@@ -84,21 +118,18 @@
         </div>
 
         <div class="presentation-slide" id="slide-gameEnd-line-chart">
-
             <h1>Game over!</h1>
-            <h2>Team buzz results</h2>
-
+            <h2>Money over time</h2>
             <div id="y-axis-label">Money</div>
             <div id="line-chart"></div>
             <div id="line-chart-legend"></div>
             <div id="x-axis-label">Question number</div>
-
         </div>
 
     </main>
 
     <footer>
-        <!-- generated at runtime -->
+        <!-- contents of the footer is generated at runtime -->
     </footer>
 
 
