@@ -23,29 +23,21 @@ export interface BuzzHistoryRecord {
 export type BuzzResult = BuzzResultTooEarly | BuzzResultTooLate | BuzzResultStartAnswer | BuzzResultIgnored
 
 interface BuzzResultTooEarly {
-    type: BuzzResultEnum.TOO_EARLY;
+    type: "too-early";
 }
 interface BuzzResultTooLate {
-    type: BuzzResultEnum.TOO_LATE;
+    type: "too-late";
 }
 interface BuzzResultStartAnswer {
-    type: BuzzResultEnum.START_ANSWERING;
+    type: "start-answering";
     answeredCorrectly: boolean;
     endTimestamp: number;
 }
 
 interface BuzzResultIgnored {
-    type: BuzzResultEnum.IGNORE;
+    type: "ignore";
     reason: string;
 }
-
-export enum BuzzResultEnum {
-    TOO_EARLY = "too early",
-    TOO_LATE = "too late",
-    START_ANSWERING = "start answering",
-    IGNORE = "ignore"
-}
-
 
 export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue): void {
     const svgWidth = 800;
@@ -97,11 +89,13 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
 
     const rowsArray: d3.Selection<SVGGElement, unknown, null, undefined>[] = [];
 
+
     for (let i = 0; i < 8; i++) {
         const group = rowsArray[i] = rowsGroup.append("g")
             .attr("id", `row-${i}`)
             .attr("transform", `translate(0, ${rowHeight * i})`);
 
+        // shaded background for alternate teams
         if (i % 2 == 0) {
             group.append("rect")
                 .attr("x", 0)
@@ -111,7 +105,7 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
                 .attr("fill", "#eee");
         }
 
-
+        // horizontal lines to separate teams
         group.append("line")
             .attr("x1", 0)
             .attr("y1", rowHeight)
@@ -121,6 +115,7 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
             .attr("stroke-width", 1)
             ;
 
+        // team name
         group.append("text")
             .attr("x", "10")
             .attr("y", rowHeight / 2)
@@ -129,6 +124,7 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
 
     }
 
+    // vertical line which shows when the operator pressed space
     groupContent.append("line")
         .attr("id", "operator-finished-reading-question")
         .attr("x1", scale(timestampDoneReading))
@@ -142,7 +138,8 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
         const groupForTeam = rowsArray[record.teamNumber];
         const yForBars = (rowHeight / 2) - (barHeight / 2);
         switch (record.result.type) {
-            case BuzzResultEnum.TOO_EARLY:
+            case "too-early":
+                // create a red bar
                 groupForTeam.append("rect")
                     .attr("x", scale(record.timestamp))
                     .attr("y", yForBars)
@@ -153,7 +150,9 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
                     .attr("stroke-width", 1);
 
                 break;
-            case BuzzResultEnum.START_ANSWERING:
+            case "start-answering":
+
+                // create a blue bar
                 groupForTeam.append("rect")
                     .attr("x", scale(record.timestamp))
                     .attr("y", yForBars)
@@ -164,6 +163,7 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
                     .attr("stroke-width", 1);
 
                 /*
+                // shade the entire area when the team is answering
                 groupContent.append("rect")
                     .attr("id", "")
                     .attr("x", scale(record.timestamp))
@@ -178,6 +178,8 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
                 break;
         }
 
+        // circle which shows every time the buzzer switch went down.
+        // a circle is bad because it has a lot of width. 
         groupForTeam.append("circle")
             .attr("cx", scale(record.timestamp))
             .attr("cy", rowHeight / 2)

@@ -1,3 +1,4 @@
+import { BuzzHistoryForClue, BuzzResult } from "../buzz-history/buzzHistoryForClue";
 import { Clue } from "../Clue";
 import { CountdownTimer } from "../CountdownTimer";
 import { Presentation } from "../presentation/Presentation";
@@ -5,9 +6,7 @@ import { Settings } from "../Settings";
 import { StateMachine } from "../stateMachine/StateMachine";
 import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
 import { AudioManager } from "./AudioManager";
-import { SpecialCategory } from "./specialCategories";
 import { createLineChart, createPieCharts } from "./statisticsCharts";
-import { BuzzHistoryForClue, BuzzResultEnum, BuzzResult } from "../buzz-history/buzzHistoryForClue";
 
 interface SavedGameInLocalStorage {
     gameTimerRemainingMillisec: number,
@@ -133,19 +132,19 @@ export class Operator {
                 switch (teamObj.getState()) {
                     case "can-answer":
                         result = {
-                            type: BuzzResultEnum.START_ANSWERING,
+                            type: "start-answering",
                             answeredCorrectly: true,
                             endTimestamp: Date.now()
                         };
                         break;
                     case "reading-question":
                         result = {
-                            type: BuzzResultEnum.TOO_EARLY,
+                            type: "too-early",
                         };
                         break;
                     default:
                         result = {
-                            type: BuzzResultEnum.IGNORE,
+                            type: "ignore",
                             reason: teamObj.getState()
                         };
                         break;
@@ -484,6 +483,8 @@ export class Operator {
         console.log(
             JSON.stringify(
                 this.buzzHistory,
+                null,
+                /*
                 (key, value) => {
                     if (key === "clue") {
                         return null;
@@ -496,7 +497,7 @@ export class Operator {
                     } else {
                         return value;
                     }
-                },
+                },*/
                 2)
         );
         this.questionCount++;

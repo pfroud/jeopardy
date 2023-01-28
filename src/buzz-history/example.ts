@@ -1,4 +1,4 @@
-import { BuzzHistoryForClue, BuzzResultEnum } from "./buzzHistoryForClue";
+import { BuzzHistoryForClue } from "./buzzHistoryForClue";
 
 export const exampleBuzzHistory: BuzzHistoryForClue = {
     "clue": null,
@@ -9,7 +9,7 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             "teamNumber": 1,
             "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
             "result": {
-                "type": BuzzResultEnum.TOO_EARLY
+                "type": "too-early"
             }
         },
         {
@@ -17,7 +17,7 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             "teamNumber": 1,
             "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
             "result": {
-                "type": BuzzResultEnum.IGNORE,
+                "type": "ignore",
                 "reason": "lockout"
             }
         },
@@ -26,7 +26,7 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             "teamNumber": 1,
             "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
             "result": {
-                "type": BuzzResultEnum.IGNORE,
+                "type": "ignore",
                 "reason": "lockout"
             }
         },
@@ -35,7 +35,7 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             "teamNumber": 1,
             "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
             "result": {
-                "type": BuzzResultEnum.TOO_EARLY
+                "type": "too-early"
             }
         },
         {
@@ -43,7 +43,7 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             "teamNumber": 1,
             "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
             "result": {
-                "type": BuzzResultEnum.IGNORE,
+                "type": "ignore",
                 "reason": "lockout"
             }
         },
@@ -52,7 +52,7 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             "teamNumber": 1,
             "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
             "result": {
-                "type": BuzzResultEnum.IGNORE,
+                "type": "ignore",
                 "reason": "lockout"
             }
         },
@@ -61,7 +61,7 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             "teamNumber": 1,
             "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
             "result": {
-                "type": BuzzResultEnum.TOO_EARLY
+                "type": "too-early"
             }
         },
         {
@@ -69,7 +69,7 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             "teamNumber": 1,
             "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
             "result": {
-                "type": BuzzResultEnum.IGNORE,
+                "type": "ignore",
                 "reason": "lockout"
             }
         },
@@ -78,7 +78,7 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             "teamNumber": 1,
             "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
             "result": {
-                "type": BuzzResultEnum.IGNORE,
+                "type": "ignore",
                 "reason": "lockout"
             }
         },
@@ -87,9 +87,17 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             "teamNumber": 2,
             "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
             "result": {
-                "type": BuzzResultEnum.START_ANSWERING,
+                "type": "start-answering",
                 "answeredCorrectly": true,
                 "endTimestamp": 1664589173247
+            }
+        },
+        {
+            "timestamp": 1664589173800,
+            "teamNumber": 3,
+            "source": "manually typed my peter",
+            "result": {
+                "type": "too-late"
             }
         }
     ],
