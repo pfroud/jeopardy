@@ -187,12 +187,16 @@ export class Team {
         divBuzzerDisplay.classList.add("buzzer-show");
         divBuzzerDisplay.classList.add("not-pressed");
 
+        // https://parceljs.org/languages/svg/#url-references
+        const switchClosedSvg = new URL("./presentation/img/switch-closed.svg", import.meta.url);
+        const switchOpenSvg = new URL("./presentation/img/switch-opened.svg", import.meta.url);
+
         const imgSwitchClosed = document.createElement("img");
-        imgSwitchClosed.setAttribute("src", "img/switch-closed.svg");
+        imgSwitchClosed.setAttribute("src", switchClosedSvg.toString());
         imgSwitchClosed.classList.add("buzzer-pressed");
 
         const imgSwitchOpened = document.createElement("img");
-        imgSwitchOpened.setAttribute("src", "img/switch-opened.svg");
+        imgSwitchOpened.setAttribute("src", switchOpenSvg.toString());
         imgSwitchOpened.classList.add("buzzer-not-pressed");
 
         divBuzzerDisplay.append(imgSwitchClosed);
