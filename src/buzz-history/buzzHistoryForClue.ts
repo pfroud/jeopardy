@@ -64,22 +64,26 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
         .attr("width", svgWidth)
         .attr("height", svgHeight);
 
+    // purpose of the content group is to move stuff in from the margins
     const groupContent = svg.append("g")
         .attr("id", "content")
         .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    const groupAxis = groupContent.append("g")
+    const groupAxis = svg.append("g")
         .attr("id", "axis")
-        .attr("transform", `translate(0, ${contentHeight})`);
+        .attr("transform", `translate(${margin.left}, ${contentHeight})`);
 
-    const scale = d3.scaleLinear()
+    const initialScale = d3.scaleLinear()
         .domain([timestampDoneReading - spaceBeforeMillisec, timestampDoneReading + spaceAfterMillisec])
         .range([0, contentWidth]);
 
-    const axis = d3.axisBottom<number>(scale)
+    let zoomedScale = initialScale;
+
+    const axis = d3.axisBottom<number>(zoomedScale)
         .ticks(4)
         .tickSizeOuter(0)
         .tickFormat(n => (n - timestampDoneReading) + "ms")
+        // .tickValues([-100, 0, 100, 200, 300].map(n => timestampDoneReading + n))
         ;
 
     groupAxis.call(axis);
@@ -89,6 +93,31 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
 
     const rowsArray: d3.Selection<SVGGElement, unknown, null, undefined>[] = [];
 
+    function handleZoom(zoomEvent: d3.D3ZoomEvent<SVGSVGElement, unknown>) {
+        // console.log(zoomEvent.transform.toString());
+
+        groupContent.attr("transform",
+            `translate(${margin.left + zoomEvent.transform.x}, ${margin.top}) scale(${zoomEvent.transform.k} 1)`);
+
+        zoomedScale = zoomEvent.transform.rescaleX(initialScale);
+
+        // pass the updated scale to the axis
+        axis.scale(zoomedScale);
+
+        // draw the updated axis
+        groupAxis.call(axis);
+
+        // TODO: redraw the diagram after changing zoomedScale.
+
+    }
+
+    // https://www.d3indepth.com/zoom-and-pan/
+    // https://observablehq.com/@d3/pan-zoom-axes
+    const zoomController = d3.zoom<SVGSVGElement, unknown>()
+        .on("zoom", handleZoom)
+        ;
+
+    svg.call(zoomController);
 
     for (let i = 0; i < 8; i++) {
         const group = rowsArray[i] = rowsGroup.append("g")
@@ -127,9 +156,9 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
     // vertical line which shows when the operator pressed space
     groupContent.append("line")
         .attr("id", "operator-finished-reading-question")
-        .attr("x1", scale(timestampDoneReading))
+        .attr("x1", zoomedScale(timestampDoneReading))
         .attr("y1", 0)
-        .attr("x2", scale(timestampDoneReading))
+        .attr("x2", zoomedScale(timestampDoneReading))
         .attr("y2", contentHeight)
         .attr("stroke", "black")
         .attr("stroke-width", 1);
@@ -141,9 +170,9 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
             case "too-early":
                 // create a red bar
                 groupForTeam.append("rect")
-                    .attr("x", scale(record.timestamp))
+                    .attr("x", zoomedScale(record.timestamp))
                     .attr("y", yForBars)
-                    .attr("width", scale(history.lockoutDurationMillisec) - scale(0))
+                    .attr("width", zoomedScale(history.lockoutDurationMillisec) - zoomedScale(0))
                     .attr("height", barHeight)
                     .attr("fill", "red")
                     .attr("stroke", "black")
@@ -154,9 +183,9 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
 
                 // create a blue bar
                 groupForTeam.append("rect")
-                    .attr("x", scale(record.timestamp))
+                    .attr("x", zoomedScale(record.timestamp))
                     .attr("y", yForBars)
-                    .attr("width", scale(record.result.endTimestamp))
+                    .attr("width", zoomedScale(record.result.endTimestamp))
                     .attr("height", barHeight)
                     .attr("fill", "lightblue" /*record.result.answeredCorrectly ? "green" : "orange"*/)
                     .attr("stroke", "black")
@@ -181,7 +210,7 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
         // circle which shows every time the buzzer switch went down.
         // a circle is bad because it has a lot of width. 
         groupForTeam.append("circle")
-            .attr("cx", scale(record.timestamp))
+            .attr("cx", zoomedScale(record.timestamp))
             .attr("cy", rowHeight / 2)
             .attr("r", dotRadius)
             .attr("fill", "black")
