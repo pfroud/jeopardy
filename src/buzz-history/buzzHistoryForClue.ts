@@ -1,5 +1,5 @@
 import { Clue } from "../Clue";
-import { select, Selection } from "d3-selection";
+import { select, Selection, BaseType } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 import { axisBottom } from "d3-axis";
 import { zoom, D3ZoomEvent } from "d3-zoom";
@@ -7,11 +7,7 @@ import { zoom, D3ZoomEvent } from "d3-zoom";
 export interface BuzzHistoryForClue {
 
     clue: Clue;
-    /*
-    Should I make a separate data structure to keep track of records
-    for each team, or should the team number be a field in the record?
-    */
-    records: BuzzHistoryRecord[];
+    records: BuzzHistoryRecord[][];
     timestampWhenClueQuestionFinishedReading: number;
     lockoutDurationMillisec: number
 }
@@ -91,16 +87,14 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
 
     groupAxis.call(axis);
 
-    const rowsGroup = groupContent.append("g")
-        .attr("id", "rows");
-
-    const rowsArray: Selection<SVGGElement, unknown, null, undefined>[] = [];
+    ///////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////// Pan & zoom //////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////
 
     function handleZoom(zoomEvent: D3ZoomEvent<SVGSVGElement, unknown>) {
         // console.log(zoomEvent.transform.toString());
 
-        groupContent.attr("transform",
-            `translate(${margin.left + zoomEvent.transform.x}, ${margin.top}) scale(${zoomEvent.transform.k} 1)`);
+        // groupContent.attr("transform",`translate(${margin.left + zoomEvent.transform.x}, ${margin.top}) scale(${zoomEvent.transform.k} 1)`);
 
         zoomedScale = zoomEvent.transform.rescaleX(initialScale);
 
@@ -110,7 +104,7 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
         // draw the updated axis
         groupAxis.call(axis);
 
-        // TODO: redraw the diagram after changing zoomedScale.
+        update();
 
     }
 
@@ -122,13 +116,22 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
 
     svg.call(zoomController);
 
-    for (let i = 0; i < 8; i++) {
-        const group = rowsArray[i] = rowsGroup.append("g")
-            .attr("id", `row-${i}`)
-            .attr("transform", `translate(0, ${rowHeight * i})`);
+    ///////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////// Draw the buzz history records /////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    const rowsGroup = groupContent.append("g")
+        .attr("id", "rows");
+
+    const rowsArray: Selection<SVGGElement, unknown, null, undefined>[] = [];
+
+    for (let teamindex = 0; teamindex < 8; teamindex++) {
+        const group = rowsArray[teamindex] = rowsGroup.append("g")
+            .attr("id", `team-index-${teamindex}`)
+            .attr("transform", `translate(0, ${rowHeight * teamindex})`);
 
         // shaded background for alternate teams
-        if (i % 2 == 0) {
+        if (teamindex % 2 == 0) {
             group.append("rect")
                 .attr("x", 0)
                 .attr("y", 0)
@@ -152,12 +155,12 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
             .attr("x", "10")
             .attr("y", rowHeight / 2)
             .attr("dominant-baseline", "middle")
-            .text(`Team ${i + 1}`);
+            .text(`Team ${teamindex + 1}`);
 
     }
 
     // vertical line which shows when the operator pressed space
-    groupContent.append("line")
+    const verticalLine = groupContent.append("line")
         .attr("id", "operator-finished-reading-question")
         .attr("x1", zoomedScale(timestampDoneReading))
         .attr("y1", 0)
@@ -166,61 +169,70 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
         .attr("stroke", "black")
         .attr("stroke-width", 1);
 
-    history.records.forEach(record => {
-        const groupForTeam = rowsArray[record.teamNumber];
-        const yForBars = (rowHeight / 2) - (barHeight / 2);
-        switch (record.result.type) {
-            case "too-early":
-                // create a red bar
-                groupForTeam.append("rect")
-                    .attr("x", zoomedScale(record.timestamp))
-                    .attr("y", yForBars)
-                    .attr("width", zoomedScale(history.lockoutDurationMillisec) - zoomedScale(0))
-                    .attr("height", barHeight)
-                    .attr("fill", "red")
-                    .attr("stroke", "black")
-                    .attr("stroke-width", 1);
+    const yForBars = (rowHeight / 2) - (barHeight / 2);
 
-                break;
-            case "start-answering":
+    function update() {
 
-                // create a blue bar
-                groupForTeam.append("rect")
-                    .attr("x", zoomedScale(record.timestamp))
-                    .attr("y", yForBars)
-                    .attr("width", zoomedScale(record.result.endTimestamp))
-                    .attr("height", barHeight)
-                    .attr("fill", "lightblue" /*record.result.answeredCorrectly ? "green" : "orange"*/)
-                    .attr("stroke", "black")
-                    .attr("stroke-width", 1);
+        verticalLine
+            .attr("x1", zoomedScale(timestampDoneReading))
+            .attr("x2", zoomedScale(timestampDoneReading))
 
-                /*
-                // shade the entire area when the team is answering
-                groupContent.append("rect")
-                    .attr("id", "")
-                    .attr("x", scale(record.timestamp))
-                    .attr("y", 0)
-                    .attr("width", scale(record.result.endTimestamp))
-                    .attr("height", contentHeight)
-                    .attr("fill", "#0088ff88")
-                    .attr("stroke", "black")
-                    .attr("stroke-width", 0);
-                */
+        history.records.forEach((recordsForTeam, teamIndex) => {
 
-                break;
-        }
+            const groupForTeam = rowsArray[teamIndex];
 
-        // circle which shows every time the buzzer switch went down.
-        // a circle is bad because it has a lot of width. 
-        groupForTeam.append("circle")
-            .attr("cx", zoomedScale(record.timestamp))
-            .attr("cy", rowHeight / 2)
-            .attr("r", dotRadius)
-            .attr("fill", "black")
-            .attr("stroke-width", 0);
+            /*
+            https://www.d3indepth.com/datajoins/
+            https://observablehq.com/@d3/selection-join
+            */
+
+            groupForTeam
+                .selectAll("rect.too-early")
+                .data(recordsForTeam.filter(r => r.result.type === "too-early"))
+                .join("rect")
+                .classed("too-early", true)
+                .attr("x", d => zoomedScale(d.timestamp))
+                .attr("y", yForBars)
+                // the value I am giving to the scale is a duration
+                .attr("width", zoomedScale(history.lockoutDurationMillisec) - zoomedScale(0))
+                .attr("height", barHeight)
+                .attr("fill", "red")
+                .attr("stroke", "black")
+                .attr("stroke-width", 1);
 
 
-    });
+            groupForTeam
+                .selectAll("rect.start-answering")
+                .data(recordsForTeam.filter(r => r.result.type === "start-answering"))
+                .join("rect")
+                .classed("start-answering", true)
+                .attr("x", d => zoomedScale(d.timestamp))
+                .attr("y", yForBars)
+                .attr("width", d =>
+                    zoomedScale((d.result as BuzzResultStartAnswer).endTimestamp) -
+                    zoomedScale(d.timestamp)
+                )
+                .attr("height", barHeight)
+                .attr("fill", "lightblue")
+                .attr("stroke", "black")
+                .attr("stroke-width", 1);
 
+            groupForTeam
+                .selectAll("circle.buzzer-press")
+                .data(recordsForTeam)
+                .join("circle")
+                .classed("buzzer-press", true)
+                .attr("cx", d => zoomedScale(d.timestamp))
+                .attr("cy", rowHeight / 2)
+                .attr("r", dotRadius)
+                .attr("fill", "black")
+                .attr("stroke-width", 0);
+            ;
+
+
+        });
+    }
+
+    update();
 
 }
