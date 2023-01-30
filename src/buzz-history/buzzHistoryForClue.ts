@@ -51,9 +51,12 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
     const contentWidth = svgWidth - margin.left - margin.right;
     const contentHeight = svgHeight - margin.top - margin.bottom;
 
-    const spaceBeforeMillisec = 2_000;
-    const spaceAfterMillisec = 3_000;
-    const timestampDoneReading = history.timestampWhenClueQuestionFinishedReading;
+    history.records.forEach(arrayOfRecordsForTeam => arrayOfRecordsForTeam.forEach(record => {
+        record.timestamp -= history.timestampWhenClueQuestionFinishedReading;
+        if (record.result.type == "start-answering") {
+            record.result.endTimestamp -= history.timestampWhenClueQuestionFinishedReading;
+        }
+    }));
 
     const rowHeight = 50;
     const dotRadius = 5;
@@ -73,7 +76,7 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
         .attr("transform", `translate(${margin.left}, ${contentHeight})`);
 
     const initialScale = scaleLinear()
-        .domain([timestampDoneReading - spaceBeforeMillisec, timestampDoneReading + spaceAfterMillisec])
+        .domain([-2_000, 3_000])
         .range([0, contentWidth]);
 
     let zoomedScale = initialScale;
@@ -81,9 +84,7 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
     const axis = axisBottom<number>(zoomedScale)
         .ticks(4)
         .tickSizeOuter(0)
-        .tickFormat(n => (n - timestampDoneReading) + "ms")
-        // .tickValues([-100, 0, 100, 200, 300].map(n => timestampDoneReading + n))
-        ;
+        .tickFormat(n => n + "ms");
 
     groupAxis.call(axis);
 
@@ -162,9 +163,9 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
     // vertical line which shows when the operator pressed space
     const verticalLine = groupContent.append("line")
         .attr("id", "operator-finished-reading-question")
-        .attr("x1", zoomedScale(timestampDoneReading))
+        .attr("x1", zoomedScale(0))
         .attr("y1", 0)
-        .attr("x2", zoomedScale(timestampDoneReading))
+        .attr("x2", zoomedScale(0))
         .attr("y2", contentHeight)
         .attr("stroke", "black")
         .attr("stroke-width", 1);
@@ -174,8 +175,8 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
     function update() {
 
         verticalLine
-            .attr("x1", zoomedScale(timestampDoneReading))
-            .attr("x2", zoomedScale(timestampDoneReading))
+            .attr("x1", zoomedScale(0))
+            .attr("x2", zoomedScale(0))
 
         history.records.forEach((recordsForTeam, teamIndex) => {
 
