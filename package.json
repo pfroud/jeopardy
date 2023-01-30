@@ -20,7 +20,10 @@
     "@aduh95/viz.js": "^3.7.0",
     "@parcel/transformer-sass": "^2.6.2",
     "@types/chartist": "^0.11.1",
-    "@types/d3": "^7.4.0",
+    "@types/d3-axis": "^3.0.2",
+    "@types/d3-scale": "^4.0.3",
+    "@types/d3-selection": "^3.0.4",
+    "@types/d3-zoom": "^3.0.2",
     "@types/node": "^18.7.16",
     "@typescript-eslint/eslint-plugin": "^4.28.0",
     "@typescript-eslint/parser": "^4.28.0",
@@ -31,6 +34,9 @@
   },
   "dependencies": {
     "chartist": "^1.1.2",
-    "d3": "^7.6.1"
+    "d3-axis": "^3.0.0",
+    "d3-scale": "^4.0.2",
+    "d3-selection": "^3.0.0",
+    "d3-zoom": "^3.0.0"
   }
 }

@@ -1,5 +1,8 @@
-import * as d3 from "d3";
 import { Clue } from "../Clue";
+import { select, Selection } from "d3-selection";
+import { scaleLinear } from "d3-scale";
+import { axisBottom } from "d3-axis";
+import { zoom, D3ZoomEvent } from "d3-zoom";
 
 export interface BuzzHistoryForClue {
 
@@ -73,13 +76,13 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
         .attr("id", "axis")
         .attr("transform", `translate(${margin.left}, ${contentHeight})`);
 
-    const initialScale = d3.scaleLinear()
+    const initialScale = scaleLinear()
         .domain([timestampDoneReading - spaceBeforeMillisec, timestampDoneReading + spaceAfterMillisec])
         .range([0, contentWidth]);
 
     let zoomedScale = initialScale;
 
-    const axis = d3.axisBottom<number>(zoomedScale)
+    const axis = axisBottom<number>(zoomedScale)
         .ticks(4)
         .tickSizeOuter(0)
         .tickFormat(n => (n - timestampDoneReading) + "ms")
@@ -91,9 +94,9 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
     const rowsGroup = groupContent.append("g")
         .attr("id", "rows");
 
-    const rowsArray: d3.Selection<SVGGElement, unknown, null, undefined>[] = [];
+    const rowsArray: Selection<SVGGElement, unknown, null, undefined>[] = [];
 
-    function handleZoom(zoomEvent: d3.D3ZoomEvent<SVGSVGElement, unknown>) {
+    function handleZoom(zoomEvent: D3ZoomEvent<SVGSVGElement, unknown>) {
         // console.log(zoomEvent.transform.toString());
 
         groupContent.attr("transform",
@@ -113,7 +116,7 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
 
     // https://www.d3indepth.com/zoom-and-pan/
     // https://observablehq.com/@d3/pan-zoom-axes
-    const zoomController = d3.zoom<SVGSVGElement, unknown>()
+    const zoomController = zoom<SVGSVGElement, unknown>()
         .on("zoom", handleZoom)
         ;
 
