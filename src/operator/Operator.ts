@@ -257,7 +257,7 @@ export class Operator {
         return this.presentClue.category.isSpecialCategory;
     }
 
-    public getClueFromJService(): Promise<void> {
+    public getClueForTesting(): Promise<void> {
 
         this.stateMachine.getCountdownTimerForState("showClueCategoryAndValue").reset();
 
@@ -280,7 +280,9 @@ export class Operator {
         return new Promise<void>(promiseExecutor);
     }
 
-    public __getClueFromJService__(): Promise<void> {
+    public getClueFromJService(): Promise<void> {
+
+        this.stateMachine.getCountdownTimerForState("showClueCategoryAndValue").reset();
 
         // Use a recursive helper function so we can do retries.
         const fetchClueHelper = (
