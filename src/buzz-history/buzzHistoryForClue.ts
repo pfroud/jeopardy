@@ -16,14 +16,14 @@ export interface BuzzHistoryForClue {
     lockoutDurationMillisec: number
 }
 
-export interface BuzzHistoryRecord {
+interface BuzzHistoryRecord {
     timestamp: number;
     teamNumber: number;
     result: BuzzResult;
     source?: string;
 }
 
-export type BuzzResult = BuzzResultTooEarly | BuzzResultTooLate | BuzzResultStartAnswer | BuzzResultIgnored
+type BuzzResult = BuzzResultTooEarly | BuzzResultTooLate | BuzzResultStartAnswer | BuzzResultIgnored
 
 interface BuzzResultTooEarly {
     type: "too-early";
@@ -63,7 +63,7 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
     const dotRadius = 5;
     const barHeight = dotRadius * 2;
 
-    const svg = d3.select(_svg_)
+    const svg = select(_svg_)
         .attr("width", svgWidth)
         .attr("height", svgHeight);
 
