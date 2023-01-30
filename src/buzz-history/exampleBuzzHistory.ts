@@ -8,7 +8,6 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             //index 0, team number 1
             {
                 "timestamp": 1664589171281,
-                "teamNumber": 1,
                 "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
                 "result": {
                     "type": "too-early"
@@ -16,7 +15,6 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             },
             {
                 "timestamp": 1664589171379,
-                "teamNumber": 1,
                 "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
                 "result": {
                     "type": "ignore",
@@ -25,7 +23,6 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             },
             {
                 "timestamp": 1664589171477,
-                "teamNumber": 1,
                 "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
                 "result": {
                     "type": "ignore",
@@ -34,7 +31,6 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             },
             {
                 "timestamp": 1664589171561,
-                "teamNumber": 1,
                 "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
                 "result": {
                     "type": "too-early"
@@ -42,7 +38,6 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             },
             {
                 "timestamp": 1664589171670,
-                "teamNumber": 1,
                 "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
                 "result": {
                     "type": "ignore",
@@ -51,7 +46,6 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             },
             {
                 "timestamp": 1664589171747,
-                "teamNumber": 1,
                 "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
                 "result": {
                     "type": "ignore",
@@ -60,7 +54,6 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             },
             {
                 "timestamp": 1664589171843,
-                "teamNumber": 1,
                 "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
                 "result": {
                     "type": "too-early"
@@ -68,7 +61,6 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             },
             {
                 "timestamp": 1664589171944,
-                "teamNumber": 1,
                 "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
                 "result": {
                     "type": "ignore",
@@ -77,7 +69,6 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             },
             {
                 "timestamp": 1664589172043,
-                "teamNumber": 1,
                 "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
                 "result": {
                     "type": "ignore",
@@ -88,7 +79,6 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             // index 1, team number 2
             {
                 "timestamp": 1664589173247,
-                "teamNumber": 2,
                 "source": "Operator.initBuzzerFootswitchIconDisplay() keydown",
                 "result": {
                     "type": "start-answering",
@@ -100,7 +90,6 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
             // index 2, team number 3
             {
                 "timestamp": 1664589173800,
-                "teamNumber": 3,
                 "source": "manually typed my peter",
                 "result": {
                     "type": "too-late"

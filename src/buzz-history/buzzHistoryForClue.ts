@@ -5,28 +5,28 @@ import { axisBottom } from "d3-axis";
 import { zoom, D3ZoomEvent } from "d3-zoom";
 
 export interface BuzzHistoryForClue {
-
     clue: Clue;
-    records: BuzzHistoryRecord[][];
+    records: BuzzHistoryRecord[][]; //the first array index is the team index
     timestampWhenClueQuestionFinishedReading: number;
     lockoutDurationMillisec: number
 }
 
 interface BuzzHistoryRecord {
     timestamp: number;
-    teamNumber: number;
     result: BuzzResult;
     source?: string;
 }
 
-type BuzzResult = BuzzResultTooEarly | BuzzResultTooLate | BuzzResultStartAnswer | BuzzResultIgnored
+export type BuzzResult = BuzzResultTooEarly | BuzzResultTooLate | BuzzResultStartAnswer | BuzzResultIgnored;
 
 interface BuzzResultTooEarly {
     type: "too-early";
 }
+
 interface BuzzResultTooLate {
     type: "too-late";
 }
+
 interface BuzzResultStartAnswer {
     type: "start-answering";
     answeredCorrectly: boolean;
@@ -51,6 +51,7 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
     const contentWidth = svgWidth - margin.left - margin.right;
     const contentHeight = svgHeight - margin.top - margin.bottom;
 
+    // Change all the timestamps so time zero is when the operator finished reading the question
     history.records.forEach(arrayOfRecordsForTeam => arrayOfRecordsForTeam.forEach(record => {
         record.timestamp -= history.timestampWhenClueQuestionFinishedReading;
         if (record.result.type == "start-answering") {
@@ -58,62 +59,58 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
         }
     }));
 
-    const rowHeight = 50;
-    const dotRadius = 5;
-    const barHeight = dotRadius * 2;
-
     const svg = select(_svg_)
         .attr("width", svgWidth)
         .attr("height", svgHeight);
 
-    // purpose of the content group is to move stuff in from the margins
+    // the content group is everything except the axis
     const groupContent = svg.append("g")
         .attr("id", "content")
         .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    const groupAxis = svg.append("g")
+    const groupXAxis = svg.append("g")
         .attr("id", "axis")
         .attr("transform", `translate(${margin.left}, ${contentHeight})`);
 
+    // This scale maps time (in milliseconds) to screen-space pixels
     const initialScale = scaleLinear()
-        .domain([-2_000, 3_000])
+        .domain([-2_000, 3_000]) //time in milliseconds to initially show on the X axis
         .range([0, contentWidth]);
 
-    let zoomedScale = initialScale;
+    let zoomedScale = initialScale; //will be changed by the zoom controller
 
-    const axis = axisBottom<number>(zoomedScale)
-        .ticks(4)
+    const axisGenerator = axisBottom<number>(zoomedScale)
         .tickSizeOuter(0)
         .tickFormat(n => n + "ms");
 
-    groupAxis.call(axis);
+    groupXAxis.call(axisGenerator);
 
     ///////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////// Pan & zoom //////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////
 
-    function handleZoom(zoomEvent: D3ZoomEvent<SVGSVGElement, unknown>) {
-        // console.log(zoomEvent.transform.toString());
+    /*
+    https://www.d3indepth.com/zoom-and-pan/
+    https://observablehq.com/@d3/pan-zoom-axes
+    https://gist.github.com/jgbos/9752277
+    */
 
-        // groupContent.attr("transform",`translate(${margin.left + zoomEvent.transform.x}, ${margin.top}) scale(${zoomEvent.transform.k} 1)`);
+    function handleZoom(zoomEvent: D3ZoomEvent<SVGSVGElement, unknown>) {
 
         zoomedScale = zoomEvent.transform.rescaleX(initialScale);
 
-        // pass the updated scale to the axis
-        axis.scale(zoomedScale);
+        // Change the scale which will be used by the axis generator
+        axisGenerator.scale(zoomedScale);
 
-        // draw the updated axis
-        groupAxis.call(axis);
+        // Re-draw the axis
+        groupXAxis.call(axisGenerator);
 
+        // Re-draw the buzz history diagram
         update();
-
     }
 
-    // https://www.d3indepth.com/zoom-and-pan/
-    // https://observablehq.com/@d3/pan-zoom-axes
     const zoomController = zoom<SVGSVGElement, unknown>()
-        .on("zoom", handleZoom)
-        ;
+        .on("zoom", handleZoom);
 
     svg.call(zoomController);
 
@@ -121,18 +118,24 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
     /////////////////////////// Draw the buzz history records /////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////
 
+    const rowHeight = 50;
+    const dotRadius = 5;
+    const barHeight = dotRadius * 2;
+
     const rowsGroup = groupContent.append("g")
         .attr("id", "rows");
 
     const rowsArray: Selection<SVGGElement, unknown, null, undefined>[] = [];
 
-    for (let teamindex = 0; teamindex < 8; teamindex++) {
-        const group = rowsArray[teamindex] = rowsGroup.append("g")
-            .attr("id", `team-index-${teamindex}`)
-            .attr("transform", `translate(0, ${rowHeight * teamindex})`);
+    // Draw team name, horizontal line, and alternating shaded background
+    for (let teamIndex = 0; teamIndex < 8; teamIndex++) {
 
-        // shaded background for alternate teams
-        if (teamindex % 2 == 0) {
+        const group = rowsArray[teamIndex] = rowsGroup.append("g")
+            .attr("id", `team-index-${teamIndex}`)
+            .attr("transform", `translate(0, ${rowHeight * teamIndex})`);
+
+        // Shaded background for alternate teams
+        if (teamIndex % 2 == 0) {
             group.append("rect")
                 .attr("x", 0)
                 .attr("y", 0)
@@ -141,32 +144,29 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
                 .attr("fill", "#eee");
         }
 
-        // horizontal lines to separate teams
+        // Horizontal lines to separate teams
         group.append("line")
             .attr("x1", 0)
             .attr("y1", rowHeight)
             .attr("x2", contentWidth)
             .attr("y2", rowHeight)
             .attr("stroke", "black")
-            .attr("stroke-width", 1)
-            ;
+            .attr("stroke-width", 1);
 
-        // team name
+        // Team name
         group.append("text")
             .attr("x", "10")
             .attr("y", rowHeight / 2)
             .attr("dominant-baseline", "middle")
-            .text(`Team ${teamindex + 1}`);
-
+            .text(`Team ${teamIndex + 1}`);
     }
 
-    // vertical line which shows when the operator pressed space
+    // Draw a vertical line to show when the operator pressed space
     const verticalLine = groupContent.append("line")
         .attr("id", "operator-finished-reading-question")
-        .attr("x1", zoomedScale(0))
         .attr("y1", 0)
-        .attr("x2", zoomedScale(0))
         .attr("y2", contentHeight)
+        // x1 and x2 are set in the update() function
         .attr("stroke", "black")
         .attr("stroke-width", 1);
 
@@ -174,6 +174,7 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
 
     function update() {
 
+        // Move the vertical line
         verticalLine
             .attr("x1", zoomedScale(0))
             .attr("x2", zoomedScale(0))
@@ -187,6 +188,7 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
             https://observablehq.com/@d3/selection-join
             */
 
+            // Draw bars for buzzes that were too early
             groupForTeam
                 .selectAll("rect.too-early")
                 .data(recordsForTeam.filter(r => r.result.type === "too-early"))
@@ -194,7 +196,6 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
                 .classed("too-early", true)
                 .attr("x", d => zoomedScale(d.timestamp))
                 .attr("y", yForBars)
-                // the value I am giving to the scale is a duration
                 .attr("width", zoomedScale(history.lockoutDurationMillisec) - zoomedScale(0))
                 .attr("height", barHeight)
                 .attr("fill", "red")
@@ -209,10 +210,10 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
                 .classed("start-answering", true)
                 .attr("x", d => zoomedScale(d.timestamp))
                 .attr("y", yForBars)
-                .attr("width", d =>
-                    zoomedScale((d.result as BuzzResultStartAnswer).endTimestamp) -
-                    zoomedScale(d.timestamp)
-                )
+                .attr("width", d => {
+                    const result = d.result as BuzzResultStartAnswer;
+                    return zoomedScale(result.endTimestamp) - zoomedScale(d.timestamp);
+                })
                 .attr("height", barHeight)
                 .attr("fill", "lightblue")
                 .attr("stroke", "black")
@@ -228,9 +229,6 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
                 .attr("r", dotRadius)
                 .attr("fill", "black")
                 .attr("stroke-width", 0);
-            ;
-
-
         });
     }
 

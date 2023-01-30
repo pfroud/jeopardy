@@ -121,6 +121,26 @@ export class Operator {
             teamNumbers.add(String(i + 1));
         }
 
+        function getBuzzResult(team: Team): BuzzResult {
+            switch (team.getState()) {
+                case "can-answer":
+                    return {
+                        type: "start-answering",
+                        answeredCorrectly: true,
+                        endTimestamp: Date.now()
+                    };
+                case "reading-question":
+                    return {
+                        type: "too-early",
+                    };
+                default:
+                    return {
+                        type: "ignore",
+                        reason: team.getState()
+                    };
+            }
+        }
+
         window.addEventListener("keydown", keyboardEvent => {
             const keyboardKey = keyboardEvent.key;
             if (teamNumbers.has(keyboardKey)) {
@@ -128,37 +148,15 @@ export class Operator {
                 const teamObj = this.teamArray[teamIndex];
                 teamObj.showKeyDown();
 
-                let result: BuzzResult;
-                switch (teamObj.getState()) {
-                    case "can-answer":
-                        result = {
-                            type: "start-answering",
-                            answeredCorrectly: true,
-                            endTimestamp: Date.now()
-                        };
-                        break;
-                    case "reading-question":
-                        result = {
-                            type: "too-early",
-                        };
-                        break;
-                    default:
-                        result = {
-                            type: "ignore",
-                            reason: teamObj.getState()
-                        };
-                        break;
-                }
-
-                this.buzzHistory.records.push({
+                this.buzzHistory.records[teamIndex].push({
                     timestamp: Date.now(),
-                    teamNumber: teamIndex + 1,
                     source: "Operator.initBuzzerFootswitchIconDisplay() keydown",
-                    result: result
+                    result: getBuzzResult(teamObj)
                 });
 
             }
         });
+
         window.addEventListener("keyup", keyboardEvent => {
             const keyboardKey = keyboardEvent.key;
             if (teamNumbers.has(keyboardKey)) {
