@@ -1,4 +1,4 @@
-// https://eslint.org/docs/user-guide/configuring/
+module.exports = // https://eslint.org/docs/user-guide/configuring/
 {
     // https://eslint.org/docs/user-guide/configuring/language-options#specifying-environments
     "env": {
@@ -23,7 +23,7 @@
     "parserOptions": {
         "ecmaVersion": 12,
         "sourceType": "module",
-        "tsconfigRootDir": "__dirname",
+        "tsconfigRootDir": __dirname,
         "project": [
             "./tsconfig.json"
         ]
@@ -33,6 +33,7 @@
     "plugins": [
         "@typescript-eslint"
     ],
+    "ignorePatterns": [".eslintrc.js"],
     //
     // https://eslint.org/docs/user-guide/configuring/rules
     "rules": {
@@ -73,4 +74,4 @@
             "error"
         ]
     }
-}
+};
