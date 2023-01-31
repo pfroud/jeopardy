@@ -115,6 +115,7 @@ div#paused {
     text-shadow: 3px 3px rgba(0, 0, 0, 0.2);
     filter: drop-shadow(10px 13px rgba(0, 0, 0, 0.4));
     bottom: 160px;
+    z-index: 100;
 }
 
 footer {

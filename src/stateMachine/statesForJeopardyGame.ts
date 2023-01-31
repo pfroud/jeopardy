@@ -143,8 +143,17 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 type: "timeout",
                 initialDuration: settings.displayDurationAnswerMillisec,
                 behavior: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
-                destination: "checkGameEnd"
+                destination: "showBuzzHistory"
             }],
+        }, {
+            name: "showBuzzHistory",
+            onEnter: operator.showBuzzHistory.bind(operator),
+            // presentationSlideToShow: "buzz-history-chart",
+            transitions: [{
+                type: "keyboard",
+                keyboardKeys: " ", //space
+                destination: "checkGameEnd"
+            }]
         }, {
             name: "checkGameEnd",
             transitions: [{

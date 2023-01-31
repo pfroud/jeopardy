@@ -1,7 +1,6 @@
 import { BuzzHistoryForClue } from "./buzzHistoryForClue";
 
 export const exampleBuzzHistory: BuzzHistoryForClue = {
-    "clue": null,
     "lockoutDurationMillisec": 250,
     "records": [
         [

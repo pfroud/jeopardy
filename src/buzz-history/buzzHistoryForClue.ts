@@ -1,17 +1,16 @@
 import { Clue } from "../Clue";
 import { select, Selection, BaseType } from "d3-selection";
-import { scaleLinear } from "d3-scale";
+import { ScaleLinear, scaleLinear } from "d3-scale";
 import { axisBottom } from "d3-axis";
 import { zoom, D3ZoomEvent } from "d3-zoom";
 
 export interface BuzzHistoryForClue {
-    clue: Clue;
     records: BuzzHistoryRecord[][]; //the first array index is the team index
     timestampWhenClueQuestionFinishedReading: number;
     lockoutDurationMillisec: number
 }
 
-interface BuzzHistoryRecord {
+export interface BuzzHistoryRecord {
     timestamp: number;
     result: BuzzResult;
     source?: string;
@@ -38,150 +37,163 @@ interface BuzzResultIgnored {
     reason: string;
 }
 
-export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue): void {
-    const svgWidth = 800;
-    const svgHeight = 600;
-    const margin = {
-        top: 20,
-        left: 20,
-        right: 20,
-        bottom: 20
-    };
+export class BuzzHistoryDiagram {
 
-    const contentWidth = svgWidth - margin.left - margin.right;
-    const contentHeight = svgHeight - margin.top - margin.bottom;
+    private readonly rowHeight = 50;
+    private readonly dotRadius = 5;
+    private readonly barHeight = this.dotRadius * 2;
+    private readonly yForBars = (this.rowHeight / 2) - (this.barHeight / 2);
 
-    // Change all the timestamps so time zero is when the operator finished reading the question
-    history.records.forEach(arrayOfRecordsForTeam => arrayOfRecordsForTeam.forEach(record => {
-        record.timestamp -= history.timestampWhenClueQuestionFinishedReading;
-        if (record.result.type == "start-answering") {
-            record.result.endTimestamp -= history.timestampWhenClueQuestionFinishedReading;
-        }
-    }));
+    private readonly verticalLine: Selection<SVGLineElement, unknown, null, undefined>;
+    private zoomedScale: ScaleLinear<number, number, never>;
+    private rowsArray: Selection<SVGGElement, unknown, null, undefined>[] = [];
 
-    const svg = select(_svg_)
-        .attr("width", svgWidth)
-        .attr("height", svgHeight);
+    private history: BuzzHistoryForClue;
 
-    // the content group is everything except the axis
-    const groupContent = svg.append("g")
-        .attr("id", "content")
-        .attr("transform", `translate(${margin.left}, ${margin.top})`);
+    public constructor(teamCount: number, _svg_: SVGSVGElement) {
+        const svgWidth = 800;
+        const svgHeight = 600;
+        const margin = {
+            top: 20,
+            left: 20,
+            right: 20,
+            bottom: 20
+        };
 
-    const groupXAxis = svg.append("g")
-        .attr("id", "axis")
-        .attr("transform", `translate(${margin.left}, ${contentHeight})`);
+        const contentWidth = svgWidth - margin.left - margin.right;
+        const contentHeight = svgHeight - margin.top - margin.bottom;
 
-    // This scale maps time (in milliseconds) to screen-space pixels
-    const initialScale = scaleLinear()
-        .domain([-2_000, 3_000]) //time in milliseconds to initially show on the X axis
-        .range([0, contentWidth]);
+        const svg = select(_svg_)
+            .attr("width", svgWidth)
+            .attr("height", svgHeight);
 
-    let zoomedScale = initialScale; //will be changed by the zoom controller
+        // the content group is everything except the axis
+        const groupContent = svg.append("g")
+            .attr("id", "content")
+            .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    const axisGenerator = axisBottom<number>(zoomedScale)
-        .tickSizeOuter(0)
-        .tickFormat(n => n + "ms");
+        const groupXAxis = svg.append("g")
+            .attr("id", "axis")
+            .attr("transform", `translate(${margin.left}, ${contentHeight})`);
 
-    groupXAxis.call(axisGenerator);
+        // This scale maps time (in milliseconds) to screen-space pixels
+        const initialScale = scaleLinear()
+            .domain([-2_000, 3_000]) //time in milliseconds to initially show on the X axis
+            .range([0, contentWidth]);
 
-    ///////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////// Pan & zoom //////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////////
+        this.zoomedScale = initialScale; //will be changed by the zoom controller
 
-    /*
-    https://www.d3indepth.com/zoom-and-pan/
-    https://observablehq.com/@d3/pan-zoom-axes
-    https://gist.github.com/jgbos/9752277
-    */
+        const axisGenerator = axisBottom<number>(this.zoomedScale)
+            .tickSizeOuter(0)
+            .tickFormat(n => n + "ms");
 
-    function handleZoom(zoomEvent: D3ZoomEvent<SVGSVGElement, unknown>) {
-
-        zoomedScale = zoomEvent.transform.rescaleX(initialScale);
-
-        // Change the scale which will be used by the axis generator
-        axisGenerator.scale(zoomedScale);
-
-        // Re-draw the axis
         groupXAxis.call(axisGenerator);
 
-        // Re-draw the buzz history diagram
-        update();
-    }
+        ///////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////// Pan & zoom //////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////
 
-    const zoomController = zoom<SVGSVGElement, unknown>()
-        .on("zoom", handleZoom);
+        /*
+        https://www.d3indepth.com/zoom-and-pan/
+        https://observablehq.com/@d3/pan-zoom-axes
+        https://gist.github.com/jgbos/9752277
+        */
 
-    svg.call(zoomController);
+        const handleZoom = (zoomEvent: D3ZoomEvent<SVGSVGElement, unknown>) => {
 
-    ///////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////// Draw the buzz history records /////////////////////////
-    ///////////////////////////////////////////////////////////////////////////////////
+            this.zoomedScale = zoomEvent.transform.rescaleX(initialScale);
 
-    const rowHeight = 50;
-    const dotRadius = 5;
-    const barHeight = dotRadius * 2;
+            // Change the scale which will be used by the axis generator
+            axisGenerator.scale(this.zoomedScale);
 
-    const rowsGroup = groupContent.append("g")
-        .attr("id", "rows");
+            // Re-draw the axis
+            groupXAxis.call(axisGenerator);
 
-    const rowsArray: Selection<SVGGElement, unknown, null, undefined>[] = [];
-
-    // Draw team name, horizontal line, and alternating shaded background
-    for (let teamIndex = 0; teamIndex < 8; teamIndex++) {
-
-        const group = rowsArray[teamIndex] = rowsGroup.append("g")
-            .attr("id", `team-index-${teamIndex}`)
-            .attr("transform", `translate(0, ${rowHeight * teamIndex})`);
-
-        // Shaded background for alternate teams
-        if (teamIndex % 2 == 0) {
-            group.append("rect")
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("width", contentWidth)
-                .attr("height", rowHeight)
-                .attr("fill", "#eee");
+            // Re-draw the buzz history diagram
+            this.redraw();
         }
 
-        // Horizontal lines to separate teams
-        group.append("line")
-            .attr("x1", 0)
-            .attr("y1", rowHeight)
-            .attr("x2", contentWidth)
-            .attr("y2", rowHeight)
+        const zoomController = zoom<SVGSVGElement, unknown>()
+            .on("zoom", handleZoom);
+
+        svg.call(zoomController);
+
+
+        const rowsGroup = groupContent.append("g")
+            .attr("id", "rows");
+
+
+        // Draw team name, horizontal line, and alternating shaded background
+        for (let teamIndex = 0; teamIndex < teamCount; teamIndex++) {
+
+            const group = this.rowsArray[teamIndex] = rowsGroup.append("g")
+                .attr("id", `team-index-${teamIndex}`)
+                .attr("transform", `translate(0, ${this.rowHeight * teamIndex})`);
+
+            // Shaded background for alternate teams
+            if (teamIndex % 2 == 0) {
+                group.append("rect")
+                    .attr("x", 0)
+                    .attr("y", 0)
+                    .attr("width", contentWidth)
+                    .attr("height", this.rowHeight)
+                    .attr("fill", "#eee");
+            }
+
+            // Horizontal lines to separate teams
+            group.append("line")
+                .attr("x1", 0)
+                .attr("y1", this.rowHeight)
+                .attr("x2", contentWidth)
+                .attr("y2", this.rowHeight)
+                .attr("stroke", "black")
+                .attr("stroke-width", 1);
+
+            // Team name
+            group.append("text")
+                .attr("x", "10")
+                .attr("y", this.rowHeight / 2)
+                .attr("dominant-baseline", "middle")
+                .text(`Team ${teamIndex + 1}`);
+        }
+
+        // Draw a vertical line to show when the operator pressed space
+        this.verticalLine = groupContent.append("line")
+            .attr("id", "operator-finished-reading-question")
+            .attr("y1", 0)
+            .attr("y2", contentHeight)
+            // x1 and x2 are set in the update() function
             .attr("stroke", "black")
             .attr("stroke-width", 1);
 
-        // Team name
-        group.append("text")
-            .attr("x", "10")
-            .attr("y", rowHeight / 2)
-            .attr("dominant-baseline", "middle")
-            .text(`Team ${teamIndex + 1}`);
+
     }
 
-    // Draw a vertical line to show when the operator pressed space
-    const verticalLine = groupContent.append("line")
-        .attr("id", "operator-finished-reading-question")
-        .attr("y1", 0)
-        .attr("y2", contentHeight)
-        // x1 and x2 are set in the update() function
-        .attr("stroke", "black")
-        .attr("stroke-width", 1);
+    public setHistory(history: BuzzHistoryForClue) {
+        this.history = history;
 
-    const yForBars = (rowHeight / 2) - (barHeight / 2);
+        // Change all the timestamps so time zero is when the operator finished reading the question
+        this.history.records.forEach(arrayOfRecordsForTeam => arrayOfRecordsForTeam.forEach(record => {
+            record.timestamp -= this.history.timestampWhenClueQuestionFinishedReading;
+            if (record.result.type == "start-answering") {
+                record.result.endTimestamp -= this.history.timestampWhenClueQuestionFinishedReading;
+            }
+        }));
+    }
 
-    function update() {
+    public redraw(): void {
+        if (!this.history) {
+            return;
+        }
 
         // Move the vertical line
-        verticalLine
-            .attr("x1", zoomedScale(0))
-            .attr("x2", zoomedScale(0))
+        this.verticalLine
+            .attr("x1", this.zoomedScale(0))
+            .attr("x2", this.zoomedScale(0))
 
-        history.records.forEach((recordsForTeam, teamIndex) => {
+        this.history.records.forEach((recordsForTeam, teamIndex) => {
 
-            const groupForTeam = rowsArray[teamIndex];
+            const groupForTeam = this.rowsArray[teamIndex];
 
             /*
             https://www.d3indepth.com/datajoins/
@@ -194,10 +206,10 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
                 .data(recordsForTeam.filter(r => r.result.type === "too-early"))
                 .join("rect")
                 .classed("too-early", true)
-                .attr("x", d => zoomedScale(d.timestamp))
-                .attr("y", yForBars)
-                .attr("width", zoomedScale(history.lockoutDurationMillisec) - zoomedScale(0))
-                .attr("height", barHeight)
+                .attr("x", d => this.zoomedScale(d.timestamp))
+                .attr("y", this.yForBars)
+                .attr("width", this.zoomedScale(this.history.lockoutDurationMillisec) - this.zoomedScale(0))
+                .attr("height", this.barHeight)
                 .attr("fill", "red")
                 .attr("stroke", "black")
                 .attr("stroke-width", 1);
@@ -208,13 +220,13 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
                 .data(recordsForTeam.filter(r => r.result.type === "start-answering"))
                 .join("rect")
                 .classed("start-answering", true)
-                .attr("x", d => zoomedScale(d.timestamp))
-                .attr("y", yForBars)
+                .attr("x", d => this.zoomedScale(d.timestamp))
+                .attr("y", this.yForBars)
                 .attr("width", d => {
                     const result = d.result as BuzzResultStartAnswer;
-                    return zoomedScale(result.endTimestamp) - zoomedScale(d.timestamp);
+                    return this.zoomedScale(result.endTimestamp) - this.zoomedScale(d.timestamp);
                 })
-                .attr("height", barHeight)
+                .attr("height", this.barHeight)
                 .attr("fill", "lightblue")
                 .attr("stroke", "black")
                 .attr("stroke-width", 1);
@@ -224,14 +236,12 @@ export function createDiagram(_svg_: SVGSVGElement, history: BuzzHistoryForClue)
                 .data(recordsForTeam)
                 .join("circle")
                 .classed("buzzer-press", true)
-                .attr("cx", d => zoomedScale(d.timestamp))
-                .attr("cy", rowHeight / 2)
-                .attr("r", dotRadius)
+                .attr("cx", d => this.zoomedScale(d.timestamp))
+                .attr("cy", this.rowHeight / 2)
+                .attr("r", this.dotRadius)
                 .attr("fill", "black")
                 .attr("stroke-width", 0);
         });
     }
-
-    update();
 
 }
