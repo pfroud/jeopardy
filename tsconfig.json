@@ -12,17 +12,7 @@
         "noPropertyAccessFromIndexSignature": true, // https://www.typescriptlang.org/tsconfig#noPropertyAccessFromIndexSignature
         "allowUnreachableCode": false, // https://www.typescriptlang.org/tsconfig#allowUnreachableCode
         "allowUnusedLabels": false, // https://www.typescriptlang.org/tsconfig#allowUnusedLabels
-        /*
-        The strictNullChecks option gets enabled on when the 'strict'
-        option is enabled, but I am overriding it off because I'm 
-        new to TypeScript and sort of suck at it I think.
-        https://www.typescriptlang.org/tsconfig#strictNullChecks
-
-        If I ever enable the strictNullChecks option, make sure to also
-        enable the exactOptionalPropertyTypes option:
-        https://www.typescriptlang.org/tsconfig#exactOptionalPropertyTypes
-         */
-        "strictNullChecks": false,
+        "exactOptionalPropertyTypes": true, // https://www.typescriptlang.org/tsconfig#exactOptionalPropertyTypes
         //
         // https://parceljs.org/languages/typescript/#isolatedmodules
         // https://www.typescriptlang.org/tsconfig#isolatedModules

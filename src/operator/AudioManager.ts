@@ -1,3 +1,5 @@
+import { querySelectorAndCheck } from "../common";
+
 export class AudioManager {
     private readonly audioElements: { [name: string]: HTMLAudioElement };
 
@@ -18,20 +20,20 @@ export class AudioManager {
 
     public constructor() {
         this.audioElements = {
-            answerCorrect: document.querySelector<HTMLAudioElement>("audio#answer-correct"),
-            answerIncorrectOrAnswerTimeout: document.querySelector<HTMLAudioElement>("audio#answer-incorrect"),
-            questionTimeout: document.querySelector<HTMLAudioElement>("audio#question-timeout"),
-            roundEnd: document.querySelector<HTMLAudioElement>("audio#round-end"),
-            teamBuzz: document.querySelector<HTMLAudioElement>("audio#team-buzz"),
-            tick: document.querySelector<HTMLAudioElement>("audio#tick"),
-            musicGameEnd: document.querySelector<HTMLAudioElement>("audio#music-game-end"),
-            musicGameStart: document.querySelector<HTMLAudioElement>("audio#music-game-start"),
-            doneReadingClueQuestion: document.querySelector<HTMLAudioElement>("audio#done-reading-clue-question")
+            answerCorrect: querySelectorAndCheck<HTMLAudioElement>(document, "audio#answer-correct"),
+            answerIncorrectOrAnswerTimeout: querySelectorAndCheck<HTMLAudioElement>(document, "audio#answer-incorrect"),
+            questionTimeout: querySelectorAndCheck<HTMLAudioElement>(document, "audio#question-timeout"),
+            roundEnd: querySelectorAndCheck<HTMLAudioElement>(document, "audio#round-end"),
+            teamBuzz: querySelectorAndCheck<HTMLAudioElement>(document, "audio#team-buzz"),
+            tick: querySelectorAndCheck<HTMLAudioElement>(document, "audio#tick"),
+            musicGameEnd: querySelectorAndCheck<HTMLAudioElement>(document, "audio#music-game-end"),
+            musicGameStart: querySelectorAndCheck<HTMLAudioElement>(document, "audio#music-game-start"),
+            doneReadingClueQuestion: querySelectorAndCheck<HTMLAudioElement>(document, "audio#done-reading-clue-question")
         };
         Object.freeze(this.audioElements);
     }
 
-    public play(audioName: string): Promise<void> {
+    public play(audioName: string): Promise<void> | null {
         /*
         If you're having trouble getting sounds to work:
         - If you've installed the Chrome extension called "Disable HTML5 Autoplay",
@@ -39,11 +41,12 @@ export class AudioManager {
         - You might also want to go to Site Settings (chrome://settings/content)
           and set 'Sound' to 'Allow' for this domain.
         */
-        const audio = this.audioElements[audioName];
-        if (!audio) {
-            console.warn(`can't play audio with name "${audioName}", not found`);
-            return null;
+
+        if (!(audioName in this.audioElements)) {
+            console.error(`can't play audio with name "${audioName}", unknown key into the object`);
         }
+
+        const audio = this.audioElements[audioName];
 
         /*
         The play() method returns a promise which is resolved when playback

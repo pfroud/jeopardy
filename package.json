@@ -37,7 +37,7 @@
     "eslint": "^7.29.0",
     "parcel": "^2.6.2",
     "sass": "^1.50.0",
-    "typescript": "^4.4.4"
+    "typescript": "^4.9.5"
   },
   "dependencies": {
     "chartist": "^1.1.2",

@@ -1,3 +1,4 @@
+import { querySelectorAndCheck } from "../common";
 import { Operator } from "../operator/Operator";
 import { Team } from "../Team";
 
@@ -11,21 +12,27 @@ document.addEventListener("DOMContentLoaded", function () {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     window.opener.addEventListener("unload", () => close());
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const operator = window.opener.operator as Operator;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-type-assertion
+    const operator = (window.opener as any).operator as Operator;
     if (!operator) {
         document.body.innerHTML = "no window.opener.operator";
         return;
     }
 
-    const teamArray: Team[] = operator.getTeamArray();
 
-    const table = document.querySelector("table tbody");
+    const teamArray: Team[] | undefined = operator.getTeamArray();
+
+
+    const table = querySelectorAndCheck(document, "table tbody");
     for (let teamIndex = 0; teamIndex < Operator.teamCount; teamIndex++) {
         createTableRow(teamIndex);
     }
 
     function createTableRow(teamIndex: number): void {
+        if (!teamArray) {
+            console.error("teamArray is undefined");
+            return;
+        }
         const team = teamArray[teamIndex];
         const dollarValues = [1000, 800, 600, 500, 400, 300, 200, 100, 50];
 

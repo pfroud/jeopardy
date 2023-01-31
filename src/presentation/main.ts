@@ -8,8 +8,8 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const operator = window.opener.operator as Operator;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-type-assertion
+    const operator = (window.opener as any).operator as Operator;
     if (!operator) {
         document.body.innerHTML = "no window.opener.operator";
         return;

@@ -1,4 +1,5 @@
 import { Clue } from "./Clue";
+import { querySelectorAndCheck } from "./common";
 import { CountdownTimer } from "./CountdownTimer";
 import { AudioManager } from "./operator/AudioManager";
 import { Presentation } from "./presentation/Presentation";
@@ -30,28 +31,28 @@ export class Team {
     public readonly teamName: string;
 
     private money = 0;
-    private countdownDotsInPresentationWindow: HTMLTableElement;
+    private countdownDotsInPresentationWindow?: HTMLTableElement;
     private readonly settings: Settings;
     private readonly audioManager: AudioManager;
     private readonly presentationInstance: Presentation;
     private readonly teamIdx: number;
     /** One countdown timer used to keep track of all timing for this Team */
-    private countdownTimer: CountdownTimer;
+    private countdownTimer?: CountdownTimer | null;
     private state: TeamState;
-    private stateBeforeLockout: TeamState;
-    private progressElementInPresentationWindow: HTMLProgressElement;
-    private progressElementInOperatorWindow: HTMLProgressElement;
+    private stateBeforeLockout?: TeamState | null;
+    private progressElementInPresentationWindow?: HTMLProgressElement;
+    private progressElementInOperatorWindow?: HTMLProgressElement;
     private readonly div: {
         operator: {
-            wrapper: HTMLDivElement;
-            money: HTMLDivElement;
-            teamName: HTMLDivElement;
+            wrapper: HTMLDivElement | null;
+            money: HTMLDivElement | null;
+            teamName: HTMLDivElement | null;
         };
         presentation: {
-            wrapper: HTMLDivElement;
-            money: HTMLDivElement;
-            teamName: HTMLDivElement;
-            buzzerShow: HTMLDivElement;
+            wrapper: HTMLDivElement | null;
+            money: HTMLDivElement | null;
+            teamName: HTMLDivElement | null;
+            buzzerShow: HTMLDivElement | null;
         };
     } = {
             operator: {
@@ -85,6 +86,8 @@ export class Team {
         this.createElementsInOperatorWindow();
         this.createElementsInPresentationWindow();
 
+        // suppress TS2564 "property has no initializer and is not assigned in the constructor"
+        this.state = "buzzers-off";
         this.setState("buzzers-off");
     }
 
@@ -173,8 +176,12 @@ export class Team {
     }
 
     private updateMoneyDisplay(): void {
-        this.div.presentation.money.innerHTML = "$" + this.money.toLocaleString();
-        this.div.operator.money.innerHTML = "$" + this.money.toLocaleString();
+        if (this.div.presentation.money) {
+            this.div.presentation.money.innerHTML = "$" + this.money.toLocaleString();
+        }
+        if (this.div.operator.money) {
+            this.div.operator.money.innerHTML = "$" + this.money.toLocaleString();
+        }
     }
 
     private createElementsInPresentationWindow(): void {
@@ -262,8 +269,7 @@ export class Team {
         progress.style.display = "none";
         divTeam.append(progress);
 
-        document.querySelector("footer").prepend(divTeam);
-
+        querySelectorAndCheck(document, "footer").prepend(divTeam);
     }
 
 
@@ -273,8 +279,8 @@ export class Team {
             this.stateBeforeLockout = targetState;
         } else {
             this.state = targetState;
-            this.div.operator.wrapper.setAttribute("data-team-state", targetState);
-            this.div.presentation.wrapper.setAttribute("data-team-state", targetState);
+            this.div.operator.wrapper?.setAttribute("data-team-state", targetState);
+            this.div.presentation.wrapper?.setAttribute("data-team-state", targetState);
 
             if (this.countdownTimer) {
                 this.countdownTimer.pause();
@@ -292,46 +298,58 @@ export class Team {
         this.setState("lockout");
 
         const countdownShowCategory = this.countdownTimer = new CountdownTimer(this.settings.durationLockoutMillisec);
-        countdownShowCategory.addProgressElement(this.progressElementInPresentationWindow);
-        this.progressElementInPresentationWindow.style.display = ""; //show it by removing "display=none"
+        if (this.progressElementInPresentationWindow) {
+            countdownShowCategory.addProgressElement(this.progressElementInPresentationWindow);
+            this.progressElementInPresentationWindow.style.display = ""; //show it by removing "display=none"
+        }
         countdownShowCategory.onFinished = (): void => this.endLockout();
         countdownShowCategory.start();
 
     }
 
     public endLockout(): void {
-        this.progressElementInPresentationWindow.style.display = "none";
-        this.setState(this.stateBeforeLockout, true);
+        if (this.progressElementInPresentationWindow) {
+            this.progressElementInPresentationWindow.style.display = "none";
+        }
+        if (this.stateBeforeLockout) {
+            this.setState(this.stateBeforeLockout, true);
+        }
         this.stateBeforeLockout = null;
         this.countdownTimer = null;
     }
 
     public startAnswer(): void {
         this.setState("answering");
-        this.countdownDotsInPresentationWindow.querySelector("td").classList.add("active");
-        this.progressElementInOperatorWindow.style.display = ""; //show it by removing "display=none"
+        if (this.countdownDotsInPresentationWindow) {
+            querySelectorAndCheck(this.countdownDotsInPresentationWindow, "td").classList.add("active");
+        }
+        if (this.progressElementInOperatorWindow) {
+            this.progressElementInOperatorWindow.style.display = ""; //show it by removing "display=none"
+        }
     }
 
     public stopAnswer(): void {
-        this.countdownDotsInPresentationWindow.querySelectorAll("td").forEach(td => td.classList.remove("active"));
-        this.progressElementInOperatorWindow.style.display = "none";
+        this.countdownDotsInPresentationWindow?.querySelectorAll("td").forEach(td => td.classList.remove("active"));
+        if (this.progressElementInOperatorWindow) {
+            this.progressElementInOperatorWindow.style.display = "none";
+        }
     }
 
     public showKeyDown(): void {
-        this.div.presentation.buzzerShow.classList.add("pressed");
-        this.div.presentation.buzzerShow.classList.remove("not-pressed");
+        this.div.presentation.buzzerShow?.classList.add("pressed");
+        this.div.presentation.buzzerShow?.classList.remove("not-pressed");
     }
 
     public showKeyUp(): void {
-        this.div.presentation.buzzerShow.classList.add("not-pressed");
-        this.div.presentation.buzzerShow.classList.remove("pressed");
+        this.div.presentation.buzzerShow?.classList.add("not-pressed");
+        this.div.presentation.buzzerShow?.classList.remove("pressed");
     }
 
-    public getCountdownDotsInPresentationWindow(): HTMLTableElement {
+    public getCountdownDotsInPresentationWindow(): HTMLTableElement | undefined {
         return this.countdownDotsInPresentationWindow;
     }
 
-    public getProgressElementInOperatorWindow(): HTMLProgressElement {
+    public getProgressElementInOperatorWindow(): HTMLProgressElement | undefined {
         return this.progressElementInOperatorWindow;
     }
 

@@ -1,3 +1,5 @@
+import { querySelectorAndCheck } from "./common";
+
 export class Settings {
     // How long to show the category in big text in the presentation window
     public displayDurationCategoryMillisec = 5 * 1000;
@@ -38,15 +40,15 @@ export class Settings {
 
     public constructor() {
         this.guiInput = {
-            displayDurationCategory: document.querySelector("input#display-duration-category"),
-            displayDurationAnswer: document.querySelector("input#display-duration-answer"),
-            timeoutWaitForBuzzes: document.querySelector("input#timeout-wait-for-buzzes"),
-            timeoutAnswer: document.querySelector("input#timeout-answer"),
-            allowMultipleTries: document.querySelector("input#allow-multiple-tries")
+            displayDurationCategory: querySelectorAndCheck(document, "input#display-duration-category"),
+            displayDurationAnswer: querySelectorAndCheck(document, "input#display-duration-answer"),
+            timeoutWaitForBuzzes: querySelectorAndCheck(document, "input#timeout-wait-for-buzzes"),
+            timeoutAnswer: querySelectorAndCheck(document, "input#timeout-answer"),
+            allowMultipleTries: querySelectorAndCheck(document, "input#allow-multiple-tries")
         };
         Object.freeze(this.guiInput);
         this.populateGui();
-        document.querySelector("button#saveSettings").addEventListener("click", () => this.parseGui());
+        querySelectorAndCheck(document, "button#saveSettings").addEventListener("click", () => this.parseGui());
     }
 
     public populateGui(): void {

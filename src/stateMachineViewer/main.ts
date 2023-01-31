@@ -1,4 +1,5 @@
 import Viz from "@aduh95/viz.js";
+import { querySelectorSVGAndCheck } from "../common";
 import { Operator } from "../operator/Operator";
 import { stateMachineToGraphviz } from "./generateDotFileForGraphviz";
 import { StateMachineViewer } from "./StateMachineViewer";
@@ -13,8 +14,8 @@ window.addEventListener('DOMContentLoaded', () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     window.opener.addEventListener("unload", () => close());
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const operator = window.opener.operator as Operator;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-type-assertion
+    const operator = (window.opener as any).operator as Operator;
     if (!operator) {
         document.body.innerHTML = "no window.opener.operator";
         return;
@@ -44,7 +45,7 @@ window.addEventListener('DOMContentLoaded', () => {
             document.body.innerHTML = svgString;
 
             // the body will now contain an <svg> tag
-            const svgElement = document.querySelector("svg");
+            const svgElement = querySelectorSVGAndCheck(document, "svg");
             svgElement.setAttribute("width", "100%");
             svgElement.removeAttribute("height");
             const stateMachineViewer = new StateMachineViewer(svgElement);

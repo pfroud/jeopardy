@@ -1,6 +1,7 @@
 import { Operator } from "../operator/Operator";
 import { Clue } from "../Clue";
 import { SpecialCategory } from "../operator/specialCategories";
+import { querySelectorAndCheck } from "../common";
 
 export class Presentation {
     public readonly allSlideNames = new Set<string>();
@@ -27,26 +28,26 @@ export class Presentation {
     private visibleSlideDiv?: HTMLDivElement;
 
     public constructor(operator: Operator) {
-        this.header = document.querySelector("header");
-        this.spanClueCategoryInHeader = this.header.querySelector("span#clue-category-in-header");
-        this.spanClueMoneyInHeader = this.header.querySelector("span#clue-value-in-header");
-        this.spanClueAirdateInHeader = this.header.querySelector("span#clue-airdate-in-header");
-        this.progressElementForGameTimer = this.header.querySelector("progress#game-timer");
-        this.progressElementForStateMachine = this.header.querySelector("progress#state-machine");
+        this.header = querySelectorAndCheck(document, "header");
+        this.spanClueCategoryInHeader = querySelectorAndCheck(this.header, "span#clue-category-in-header");
+        this.spanClueMoneyInHeader = querySelectorAndCheck(this.header, "span#clue-value-in-header");
+        this.spanClueAirdateInHeader = querySelectorAndCheck(this.header, "span#clue-airdate-in-header");
+        this.progressElementForGameTimer = querySelectorAndCheck(this.header, "progress#game-timer");
+        this.progressElementForStateMachine = querySelectorAndCheck(this.header, "progress#state-machine");
 
-        this.divSlideClueQuestion = document.querySelector("div#slide-clue-question");
-        this.divSlideClueAnswerText = document.querySelector("div#slide-clue-answer div#clue-answer-text");
+        this.divSlideClueQuestion = querySelectorAndCheck(document, "div#slide-clue-question");
+        this.divSlideClueAnswerText = querySelectorAndCheck(document, "div#slide-clue-answer div#clue-answer-text");
 
-        this.divClueCategoryBig = document.querySelector("div#clue-category-big");
-        this.divClueValueBig = document.querySelector("div#clue-value-big");
-        this.divClueAirdateBig = document.querySelector("div#clue-airdate-big");
+        this.divClueCategoryBig = querySelectorAndCheck(document, "div#clue-category-big");
+        this.divClueValueBig = querySelectorAndCheck(document, "div#clue-value-big");
+        this.divClueAirdateBig = querySelectorAndCheck(document, "div#clue-airdate-big");
 
-        this.divSpecialCategoryBackdrop = document.querySelector("div#special-category-backdrop");
-        this.divSpecialCategoryPopup = document.querySelector("div#special-category-popup");
+        this.divSpecialCategoryBackdrop = querySelectorAndCheck(document, "div#special-category-backdrop");
+        this.divSpecialCategoryPopup = querySelectorAndCheck(document, "div#special-category-popup");
 
-        this.divPaused = document.querySelector("div#paused");
+        this.divPaused = querySelectorAndCheck(document, "div#paused");
 
-        this.footer = document.querySelector("footer");
+        this.footer = querySelectorAndCheck(document, "footer");
 
         this.initSlides();
 
@@ -114,7 +115,7 @@ export class Presentation {
         // remove font-size in the inline style property on the div, which may have been set by a previous call to this function
         this.divSlideClueQuestion.style.fontSize = "";
 
-        const heightOfMain = document.querySelector("main").clientHeight;
+        const heightOfMain = querySelectorAndCheck(document, "main").clientHeight;
         while (this.divSlideClueQuestion.clientHeight > heightOfMain) {
             const oldFontSizeString = window.getComputedStyle(this.divSlideClueQuestion).getPropertyValue("font-size");
             const oldFontSize = Number(oldFontSizeString.replace("px", ""));
@@ -130,19 +131,19 @@ export class Presentation {
     }
 
     public setTeamRankingHtml(htmlString: string): void {
-        document.querySelector("div#slide-gameEnd-team-ranking-table div#team-ranking").innerHTML = htmlString;
+        querySelectorAndCheck(document, "div#slide-gameEnd-team-ranking-table div#team-ranking").innerHTML = htmlString;
     }
 
     public getDivForPieCharts(): HTMLDivElement {
-        return document.querySelector("div#slide-gameEnd-pie-charts div#pie-charts");
+        return querySelectorAndCheck(document, "div#slide-gameEnd-pie-charts div#pie-charts");
     }
 
     public getDivForLineChart(): HTMLDivElement {
-        return document.querySelector("div#slide-gameEnd-line-chart div#line-chart");
+        return querySelectorAndCheck(document, "div#slide-gameEnd-line-chart div#line-chart");
     }
 
     public getDivForLineChartLegend(): HTMLDivElement {
-        return document.querySelector("div#slide-gameEnd-line-chart div#line-chart-legend");
+        return querySelectorAndCheck(document, "div#slide-gameEnd-line-chart div#line-chart-legend");
     }
 
     public hideHeaderAndFooter(): void {
@@ -159,12 +160,12 @@ export class Presentation {
 
     public showSpecialCategoryPopup(specialCategory: SpecialCategory): void {
 
-        this.divSpecialCategoryPopup.querySelector("#special-category-title").innerHTML = specialCategory.displayName;
-        this.divSpecialCategoryPopup.querySelector("#special-category-description").innerHTML = specialCategory.description;
+        querySelectorAndCheck(this.divSpecialCategoryPopup, "#special-category-title").innerHTML = specialCategory.displayName;
+        querySelectorAndCheck(this.divSpecialCategoryPopup, "#special-category-description").innerHTML = specialCategory.description;
         if (specialCategory.example) {
-            this.divSpecialCategoryPopup.querySelector("#special-category-example-category").innerHTML = specialCategory.example.category;
-            this.divSpecialCategoryPopup.querySelector("#special-category-example-question").innerHTML = specialCategory.example.question;
-            this.divSpecialCategoryPopup.querySelector("#special-category-example-answer").innerHTML = specialCategory.example.answer;
+            querySelectorAndCheck(this.divSpecialCategoryPopup, "#special-category-example-category").innerHTML = specialCategory.example.category;
+            querySelectorAndCheck(this.divSpecialCategoryPopup, "#special-category-example-question").innerHTML = specialCategory.example.question;
+            querySelectorAndCheck(this.divSpecialCategoryPopup, "#special-category-example-answer").innerHTML = specialCategory.example.answer;
         }
 
         this.divSpecialCategoryBackdrop.className = "blurred";

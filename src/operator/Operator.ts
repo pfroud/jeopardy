@@ -1,11 +1,13 @@
 import { BuzzHistoryDiagram, BuzzHistoryForClue, BuzzHistoryRecord, BuzzResult } from "../buzz-history/buzzHistoryForClue";
 import { Clue } from "../Clue";
+import { querySelectorAndCheck } from "../common";
 import { CountdownTimer } from "../CountdownTimer";
 import { Presentation } from "../presentation/Presentation";
 import { Settings } from "../Settings";
 import { StateMachine } from "../stateMachine/StateMachine";
 import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
 import { AudioManager } from "./AudioManager";
+import { SpecialCategory } from "./specialCategories";
 import { createLineChart, createPieCharts } from "./statisticsCharts";
 
 interface SavedGameInLocalStorage {
@@ -35,50 +37,52 @@ export class Operator {
     private readonly specialCategoryPrompt: HTMLDivElement;
     private readonly specialCategoryTitle: HTMLSpanElement;
     private readonly specialCategoryPopup: HTMLDivElement;
-    private gameTimer: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
-    private teamArray: Team[];
-    private presentClue: Clue;
-    private presentation: Presentation;
+    private readonly gameTimer: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
+    private teamArray?: Team[];
+    private presentClue?: Clue;
+    private presentation?: Presentation;
     private isPaused = false;
-    private stateMachine: StateMachine;
-    private teamPresentlyAnswering: Team;
+    private stateMachine?: StateMachine;
+    private teamPresentlyAnswering?: Team;
     private questionCount = 0;
 
-    private buzzHistoryForPresentClue: BuzzHistoryForClue;
+    private buzzHistoryForPresentClue?: BuzzHistoryForClue;
     private readonly buzzHistoryDiagram: BuzzHistoryDiagram;
 
     public constructor(audioManager: AudioManager, settings: Settings) {
         this.audioManager = audioManager;
         this.settings = settings;
 
-        this.divClueWrapper = document.querySelector("div#clue-wrapper");
-        this.divClueQuestion = document.querySelector("div#div-clue-question");
-        this.divClueValue = document.querySelector("div#div-clue-value");
-        this.divClueCategory = document.querySelector("div#div-clue-category");
-        this.divClueAnswer = document.querySelector("div#div-clue-answer");
-        this.divClueAirdate = document.querySelector("div#div-clue-airdate");
+        this.divClueWrapper = querySelectorAndCheck(document, "div#clue-wrapper");
+        this.divClueQuestion = querySelectorAndCheck(document, "div#div-clue-question");
+        this.divClueValue = querySelectorAndCheck(document, "div#div-clue-value");
+        this.divClueCategory = querySelectorAndCheck(document, "div#div-clue-category");
+        this.divClueAnswer = querySelectorAndCheck(document, "div#div-clue-answer");
+        this.divClueAirdate = querySelectorAndCheck(document, "div#div-clue-airdate");
 
-        this.trQuestion = document.querySelector("tr#tr-clue-question");
-        this.trAnswer = document.querySelector("tr#tr-clue-answer");
+        this.trQuestion = querySelectorAndCheck(document, "tr#tr-clue-question");
+        this.trAnswer = querySelectorAndCheck(document, "tr#tr-clue-answer");
 
-        this.divPaused = document.querySelector("div#paused");
-        this.divInstructions = document.querySelector("div#instructions");
+        this.divPaused = querySelectorAndCheck(document, "div#paused");
+        this.divInstructions = querySelectorAndCheck(document, "div#instructions");
 
-        this.buttonStartGame = document.querySelector("button#start-game");
-        this.buttonSkipClue = document.querySelector("button#skip-clue");
+        this.buttonStartGame = querySelectorAndCheck(document, "button#start-game");
+        this.buttonSkipClue = querySelectorAndCheck(document, "button#skip-clue");
 
-        this.specialCategoryPrompt = document.querySelector("div#special-category-prompt");
-        this.specialCategoryTitle = this.specialCategoryPrompt.querySelector("span#special-category-title");
+        this.specialCategoryPrompt = querySelectorAndCheck(document, "div#special-category-prompt");
+        this.specialCategoryTitle = querySelectorAndCheck(this.specialCategoryPrompt, "span#special-category-title");
 
-        this.specialCategoryPopup = document.querySelector("div#special-category-popup");
+        this.specialCategoryPopup = querySelectorAndCheck(document, "div#special-category-popup");
 
         this.initPauseKeyboardListener();
         this.initMouseListeners();
         this.lookForSavedGame();
 
-        this.initGameTimer(this.settings.gameTimeLimitMillisec);
+        this.gameTimer = new CountdownTimer(this.settings.gameTimeLimitMillisec);
+        this.gameTimer.addProgressElement(querySelectorAndCheck(document, "div#game-timer progress"));
+        this.gameTimer.addTextElement(querySelectorAndCheck(document, "div#game-timer div.remaining-time-text"));
 
-        this.buzzHistoryDiagram = new BuzzHistoryDiagram(Operator.teamCount, document.querySelector("svg#buzz-history"));
+        this.buzzHistoryDiagram = new BuzzHistoryDiagram(Operator.teamCount, querySelectorAndCheck(document, "svg#buzz-history"));
 
         window.open("../presentation/presentation.html", "windowPresentation");
 
@@ -88,11 +92,6 @@ export class Operator {
         */
     }
 
-    private initGameTimer(millisec: number): void {
-        this.gameTimer = new CountdownTimer(millisec);
-        this.gameTimer.addProgressElement(document.querySelector("div#game-timer progress"));
-        this.gameTimer.addTextElement(document.querySelector("div#game-timer div.remaining-time-text"));
-    }
 
     public handlePresentationReady(presentationInstanceFromOtherWindow: Presentation): void {
         /* 
@@ -148,12 +147,12 @@ export class Operator {
         // TODO avoid adding another keyboard listener
         window.addEventListener("keydown", keyboardEvent => {
             const keyboardKey = keyboardEvent.key;
-            if (teamNumbers.has(keyboardKey)) {
+            if (this.teamArray && teamNumbers.has(keyboardKey)) {
                 const teamIndex = Number(keyboardKey) - 1;
                 const teamObj = this.teamArray[teamIndex];
                 teamObj.showKeyDown();
 
-                this.buzzHistoryForPresentClue.records[teamIndex].push({
+                this.buzzHistoryForPresentClue?.records[teamIndex].push({
                     timestamp: Date.now(),
                     source: "Operator.initBuzzerFootswitchIconDisplay() keydown",
                     result: getBuzzResult(teamObj)
@@ -164,7 +163,7 @@ export class Operator {
 
         window.addEventListener("keyup", keyboardEvent => {
             const keyboardKey = keyboardEvent.key;
-            if (teamNumbers.has(keyboardKey)) {
+            if (this.teamArray && teamNumbers.has(keyboardKey)) {
                 const teamIndex = Number(keyboardKey) - 1;
                 const team = this.teamArray[teamIndex];
                 team.showKeyUp();
@@ -182,36 +181,48 @@ export class Operator {
     }
 
     public handleAnswerCorrect(): void {
-        this.teamPresentlyAnswering.handleAnswerCorrect(this.presentClue);
+        if (this.presentClue) {
+            this.teamPresentlyAnswering?.handleAnswerCorrect(this.presentClue);
+        } else {
+            console.error("called handleAnswerCorrect() when presentClue is undefined");
+        }
     }
 
     public handleAnswerWrongOrTimeout(): void {
-        this.teamPresentlyAnswering.handleAnswerIncorrectOrAnswerTimeout(this.presentClue);
-        this.stateMachine.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
+        if (this.presentClue) {
+            this.teamPresentlyAnswering?.handleAnswerIncorrectOrAnswerTimeout(this.presentClue);
+        } else {
+            console.error("called handleAnswerWrongOrTimeout() when presentClue is undefined");
+        }
+        this.stateMachine?.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
     }
 
     private initMouseListeners(): void {
+
+
         this.buttonStartGame.addEventListener("click", () => this.startGame());
 
         this.buttonSkipClue.addEventListener("click", () => this.skipClue());
 
-        document.querySelector("a#aMoneyOverride").addEventListener("click", () =>
+        querySelectorAndCheck(document, "a#aMoneyOverride").addEventListener("click", () => console.log("asdf"));
+
+        querySelectorAndCheck(document, "a#aMoneyOverride").addEventListener("click", () =>
             window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney"));
 
 
-        document.querySelector("a#aOpenStateMachineViewer").addEventListener("click", () =>
+        querySelectorAndCheck(document, "a#aOpenStateMachineViewer").addEventListener("click", () =>
             window.open("../stateMachineViewer", "windowStateMachineViewer", "popup")
         );
 
-        const gameEndControls = document.querySelector("div#game-end-controls");
-        gameEndControls.querySelector("button#show-team-ranking-table").addEventListener("click", () => this.presentation.showSlide("slide-gameEnd-team-ranking-table"));
-        gameEndControls.querySelector("button#show-money-over-time-line-chart").addEventListener("click", () => this.presentation.showSlide("slide-gameEnd-line-chart"));
-        gameEndControls.querySelector("button#show-buzz-results-pie-charts").addEventListener("click", () => this.presentation.showSlide("slide-gameEnd-pie-charts"));
+        const gameEndControls = querySelectorAndCheck(document, "div#game-end-controls");
+        querySelectorAndCheck(gameEndControls, "button#show-team-ranking-table").addEventListener("click", () => this.presentation?.showSlide("slide-gameEnd-team-ranking-table"));
+        querySelectorAndCheck(gameEndControls, "button#show-money-over-time-line-chart").addEventListener("click", () => this.presentation?.showSlide("slide-gameEnd-line-chart"));
+        querySelectorAndCheck(gameEndControls, "button#show-buzz-results-pie-charts").addEventListener("click", () => this.presentation?.showSlide("slide-gameEnd-pie-charts"));
 
     }
 
     private startGame(): void {
-        this.stateMachine.manualTrigger("startGame");
+        this.stateMachine?.manualTrigger("startGame");
         this.buttonStartGame.setAttribute("disabled", "disabled");
         this.gameTimer.start();
     }
@@ -221,12 +232,17 @@ export class Operator {
         this.setAllTeamsState("buzzers-off", true); // the second argument is endLockout
         this.buttonSkipClue.setAttribute("disabled", "disabled");
         this.buttonSkipClue.blur();
-        this.stateMachine.goToState("getClueFromJService");
+        this.stateMachine?.goToState("getClueFromJService");
     }
 
     private initTeams(teamCount: number): void {
+        if (!this.presentation) {
+            console.error("called initTeams() when presentation is undefined");
+            return;
+        }
+
         this.teamArray = new Array<Team>(teamCount);
-        document.querySelector("footer").innerHTML = "";
+        querySelectorAndCheck(document, "footer").innerHTML = "";
         this.presentation.clearFooter();
         for (let i = 0; i < teamCount; i++) {
             this.teamArray[i] = new Team(i, this.presentation, this.settings, this.audioManager);
@@ -238,7 +254,15 @@ export class Operator {
         this.audioManager.play("questionTimeout");
     }
 
-    public handleBuzzerPress(keyboardEvent: KeyboardEvent): void {
+    public handleBuzzerPress(keyboardEvent?: KeyboardEvent): void {
+        if (!this.teamArray) {
+            console.error("called handleBuzzerPress() when teamArray is undefined");
+            return;
+        }
+        if (!keyboardEvent) {
+            console.error("called handleBuzzerPress() without a keyboardEvent");
+            return;
+        }
         const teamNumber = Number(keyboardEvent.key);
         const teamIndex = teamNumber - 1;
         const team = this.teamArray[teamIndex];
@@ -254,15 +278,24 @@ export class Operator {
     }
 
     public shouldGameEnd(): boolean {
-        return this.gameTimer.getIsFinished() ||
-            this.teamArray.some(team => team.getMoney() >= this.settings.teamMoneyWhenGameShouldEnd);
+        if (this.teamArray) {
+            return this.gameTimer.getIsFinished() ||
+                this.teamArray.some(team => team.getMoney() >= this.settings.teamMoneyWhenGameShouldEnd);
+        } else {
+            console.error("called shouldGameEnd() when teamArray is undefined");
+            return false;
+        }
     }
 
     public handleLockout(keyboardEvent: KeyboardEvent): void {
-        const teamNumber = Number(keyboardEvent.key);
-        const teamIndex = teamNumber - 1;
-        const team = this.teamArray[teamIndex];
-        team.canBeLockedOut() && team.startLockout();
+        if (this.teamArray) {
+            const teamNumber = Number(keyboardEvent.key);
+            const teamIndex = teamNumber - 1;
+            const team = this.teamArray[teamIndex];
+            team.canBeLockedOut() && team.startLockout();
+        } else {
+            console.error("called handleLockout() when teamArray is undefined");
+        }
     }
 
 
@@ -282,20 +315,20 @@ export class Operator {
     private setPresentClue(clue: Clue): void {
         this.presentClue = clue;
         this.showClueToOperator(clue);
-        this.presentation.setClue(clue);
+        this.presentation?.setClue(clue);
 
-        if (clue.category.isSpecialCategory) {
-            this.showSpecialCategoryPrompt();
+        if (clue.category.specialCategory) {
+            this.showSpecialCategoryPrompt(clue.category.specialCategory);
         }
     }
 
     public isCurrentClueSpecialCategory(): boolean {
-        return this.presentClue.category.isSpecialCategory;
+        return this.presentClue?.category.specialCategory !== null;
     }
 
     public getClueForTesting(): Promise<void> {
 
-        this.stateMachine.getCountdownTimerForState("showClueCategoryAndValue").reset();
+        this.stateMachine?.getCountdownTimerForState("showClueCategoryAndValue").reset();
 
         const promiseExecutor = (
             resolveFunc: () => void,
@@ -317,7 +350,7 @@ export class Operator {
 
     public getClueFromJService(): Promise<void> {
 
-        this.stateMachine.getCountdownTimerForState("showClueCategoryAndValue").reset();
+        this.stateMachine?.getCountdownTimerForState("showClueCategoryAndValue").reset();
 
         // Use a recursive helper function so we can do retries.
         const fetchClueHelper = (
@@ -376,11 +409,11 @@ export class Operator {
     }
 
     public fitClueQuestionToScreenInOperatorWindow(): void {
-        this.presentation.fitClueQuestionToScreen();
+        this.presentation?.fitClueQuestionToScreen();
     }
 
-    public showSpecialCategoryPrompt(): void {
-        this.specialCategoryTitle.innerHTML = this.presentClue.category.specialCategory.displayName;
+    public showSpecialCategoryPrompt(specialCategory: SpecialCategory): void {
+        this.specialCategoryTitle.innerHTML = specialCategory.displayName;
         this.specialCategoryPrompt.style.display = "block";
     }
 
@@ -392,15 +425,20 @@ export class Operator {
     public showSpecialCategoryOverlay(): void {
         this.gameTimer.pause();
 
-        this.presentation.showSpecialCategoryPopup(this.presentClue.category.specialCategory);
+        const specialCategory = this.presentClue?.category.specialCategory;
+        if (!specialCategory) {
+            console.error("called showSpecialCategoryOverlay() when the present clue does not have a special category");
+            return;
+        }
 
-        const specialCategory = this.presentClue.category.specialCategory;
-        this.specialCategoryPopup.querySelector("#special-category-title").innerHTML = specialCategory.displayName;
-        this.specialCategoryPopup.querySelector("#special-category-description").innerHTML = specialCategory.description;
+        this.presentation?.showSpecialCategoryPopup(specialCategory);
+
+        querySelectorAndCheck(this.specialCategoryPopup, "#special-category-title").innerHTML = specialCategory.displayName;
+        querySelectorAndCheck(this.specialCategoryPopup, "#special-category-description").innerHTML = specialCategory.description;
         if (specialCategory.example) {
-            this.specialCategoryPopup.querySelector("#special-category-example-category").innerHTML = specialCategory.example.category;
-            this.specialCategoryPopup.querySelector("#special-category-example-question").innerHTML = specialCategory.example.question;
-            this.specialCategoryPopup.querySelector("#special-category-example-answer").innerHTML = specialCategory.example.answer;
+            querySelectorAndCheck(this.specialCategoryPopup, "#special-category-example-category").innerHTML = specialCategory.example.category;
+            querySelectorAndCheck(this.specialCategoryPopup, "#special-category-example-question").innerHTML = specialCategory.example.question;
+            querySelectorAndCheck(this.specialCategoryPopup, "#special-category-example-answer").innerHTML = specialCategory.example.answer;
         }
 
         this.specialCategoryPopup.style.display = "block";
@@ -409,11 +447,16 @@ export class Operator {
 
     public hideSpecialCategoryOverlay(): void {
         this.specialCategoryPopup.style.display = "none";
-        this.presentation.hideSpecialCategoryPopup();
+        this.presentation?.hideSpecialCategoryPopup();
         this.setPaused(false);
     }
 
     public handleShowClueQuestion(): void {
+        if (!this.presentClue) {
+            console.error("called handleShowClueQuestion() when presentClue is undefined");
+            return;
+        }
+
         /*
         This method mostly is about showing the clue question to the operator.
         The clue question is already being shown in the presentation because
@@ -450,31 +493,37 @@ export class Operator {
     public handleDoneReadingClueQuestion(): void {
         this.audioManager.play("doneReadingClueQuestion");
         this.trAnswer.style.display = ""; //show it by removing "display=none"
-        this.divClueAnswer.innerHTML = this.presentClue.answer;
+        if (this.presentClue) {
+            this.divClueAnswer.innerHTML = this.presentClue.answer;
+        } else {
+            console.error("called handleDoneReadingClueQuestion() when presentClue is undefined");
+        }
         this.divInstructions.innerHTML = "Wait for people to answer.";
         this.setAllTeamsState("can-answer");
         this.buttonSkipClue.setAttribute("disabled", "disabled");
 
-        this.stateMachine.getCountdownTimerForState("waitForBuzzes").reset();
+        this.stateMachine?.getCountdownTimerForState("waitForBuzzes").reset();
 
-        this.teamArray.forEach(team => team.hasBuzzedForCurrentQuestion = false);
-        this.buzzHistoryForPresentClue.timestampWhenClueQuestionFinishedReading = Date.now();
+        this.teamArray?.forEach(team => team.hasBuzzedForCurrentQuestion = false);
+        if (this.buzzHistoryForPresentClue) {
+            this.buzzHistoryForPresentClue.timestampWhenClueQuestionFinishedReading = Date.now();
+        }
     }
 
     public handleShowAnswer(): void {
 
         // only save the game if somebody has more than $0
-        if (this.teamArray.some(team => team.getMoney() > 0)) {
+        if (this.teamArray?.some(team => team.getMoney() > 0)) {
             this.saveGame();
         }
 
-        this.stateMachine.getCountdownTimerForState("waitForBuzzes").showProgressBarFinished();
-        this.stateMachine.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
+        this.stateMachine?.getCountdownTimerForState("waitForBuzzes").showProgressBarFinished();
+        this.stateMachine?.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
 
         this.setAllTeamsState("buzzers-off");
         this.divInstructions.innerHTML = "Let people read the answer.";
 
-        this.teamArray.forEach(team => {
+        this.teamArray?.forEach(team => {
             team.updateMoneyAtEndOfRound();
             if (!team.hasBuzzedForCurrentQuestion) {
                 team.statistics.questionsNotBuzzed++;
@@ -486,10 +535,14 @@ export class Operator {
     }
 
     public setAllTeamsState(targetState: TeamState, endLockout = false): void {
-        this.teamArray.forEach(team => team.setState(targetState, endLockout));
+        this.teamArray?.forEach(team => team.setState(targetState, endLockout));
     }
 
     public canTeamBuzz(keyboardEvent: KeyboardEvent): boolean {
+        if (!this.teamArray) {
+            console.error("called canTeamBuzz() when teamArray is null");
+            return false;
+        }
         const teamNumber = Number(keyboardEvent.key);
         const teamIndex = teamNumber - 1;
         if (teamIndex > Operator.teamCount - 1) {
@@ -500,6 +553,9 @@ export class Operator {
     }
 
     public haveAllTeamsAnswered(): boolean {
+        if (!this.teamArray) {
+            return false;
+        }
         if (this.settings.allowMultipleAnswersToSameQuestion) {
             // allow teams to keep answering until time runs out
             return false;
@@ -516,25 +572,29 @@ export class Operator {
     public setPaused(isPaused: boolean): void {
         this.isPaused = isPaused;
         this.divPaused.style.display = isPaused ? "" : "none";
-        this.stateMachine.setPaused(isPaused);
+        this.stateMachine?.setPaused(isPaused);
         this.gameTimer.setPaused(isPaused);
-        this.teamArray.forEach(team => team.setPaused(isPaused));
-        this.presentation.setPaused(isPaused);
+        this.teamArray?.forEach(team => team.setPaused(isPaused));
+        this.presentation?.setPaused(isPaused);
     }
 
     public getIsPaused(): boolean {
         return this.isPaused;
     }
 
-    public getTeam(teamIdx: number): Team {
-        return this.teamArray[teamIdx];
+    public getTeam(teamIdx: number): Team | undefined {
+        if (this.teamArray) {
+            return this.teamArray[teamIdx];
+        } else {
+            return undefined;
+        }
     }
 
     private lookForSavedGame(): void {
 
-        const divMessage = document.querySelector<HTMLDivElement>("div#saved-game-message");
+        const divMessage = querySelectorAndCheck<HTMLDivElement>(document, "div#saved-game-message");
 
-        const divSavedGame = document.querySelector<HTMLDivElement>("div#tab-content-saved-game");
+        const divSavedGame = querySelectorAndCheck<HTMLDivElement>(document, "div#tab-content-load-game");
 
         const rawLocalStorageResult = window.localStorage.getItem(Operator.localStorageKey);
         if (rawLocalStorageResult === null) {
@@ -547,7 +607,7 @@ export class Operator {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const parsedJson: SavedGameInLocalStorage = JSON.parse(rawLocalStorageResult);
 
-        const tableDetails = document.querySelector("table#saved-game-details tbody");
+        const tableDetails = querySelectorAndCheck(document, "table#saved-game-details tbody");
 
         const tableRowTeamNumber = document.createElement("tr");
         tableDetails.appendChild(tableRowTeamNumber);
@@ -565,11 +625,11 @@ export class Operator {
             tableRowTeamMoney.appendChild(cellTeamMoney);
         }
 
-        document.querySelector("button#saved-game-load").addEventListener("click", () => {
+        querySelectorAndCheck(document, "button#saved-game-load").addEventListener("click", () => {
             this.loadGame(parsedJson);
             divSavedGame.style.display = "none";
         });
-        document.querySelector("button#saved-game-delete").addEventListener("click", function () {
+        querySelectorAndCheck(document, "button#saved-game-delete").addEventListener("click", function () {
             if (window.confirm("Delete the saved game?")) {
                 window.localStorage.removeItem(Operator.localStorageKey);
                 divSavedGame.style.display = "none";
@@ -578,6 +638,10 @@ export class Operator {
     }
 
     private saveGame(): void {
+        if (!this.teamArray) {
+            console.error("called saveGame() when teamArray is undefined");
+            return;
+        }
         const objectToSave: SavedGameInLocalStorage = {
             gameTimerRemainingMillisec: this.gameTimer.getRemainingMillisec(),
             teams: this.teamArray.map(t => t.getObjectToSaveInLocalStorage())
@@ -595,11 +659,11 @@ export class Operator {
 
         this.initTeams(parsedJson.teams.length);
         for (let i = 0; i < parsedJson.teams.length; i++) {
-            this.teamArray[i].loadFromLocalStorage(parsedJson.teams[i]);
+            this.teamArray![i].loadFromLocalStorage(parsedJson.teams[i]);
         }
 
         if (this.shouldGameEnd()) {
-            this.stateMachine.goToState("gameEnd");
+            this.stateMachine?.goToState("gameEnd");
         }
     }
 
@@ -609,18 +673,24 @@ export class Operator {
         this.divInstructions.innerHTML = "Game over";
 
         // First play the eight high-pitched beeps sound, then play the closing music
-        this.audioManager.play("roundEnd")
-            .then(() => this.audioManager.play("musicGameEnd"));
+        this.audioManager.play("roundEnd")?.then(() => this.audioManager.play("musicGameEnd"));
 
-        document.querySelector<HTMLDivElement>("div#game-end-controls").style.display = "block";
+        querySelectorAndCheck<HTMLDivElement>(document, "div#game-end-controls").style.display = "block";
 
         this.createTeamRankingTable();
-        this.presentation.hideHeaderAndFooter();
-        createPieCharts(this, this.presentation.getDivForPieCharts(), this.teamArray);
-        createLineChart(this.presentation.getDivForLineChart(), this.presentation.getDivForLineChartLegend(), this.teamArray);
+        this.presentation?.hideHeaderAndFooter();
+        if (this.presentation && this.teamArray) {
+            createPieCharts(this, this.presentation.getDivForPieCharts(), this.teamArray);
+            createLineChart(this.presentation.getDivForLineChart(), this.presentation.getDivForLineChartLegend(), this.teamArray);
+        }
     }
 
     private createTeamRankingTable(): void {
+        if (!this.teamArray) {
+            console.error("called createTeamRankingTable() when teamArray is undefined");
+            return;
+        }
+
         // sort teams by money descending
         const shallowCopy = this.teamArray.slice();
         function comparator(team1: Team, team2: Team): number {
@@ -642,19 +712,21 @@ export class Operator {
 
         html.push("</tbody></table>");
 
-        this.presentation.setTeamRankingHtml(html.join(""));
+        this.presentation?.setTeamRankingHtml(html.join(""));
     }
 
     public showBuzzHistory(): void {
-        this.buzzHistoryDiagram.setHistory(this.buzzHistoryForPresentClue);
-        this.buzzHistoryDiagram.redraw();
+        if (this.buzzHistoryForPresentClue) {
+            this.buzzHistoryDiagram.setHistory(this.buzzHistoryForPresentClue);
+            this.buzzHistoryDiagram.redraw();
+        }
     }
 
-    public getStateMachine(): StateMachine {
+    public getStateMachine(): StateMachine | undefined {
         return this.stateMachine;
     }
 
-    public getTeamArray(): Team[] {
+    public getTeamArray(): Team[] | undefined {
         return this.teamArray;
     }
 

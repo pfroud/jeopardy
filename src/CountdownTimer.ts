@@ -13,7 +13,7 @@ export class CountdownTimer {
     private readonly DEBUG = false;
     private static readonly desiredFrameRateHz = 30;
     private readonly updateIntervalMillisec = 1000 / CountdownTimer.desiredFrameRateHz;
-    private readonly audioManager: AudioManager;
+    private readonly audioManager: AudioManager | undefined;
     private readonly textElements = new Set<HTMLElement>();
     private readonly progressElements = new Set<HTMLProgressElement>();
     private readonly dotsTables = new Set<HTMLTableElement>();
@@ -146,7 +146,7 @@ export class CountdownTimer {
     private guiUpdatePaused(): void {
         this.progressElements.forEach(elem => elem.classList.toggle("paused", this.isPaused));
         this.textElements.forEach(elem => elem.classList.toggle("paused", this.isPaused));
-        this.dotsTables?.forEach(e => e.classList.toggle("paused", this.isPaused));
+        this.dotsTables.forEach(e => e.classList.toggle("paused", this.isPaused));
     }
 
     public start(): void {
@@ -168,7 +168,7 @@ export class CountdownTimer {
             this.dotsTables.forEach(tableElement => {
                 const tds = tableElement.querySelectorAll("td");
                 if (tds.length !== 9) {
-                    console.warn(`found ${tds.length} dots <td> element(s), expected exactly 9`);
+                    console.error(`found ${tds.length} dots <td> element(s), expected exactly 9`);
                 }
                 tds.forEach(td => td.classList.add("active"));
             });
@@ -189,7 +189,7 @@ export class CountdownTimer {
         this.remainingMillisec -= elapsedMillisecSinceLastInterval;
         this.timestampOfLastInterval = presentTimestamp;
 
-        let logLine: string;
+        let logLine = "";
         if (this.DEBUG) {
             logLine = `CountdownTimer: handleInterval. elapsed = ${String(elapsedMillisecSinceLastInterval).padStart(4)}; remaining = ${String(this.remainingMillisec).padStart(4)}. `;
         }
@@ -298,23 +298,17 @@ export class CountdownTimer {
         }
         this.isFinished = true;
         this.textElements.forEach(elem => elem.innerHTML = "done");
-        this.dotsTables?.forEach(table => table.querySelectorAll("td").forEach(td => td.classList.remove("active")));
+        this.dotsTables.forEach(table => table.querySelectorAll("td").forEach(td => td.classList.remove("active")));
         clearInterval(this.intervalID);
 
         this.onFinished?.();
     }
 
     public addTextElement(textElement: HTMLElement): void {
-        if (!textElement) {
-            throw new Error("trying to add falsey text element");
-        }
         this.textElements.add(textElement);
     }
 
     public addProgressElement(progressElement: HTMLProgressElement): void {
-        if (!progressElement) {
-            throw new Error("trying to add falsey <progress> element");
-        }
         this.progressElements.add(progressElement);
     }
 

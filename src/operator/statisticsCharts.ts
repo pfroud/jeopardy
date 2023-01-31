@@ -1,4 +1,5 @@
 import * as Chartist from "chartist";
+import { querySelectorSVGAndCheck } from "../common";
 import { Team } from "../Team";
 import { Operator } from "./Operator";
 
@@ -92,9 +93,10 @@ export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElem
         */
         const needToManuallyMoveLabel = seriesToAdd.map(obj => obj.value).some(n => n === questionCount);
         if (needToManuallyMoveLabel) {
-            pieChart.on("created", () =>
-                chartContainer.querySelector("svg text").setAttribute("dy", "20")
-            );
+            pieChart.on("created", () => {
+                const svgCreatedByChartist = querySelectorSVGAndCheck(document, "svg");
+                querySelectorSVGAndCheck(svgCreatedByChartist, "text").setAttribute("dy", "20");
+            });
         }
     });
 }

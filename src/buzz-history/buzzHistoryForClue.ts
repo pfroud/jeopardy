@@ -47,7 +47,7 @@ export class BuzzHistoryDiagram {
     private zoomedScale: ScaleLinear<number, number>;
     private readonly rowsArray: Selection<SVGGElement, unknown, null, undefined>[] = [];
 
-    private history: BuzzHistoryForClue = null;
+    private history: BuzzHistoryForClue | null = null;
 
     public constructor(teamCount: number, _svg_: SVGSVGElement) {
         const svgWidth = 800;
@@ -173,15 +173,15 @@ export class BuzzHistoryDiagram {
 
         // Change all the timestamps so time zero is when the operator finished reading the question
         this.history.records.forEach(arrayOfRecordsForTeam => arrayOfRecordsForTeam.forEach(record => {
-            record.timestamp -= this.history.timestampWhenClueQuestionFinishedReading;
+            record.timestamp -= this.history!.timestampWhenClueQuestionFinishedReading;
             if (record.result.type === "start-answering") {
-                record.result.endTimestamp -= this.history.timestampWhenClueQuestionFinishedReading;
+                record.result.endTimestamp -= this.history!.timestampWhenClueQuestionFinishedReading;
             }
         }));
     }
 
     public redraw(): void {
-        if (this.history === null) {
+        if (!this.history) {
             return;
         }
 
@@ -207,7 +207,7 @@ export class BuzzHistoryDiagram {
                 .classed("too-early", true)
                 .attr("x", d => this.zoomedScale(d.timestamp))
                 .attr("y", BuzzHistoryDiagram.yForBars)
-                .attr("width", this.zoomedScale(this.history.lockoutDurationMillisec) - this.zoomedScale(0))
+                .attr("width", this.zoomedScale(this.history!.lockoutDurationMillisec) - this.zoomedScale(0))
                 .attr("height", BuzzHistoryDiagram.barHeight)
                 .attr("fill", "red")
                 .attr("stroke", "black")

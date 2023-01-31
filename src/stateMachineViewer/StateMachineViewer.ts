@@ -51,9 +51,9 @@ export class StateMachineViewer {
         this.svg.appendChild(styleElement);
     }
 
-    public updateTrail(previousStateName: string, newStateName: string): void {
+    public updateTrail(previousStateName: string | null, newStateName: string): void {
 
-        if (this.DEBUG) {
+        if (this.DEBUG && previousStateName) {
             console.log(`stateMachineViewer: ${previousStateName} --> ${newStateName}`);
         }
 

@@ -5,6 +5,7 @@ import { Presentation } from "../presentation/Presentation";
 import { Settings } from "../Settings";
 import { CountdownBehavior, StateMachineState, StateMachineTransition, TimeoutTransition } from "./stateInterfaces";
 import { getStatesForJeopardyGame } from "./statesForJeopardyGame";
+import { querySelectorAndCheck } from "../common";
 
 
 export class StateMachine {
@@ -22,18 +23,18 @@ export class StateMachine {
     private readonly countdownTimerLeavingState: { [stateName: string]: CountdownTimer } = {};
     private readonly allStates: StateMachineState[];
     private readonly tableOfAllCountdownTimers: HTMLTableElement;
-    private stateMachineViewer: StateMachineViewer;
+    private stateMachineViewer?: StateMachineViewer;
     private presentState: StateMachineState;
 
     public constructor(settings: Settings, operator: Operator, presentation: Presentation) {
         this.operator = operator;
         this.presentation = presentation;
 
-        this.operatorWindowCountdownProgress = document.querySelector("div#state-machine-viz progress");
-        this.operatorWindowCountdownText = document.querySelector("div#state-machine-viz div.remaining-time-text");
-        this.operatorWindowDivStateName = document.querySelector("div#state-machine-viz div#state-name");
+        this.operatorWindowCountdownProgress = querySelectorAndCheck(document, "div#state-machine-viz progress");
+        this.operatorWindowCountdownText = querySelectorAndCheck(document, "div#state-machine-viz div.remaining-time-text");
+        this.operatorWindowDivStateName = querySelectorAndCheck(document, "div#state-machine-viz div#state-name");
 
-        this.tableOfAllCountdownTimers = document.querySelector("table#state-machine-all-countdown-timers");
+        this.tableOfAllCountdownTimers = querySelectorAndCheck(document, "table#state-machine-all-countdown-timers");
 
         window.addEventListener("keydown", keyboardEvent => this.handleKeyboardEvent(keyboardEvent));
 
@@ -59,7 +60,7 @@ export class StateMachine {
             return;
         }
 
-        if (this.presentState && !this.operator.getIsPaused()) {
+        if (!this.operator.getIsPaused()) {
 
             // Search for the first transition with a keyboard transition for the key pressed.
             for (const transition of this.presentState.transitions) {
@@ -88,6 +89,7 @@ export class StateMachine {
     }
 
     public setPaused(isPaused: boolean): void {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         this.countdownTimerLeavingState[this.presentState.name]?.setPaused(isPaused);
     }
 
@@ -114,6 +116,7 @@ export class StateMachine {
             throw new RangeError(`can't go to state named "${destinationStateName}", state not found`);
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         this.countdownTimerLeavingState[this.presentState.name]?.pause();
 
         if (this.DEBUG) {
@@ -193,10 +196,25 @@ export class StateMachine {
                     how much time is left for teams to buzz in.
                 */
                 if (transition.isWaitingForTeamToAnswerAfterBuzz) {
-                    const teamIndex = Number(keyboardEvent.key) - 1;
-                    const team = this.operator.getTeam(teamIndex);
-                    countdownTimer.addDotsTable(team.getCountdownDotsInPresentationWindow());
-                    countdownTimer.addProgressElement(team.getProgressElementInOperatorWindow());
+                    if (keyboardEvent) {
+
+                        const teamIndex = Number(keyboardEvent.key) - 1;
+                        const team = this.operator.getTeam(teamIndex);
+                        if (team) {
+                            const dotsInPresentationWindow = team.getCountdownDotsInPresentationWindow();
+                            if (dotsInPresentationWindow) {
+                                countdownTimer.addDotsTable(dotsInPresentationWindow);
+                            }
+                            const progressElement = team.getProgressElementInOperatorWindow();
+                            if (progressElement) {
+                                countdownTimer.addProgressElement(progressElement);
+                            }
+                        } else {
+                            console.error(`no team for keyboard key ${keyboardEvent.key}`);
+                        }
+                    } else {
+                        console.error("keyboardEvent is undefined when transition.isWaitingForTeamToAnswerAfterBuzz is true");
+                    }
 
                     if (transition.behavior !== CountdownBehavior.ResetTimerEveryTimeYouEnterTheState) {
                         console.warn(`in state ${this.presentState.name}: transition to ${transition.destination}: dots table and progress element will be repeatedly added to the countdown timer`);
@@ -271,7 +289,7 @@ export class StateMachine {
                 } else {
                     if (transition.else.onTransition) {
                         if (this.DEBUG) {
-                            console.log(`Running the else.onTransitionThen function of ${this.presentState.name}: ${transition.then.onTransition.name}`);
+                            console.log(`Running the else.onTransitionThen function of ${this.presentState.name}: ${transition.else.onTransition.name}`);
                         }
                         transition.else.onTransition();
 

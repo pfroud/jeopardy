@@ -16,8 +16,7 @@ export class Clue {
     public readonly airdate: Date;
     public readonly category: {
         title: string;
-        isSpecialCategory: boolean;
-        specialCategory?: SpecialCategory;
+        specialCategory: SpecialCategory | null;
     }
 
     public constructor(xhrResponse: string) {
@@ -33,8 +32,7 @@ export class Clue {
 
         this.category = {
             title: parsedJson.category.title.replace(/\\/g, ""),
-            isSpecialCategory: undefined,
-            specialCategory: undefined
+            specialCategory: null
         };
 
         this.checkSpecialCategory();
@@ -89,12 +87,10 @@ export class Clue {
         // search for the first one which matches
         for (const specialCategory of specialCategories) {
             if (specialCategory.categoryTitleMatches.test(this.category.title)) {
-                this.category.isSpecialCategory = true;
                 this.category.specialCategory = specialCategory;
                 return;
             }
         }
-        this.category.isSpecialCategory = false;
         this.category.specialCategory = null;
     }
 
