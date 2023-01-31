@@ -28,7 +28,7 @@ export class Settings {
 
     public gameTimeLimitMillisec = 10 * 60 * 1000;
 
-    private guiInput: {
+    private readonly guiInput: {
         displayDurationCategory: HTMLInputElement;
         displayDurationAnswer: HTMLInputElement;
         timeoutWaitForBuzzes: HTMLInputElement;
@@ -36,7 +36,7 @@ export class Settings {
         allowMultipleTries: HTMLInputElement;
     };
 
-    constructor() {
+    public constructor() {
         this.guiInput = {
             displayDurationCategory: document.querySelector("input#display-duration-category"),
             displayDurationAnswer: document.querySelector("input#display-duration-answer"),

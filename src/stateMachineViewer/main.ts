@@ -10,9 +10,11 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     window.opener.addEventListener("unload", () => close());
 
-    const operator = ((window.opener as any).operator as Operator);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const operator = window.opener.operator as Operator;
     if (!operator) {
         document.body.innerHTML = "no window.opener.operator";
         return;
@@ -50,6 +52,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         })
         .catch((error) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             document.body.innerHTML = error;
             console.error(error);
         });

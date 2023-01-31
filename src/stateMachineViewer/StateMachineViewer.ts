@@ -14,10 +14,10 @@ export class StateMachineViewer {
     private static readonly TRAIL_LENGTH = StateMachineViewer.TRAIL_COLORS.length;
 
     private readonly svg: SVGElement;
-    private stateTrail: SVGGElement[] = [];
-    private transitionTrail: SVGGElement[] = [];
+    private readonly stateTrail: SVGGElement[] = [];
+    private readonly transitionTrail: SVGGElement[] = [];
 
-    constructor(svgElement: SVGSVGElement) {
+    public constructor(svgElement: SVGSVGElement) {
         this.svg = svgElement;
 
         this.createStyleElementInSVG();

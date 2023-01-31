@@ -75,7 +75,7 @@ export class Team {
         moneyAtEndOfEachRound: []
     };
 
-    constructor(teamIdx: number, presentationInstance: Presentation, settings: Settings, audioManager: AudioManager) {
+    public constructor(teamIdx: number, presentationInstance: Presentation, settings: Settings, audioManager: AudioManager) {
         this.settings = settings;
         this.audioManager = audioManager;
         this.teamIdx = teamIdx;
@@ -146,7 +146,7 @@ export class Team {
 
         setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MILLISEC, this);
 
-        function handleTimeout(instance: Team) {
+        function handleTimeout(instance: Team): void {
             const difference = Math.abs(targetMoney - instance.money);
 
             // teams could loose $50 if the guessing penalty is 0.5, for example
@@ -226,7 +226,7 @@ export class Team {
 
         const divMoney = this.div.presentation.money = document.createElement("div");
         divMoney.classList.add("team-money");
-        divMoney.innerHTML = "$" + this.money;
+        divMoney.innerHTML = `$${this.money}`;
         divTeam.append(divMoney);
 
         const divName = this.div.presentation.teamName = document.createElement("div");
@@ -255,7 +255,7 @@ export class Team {
 
         const divMoney = this.div.operator.money = document.createElement("div");
         divMoney.classList.add("team-money");
-        divMoney.innerHTML = "$" + this.money;
+        divMoney.innerHTML = `$${this.money}`;
         divTeam.append(divMoney);
 
         const progress = this.progressElementInOperatorWindow = document.createElement("progress");
@@ -294,7 +294,7 @@ export class Team {
         const countdownShowCategory = this.countdownTimer = new CountdownTimer(this.settings.durationLockoutMillisec);
         countdownShowCategory.addProgressElement(this.progressElementInPresentationWindow);
         this.progressElementInPresentationWindow.style.display = ""; //show it by removing "display=none"
-        countdownShowCategory.onFinished = () => this.endLockout();
+        countdownShowCategory.onFinished = (): void => this.endLockout();
         countdownShowCategory.start();
 
     }

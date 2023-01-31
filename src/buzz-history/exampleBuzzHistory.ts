@@ -97,4 +97,4 @@ export const exampleBuzzHistory: BuzzHistoryForClue = {
         ]
     ],
     "timestampWhenClueQuestionFinishedReading": 1664589172934
-}
+};

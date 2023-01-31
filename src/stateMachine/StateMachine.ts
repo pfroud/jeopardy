@@ -25,7 +25,7 @@ export class StateMachine {
     private stateMachineViewer: StateMachineViewer;
     private presentState: StateMachineState;
 
-    constructor(settings: Settings, operator: Operator, presentation: Presentation) {
+    public constructor(settings: Settings, operator: Operator, presentation: Presentation) {
         this.operator = operator;
         this.presentation = presentation;
 
@@ -54,7 +54,7 @@ export class StateMachine {
             return;
         }
 
-        if (keyboardEvent.key.length != 1) {
+        if (keyboardEvent.key.length !== 1) {
             // ignore non-printable characters https://stackoverflow.com/a/38802011/7376577
             return;
         }
@@ -62,8 +62,7 @@ export class StateMachine {
         if (this.presentState && !this.operator.getIsPaused()) {
 
             // Search for the first transition with a keyboard transition for the key pressed.
-            for (let i = 0; i < this.presentState.transitions.length; i++) {
-                const transition = this.presentState.transitions[i];
+            for (const transition of this.presentState.transitions) {
                 if (transition.type === "keyboard" && transition.keyboardKeys.includes(keyboardEvent.key)) {
 
                     if (transition.guardCondition && !transition.guardCondition(keyboardEvent)) {
@@ -95,8 +94,7 @@ export class StateMachine {
 
     public manualTrigger(triggerName: string): void {
         // Search for the first transition which has a matching manual trigger.
-        for (let i = 0; i < this.presentState.transitions.length; i++) {
-            const transition = this.presentState.transitions[i];
+        for (const transition of this.presentState.transitions) {
             if (transition.type === "manualTrigger" && transition.triggerName === triggerName) {
                 if (transition.guardCondition && !transition.guardCondition()) {
                     continue;
@@ -127,7 +125,7 @@ export class StateMachine {
         ////////////////////////////////////////////////////////////////////////////////////////
         if (this.presentState.onExit) {
             if (this.DEBUG) {
-                console.log(`Running the onExit function of ${this.presentState}: ${this.presentState.onExit.name}`);
+                console.log(`Running the onExit function of ${this.presentState.name}: ${this.presentState.onExit.name}`);
             }
             this.presentState.onExit();
         }
@@ -174,8 +172,7 @@ export class StateMachine {
         const transitionArray = this.presentState.transitions;
         let foundCountdownTimer = false;
         // Search for the first timeout transition.
-        for (let i = 0; i < transitionArray.length; i++) {
-            const transition = transitionArray[i];
+        for (const transition of transitionArray) {
             if (transition.type === "timeout") {
                 if (transition.guardCondition && !transition.guardCondition()) {
                     continue;
@@ -183,7 +180,7 @@ export class StateMachine {
 
                 const countdownTimer = this.countdownTimerLeavingState[this.presentState.name];
 
-                if (transition.behavior == CountdownBehavior.ResetTimerEveryTimeYouEnterTheState) {
+                if (transition.behavior === CountdownBehavior.ResetTimerEveryTimeYouEnterTheState) {
                     countdownTimer.reset();
                 }
 
@@ -201,7 +198,7 @@ export class StateMachine {
                     countdownTimer.addDotsTable(team.getCountdownDotsInPresentationWindow());
                     countdownTimer.addProgressElement(team.getProgressElementInOperatorWindow());
 
-                    if (transition.behavior != CountdownBehavior.ResetTimerEveryTimeYouEnterTheState) {
+                    if (transition.behavior !== CountdownBehavior.ResetTimerEveryTimeYouEnterTheState) {
                         console.warn(`in state ${this.presentState.name}: transition to ${transition.destination}: dots table and progress element will be repeatedly added to the countdown timer`);
                     }
 
@@ -230,8 +227,7 @@ export class StateMachine {
         //////////////// Handle promise transition ///////////////////
         //////////////////////////////////////////////////////////////
         // Search for the first promise transition.
-        for (let i = 0; i < transitionArray.length; i++) {
-            const transition = transitionArray[i];
+        for (const transition of transitionArray) {
             if (transition.type === "promise") {
                 if (transition.guardCondition && !transition.guardCondition()) {
                     continue;
@@ -241,7 +237,7 @@ export class StateMachine {
                     () => this.goToState(transition.destination)
                 ).catch(
                     (err: Error) => {
-                        alert("promise rejected: " + err);
+                        alert(`promise rejected: ${err.message}`);
                         throw err;
                     }
                 );
@@ -258,8 +254,7 @@ export class StateMachine {
         /////////////////////// Handle if transition ///////////////////
         ////////////////////////////////////////////////////////////////
         // Search for the first if transition.
-        for (let i = 0; i < transitionArray.length; i++) {
-            const transition = transitionArray[i];
+        for (const transition of transitionArray) {
             if (transition.type === "if") {
                 if (this.DEBUG) {
                     console.log(`Transition type if: the condition function is ${transition.condition.name}`);
@@ -267,7 +262,7 @@ export class StateMachine {
                 if (transition.condition()) {
                     if (transition.then.onTransition) {
                         if (this.DEBUG) {
-                            console.log(`Running the then.onTransition function of ${this.presentState}: ${transition.then.onTransition.name}`);
+                            console.log(`Running the then.onTransition function of ${this.presentState.name}: ${transition.then.onTransition.name}`);
                         }
                         transition.then.onTransition();
 
@@ -276,7 +271,7 @@ export class StateMachine {
                 } else {
                     if (transition.else.onTransition) {
                         if (this.DEBUG) {
-                            console.log(`Running the else.onTransitionThen function of ${this.presentState}: ${transition.then.onTransition.name}`);
+                            console.log(`Running the else.onTransitionThen function of ${this.presentState.name}: ${transition.then.onTransition.name}`);
                         }
                         transition.else.onTransition();
 
@@ -296,7 +291,7 @@ export class StateMachine {
 
         const countdownTimer = new CountdownTimer(timeoutTransition.initialDuration);
 
-        countdownTimer.onFinished = () => {
+        countdownTimer.onFinished = (): void => {
             timeoutTransition.onTransition?.();
             this.goToState(timeoutTransition.destination);
         };
@@ -371,11 +366,11 @@ export class StateMachine {
                         // Verify destination states exist.
                         if (!(transition.then.destination in this.stateMap)) {
                             printWarning(state.name, transitionIndex,
-                                `unknown 'then' state "${transition.then}"`);
+                                `unknown 'then' state "${transition.then.destination}"`);
                         }
                         if (!(transition.else.destination in this.stateMap)) {
                             printWarning(state.name, transitionIndex,
-                                `unknown 'else' state "${transition.else}"`);
+                                `unknown 'else' state "${transition.else.destination}"`);
                         }
                         break;
                     }
@@ -388,13 +383,13 @@ export class StateMachine {
                                 "multiple timeout transitions leaving a state is not supported (because the countdownTimerForState map uses the state name as the key)");
                         }
 
-                        let countdownTimer = this.createCountdownTimerForTransition(transition);
+                        const countdownTimer = this.createCountdownTimerForTransition(transition);
 
                         // create a progress element in the operator page - probably only needed for debugging
                         this.countdownTimerLeavingState[state.name] = countdownTimer;
                         const tr = document.createElement("tr");
 
-                        const tdStateLabel = document.createElement("td")
+                        const tdStateLabel = document.createElement("td");
                         tdStateLabel.innerHTML = `(${transition.behavior}) ${state.name} &rarr; ${transition.destination} `;
                         tr.appendChild(tdStateLabel);
 
@@ -416,7 +411,7 @@ export class StateMachine {
                     }
                 }
 
-                function printWarning(stateName: string, transitionIdx: number, message: string) {
+                function printWarning(stateName: string, transitionIdx: number, message: string): void {
                     console.warn(`state "${stateName}": transition ${transitionIdx}: ${message}`);
                 }
 

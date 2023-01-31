@@ -8,13 +8,15 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    const operator = ((window.opener as any).operator as Operator);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const operator = window.opener.operator as Operator;
     if (!operator) {
         document.body.innerHTML = "no window.opener.operator";
         return;
     }
 
     // close the presentation window if the operator window closes
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     window.opener.addEventListener("unload", () => close());
 
     // Show errors from the presentation window in the operator window
@@ -26,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Add global variable so we can access the presentation instance in the web browser debugger.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (window as any).presentation = new Presentation(operator);
 
 });

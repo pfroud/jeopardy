@@ -45,9 +45,9 @@ export class Operator {
     private questionCount = 0;
 
     private buzzHistoryForPresentClue: BuzzHistoryForClue;
-    private buzzHistoryDiagram: BuzzHistoryDiagram;
+    private readonly buzzHistoryDiagram: BuzzHistoryDiagram;
 
-    constructor(audioManager: AudioManager, settings: Settings) {
+    public constructor(audioManager: AudioManager, settings: Settings) {
         this.audioManager = audioManager;
         this.settings = settings;
 
@@ -225,7 +225,7 @@ export class Operator {
     }
 
     private initTeams(teamCount: number): void {
-        this.teamArray = new Array(teamCount);
+        this.teamArray = new Array<Team>(teamCount);
         document.querySelector("footer").innerHTML = "";
         this.presentation.clearFooter();
         for (let i = 0; i < teamCount; i++) {
@@ -266,18 +266,18 @@ export class Operator {
     }
 
 
-    private showClueToOperator(clue: Clue) {
+    private showClueToOperator(clue: Clue): void {
         /*
         This function only shows the airdate, category, and dollar value to the operator.
         The state machine will show the clue question after a timeout.
         */
         this.divClueWrapper.style.display = ""; //show it by removing "display=none"
         this.divClueCategory.innerHTML = clue.category.title;
-        this.divClueValue.innerHTML = "$" + clue.value;
+        this.divClueValue.innerHTML = `$${clue.value}`;
         this.divClueAirdate.innerHTML = clue.airdate.getFullYear().toString();
         this.trAnswer.style.display = "none";
         this.divInstructions.innerHTML = "Read aloud the category and dollar value.";
-    };
+    }
 
     private setPresentClue(clue: Clue): void {
         this.presentClue = clue;
@@ -299,8 +299,7 @@ export class Operator {
 
         const promiseExecutor = (
             resolveFunc: () => void,
-            rejectFunc: (rejectReason: Error) => void
-        ) => {
+        ): void => {
             this.buttonStartGame.blur();
             this.trQuestion.style.display = "none";
             this.divInstructions.innerHTML = "Loading clue...";
@@ -326,7 +325,7 @@ export class Operator {
             promiseRejectFunc: (rejectReason: Error) => void,
             tryNum: number,
             maxTries: number
-        ) => {
+        ): void => {
             // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
             const xhr = new XMLHttpRequest();
             xhr.open("GET", "http://jservice.io/api/random");
@@ -336,6 +335,7 @@ export class Operator {
                     alert(`Error ${xhr.status}: ${xhr.statusText}`);
                 }
 
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                 const clue = new Clue(xhr.response);
 
                 if (clue.isValid() && !clue.hasMultimedia()) {
@@ -365,7 +365,7 @@ export class Operator {
         const promiseExecutor = (
             resolveFunc: () => void,
             rejectFunc: (rejectReason: Error) => void
-        ) => {
+        ): void => {
             this.buttonStartGame.blur();
             this.trQuestion.style.display = "none";
             this.divInstructions.innerHTML = "Loading clue...";
@@ -434,10 +434,10 @@ export class Operator {
             lockoutDurationMillisec: this.settings.durationLockoutMillisec,
             records: getEmpty2DArray(),
             timestampWhenClueQuestionFinishedReading: -1
-        }
+        };
 
         function getEmpty2DArray(): BuzzHistoryRecord[][] {
-            let rv = new Array(Operator.teamCount);
+            const rv = new Array<BuzzHistoryRecord[]>(Operator.teamCount);
             for (let i = 0; i < Operator.teamCount; i++) {
                 rv[i] = [];
             }
@@ -544,6 +544,7 @@ export class Operator {
 
         divMessage.innerHTML = "Found a saved game:";
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const parsedJson: SavedGameInLocalStorage = JSON.parse(rawLocalStorageResult);
 
         const tableDetails = document.querySelector("table#saved-game-details tbody");
@@ -558,9 +559,9 @@ export class Operator {
 
         const tableRowTeamMoney = document.createElement("tr");
         tableDetails.appendChild(tableRowTeamMoney);
-        for (let i = 0; i < parsedJson.teams.length; i++) {
+        for (const team of parsedJson.teams) {
             const cellTeamMoney = document.createElement("td");
-            cellTeamMoney.innerHTML = "$" + parsedJson.teams[i].money;
+            cellTeamMoney.innerHTML = `$${team.money}`;
             tableRowTeamMoney.appendChild(cellTeamMoney);
         }
 
@@ -619,10 +620,10 @@ export class Operator {
         createLineChart(this.presentation.getDivForLineChart(), this.presentation.getDivForLineChartLegend(), this.teamArray);
     }
 
-    private createTeamRankingTable() {
+    private createTeamRankingTable(): void {
         // sort teams by money descending
         const shallowCopy = this.teamArray.slice();
-        function comparator(team1: Team, team2: Team) {
+        function comparator(team1: Team, team2: Team): number {
             return team2.getMoney() - team1.getMoney();
         }
         shallowCopy.sort(comparator);

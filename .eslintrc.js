@@ -57,6 +57,9 @@ module.exports = // https://eslint.org/docs/user-guide/configuring/
         "@typescript-eslint/explicit-function-return-type": "warn", // https://typescript-eslint.io/rules/explicit-function-return-type/
         "@typescript-eslint/no-require-imports": "warn", // https://typescript-eslint.io/rules/no-require-imports/
         "@typescript-eslint/prefer-readonly": "warn", // https://typescript-eslint.io/rules/prefer-readonly/
+        "@typescript-eslint/no-unnecessary-condition": "off", // https://typescript-eslint.io/rules/no-unnecessary-condition/
+        "@typescript-eslint/consistent-indexed-object-style": "off", // https://typescript-eslint.io/rules/consistent-indexed-object-style/
+        "@typescript-eslint/no-floating-promises": "off", // https://typescript-eslint.io/rules/no-floating-promises/
         //
         /*
         I actually want to use the explicit any type to set globals

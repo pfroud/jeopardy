@@ -26,7 +26,7 @@ export class Presentation {
     private readonly allSlideDivs: { [slideName: string]: HTMLDivElement } = {};
     private visibleSlideDiv?: HTMLDivElement;
 
-    constructor(operator: Operator) {
+    public constructor(operator: Operator) {
         this.header = document.querySelector("header");
         this.spanClueCategoryInHeader = this.header.querySelector("span#clue-category-in-header");
         this.spanClueMoneyInHeader = this.header.querySelector("span#clue-value-in-header");
@@ -41,8 +41,8 @@ export class Presentation {
         this.divClueValueBig = document.querySelector("div#clue-value-big");
         this.divClueAirdateBig = document.querySelector("div#clue-airdate-big");
 
-        this.divSpecialCategoryBackdrop = document.querySelector("div#special-category-backdrop")
-        this.divSpecialCategoryPopup = document.querySelector("div#special-category-popup")
+        this.divSpecialCategoryBackdrop = document.querySelector("div#special-category-backdrop");
+        this.divSpecialCategoryPopup = document.querySelector("div#special-category-popup");
 
         this.divPaused = document.querySelector("div#paused");
 
@@ -90,18 +90,20 @@ export class Presentation {
             targetSlide.style.display = "block";
             this.visibleSlideDiv = targetSlide;
         } else {
-            throw new RangeError(`slide name "${slideName}" not in known slides: ${Object.keys(this.allSlideDivs)}`);
+            throw new RangeError(
+                `slide name "${slideName}" not in known slides: ${Object.keys(this.allSlideDivs).toString()}`
+            );
         }
     }
 
     public setClue(clue: Clue): void {
         this.spanClueCategoryInHeader.innerHTML = clue.category.title;
-        this.spanClueMoneyInHeader.innerHTML = "$" + clue.value;
-        this.spanClueAirdateInHeader.innerHTML = "(" + clue.airdate.getFullYear() + ")";
+        this.spanClueMoneyInHeader.innerHTML = `$${clue.value}`;
+        this.spanClueAirdateInHeader.innerHTML = `(${clue.airdate.getFullYear()})`;
 
         this.divClueCategoryBig.innerHTML = clue.category.title;
-        this.divClueValueBig.innerHTML = "$" + clue.value;
-        this.divClueAirdateBig.innerHTML = "Airdate: " + clue.airdate.getFullYear();
+        this.divClueValueBig.innerHTML = `$${clue.value}`;
+        this.divClueAirdateBig.innerHTML = `Airdate: ${clue.airdate.getFullYear()}`;
 
         this.divSlideClueQuestion.innerHTML = clue.question;
 
@@ -119,7 +121,7 @@ export class Presentation {
             const newFontSize = oldFontSize - 10;
 
             // set font-size in the inline style property on the div
-            this.divSlideClueQuestion.style.fontSize = newFontSize + "px";
+            this.divSlideClueQuestion.style.fontSize = `${newFontSize}px`;
         }
     }
 

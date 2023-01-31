@@ -18,7 +18,7 @@ export interface SpecialCategory {
 export const specialCategories: SpecialCategory[] = [
     {
         displayName: "Quotation-mark categories",
-        categoryTitleMatches: /\"|“|”/,  // match quotation mark and curly quotes
+        categoryTitleMatches: /"|“|”/,  // match quotation mark and curly quotes
         description: "The correct answer contains the letter(s) in quotes.",
         example: {
             category: "\"AFTER\" CLASS",

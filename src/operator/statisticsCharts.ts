@@ -31,9 +31,9 @@ export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElem
             className: "buzzed-then-answered-wrong-or-timed-out"
         }];
         // only add if non-zero
-        seriesToAdd.forEach(candidate => { if (candidate.value > 0) chartData.series.push(candidate) });
+        seriesToAdd.forEach(candidate => { if (candidate.value > 0) chartData.series.push(candidate); });
 
-        if (chartData.series.length == 0) {
+        if (chartData.series.length === 0) {
             return;
         }
 
@@ -90,7 +90,7 @@ export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElem
         of the chart, but we already put our own label for "Team #" in the center. In that 
         case we will manually move the Chartist label.
         */
-        const needToManuallyMoveLabel = seriesToAdd.map(obj => obj.value).some(n => n == questionCount);
+        const needToManuallyMoveLabel = seriesToAdd.map(obj => obj.value).some(n => n === questionCount);
         if (needToManuallyMoveLabel) {
             pieChart.on("created", () =>
                 chartContainer.querySelector("svg text").setAttribute("dy", "20")
@@ -164,8 +164,8 @@ export function createLineChart(divForLineChart: HTMLDivElement, legendContainer
         const svgHeight = 20;
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svg.classList.add("ct-chart-line");
-        svg.setAttribute("width", svgWidth + "px");
-        svg.setAttribute("height", svgHeight + "px");
+        svg.setAttribute("width", `${svgWidth}px`);
+        svg.setAttribute("height", `${svgHeight}px`);
         legendRow.appendChild(svg);
 
         const group = document.createElementNS("http://www.w3.org/2000/svg", "g");

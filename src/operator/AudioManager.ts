@@ -16,7 +16,7 @@ export class AudioManager {
     (I am using this sound correctly.)
     */
 
-    constructor() {
+    public constructor() {
         this.audioElements = {
             answerCorrect: document.querySelector<HTMLAudioElement>("audio#answer-correct"),
             answerIncorrectOrAnswerTimeout: document.querySelector<HTMLAudioElement>("audio#answer-incorrect"),
@@ -54,7 +54,7 @@ export class AudioManager {
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/Promise#syntax
         const promiseExecutor = (
             resolveFunc: () => void
-        ) => {
+        ): void => {
             // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/ended_event
             audio.addEventListener("ended", () => resolveFunc());
         };

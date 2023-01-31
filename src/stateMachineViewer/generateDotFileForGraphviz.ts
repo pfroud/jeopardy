@@ -68,7 +68,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                 case "timeout": {
                     let transitionLabel = transition.type.toString() + ": ";
 
-                    transitionLabel += transition.behavior + " " + transition.initialDuration + "ms";
+                    transitionLabel += `${transition.behavior} ${transition.initialDuration} ms`;
 
                     if (transition.guardCondition) {
                         transitionLabel += ` [${transition.guardCondition.name.replace("bound ", "")}] `;

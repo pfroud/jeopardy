@@ -25,18 +25,18 @@ export class CountdownTimer {
     private isFinished = false;
     private isPaused = false;
 
-    constructor(durationMillisec: number, audioManager?: AudioManager) {
+    public constructor(durationMillisec: number, audioManager?: AudioManager) {
         if (!Number.isInteger(durationMillisec)) {
-            throw new TypeError("duration must be an integer: " + durationMillisec);
+            throw new TypeError(`duration must be an integer: ${durationMillisec}`);
         }
         if (!isFinite(durationMillisec)) {
-            throw new TypeError("duration must be finite: " + durationMillisec);
+            throw new TypeError(`duration must be finite: ${durationMillisec}`);
         }
         if (isNaN(durationMillisec)) {
-            throw new TypeError("duration cannot be NaN: " + durationMillisec);
+            throw new TypeError(`duration cannot be NaN: ${durationMillisec}`);
         }
         if (durationMillisec < 1) {
-            throw new RangeError("duration cannot be less than one:" + durationMillisec);
+            throw new RangeError(`duration cannot be less than one: ${durationMillisec}`);
         }
         this.audioManager = audioManager;
 
@@ -89,7 +89,7 @@ export class CountdownTimer {
         }
     }
 
-    public startOrResume() {
+    public startOrResume(): void {
         if (this.isStarted) {
             this.resume();
         } else {
@@ -221,7 +221,7 @@ export class CountdownTimer {
         const remainingSeconds = this.remainingMillisec / 1000;
         if (this.remainingMillisec > 60 * 1000) {
             const date = new Date(this.remainingMillisec);
-            newText = date.getMinutes() + " min " + date.getSeconds() + " sec";
+            newText = `${date.getMinutes()} min ${date.getSeconds()} sec`;
         } else {
             newText = remainingSeconds.toFixed(1) + " sec";
         }
