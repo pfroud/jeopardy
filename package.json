@@ -3,6 +3,13 @@
   "version": "1.0.0",
   "description": "trivia game",
   "main": "index.js",
+  "source": [
+    "src/index.html",
+    "src/operator/operator.html",
+    "src/presentation/presentation.html",
+    "src/stateMachineViewer/index.html",
+    "src/moneyOverride/moneyOverride.html"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

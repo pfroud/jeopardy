@@ -6,10 +6,13 @@
             "label": "Start Parcel development server",
             "type": "shell",
             "group": "build",
-            // https://parceljs.org/features/cli/
-            // Source maps are not working so I am turning them off
-            "command": "npx parcel serve src/buzz-history/index.html --no-source-maps",
-            //"command": "npx parcel serve src/index.html src/operator/operator.html src/presentation/presentation.html src/stateMachineViewer/index.html src/moneyOverride/moneyOverride.html --no-source-maps",
+            /*
+            https://parceljs.org/features/cli/
+            https: //parceljs.org/features/development/#dev-server
+            Source maps are not working so I am turning them off.
+            The targets (HTML files) are specified in package.json in 'source'.
+            */
+            "command": "npx parcel serve --no-source-maps",
             "presentation": {
                 "echo": false,
                 "reveal": "always",
