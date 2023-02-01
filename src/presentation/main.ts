@@ -17,10 +17,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Show errors from the presentation window in the operator window
     window.addEventListener("error", function (errorEvent) {
-        // suppress error TS2339 "property 'console' does not exist on type 'Window'"
-        const castOpener = window.opener as (Window & typeof globalThis);
-        castOpener.console.error("ERROR FROM PRESENTATION WINDOW:");
-        castOpener.console.error(errorEvent.error);
+        const errorDiv = document.createElement("div");
+        errorDiv.innerText = errorEvent.message;
+        errorDiv.style.backgroundColor = "red";
+        errorDiv.style.color = "white";
+        errorDiv.style.padding = "20px";
+        errorDiv.style.fontSize = "30px";
+        errorDiv.style.position = "absolute";
+        errorDiv.style.zIndex = "500";
+        document.body.prepend(errorDiv);
     });
 
     // Add global variable so we can access the presentation instance in the web browser debugger.
