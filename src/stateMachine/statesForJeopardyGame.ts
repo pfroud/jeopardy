@@ -1,6 +1,6 @@
 import { Operator } from "../operator/Operator";
 import { Settings } from "../Settings";
-import { CountdownBehavior, StateMachineState } from "./stateInterfaces";
+import { CountdownBehavior, StateMachineState } from "./typesForStateMachine";
 
 export function getStatesForJeopardyGame(operator: Operator, settings: Settings): StateMachineState[] {
 

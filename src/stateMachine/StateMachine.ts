@@ -3,7 +3,7 @@ import { StateMachineViewer } from "../stateMachineViewer/StateMachineViewer";
 import { Operator } from "../operator/Operator";
 import { Presentation } from "../presentation/Presentation";
 import { Settings } from "../Settings";
-import { CountdownBehavior, StateMachineState, StateMachineTransition, TimeoutTransition } from "./stateInterfaces";
+import { CountdownBehavior, StateMachineState, StateMachineTransition, TimeoutTransition } from "./typesForStateMachine";
 import { getStatesForJeopardyGame } from "./statesForJeopardyGame";
 import { querySelectorAndCheck } from "../common";
 

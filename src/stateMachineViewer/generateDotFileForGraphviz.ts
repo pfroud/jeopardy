@@ -1,4 +1,4 @@
-import { StateMachineState, StateMachineTransition } from "../stateMachine/stateInterfaces";
+import { StateMachineState, StateMachineTransition } from "../stateMachine/typesForStateMachine";
 
 /**
  * Convert state machine states into a string of the Graphviz graph description language.

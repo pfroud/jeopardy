@@ -1,4 +1,3 @@
-
 export interface StateMachineState {
     name: string;
     presentationSlideToShow?: string;
@@ -17,7 +16,6 @@ export interface ManualTransition {
     guardCondition?: () => boolean;
 }
 
-
 export interface IfTransition {
     type: "if";
     condition: () => boolean;
@@ -30,7 +28,6 @@ export interface IfTransition {
         onTransition?: () => void;
     };
 }
-
 
 export interface PromiseTransition {
     type: "promise";
@@ -54,7 +51,6 @@ export enum CountdownBehavior {
     ResetTimerEveryTimeYouEnterTheState = "new",
     ContinueTimerUntilManuallyReset = "continue"
 }
-
 
 export interface KeyboardTransition {
     type: "keyboard";
