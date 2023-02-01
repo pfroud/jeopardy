@@ -245,7 +245,7 @@ export class Operator {
         querySelectorAndCheck(document, "footer").innerHTML = "";
         this.presentation.clearFooter();
         for (let i = 0; i < teamCount; i++) {
-            this.teamArray[i] = new Team(i, this.presentation, this.settings, this.audioManager);
+            this.teamArray[i] = new Team(i, this, this.presentation, this.settings, this.audioManager);
         }
     }
 
@@ -717,6 +717,7 @@ export class Operator {
 
     public showBuzzHistory(): void {
         if (this.buzzHistoryForPresentClue) {
+            this.divInstructions.innerHTML = "The buzz history is showing. Press space to continue.";
             this.buzzHistoryDiagram.setHistory(this.buzzHistoryForPresentClue);
             this.buzzHistoryDiagram.redraw();
         }

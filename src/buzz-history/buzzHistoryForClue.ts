@@ -161,7 +161,8 @@ export class BuzzHistoryDiagram {
             .attr("id", "operator-finished-reading-question")
             .attr("y1", 0)
             .attr("y2", contentHeight)
-            // x1 and x2 are set in the update() function
+            .attr("x1", this.zoomedScale(0))
+            .attr("x2", this.zoomedScale(0))
             .attr("stroke", "black")
             .attr("stroke-width", 1);
 

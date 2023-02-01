@@ -61,6 +61,7 @@ export class CountdownTimer {
 
         this.timestampOfLastInterval = NaN;
         this.intervalID = NaN;
+        this.previousDotsDeactivated = NaN;
 
         this.isStarted = false;
         this.isFinished = false;
@@ -69,9 +70,11 @@ export class CountdownTimer {
             progressElement.setAttribute("max", String(this.maxMillisec));
             progressElement.setAttribute("value", String(this.maxMillisec));
         });
+
         this.dotsTables.forEach(tableElement =>
             tableElement.querySelectorAll("td").forEach(td => td.classList.remove("active"))
         );
+
         this.textElements.forEach(divElement => divElement.innerHTML = "Reset");
 
         this.onReset?.();
@@ -314,6 +317,14 @@ export class CountdownTimer {
 
     public addDotsTable(dotsTable: HTMLTableElement): void {
         this.dotsTables.add(dotsTable);
+    }
+
+    public removeProgressElement(progressElement: HTMLProgressElement): void {
+        this.progressElements.delete(progressElement);
+    }
+
+    public removeDotsTable(dotsTable: HTMLTableElement): void {
+        this.dotsTables.delete(dotsTable);
     }
 
     public getRemainingMillisec(): number {

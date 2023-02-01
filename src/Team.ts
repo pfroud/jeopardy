@@ -2,6 +2,7 @@ import { Clue } from "./Clue";
 import { querySelectorAndCheck } from "./common";
 import { CountdownTimer } from "./CountdownTimer";
 import { AudioManager } from "./operator/AudioManager";
+import { Operator } from "./operator/Operator";
 import { Presentation } from "./presentation/Presentation";
 import { Settings } from "./Settings";
 
@@ -34,7 +35,8 @@ export class Team {
     private countdownDotsInPresentationWindow?: HTMLTableElement;
     private readonly settings: Settings;
     private readonly audioManager: AudioManager;
-    private readonly presentationInstance: Presentation;
+    private readonly presentation: Presentation;
+    private readonly operator: Operator;
     private readonly teamIdx: number;
     /** One countdown timer used to keep track of all timing for this Team */
     private countdownTimer?: CountdownTimer | null;
@@ -76,11 +78,12 @@ export class Team {
         moneyAtEndOfEachRound: []
     };
 
-    public constructor(teamIdx: number, presentationInstance: Presentation, settings: Settings, audioManager: AudioManager) {
+    public constructor(teamIdx: number, operator: Operator, presentation: Presentation, settings: Settings, audioManager: AudioManager) {
         this.settings = settings;
         this.audioManager = audioManager;
         this.teamIdx = teamIdx;
-        this.presentationInstance = presentationInstance;
+        this.presentation = presentation;
+        this.operator = operator;
         this.teamName = `Team ${teamIdx + 1}`;
 
         this.createElementsInOperatorWindow();
@@ -147,24 +150,25 @@ export class Team {
         const DELAY_BETWEEN_STEPS_MILLISEC = 50;
         const DIRECTION_MULTIPLIER = targetMoney > this.money ? 1 : -1;
 
-        setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MILLISEC, this);
-
-        function handleTimeout(instance: Team): void {
-            const difference = Math.abs(targetMoney - instance.money);
+        const handleTimeout = (): void => {
+            const difference = Math.abs(targetMoney - this.money);
 
             // teams could loose $50 if the guessing penalty is 0.5, for example
             if (difference >= DOLLAR_CHANGE_PER_STEP) {
-                instance.money += DIRECTION_MULTIPLIER * DOLLAR_CHANGE_PER_STEP;
+                this.money += DIRECTION_MULTIPLIER * DOLLAR_CHANGE_PER_STEP;
             } else {
-                instance.money += DIRECTION_MULTIPLIER * difference;
+                this.money += DIRECTION_MULTIPLIER * difference;
             }
 
-            instance.updateMoneyDisplay();
-            if (instance.money !== targetMoney) {
-                setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MILLISEC, instance);
+            this.updateMoneyDisplay();
+            if (this.money !== targetMoney) {
+                setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MILLISEC, this);
             }
 
-        }
+        };
+
+        setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MILLISEC);
+
     }
 
     public canBuzz(): boolean {
@@ -245,7 +249,7 @@ export class Team {
         progress.style.display = "none";
         divTeam.append(progress);
 
-        this.presentationInstance.appendTeamDivToFooter(divTeam);
+        this.presentation.appendTeamDivToFooter(divTeam);
 
     }
 
@@ -333,6 +337,17 @@ export class Team {
         if (this.progressElementInOperatorWindow) {
             this.progressElementInOperatorWindow.style.display = "none";
         }
+
+        const timer = this.operator.getStateMachine()?.getCountdownTimerForState("waitForTeamAnswer");
+
+        if (this.countdownDotsInPresentationWindow) {
+            timer?.removeDotsTable(this.countdownDotsInPresentationWindow);
+        }
+        if (this.progressElementInOperatorWindow) {
+            timer?.removeProgressElement(this.progressElementInOperatorWindow);
+        }
+
+
     }
 
     public showKeyDown(): void {
