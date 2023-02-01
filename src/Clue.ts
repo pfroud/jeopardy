@@ -24,18 +24,17 @@ export class Clue {
     public readonly buzzHistory: BuzzHistoryForClue;
 
     public constructor(xhrResponse: string) {
-
         const parsedJson = JSON.parse(xhrResponse)[0];
 
-        this.answer = parsedJson.answer.replace(/\\/g, "");
-        this.question = parsedJson.question.replace(/\\/g, "");
+        this.answer = cleanString(parsedJson.answer);
+        this.question = cleanString(parsedJson.question);
         this.value = parsedJson.value;
 
         // example of what format the airdate is in: "2013-01-25T12:00:00.000Z"
         this.airdate = new Date(parsedJson.airdate);
 
         this.category = {
-            title: parsedJson.category.title.replace(/\\/g, ""),
+            title: cleanString(parsedJson.category.title),
             specialCategory: null
         };
 
@@ -54,6 +53,43 @@ export class Clue {
             }
             return rv;
         }
+
+        function cleanString(rawString: string): string {
+            const withoutBackslashes = rawString.replace(/\\/g, "");
+            try {
+                return decodeUTF8(withoutBackslashes);
+            } catch (error) {
+                console.warn("UTF-8 decoding failed:");
+                console.warn(error);
+                console.warn("The original response from JService was:");
+                console.warn(xhrResponse);
+                return withoutBackslashes;
+            }
+        }
+
+        function decodeUTF8(rawString: string): string {
+
+            /*
+            Fixes strings like:
+            "MÃ©lisande"       --> "Mélisande"
+            "Ãle de la CitÃ©" --> "Île de la Cité"
+            "lycÃ©e"           --> "lycée"
+    
+            But it does not work on:
+            "espaãol"
+            */
+
+            // https://developer.chrome.com/blog/how-to-convert-arraybuffer-to-and-from-string/
+            const arrayBuffer = new ArrayBuffer(rawString.length);
+            const uint8Array = new Uint8Array(arrayBuffer);
+            for (let i = 0, strLen = rawString.length; i < strLen; i++) {
+                uint8Array[i] = rawString.charCodeAt(i);
+            }
+
+            const textDecoder = new TextDecoder("utf-8", { fatal: true });
+            return textDecoder.decode(arrayBuffer);
+        }
+
     }
 
     public getQuestionHtmlWithSubjectInBold(): string {
