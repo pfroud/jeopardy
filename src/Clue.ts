@@ -57,12 +57,23 @@ export class Clue {
         function cleanString(rawString: string): string {
             const withoutBackslashes = rawString.replace(/\\/g, "");
             try {
-                return decodeUTF8(withoutBackslashes);
+                const decoded = decodeUTF8(withoutBackslashes);
+                if (withoutBackslashes !== decoded) {
+                    console.log("UTF-8 decode success");
+                    console.log("Before:");
+                    console.log(withoutBackslashes);
+                    console.log("After:");
+                    console.log(decoded);
+                    console.groupEnd();
+                }
+                return decoded;
             } catch (error) {
-                console.warn("UTF-8 decoding failed:");
+                console.group("UTF-8 decode failed");
+                console.warn("The error was:");
                 console.warn(error);
                 console.warn("The original response from JService was:");
                 console.warn(xhrResponse);
+                console.groupEnd();
                 return withoutBackslashes;
             }
         }
