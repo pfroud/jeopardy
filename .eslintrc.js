@@ -60,6 +60,7 @@ module.exports = // https://eslint.org/docs/user-guide/configuring/
         "@typescript-eslint/consistent-indexed-object-style": "off", // https://typescript-eslint.io/rules/consistent-indexed-object-style/
         "@typescript-eslint/no-floating-promises": "off", // https://typescript-eslint.io/rules/no-floating-promises/
         "@typescript-eslint/no-non-null-assertion": "off", // https://typescript-eslint.io/rules/no-non-null-assertion
+        "@typescript-eslint/no-unnecessary-condition": "off", //https://typescript-eslint.io/rules/no-unnecessary-condition/
         //
         /*
         I actually want to use the explicit any type to set globals

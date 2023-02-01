@@ -15,10 +15,10 @@ interface Statistics {
 
 export type TeamState =
     "buzzers-off" | // game has not started
-    "reading-question" | //operator is reading the question out loud
+    "operator-is-reading-question" |
     "can-answer" | //operator is done reading the question
     "answering" |
-    "already-answered" | // the team tried answering the question but got it wrong
+    "already-answered-this-clue" |
     "lockout" //team buzzed while operator was reading the question
     ;
 
@@ -106,7 +106,7 @@ export class Team {
         this.stopAnswer();
         this.audioManager.play("answerIncorrectOrAnswerTimeout");
         this.moneySubtract(clue.value * this.settings.wrongAnswerPenaltyMultiplier);
-        this.setState(this.settings.allowMultipleAnswersToSameQuestion ? "can-answer" : "already-answered");
+        this.setState(this.settings.allowMultipleAnswersToSameQuestion ? "can-answer" : "already-answered-this-clue");
         this.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut++;
         this.hasBuzzedForCurrentQuestion = true;
     }
@@ -294,7 +294,7 @@ export class Team {
     }
 
     public canBeLockedOut(): boolean {
-        return this.state === "reading-question";
+        return this.state === "operator-is-reading-question";
     }
 
     public startLockout(): void {
@@ -346,8 +346,6 @@ export class Team {
         if (this.progressElementInOperatorWindow) {
             timer?.removeProgressElement(this.progressElementInOperatorWindow);
         }
-
-
     }
 
     public showKeyDown(): void {
@@ -390,6 +388,10 @@ export class Team {
     public loadFromLocalStorage(source: TeamSavedInLocalStorage): void {
         this.moneySet(source.money, false);
         this.statistics = source.statistics;
+    }
+
+    public getTeamIndex(): number {
+        return this.teamIdx;
     }
 
 

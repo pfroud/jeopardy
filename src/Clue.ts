@@ -2,14 +2,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { BuzzHistoryForClue, BuzzHistoryRecord, BuzzResult } from "./BuzzHistoryChart";
+import { Operator } from "./operator/Operator";
 import { specialCategories, SpecialCategory } from "./operator/specialCategories";
 
 export class Clue {
 
-    /** Prase read aloud by the host */
+    /** The phrase read aloud by the person operating the game */
     public readonly question: string;
 
-    /** Correct response from a player to get money */
+    /** The correct response a player needs to say to get money */
     public readonly answer: string;
 
     public readonly value: number;
@@ -18,6 +20,8 @@ export class Clue {
         title: string;
         specialCategory: SpecialCategory | null;
     }
+
+    public readonly buzzHistory: BuzzHistoryForClue;
 
     public constructor(xhrResponse: string) {
 
@@ -36,6 +40,20 @@ export class Clue {
         };
 
         this.checkSpecialCategory();
+
+        this.buzzHistory = {
+            records: getEmpty2DArray(Operator.teamCount),
+            timestampWhenClueQuestionFinishedReading: NaN
+        };
+
+        function getEmpty2DArray(size: number): BuzzHistoryRecord<BuzzResult>[][] {
+            // do not use Array.fill() because then every array element will refer to that argument
+            const rv = new Array<BuzzHistoryRecord<BuzzResult>[]>(size);
+            for (let teamIdx = 0; teamIdx < size; teamIdx++) {
+                rv[teamIdx] = [];
+            }
+            return rv;
+        }
     }
 
     public getQuestionHtmlWithSubjectInBold(): string {

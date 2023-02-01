@@ -1,4 +1,4 @@
-import { StateMachineState, StateMachineTransition } from "../stateMachine/typesForStateMachine";
+import { StateMachineState } from "../stateMachine/typesForStateMachine";
 
 /**
  * Convert state machine states into a string of the Graphviz graph description language.
@@ -30,7 +30,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
         }
         dotFileLines.push(`\t${state.name} [label= < ${stateLabel} >, id="${state.name}"];`);
 
-        state.transitions.forEach((transition: StateMachineTransition) => {
+        state.transitions.forEach((transition) => {
 
 
             switch (transition.type) {

@@ -1,11 +1,11 @@
+import { querySelectorAndCheck } from "../common";
 import { CountdownTimer } from "../CountdownTimer";
-import { StateMachineViewer } from "../stateMachineViewer/StateMachineViewer";
 import { Operator } from "../operator/Operator";
 import { Presentation } from "../presentation/Presentation";
 import { Settings } from "../Settings";
-import { CountdownBehavior, StateMachineState, StateMachineTransition, TimeoutTransition } from "./typesForStateMachine";
+import { StateMachineViewer } from "../stateMachineViewer/StateMachineViewer";
 import { getStatesForJeopardyGame } from "./statesForJeopardyGame";
-import { querySelectorAndCheck } from "../common";
+import { CountdownBehavior, StateMachineState, TimeoutTransition } from "./typesForStateMachine";
 
 
 export class StateMachine {
@@ -353,7 +353,7 @@ export class StateMachine {
 
             let stateHasTimeoutTransition = false;
 
-            state.transitions.forEach((transition: StateMachineTransition, transitionIndex: number) => {
+            state.transitions.forEach((transition, transitionIndex) => {
 
                 // Verify all the destination states exist.
                 if (transition.type !== "if") {

@@ -1,4 +1,4 @@
-import { BuzzHistoryChart, BuzzHistoryForClue, BuzzHistoryRecord, BuzzResult } from "../BuzzHistoryChart";
+import { BuzzHistoryChart, BuzzHistoryRecord, BuzzResultStartAnswer } from "../BuzzHistoryChart";
 import { Clue } from "../Clue";
 import { querySelectorAndCheck } from "../common";
 import { CountdownTimer } from "../CountdownTimer";
@@ -44,10 +44,10 @@ export class Operator {
     private isPaused = false;
     private stateMachine?: StateMachine;
     private teamPresentlyAnswering?: Team;
+    private activeBuzzHistoryRecord?: BuzzHistoryRecord<BuzzResultStartAnswer> | undefined;
     private questionCount = 0;
 
-    private buzzHistoryForPresentClue?: BuzzHistoryForClue;
-    private readonly buzzHistoryDiagram: BuzzHistoryChart;
+    private readonly buzzHistoryDiagram: BuzzHistoryChart | undefined;
 
     public constructor(audioManager: AudioManager, settings: Settings) {
         this.audioManager = audioManager;
@@ -82,7 +82,7 @@ export class Operator {
         this.gameTimer.addProgressElement(querySelectorAndCheck(document, "div#game-timer progress"));
         this.gameTimer.addTextElement(querySelectorAndCheck(document, "div#game-timer div.remaining-time-text"));
 
-        this.buzzHistoryDiagram = new BuzzHistoryChart(Operator.teamCount, querySelectorAndCheck(document, "svg#buzz-history"));
+        this.buzzHistoryDiagram = new BuzzHistoryChart(Operator.teamCount, querySelectorAndCheck(document, "svg#buzz-history"), settings.durationLockoutMillisec);
 
         window.open("../presentation/presentation.html", "windowPresentation");
 
@@ -119,45 +119,16 @@ export class Operator {
         so people can verify their buzzers are working.
         */
         const teamNumbers = new Set<string>();
-        for (let i = 0; i < Operator.teamCount; i++) {
-            teamNumbers.add(String(i + 1));
+        for (let teamIndex = 0; teamIndex < Operator.teamCount; teamIndex++) {
+            teamNumbers.add(String(teamIndex + 1));
         }
 
-        // TODO checking the team state is a bad way to find out what the buzz result is
-        function getBuzzResult(team: Team): BuzzResult {
-            switch (team.getState()) {
-                case "can-answer":
-                    return {
-                        type: "start-answering",
-                        answeredCorrectly: true,
-                        endTimestamp: Date.now() + 1000 //TODO figure out a way to access the time when they finish answering
-                    };
-                case "reading-question":
-                    return {
-                        type: "too-early",
-                    };
-                default:
-                    return {
-                        type: "ignore",
-                        reason: team.getState()
-                    };
-            }
-        }
-
-        // TODO avoid adding another keyboard listener
         window.addEventListener("keydown", keyboardEvent => {
             const keyboardKey = keyboardEvent.key;
             if (this.teamArray && teamNumbers.has(keyboardKey)) {
                 const teamIndex = Number(keyboardKey) - 1;
                 const teamObj = this.teamArray[teamIndex];
                 teamObj.showKeyDown();
-
-                this.buzzHistoryForPresentClue?.records[teamIndex].push({
-                    timestamp: Date.now(),
-                    source: "Operator.initBuzzerFootswitchIconDisplay() keydown",
-                    result: getBuzzResult(teamObj)
-                });
-
             }
         });
 
@@ -183,6 +154,7 @@ export class Operator {
     public handleAnswerCorrect(): void {
         if (this.presentClue) {
             this.teamPresentlyAnswering?.handleAnswerCorrect(this.presentClue);
+            this.populateActiveBuzzHistoryRecordAndSave(true);
         } else {
             console.error("called handleAnswerCorrect() when presentClue is undefined");
         }
@@ -191,10 +163,23 @@ export class Operator {
     public handleAnswerWrongOrTimeout(): void {
         if (this.presentClue) {
             this.teamPresentlyAnswering?.handleAnswerIncorrectOrAnswerTimeout(this.presentClue);
+            this.stateMachine?.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
+            this.populateActiveBuzzHistoryRecordAndSave(false);
         } else {
             console.error("called handleAnswerWrongOrTimeout() when presentClue is undefined");
         }
-        this.stateMachine?.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
+    }
+
+    private populateActiveBuzzHistoryRecordAndSave(answeredCorrectly: boolean): void {
+        if (this.presentClue && this.activeBuzzHistoryRecord && this.teamPresentlyAnswering) {
+            this.activeBuzzHistoryRecord.result.endTimestamp = Date.now();
+            this.activeBuzzHistoryRecord.result.answeredCorrectly = answeredCorrectly;
+
+            this.presentClue.buzzHistory.records[this.teamPresentlyAnswering.getTeamIndex()]
+                .push(this.activeBuzzHistoryRecord);
+
+            this.activeBuzzHistoryRecord = undefined;
+        }
     }
 
     private initMouseListeners(): void {
@@ -275,6 +260,16 @@ export class Operator {
 
         this.divInstructions.innerHTML = "Did they answer correctly? y / n";
 
+        this.activeBuzzHistoryRecord = {
+            timestamp: Date.now(),
+            result: {
+                type: "start-answer",
+                answeredCorrectly: false,
+                endTimestamp: NaN
+            }
+        };
+
+
     }
 
     public shouldGameEnd(): boolean {
@@ -293,6 +288,12 @@ export class Operator {
             const teamIndex = teamNumber - 1;
             const team = this.teamArray[teamIndex];
             team.canBeLockedOut() && team.startLockout();
+
+            this.presentClue?.buzzHistory.records[teamIndex].push({
+                timestamp: Date.now(),
+                result: { type: "too-early-start-lockout" }
+            });
+
         } else {
             console.error("called handleLockout() when teamArray is undefined");
         }
@@ -462,7 +463,7 @@ export class Operator {
         The clue question is already being shown in the presentation because
         the state machine changes the slide.
         */
-        this.setAllTeamsState("reading-question");
+        this.setAllTeamsState("operator-is-reading-question");
 
         this.divInstructions.innerHTML = "Read the question out loud. Buzzers open when you press space.";
 
@@ -471,21 +472,6 @@ export class Operator {
         this.trAnswer.style.display = "none";
 
         this.buttonSkipClue.removeAttribute("disabled");
-
-        // Reset the buzz history because this is a new clue
-        this.buzzHistoryForPresentClue = {
-            lockoutDurationMillisec: this.settings.durationLockoutMillisec,
-            records: getEmpty2DArray(),
-            timestampWhenClueQuestionFinishedReading: -1
-        };
-
-        function getEmpty2DArray(): BuzzHistoryRecord[][] {
-            const rv = new Array<BuzzHistoryRecord[]>(Operator.teamCount);
-            for (let teamIdx = 0; teamIdx < Operator.teamCount; teamIdx++) {
-                rv[teamIdx] = [];
-            }
-            return rv;
-        }
 
         this.hideSpecialCategoryPrompt();
     }
@@ -505,8 +491,9 @@ export class Operator {
         this.stateMachine?.getCountdownTimerForState("waitForBuzzes").reset();
 
         this.teamArray?.forEach(team => team.hasBuzzedForCurrentQuestion = false);
-        if (this.buzzHistoryForPresentClue) {
-            this.buzzHistoryForPresentClue.timestampWhenClueQuestionFinishedReading = Date.now();
+
+        if (this.presentClue) {
+            this.presentClue.buzzHistory.timestampWhenClueQuestionFinishedReading = Date.now();
         }
     }
 
@@ -561,7 +548,7 @@ export class Operator {
             return false;
         } else {
             // each team only gets one try to answer a question
-            return this.teamArray.every(team => team.getState() === "already-answered");
+            return this.teamArray.every(team => team.getState() === "already-answered-this-clue");
         }
     }
 
@@ -716,9 +703,9 @@ export class Operator {
     }
 
     public showBuzzHistory(): void {
-        if (this.buzzHistoryForPresentClue) {
+        if (this.presentClue && this.buzzHistoryDiagram) {
             this.divInstructions.innerHTML = "The buzz history is showing. Press space to continue.";
-            this.buzzHistoryDiagram.setHistory(this.buzzHistoryForPresentClue);
+            this.buzzHistoryDiagram.setHistory(this.presentClue.buzzHistory);
             this.buzzHistoryDiagram.redraw();
         }
     }

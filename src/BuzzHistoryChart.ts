@@ -4,37 +4,40 @@ import { axisBottom } from "d3-axis";
 import { zoom, D3ZoomEvent } from "d3-zoom";
 
 
+/**
+ * This is history of buzzes for one single clue.
+ */
 export interface BuzzHistoryForClue {
-    records: BuzzHistoryRecord[][]; //the first array index is the team index
+    /**
+     * The first index of the array is the team index.
+     * Each subarray is a list of records in the order they happened.
+     */
+    records: BuzzHistoryRecord<BuzzResult>[][];
     timestampWhenClueQuestionFinishedReading: number;
-    lockoutDurationMillisec: number
 }
 
-export interface BuzzHistoryRecord {
+/**
+ * One BuzzHistoryRecord corresponds to one press of the physical buzzer button.
+ */
+export interface BuzzHistoryRecord<R> {
     timestamp: number;
-    result: BuzzResult;
-    source?: string;
+    result: R;
 }
 
-export type BuzzResult = BuzzResultTooEarly | BuzzResultTooLate | BuzzResultStartAnswer | BuzzResultIgnored;
+export type BuzzResult = BuzzResultTooEarlyStartLockout | BuzzResultTooLate | BuzzResultStartAnswer;
 
-interface BuzzResultTooEarly {
-    type: "too-early";
+interface BuzzResultTooEarlyStartLockout {
+    type: "too-early-start-lockout";
 }
 
 interface BuzzResultTooLate {
     type: "too-late";
 }
 
-interface BuzzResultStartAnswer {
-    type: "start-answering";
+export interface BuzzResultStartAnswer {
+    type: "start-answer";
     answeredCorrectly: boolean;
     endTimestamp: number;
-}
-
-interface BuzzResultIgnored {
-    type: "ignore";
-    reason: string;
 }
 
 
@@ -51,7 +54,10 @@ export class BuzzHistoryChart {
 
     private history: BuzzHistoryForClue | null = null;
 
-    public constructor(teamCount: number, _svg_: SVGSVGElement) {
+    private readonly lockoutDurationMillisec: number;
+
+    public constructor(teamCount: number, _svg_: SVGSVGElement, lockoutDurationMillisec: number) {
+        this.lockoutDurationMillisec = lockoutDurationMillisec;
         const svgWidth = 800;
         const svgHeight = 600;
         const margin = {
@@ -177,7 +183,7 @@ export class BuzzHistoryChart {
         // Change all the timestamps so time zero is when the operator finished reading the question
         this.history.records.forEach(arrayOfRecordsForTeam => arrayOfRecordsForTeam.forEach(record => {
             record.timestamp -= this.history!.timestampWhenClueQuestionFinishedReading;
-            if (record.result.type === "start-answering") {
+            if (record.result?.type === "start-answer") {
                 record.result.endTimestamp -= this.history!.timestampWhenClueQuestionFinishedReading;
             }
         }));
@@ -188,10 +194,14 @@ export class BuzzHistoryChart {
             return;
         }
 
+        const zoomedScaleTimeZero = this.zoomedScale(0);
+        const zoomedScaleLockoutDuration = this.zoomedScale(this.lockoutDurationMillisec);
+        const lockoutBarWidth = zoomedScaleLockoutDuration - zoomedScaleTimeZero;
+
         // Move the vertical line
         this.verticalLine
-            .attr("x1", this.zoomedScale(0))
-            .attr("x2", this.zoomedScale(0));
+            .attr("x1", zoomedScaleTimeZero)
+            .attr("x2", zoomedScaleTimeZero);
 
         this.history.records.forEach((recordsForTeam, teamIndex) => {
 
@@ -202,15 +212,16 @@ export class BuzzHistoryChart {
             https://observablehq.com/@d3/selection-join
             */
 
+
             // Draw bars for buzzes that were too early
             groupForTeam
-                .selectAll("rect.too-early")
-                .data(recordsForTeam.filter(r => r.result.type === "too-early"))
+                .selectAll("rect.too-early-start-lockout")
+                .data(recordsForTeam.filter(r => r.result?.type === "too-early-start-lockout"))
                 .join("rect")
-                .classed("too-early", true)
+                .classed("too-early-start-lockout", true)
                 .attr("x", d => this.zoomedScale(d.timestamp))
                 .attr("y", BuzzHistoryChart.yForBars)
-                .attr("width", this.zoomedScale(this.history!.lockoutDurationMillisec) - this.zoomedScale(0))
+                .attr("width", lockoutBarWidth)
                 .attr("height", BuzzHistoryChart.barHeight)
                 .attr("fill", "red")
                 .attr("stroke", "black")
@@ -218,15 +229,15 @@ export class BuzzHistoryChart {
 
 
             groupForTeam
-                .selectAll("rect.start-answering")
-                .data(recordsForTeam.filter(r => r.result.type === "start-answering"))
+                .selectAll("rect.start-answer")
+                .data(recordsForTeam.filter(r => r.result?.type === "start-answer"))
                 .join("rect")
-                .classed("start-answering", true)
+                .classed("start-answer", true)
                 .attr("x", d => this.zoomedScale(d.timestamp))
                 .attr("y", BuzzHistoryChart.yForBars)
                 .attr("width", d => {
-                    const result = d.result as BuzzResultStartAnswer;
-                    return this.zoomedScale(result.endTimestamp) - this.zoomedScale(d.timestamp);
+                    const resultStartAnswer = d.result as BuzzResultStartAnswer;
+                    return this.zoomedScale(resultStartAnswer.endTimestamp) - this.zoomedScale(d.timestamp);
                 })
                 .attr("height", BuzzHistoryChart.barHeight)
                 .attr("fill", "lightblue")
