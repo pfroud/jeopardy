@@ -4,15 +4,14 @@ This list is from:
 https://list.fandom.com/wiki/Jeopardy!_recurring_categories
 */
 export interface SpecialCategory {
-    displayName: string;
-    categoryTitleMatches: RegExp;
-    description: string;
-    example?: {
-        category: string;
-        question: string;
-        answer: string;
-    },
-    alreadyShowedTheMessageInThisGame?: boolean;
+    readonly displayName: string;
+    readonly categoryTitleMatches: RegExp;
+    readonly description: string;
+    readonly example?: {
+        readonly category: string;
+        readonly question: string;
+        readonly answer: string;
+    }
 }
 
 export const specialCategories: SpecialCategory[] = [

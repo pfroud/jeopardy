@@ -11,8 +11,8 @@ import { SpecialCategory } from "./specialCategories";
 import { createLineChart, createPieCharts } from "./statisticsCharts";
 
 interface SavedGameInLocalStorage {
-    gameTimerRemainingMillisec: number,
-    teams: TeamSavedInLocalStorage[]
+    readonly gameTimerRemainingMillisec: number,
+    readonly teams: readonly TeamSavedInLocalStorage[]
     // todo save the settings
 }
 
@@ -261,7 +261,7 @@ export class Operator {
         this.divInstructions.innerHTML = "Did they answer correctly? y / n";
 
         this.activeBuzzHistoryRecord = {
-            timestamp: Date.now(),
+            startTimestamp: Date.now(),
             result: {
                 type: "start-answer",
                 answeredCorrectly: false,
@@ -290,7 +290,7 @@ export class Operator {
             team.canBeLockedOut() && team.startLockout();
 
             this.presentClue?.buzzHistory.records[teamIndex].push({
-                timestamp: Date.now(),
+                startTimestamp: Date.now(),
                 result: { type: "too-early-start-lockout" }
             });
 

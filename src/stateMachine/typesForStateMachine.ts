@@ -1,49 +1,49 @@
 export interface StateMachineState {
-    name: string;
-    presentationSlideToShow?: string;
-    onEnter?: (keyboardEvent?: KeyboardEvent) => void; //keyboard event is used for Operator.handleBuzzerPress()
-    onExit?: () => void;
-    transitions: StateMachineTransition[];
+    readonly name: string;
+    readonly presentationSlideToShow?: string;
+    readonly onEnter?: (keyboardEvent?: KeyboardEvent) => void; //keyboard event is used for Operator.handleBuzzerPress()
+    readonly onExit?: () => void;
+    readonly transitions: StateMachineTransition[];
 }
 
 export type StateMachineTransition = ManualTransition | IfTransition | PromiseTransition | TimeoutTransition | KeyboardTransition;
 
 export interface ManualTransition {
-    type: "manualTrigger";
-    triggerName: string;
-    destination: string;
-    onTransition?: () => void;
-    guardCondition?: () => boolean;
+    readonly type: "manualTrigger";
+    readonly triggerName: string;
+    readonly destination: string;
+    readonly onTransition?: () => void;
+    readonly guardCondition?: () => boolean;
 }
 
 export interface IfTransition {
-    type: "if";
-    condition: () => boolean;
-    then: {
-        destination: string;
-        onTransition?: () => void;
+    readonly type: "if";
+    readonly condition: () => boolean;
+    readonly then: {
+        readonly destination: string;
+        readonly onTransition?: () => void;
     };
-    else: {
-        destination: string;
-        onTransition?: () => void;
+    readonly else: {
+        readonly destination: string;
+        readonly onTransition?: () => void;
     };
 }
 
 export interface PromiseTransition {
-    type: "promise";
-    functionToGetPromise: () => Promise<void>;
-    destination: string;
-    guardCondition?: () => boolean;
+    readonly type: "promise";
+    readonly functionToGetPromise: () => Promise<void>;
+    readonly destination: string;
+    readonly guardCondition?: () => boolean;
 }
 
 export interface TimeoutTransition {
-    type: "timeout";
-    destination: string;
-    behavior: CountdownBehavior;
-    initialDuration: number;
-    isWaitingForTeamToAnswerAfterBuzz?: boolean;
-    onTransition?: () => void; //called when time runs out
-    guardCondition?: () => boolean;
+    readonly type: "timeout";
+    readonly destination: string;
+    readonly behavior: CountdownBehavior;
+    readonly initialDuration: number;
+    readonly isWaitingForTeamToAnswerAfterBuzz?: boolean;
+    readonly onTransition?: () => void; //called when time runs out
+    readonly guardCondition?: () => boolean;
 }
 
 export enum CountdownBehavior {
@@ -53,9 +53,9 @@ export enum CountdownBehavior {
 }
 
 export interface KeyboardTransition {
-    type: "keyboard";
-    keyboardKeys: string;
-    destination: string;
-    onTransition?: (keyboardEvent: KeyboardEvent) => void;
-    guardCondition?: (keyboardEvent: KeyboardEvent) => boolean;
+    readonly type: "keyboard";
+    readonly keyboardKeys: string;
+    readonly destination: string;
+    readonly onTransition?: (keyboardEvent: KeyboardEvent) => void;
+    readonly guardCondition?: (keyboardEvent: KeyboardEvent) => boolean;
 }

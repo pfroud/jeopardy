@@ -31,11 +31,11 @@ export class Settings {
     public gameTimeLimitMillisec = 10 * 60 * 1000;
 
     private readonly guiInput: {
-        displayDurationCategory: HTMLInputElement;
-        displayDurationAnswer: HTMLInputElement;
-        timeoutWaitForBuzzes: HTMLInputElement;
-        timeoutAnswer: HTMLInputElement;
-        allowMultipleTries: HTMLInputElement;
+        readonly displayDurationCategory: HTMLInputElement;
+        readonly displayDurationAnswer: HTMLInputElement;
+        readonly timeoutWaitForBuzzes: HTMLInputElement;
+        readonly timeoutAnswer: HTMLInputElement;
+        readonly allowMultipleTries: HTMLInputElement;
     };
 
     public constructor() {

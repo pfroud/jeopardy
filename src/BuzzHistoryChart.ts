@@ -12,7 +12,7 @@ export interface BuzzHistoryForClue {
      * The first index of the array is the team index.
      * Each subarray is a list of records in the order they happened.
      */
-    records: BuzzHistoryRecord<BuzzResult>[][];
+    readonly records: BuzzHistoryRecord<BuzzResult>[][];
     timestampWhenClueQuestionFinishedReading: number;
 }
 
@@ -20,22 +20,22 @@ export interface BuzzHistoryForClue {
  * One BuzzHistoryRecord corresponds to one press of the physical buzzer button.
  */
 export interface BuzzHistoryRecord<R> {
-    timestamp: number;
-    result: R;
+    startTimestamp: number;
+    readonly result: R;
 }
 
 export type BuzzResult = BuzzResultTooEarlyStartLockout | BuzzResultTooLate | BuzzResultStartAnswer;
 
 interface BuzzResultTooEarlyStartLockout {
-    type: "too-early-start-lockout";
+    readonly type: "too-early-start-lockout";
 }
 
 interface BuzzResultTooLate {
-    type: "too-late";
+    readonly type: "too-late";
 }
 
 export interface BuzzResultStartAnswer {
-    type: "start-answer";
+    readonly type: "start-answer";
     answeredCorrectly: boolean;
     endTimestamp: number;
 }
@@ -182,7 +182,7 @@ export class BuzzHistoryChart {
 
         // Change all the timestamps so time zero is when the operator finished reading the question
         this.history.records.forEach(arrayOfRecordsForTeam => arrayOfRecordsForTeam.forEach(record => {
-            record.timestamp -= this.history!.timestampWhenClueQuestionFinishedReading;
+            record.startTimestamp -= this.history!.timestampWhenClueQuestionFinishedReading;
             if (record.result?.type === "start-answer") {
                 record.result.endTimestamp -= this.history!.timestampWhenClueQuestionFinishedReading;
             }
@@ -219,7 +219,7 @@ export class BuzzHistoryChart {
                 .data(recordsForTeam.filter(r => r.result?.type === "too-early-start-lockout"))
                 .join("rect")
                 .classed("too-early-start-lockout", true)
-                .attr("x", d => this.zoomedScale(d.timestamp))
+                .attr("x", d => this.zoomedScale(d.startTimestamp))
                 .attr("y", BuzzHistoryChart.yForBars)
                 .attr("width", lockoutBarWidth)
                 .attr("height", BuzzHistoryChart.barHeight)
@@ -233,11 +233,11 @@ export class BuzzHistoryChart {
                 .data(recordsForTeam.filter(r => r.result?.type === "start-answer"))
                 .join("rect")
                 .classed("start-answer", true)
-                .attr("x", d => this.zoomedScale(d.timestamp))
+                .attr("x", d => this.zoomedScale(d.startTimestamp))
                 .attr("y", BuzzHistoryChart.yForBars)
                 .attr("width", d => {
                     const resultStartAnswer = d.result as BuzzResultStartAnswer;
-                    return this.zoomedScale(resultStartAnswer.endTimestamp) - this.zoomedScale(d.timestamp);
+                    return this.zoomedScale(resultStartAnswer.endTimestamp) - this.zoomedScale(d.startTimestamp);
                 })
                 .attr("height", BuzzHistoryChart.barHeight)
                 .attr("fill", "lightblue")
@@ -249,7 +249,7 @@ export class BuzzHistoryChart {
                 .data(recordsForTeam)
                 .join("circle")
                 .classed("buzzer-press", true)
-                .attr("cx", d => this.zoomedScale(d.timestamp))
+                .attr("cx", d => this.zoomedScale(d.startTimestamp))
                 .attr("cy", BuzzHistoryChart.rowHeight / 2)
                 .attr("r", BuzzHistoryChart.dotRadius)
                 .attr("fill", "black")

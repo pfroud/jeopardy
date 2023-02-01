@@ -24,8 +24,8 @@ export type TeamState =
 
 
 export interface TeamSavedInLocalStorage {
-    money: number;
-    statistics: Statistics;
+    readonly money: number;
+    readonly statistics: Statistics;
 }
 
 export class Team {
@@ -45,13 +45,13 @@ export class Team {
     private progressElementInPresentationWindow?: HTMLProgressElement;
     private progressElementInOperatorWindow?: HTMLProgressElement;
     private readonly div: {
-        operator: {
+        readonly operator: {
             wrapper: HTMLDivElement | null;
             money: HTMLDivElement | null;
             teamName: HTMLDivElement | null;
             state: HTMLDivElement | null;
         };
-        presentation: {
+        readonly presentation: {
             wrapper: HTMLDivElement | null;
             money: HTMLDivElement | null;
             teamName: HTMLDivElement | null;
