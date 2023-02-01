@@ -9,10 +9,9 @@
             /*
             https://parceljs.org/features/cli/
             https: //parceljs.org/features/development/#dev-server
-            Source maps are not working so I am turning them off.
             The targets (HTML files) are specified in package.json in 'source'.
             */
-            "command": "npx parcel serve --no-source-maps",
+            "command": "npx parcel serve",
             "presentation": {
                 "echo": false,
                 "reveal": "always",
