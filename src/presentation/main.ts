@@ -15,10 +15,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    // close the presentation window if the operator window closes
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    window.opener.addEventListener("unload", () => close());
-
     // Show errors from the presentation window in the operator window
     window.addEventListener("error", function (errorEvent) {
         // suppress error TS2339 "property 'console' does not exist on type 'Window'"
