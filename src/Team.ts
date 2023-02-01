@@ -49,6 +49,7 @@ export class Team {
             wrapper: HTMLDivElement | null;
             money: HTMLDivElement | null;
             teamName: HTMLDivElement | null;
+            state: HTMLDivElement | null;
         };
         presentation: {
             wrapper: HTMLDivElement | null;
@@ -60,7 +61,8 @@ export class Team {
             operator: {
                 wrapper: null,
                 money: null,
-                teamName: null
+                teamName: null,
+                state: null
             },
             presentation: {
                 wrapper: null,
@@ -264,6 +266,11 @@ export class Team {
         divName.innerHTML = this.teamName;
         divTeam.append(divName);
 
+        const divState = this.div.operator.state = document.createElement("div");
+        divState.classList.add("team-state");
+        divState.innerHTML = this.state;
+        divTeam.append(divState);
+
         const divMoney = this.div.operator.money = document.createElement("div");
         divMoney.classList.add("team-money");
         divMoney.innerHTML = `$${this.money}`;
@@ -285,6 +292,10 @@ export class Team {
             this.state = targetState;
             this.div.operator.wrapper?.setAttribute("data-team-state", targetState);
             this.div.presentation.wrapper?.setAttribute("data-team-state", targetState);
+
+            if (this.div.operator.state) {
+                this.div.operator.state.innerHTML = targetState;
+            }
 
             if (this.countdownTimer) {
                 this.countdownTimer.pause();
@@ -324,9 +335,7 @@ export class Team {
 
     public startAnswer(): void {
         this.setState("answering");
-        if (this.countdownDotsInPresentationWindow) {
-            querySelectorAndCheck(this.countdownDotsInPresentationWindow, "td").classList.add("active");
-        }
+
         if (this.progressElementInOperatorWindow) {
             this.progressElementInOperatorWindow.style.display = ""; //show it by removing "display=none"
         }
