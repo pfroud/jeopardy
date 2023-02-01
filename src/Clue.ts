@@ -98,20 +98,11 @@ export class Clue {
         of the question. Look for words that are probably the subject and make them bold.
         \b means word boundary.
         */
-        const regex = /\b((this)|(these)|(her)|(his)|(she)|(he)|(here))\b/i;
-        const result = regex.exec(this.question);
+        const regex = /\b((this)|(these)|(her)|(his)|(she)|(he)|(here))\b/ig;
 
-        if (result === null) {
-            // didn't find any words to make bold
-            return this.question;
-        } else {
-            const startIndex = result.index;
-            const foundWord = result[0];
+        // "$&" is the matched substring
+        return this.question.replace(regex, '<span class="clue-keyword">$&</span>');
 
-            return this.question.substring(0, startIndex)
-                + '<span class="clue-keyword">' + foundWord + '</span>'
-                + this.question.substring(startIndex + foundWord.length);
-        }
     }
 
     public isValid(): boolean {
