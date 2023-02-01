@@ -368,12 +368,12 @@ export class StateMachine {
                         // Verify each keyboard key is not used in multiple transitions leaving this state.
                         const keyboardKeys: string = transition.keyboardKeys;
                         for (let i = 0; i < keyboardKeys.length; i++) {
-                            const key = keyboardKeys.charAt(i);
-                            if (key in keyboardKeysUsedInTransitionsFromThisState) {
+                            const keyboardKey = keyboardKeys.charAt(i);
+                            if (keyboardKey in keyboardKeysUsedInTransitionsFromThisState) {
                                 printWarning(state.name, transitionIndex,
-                                    `keyboard key "${key}" was already used in a transition from this state with index ${keyboardKeysUsedInTransitionsFromThisState[key]}`);
+                                    `keyboard key "${keyboardKey}" was already used in a transition from this state with index ${keyboardKeysUsedInTransitionsFromThisState[keyboardKey]}`);
                             } else {
-                                keyboardKeysUsedInTransitionsFromThisState[key] = transitionIndex;
+                                keyboardKeysUsedInTransitionsFromThisState[keyboardKey] = transitionIndex;
                             }
                         }
 

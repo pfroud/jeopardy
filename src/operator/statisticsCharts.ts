@@ -157,7 +157,7 @@ export function createLineChart(divForLineChart: HTMLDivElement, legendContainer
      There is a package called chartist-plugin-legend but 
      plugins are not yet supported in chartist v1 (only v0.x).
      */
-    for (let i = 0; i < teams.length; i++) {
+    for (let teamIdx = 0; teamIdx < teams.length; teamIdx++) {
 
         const legendRow = document.createElement("div");
         legendRow.className = "line-chart-legend-row";
@@ -172,7 +172,7 @@ export function createLineChart(divForLineChart: HTMLDivElement, legendContainer
 
         const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
         group.classList.add("ct-series");
-        group.classList.add(`team-${i + 1}`);
+        group.classList.add(`team-${teamIdx + 1}`);
         svg.appendChild(group);
 
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -188,7 +188,7 @@ export function createLineChart(divForLineChart: HTMLDivElement, legendContainer
         point.setAttribute("y2", String(svgHeight / 2));
         group.appendChild(point);
 
-        legendRow.append(teams[i].teamName);
+        legendRow.append(teams[teamIdx].teamName);
 
         legendContainer.appendChild(legendRow);
 

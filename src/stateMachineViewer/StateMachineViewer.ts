@@ -30,20 +30,20 @@ export class StateMachineViewer {
 
         const lines: string[] = [];
 
-        for (let i = 0; i < StateMachineViewer.TRAIL_LENGTH; i++) {
-            const color = StateMachineViewer.TRAIL_COLORS[i];
+        for (let trailIdx = 0; trailIdx < StateMachineViewer.TRAIL_LENGTH; trailIdx++) {
+            const color = StateMachineViewer.TRAIL_COLORS[trailIdx];
 
-            if (i === 0) {
+            if (trailIdx === 0) {
                 // this is the present state. make the text bold and make the outline thicker
-                lines.push(`g[${StateMachineViewer.ATTRIBUTE_STATE_TRAIL_INDEX}="${i}"] polygon {fill: ${color}; stroke-width: 3}`);
-                lines.push(`g[${StateMachineViewer.ATTRIBUTE_STATE_TRAIL_INDEX}="${i}"] text {font-weight: bold}`);
+                lines.push(`g[${StateMachineViewer.ATTRIBUTE_STATE_TRAIL_INDEX}="${trailIdx}"] polygon {fill: ${color}; stroke-width: 3}`);
+                lines.push(`g[${StateMachineViewer.ATTRIBUTE_STATE_TRAIL_INDEX}="${trailIdx}"] text {font-weight: bold}`);
             } else {
-                lines.push(`g[${StateMachineViewer.ATTRIBUTE_STATE_TRAIL_INDEX}="${i}"] polygon {fill: ${color}}`);
+                lines.push(`g[${StateMachineViewer.ATTRIBUTE_STATE_TRAIL_INDEX}="${trailIdx}"] polygon {fill: ${color}}`);
             }
 
-            lines.push(`g[${StateMachineViewer.ATTRIBUTE_TRANSITION_TRAIL_INDEX}="${i}"] path {stroke: ${color}; stroke-width: 4}`);
-            lines.push(`g[${StateMachineViewer.ATTRIBUTE_TRANSITION_TRAIL_INDEX}="${i}"] polygon {fill: ${color}; stroke: ${color}; stroke-width: 4}`);
-            lines.push(`g[${StateMachineViewer.ATTRIBUTE_TRANSITION_TRAIL_INDEX}="${i}"] text {fill: ${color}; font-weight: bold}`);
+            lines.push(`g[${StateMachineViewer.ATTRIBUTE_TRANSITION_TRAIL_INDEX}="${trailIdx}"] path {stroke: ${color}; stroke-width: 4}`);
+            lines.push(`g[${StateMachineViewer.ATTRIBUTE_TRANSITION_TRAIL_INDEX}="${trailIdx}"] polygon {fill: ${color}; stroke: ${color}; stroke-width: 4}`);
+            lines.push(`g[${StateMachineViewer.ATTRIBUTE_TRANSITION_TRAIL_INDEX}="${trailIdx}"] text {fill: ${color}; font-weight: bold}`);
         }
 
 
@@ -69,8 +69,8 @@ export class StateMachineViewer {
             }
 
             // update the indexes
-            for (let i = 0; i < this.stateTrail.length; i++) {
-                this.stateTrail[i].setAttribute(StateMachineViewer.ATTRIBUTE_STATE_TRAIL_INDEX, i.toString());
+            for (let trailIdx = 0; trailIdx < this.stateTrail.length; trailIdx++) {
+                this.stateTrail[trailIdx].setAttribute(StateMachineViewer.ATTRIBUTE_STATE_TRAIL_INDEX, trailIdx.toString());
             }
 
         }
@@ -88,8 +88,8 @@ export class StateMachineViewer {
                 }
 
                 // update indexes
-                for (let i = 0; i < this.transitionTrail.length; i++) {
-                    this.transitionTrail[i].setAttribute(StateMachineViewer.ATTRIBUTE_TRANSITION_TRAIL_INDEX, i.toString());
+                for (let trailIdx = 0; trailIdx < this.transitionTrail.length; trailIdx++) {
+                    this.transitionTrail[trailIdx].setAttribute(StateMachineViewer.ATTRIBUTE_TRANSITION_TRAIL_INDEX, trailIdx.toString());
                 }
             }
         }

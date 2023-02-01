@@ -244,8 +244,8 @@ export class Operator {
         this.teamArray = new Array<Team>(teamCount);
         querySelectorAndCheck(document, "footer").innerHTML = "";
         this.presentation.clearFooter();
-        for (let i = 0; i < teamCount; i++) {
-            this.teamArray[i] = new Team(i, this, this.presentation, this.settings, this.audioManager);
+        for (let teamIndex = 0; teamIndex < teamCount; teamIndex++) {
+            this.teamArray[teamIndex] = new Team(teamIndex, this, this.presentation, this.settings, this.audioManager);
         }
     }
 
@@ -481,8 +481,8 @@ export class Operator {
 
         function getEmpty2DArray(): BuzzHistoryRecord[][] {
             const rv = new Array<BuzzHistoryRecord[]>(Operator.teamCount);
-            for (let i = 0; i < Operator.teamCount; i++) {
-                rv[i] = [];
+            for (let teamIdx = 0; teamIdx < Operator.teamCount; teamIdx++) {
+                rv[teamIdx] = [];
             }
             return rv;
         }
@@ -611,9 +611,9 @@ export class Operator {
 
         const tableRowTeamNumber = document.createElement("tr");
         tableDetails.appendChild(tableRowTeamNumber);
-        for (let i = 0; i < parsedJson.teams.length; i++) {
+        for (let teamIdx = 0; teamIdx < parsedJson.teams.length; teamIdx++) {
             const cellTeamNumber = document.createElement("td");
-            cellTeamNumber.innerHTML = `Team ${i + 1}`;
+            cellTeamNumber.innerHTML = `Team ${teamIdx + 1}`;
             tableRowTeamNumber.appendChild(cellTeamNumber);
         }
 
@@ -658,8 +658,8 @@ export class Operator {
         this.gameTimer.setRemainingMillisec(parsedJson.gameTimerRemainingMillisec);
 
         this.initTeams(parsedJson.teams.length);
-        for (let i = 0; i < parsedJson.teams.length; i++) {
-            this.teamArray![i].loadFromLocalStorage(parsedJson.teams[i]);
+        for (let teamIdx = 0; teamIdx < parsedJson.teams.length; teamIdx++) {
+            this.teamArray![teamIdx].loadFromLocalStorage(parsedJson.teams[teamIdx]);
         }
 
         if (this.shouldGameEnd()) {

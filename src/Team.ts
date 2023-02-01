@@ -217,9 +217,9 @@ export class Team {
         const tableCountdownDots = this.countdownDotsInPresentationWindow = document.createElement("table");
         tableCountdownDots.classList.add("countdown-dots");
 
-        for (let i = 5; i > 1; i--) {
+        for (let dotIdx = 5; dotIdx > 1; dotIdx--) {
             const tdDescending = document.createElement("td");
-            tdDescending.setAttribute("data-countdown", String(i));
+            tdDescending.setAttribute("data-countdown", String(dotIdx));
             tableCountdownDots.appendChild(tdDescending);
         }
 
@@ -227,9 +227,9 @@ export class Team {
         tdOne.setAttribute("data-countdown", "1");
         tableCountdownDots.appendChild(tdOne);
 
-        for (let i = 2; i <= 5; i++) {
+        for (let dotIdx = 2; dotIdx <= 5; dotIdx++) {
             const tdAscending = document.createElement("td");
-            tdAscending.setAttribute("data-countdown", String(i));
+            tdAscending.setAttribute("data-countdown", String(dotIdx));
             tableCountdownDots.appendChild(tdAscending);
         }
 
