@@ -1,4 +1,4 @@
-import { BuzzHistoryDiagram, BuzzHistoryForClue, BuzzHistoryRecord, BuzzResult } from "../buzz-history/buzzHistoryForClue";
+import { BuzzHistoryChart, BuzzHistoryForClue, BuzzHistoryRecord, BuzzResult } from "../BuzzHistoryChart";
 import { Clue } from "../Clue";
 import { querySelectorAndCheck } from "../common";
 import { CountdownTimer } from "../CountdownTimer";
@@ -47,7 +47,7 @@ export class Operator {
     private questionCount = 0;
 
     private buzzHistoryForPresentClue?: BuzzHistoryForClue;
-    private readonly buzzHistoryDiagram: BuzzHistoryDiagram;
+    private readonly buzzHistoryDiagram: BuzzHistoryChart;
 
     public constructor(audioManager: AudioManager, settings: Settings) {
         this.audioManager = audioManager;
@@ -82,7 +82,7 @@ export class Operator {
         this.gameTimer.addProgressElement(querySelectorAndCheck(document, "div#game-timer progress"));
         this.gameTimer.addTextElement(querySelectorAndCheck(document, "div#game-timer div.remaining-time-text"));
 
-        this.buzzHistoryDiagram = new BuzzHistoryDiagram(Operator.teamCount, querySelectorAndCheck(document, "svg#buzz-history"));
+        this.buzzHistoryDiagram = new BuzzHistoryChart(Operator.teamCount, querySelectorAndCheck(document, "svg#buzz-history"));
 
         window.open("../presentation/presentation.html", "windowPresentation");
 

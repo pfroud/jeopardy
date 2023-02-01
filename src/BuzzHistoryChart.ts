@@ -3,6 +3,7 @@ import { ScaleLinear, scaleLinear } from "d3-scale";
 import { axisBottom } from "d3-axis";
 import { zoom, D3ZoomEvent } from "d3-zoom";
 
+
 export interface BuzzHistoryForClue {
     records: BuzzHistoryRecord[][]; //the first array index is the team index
     timestampWhenClueQuestionFinishedReading: number;
@@ -36,12 +37,13 @@ interface BuzzResultIgnored {
     reason: string;
 }
 
-export class BuzzHistoryDiagram {
+
+export class BuzzHistoryChart {
 
     private static readonly rowHeight = 50;
     private static readonly dotRadius = 5;
-    private static readonly barHeight = BuzzHistoryDiagram.dotRadius * 2;
-    private static readonly yForBars = (BuzzHistoryDiagram.rowHeight / 2) - (BuzzHistoryDiagram.barHeight / 2);
+    private static readonly barHeight = BuzzHistoryChart.dotRadius * 2;
+    private static readonly yForBars = (BuzzHistoryChart.rowHeight / 2) - (BuzzHistoryChart.barHeight / 2);
 
     private readonly verticalLine: Selection<SVGLineElement, unknown, null, undefined>;
     private zoomedScale: ScaleLinear<number, number>;
@@ -127,7 +129,7 @@ export class BuzzHistoryDiagram {
 
             const group = this.rowsArray[teamIndex] = rowsGroup.append("g")
                 .attr("id", `team-index-${teamIndex}`)
-                .attr("transform", `translate(0, ${BuzzHistoryDiagram.rowHeight * teamIndex})`);
+                .attr("transform", `translate(0, ${BuzzHistoryChart.rowHeight * teamIndex})`);
 
             // Shaded background for alternate teams
             if (teamIndex % 2 === 0) {
@@ -135,23 +137,23 @@ export class BuzzHistoryDiagram {
                     .attr("x", 0)
                     .attr("y", 0)
                     .attr("width", contentWidth)
-                    .attr("height", BuzzHistoryDiagram.rowHeight)
+                    .attr("height", BuzzHistoryChart.rowHeight)
                     .attr("fill", "#eee");
             }
 
             // Horizontal lines to separate teams
             group.append("line")
                 .attr("x1", 0)
-                .attr("y1", BuzzHistoryDiagram.rowHeight)
+                .attr("y1", BuzzHistoryChart.rowHeight)
                 .attr("x2", contentWidth)
-                .attr("y2", BuzzHistoryDiagram.rowHeight)
+                .attr("y2", BuzzHistoryChart.rowHeight)
                 .attr("stroke", "black")
                 .attr("stroke-width", 1);
 
             // Team name
             group.append("text")
                 .attr("x", "10")
-                .attr("y", BuzzHistoryDiagram.rowHeight / 2)
+                .attr("y", BuzzHistoryChart.rowHeight / 2)
                 .attr("dominant-baseline", "middle")
                 .text(`Team ${teamIndex + 1}`);
         }
@@ -207,9 +209,9 @@ export class BuzzHistoryDiagram {
                 .join("rect")
                 .classed("too-early", true)
                 .attr("x", d => this.zoomedScale(d.timestamp))
-                .attr("y", BuzzHistoryDiagram.yForBars)
+                .attr("y", BuzzHistoryChart.yForBars)
                 .attr("width", this.zoomedScale(this.history!.lockoutDurationMillisec) - this.zoomedScale(0))
-                .attr("height", BuzzHistoryDiagram.barHeight)
+                .attr("height", BuzzHistoryChart.barHeight)
                 .attr("fill", "red")
                 .attr("stroke", "black")
                 .attr("stroke-width", 1);
@@ -221,12 +223,12 @@ export class BuzzHistoryDiagram {
                 .join("rect")
                 .classed("start-answering", true)
                 .attr("x", d => this.zoomedScale(d.timestamp))
-                .attr("y", BuzzHistoryDiagram.yForBars)
+                .attr("y", BuzzHistoryChart.yForBars)
                 .attr("width", d => {
                     const result = d.result as BuzzResultStartAnswer;
                     return this.zoomedScale(result.endTimestamp) - this.zoomedScale(d.timestamp);
                 })
-                .attr("height", BuzzHistoryDiagram.barHeight)
+                .attr("height", BuzzHistoryChart.barHeight)
                 .attr("fill", "lightblue")
                 .attr("stroke", "black")
                 .attr("stroke-width", 1);
@@ -237,8 +239,8 @@ export class BuzzHistoryDiagram {
                 .join("circle")
                 .classed("buzzer-press", true)
                 .attr("cx", d => this.zoomedScale(d.timestamp))
-                .attr("cy", BuzzHistoryDiagram.rowHeight / 2)
-                .attr("r", BuzzHistoryDiagram.dotRadius)
+                .attr("cy", BuzzHistoryChart.rowHeight / 2)
+                .attr("r", BuzzHistoryChart.dotRadius)
                 .attr("fill", "black")
                 .attr("stroke-width", 0);
         });
