@@ -59,7 +59,7 @@ export class Clue {
             try {
                 const decoded = decodeUTF8(withoutBackslashes);
                 if (withoutBackslashes !== decoded) {
-                    console.log("UTF-8 decode success");
+                    console.group("UTF-8 decode success");
                     console.log("Before:");
                     console.log(withoutBackslashes);
                     console.log("After:");

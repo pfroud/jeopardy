@@ -43,11 +43,11 @@ export class Operator {
     private presentation?: Presentation;
     private isPaused = false;
     private stateMachine?: StateMachine;
-    private teamPresentlyAnswering?: Team;
-    private activeBuzzHistoryRecord?: BuzzHistoryRecord<BuzzResultStartAnswer> | undefined;
+    private teamPresentlyAnswering?: Team | undefined;
+    private buzzHistoryRecordForActiveAnswer?: BuzzHistoryRecord<BuzzResultStartAnswer> | undefined;
     private questionCount = 0;
 
-    private readonly buzzHistoryDiagram: BuzzHistoryChart | undefined;
+    private buzzHistoryDiagram: BuzzHistoryChart | undefined;
 
     public constructor(audioManager: AudioManager, settings: Settings) {
         this.audioManager = audioManager;
@@ -82,8 +82,6 @@ export class Operator {
         this.gameTimer.addProgressElement(querySelectorAndCheck(document, "div#game-timer progress"));
         this.gameTimer.addTextElement(querySelectorAndCheck(document, "div#game-timer div.remaining-time-text"));
 
-        this.buzzHistoryDiagram = new BuzzHistoryChart(Operator.teamCount, querySelectorAndCheck(document, "svg#buzz-history"), settings.durationLockoutMillisec);
-
         window.open("../presentation/presentation.html", "windowPresentation");
 
         /*
@@ -107,10 +105,13 @@ export class Operator {
 
         this.stateMachine = new StateMachine(this.settings, this, this.presentation);
 
+        if (this.teamArray) {
+            this.buzzHistoryDiagram = new BuzzHistoryChart(this.teamArray, querySelectorAndCheck(document, "svg#buzz-history"), this.settings.durationLockoutMillisec);
+        }
+
         this.buttonStartGame.removeAttribute("disabled");
         this.buttonStartGame.focus();
         this.divInstructions.innerHTML = "Ready. Click the button to start the game.";
-
     }
 
     private initBuzzerFootswitchIconDisplay(): void {
@@ -127,8 +128,22 @@ export class Operator {
             const keyboardKey = keyboardEvent.key;
             if (this.teamArray && teamNumbers.has(keyboardKey)) {
                 const teamIndex = Number(keyboardKey) - 1;
-                const teamObj = this.teamArray[teamIndex];
-                teamObj.showKeyDown();
+                const team = this.teamArray[teamIndex];
+                team.showKeyDown();
+
+                const state = team.getState();
+
+                if (this.presentClue && Team.statesWhereBuzzingDoesNotDoAnything.has(state)) {
+                    this.presentClue.buzzHistory.records[teamIndex].push({
+                        startTimestamp: Date.now(),
+                        result: {
+                            type: "ignored",
+                            teamStateWhyItWasIgnored: state
+                        }
+                    });
+                }
+
+
             }
         });
 
@@ -140,7 +155,6 @@ export class Operator {
                 team.showKeyUp();
             }
         });
-
     }
 
     private initPauseKeyboardListener(): void {
@@ -152,39 +166,58 @@ export class Operator {
     }
 
     public handleAnswerCorrect(): void {
-        if (this.presentClue) {
-            this.teamPresentlyAnswering?.handleAnswerCorrect(this.presentClue);
-            this.populateActiveBuzzHistoryRecordAndSave(true);
-        } else {
-            console.error("called handleAnswerCorrect() when presentClue is undefined");
+        if (!this.presentClue) {
+            throw new Error("called handleAnswerCorrect() when presentClue is undefined");
         }
+        this.teamPresentlyAnswering?.handleAnswerCorrect(this.presentClue);
+        this.populateBuzzHistoryRecordForActiveAnswerAndSave(true);
+
+        this.setStatesOfTeamsNotAnswering("can-answer"); //only correct if teams can answer multiple questions for the same clue
+        this.teamPresentlyAnswering = undefined;
     }
 
     public handleAnswerWrongOrTimeout(): void {
-        if (this.presentClue) {
-            this.teamPresentlyAnswering?.handleAnswerIncorrectOrAnswerTimeout(this.presentClue);
-            this.stateMachine?.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
-            this.populateActiveBuzzHistoryRecordAndSave(false);
-        } else {
-            console.error("called handleAnswerWrongOrTimeout() when presentClue is undefined");
+        if (!this.presentClue) {
+            throw new Error("called handleAnswerWrongOrTimeout() when presentClue is undefined");
+        }
+        this.teamPresentlyAnswering?.handleAnswerIncorrectOrAnswerTimeout(this.presentClue);
+        this.populateBuzzHistoryRecordForActiveAnswerAndSave(false);
+
+        this.stateMachine?.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
+
+        this.setStatesOfTeamsNotAnswering("can-answer"); //only correct if teams can answer multiple questions for the same clue
+        this.teamPresentlyAnswering = undefined;
+    }
+
+    private setStatesOfTeamsNotAnswering(targetState: TeamState): void {
+        if (!this.teamPresentlyAnswering) {
+            throw new Error("called setStatesOfTeamsNotAnswering() when teamPresentlyAnswering is undefined");
+        }
+        if (!this.teamArray) {
+            throw new Error("called setStatesOfTeamsNotAnswering() when teamArray is undefined");
+        }
+
+        const indexOfTeamPresentlyAnswering = this.teamPresentlyAnswering.getTeamIndex();
+        for (let i = 0; i < Operator.teamCount; i++) {
+            if (i !== indexOfTeamPresentlyAnswering) {
+                this.teamArray[i].setState(targetState);
+            }
         }
     }
 
-    private populateActiveBuzzHistoryRecordAndSave(answeredCorrectly: boolean): void {
-        if (this.presentClue && this.activeBuzzHistoryRecord && this.teamPresentlyAnswering) {
-            this.activeBuzzHistoryRecord.result.endTimestamp = Date.now();
-            this.activeBuzzHistoryRecord.result.answeredCorrectly = answeredCorrectly;
+    private populateBuzzHistoryRecordForActiveAnswerAndSave(answeredCorrectly: boolean): void {
+        if (this.presentClue && this.buzzHistoryRecordForActiveAnswer && this.teamPresentlyAnswering) {
+            this.buzzHistoryRecordForActiveAnswer.result.endTimestamp = Date.now();
+            this.buzzHistoryRecordForActiveAnswer.result.answeredCorrectly = answeredCorrectly;
 
             this.presentClue.buzzHistory.records[this.teamPresentlyAnswering.getTeamIndex()]
-                .push(this.activeBuzzHistoryRecord);
+                .push(this.buzzHistoryRecordForActiveAnswer);
 
-            this.activeBuzzHistoryRecord = undefined;
+            this.buzzHistoryRecordForActiveAnswer = undefined;
         }
     }
 
     private initMouseListeners(): void {
-
-
         this.buttonStartGame.addEventListener("click", () => this.startGame());
 
         this.buttonSkipClue.addEventListener("click", () => this.skipClue());
@@ -203,7 +236,6 @@ export class Operator {
         querySelectorAndCheck(gameEndControls, "button#show-team-ranking-table").addEventListener("click", () => this.presentation?.showSlide("slide-gameEnd-team-ranking-table"));
         querySelectorAndCheck(gameEndControls, "button#show-money-over-time-line-chart").addEventListener("click", () => this.presentation?.showSlide("slide-gameEnd-line-chart"));
         querySelectorAndCheck(gameEndControls, "button#show-buzz-results-pie-charts").addEventListener("click", () => this.presentation?.showSlide("slide-gameEnd-pie-charts"));
-
     }
 
     private startGame(): void {
@@ -214,7 +246,7 @@ export class Operator {
 
 
     public skipClue(): void {
-        this.setAllTeamsState("buzzers-off", true); // the second argument is endLockout
+        this.setAllTeamsState("idle", true); // the second argument is endLockout
         this.buttonSkipClue.setAttribute("disabled", "disabled");
         this.buttonSkipClue.blur();
         this.stateMachine?.goToState("getClueFromJService");
@@ -222,8 +254,7 @@ export class Operator {
 
     private initTeams(teamCount: number): void {
         if (!this.presentation) {
-            console.error("called initTeams() when presentation is undefined");
-            return;
+            throw new Error("called initTeams() when presentation is undefined");
         }
 
         this.teamArray = new Array<Team>(teamCount);
@@ -239,28 +270,27 @@ export class Operator {
         this.audioManager.play("questionTimeout");
     }
 
-    public handleBuzzerPress(keyboardEvent?: KeyboardEvent): void {
+    public startAnswer(keyboardEvent?: KeyboardEvent): void {
         if (!this.teamArray) {
-            console.error("called handleBuzzerPress() when teamArray is undefined");
-            return;
+            throw new Error("called handleBuzzerPress() when teamArray is undefined");
         }
         if (!keyboardEvent) {
-            console.error("called handleBuzzerPress() without a keyboardEvent");
-            return;
+            throw new Error("called handleBuzzerPress() without a keyboardEvent");
         }
-        const teamNumber = Number(keyboardEvent.key);
-        const teamIndex = teamNumber - 1;
-        const team = this.teamArray[teamIndex];
+        const teamNumberBuzzed = Number(keyboardEvent.key);
+        const teamIndexBuzzed = teamNumberBuzzed - 1;
+        const teamAnswering = this.teamArray[teamIndexBuzzed];
 
-        this.teamPresentlyAnswering = team;
+        this.teamPresentlyAnswering = teamAnswering;
+        teamAnswering.startAnswer();
+        this.setStatesOfTeamsNotAnswering("other-team-is-answering");
 
         this.audioManager.play("teamBuzz");
 
-        team.startAnswer();
 
         this.divInstructions.innerHTML = "Did they answer correctly? y / n";
 
-        this.activeBuzzHistoryRecord = {
+        this.buzzHistoryRecordForActiveAnswer = {
             startTimestamp: Date.now(),
             result: {
                 type: "start-answer",
@@ -268,35 +298,30 @@ export class Operator {
                 endTimestamp: NaN
             }
         };
-
-
     }
 
     public shouldGameEnd(): boolean {
-        if (this.teamArray) {
-            return this.gameTimer.getIsFinished() ||
-                this.teamArray.some(team => team.getMoney() >= this.settings.teamMoneyWhenGameShouldEnd);
-        } else {
-            console.error("called shouldGameEnd() when teamArray is undefined");
-            return false;
+        if (!this.teamArray) {
+            throw new Error("called shouldGameEnd() when teamArray is undefined");
         }
+        return this.gameTimer.getIsFinished() ||
+            this.teamArray.some(team => team.getMoney() >= this.settings.teamMoneyWhenGameShouldEnd);
     }
 
     public handleLockout(keyboardEvent: KeyboardEvent): void {
-        if (this.teamArray) {
-            const teamNumber = Number(keyboardEvent.key);
-            const teamIndex = teamNumber - 1;
-            const team = this.teamArray[teamIndex];
-            team.canBeLockedOut() && team.startLockout();
-
-            this.presentClue?.buzzHistory.records[teamIndex].push({
-                startTimestamp: Date.now(),
-                result: { type: "too-early-start-lockout" }
-            });
-
-        } else {
-            console.error("called handleLockout() when teamArray is undefined");
+        if (!this.teamArray) {
+            throw new Error("called handleLockout() when teamArray is undefined");
         }
+        const teamNumber = Number(keyboardEvent.key);
+        const teamIndex = teamNumber - 1;
+        const team = this.teamArray[teamIndex];
+        team.canBeLockedOut() && team.startLockout();
+
+        this.presentClue?.buzzHistory.records[teamIndex].push({
+            startTimestamp: Date.now(),
+            result: { type: "too-early-start-lockout" }
+        });
+
     }
 
 
@@ -428,8 +453,7 @@ export class Operator {
 
         const specialCategory = this.presentClue?.category.specialCategory;
         if (!specialCategory) {
-            console.error("called showSpecialCategoryOverlay() when the present clue does not have a special category");
-            return;
+            throw new Error("called showSpecialCategoryOverlay() when the present clue does not have a special category");
         }
 
         this.presentation?.showSpecialCategoryPopup(specialCategory);
@@ -454,8 +478,7 @@ export class Operator {
 
     public handleShowClueQuestion(): void {
         if (!this.presentClue) {
-            console.error("called handleShowClueQuestion() when presentClue is undefined");
-            return;
+            throw new Error("called handleShowClueQuestion() when presentClue is undefined");
         }
 
         /*
@@ -477,13 +500,13 @@ export class Operator {
     }
 
     public handleDoneReadingClueQuestion(): void {
+        if (!this.presentClue) {
+
+            throw new Error("called handleDoneReadingClueQuestion() when presentClue is undefined");
+        }
         this.audioManager.play("doneReadingClueQuestion");
         this.trAnswer.style.display = ""; //show it by removing "display=none"
-        if (this.presentClue) {
-            this.divClueAnswer.innerHTML = this.presentClue.answer;
-        } else {
-            console.error("called handleDoneReadingClueQuestion() when presentClue is undefined");
-        }
+        this.divClueAnswer.innerHTML = this.presentClue.answer;
         this.divInstructions.innerHTML = "Wait for people to answer.";
         this.setAllTeamsState("can-answer");
         this.buttonSkipClue.setAttribute("disabled", "disabled");
@@ -507,7 +530,7 @@ export class Operator {
         this.stateMachine?.getCountdownTimerForState("waitForBuzzes").showProgressBarFinished();
         this.stateMachine?.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
 
-        this.setAllTeamsState("buzzers-off");
+        this.setAllTeamsState("idle");
         this.divInstructions.innerHTML = "Let people read the answer.";
 
         this.teamArray?.forEach(team => {
@@ -527,8 +550,7 @@ export class Operator {
 
     public canTeamBuzz(keyboardEvent: KeyboardEvent): boolean {
         if (!this.teamArray) {
-            console.error("called canTeamBuzz() when teamArray is null");
-            return false;
+            throw new Error("called canTeamBuzz() when teamArray is null");
         }
         const teamNumber = Number(keyboardEvent.key);
         const teamIndex = teamNumber - 1;
@@ -626,8 +648,7 @@ export class Operator {
 
     private saveGame(): void {
         if (!this.teamArray) {
-            console.error("called saveGame() when teamArray is undefined");
-            return;
+            throw new Error("called saveGame() when teamArray is undefined");
         }
         const objectToSave: SavedGameInLocalStorage = {
             gameTimerRemainingMillisec: this.gameTimer.getRemainingMillisec(),
@@ -674,8 +695,7 @@ export class Operator {
 
     private createTeamRankingTable(): void {
         if (!this.teamArray) {
-            console.error("called createTeamRankingTable() when teamArray is undefined");
-            return;
+            throw new Error("called createTeamRankingTable() when teamArray is undefined");
         }
 
         // sort teams by money descending

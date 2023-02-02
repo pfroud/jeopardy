@@ -108,7 +108,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             A team has pressed the buzzer, now we are waiting for them to say their answer.
             */
             name: "waitForTeamAnswer",
-            onEnter: operator.handleBuzzerPress.bind(operator),
+            onEnter: operator.startAnswer.bind(operator),
             transitions: [{
                 type: "keyboard",
                 keyboardKeys: "y",

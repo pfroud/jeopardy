@@ -43,7 +43,7 @@ export class AudioManager {
         */
 
         if (!(audioName in this.audioElements)) {
-            console.error(`can't play audio with name "${audioName}", unknown key into the object`);
+            throw new Error(`can't play audio with name "${audioName}", unknown key into the object`);
         }
 
         const audio = this.audioElements[audioName];

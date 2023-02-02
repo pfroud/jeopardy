@@ -30,8 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function createTableRow(teamIndex: number): void {
         if (!teamArray) {
-            console.error("teamArray is undefined");
-            return;
+            throw new Error("called createTableRow() when teamArray is undefined");
         }
         const team = teamArray[teamIndex];
         const dollarValues = [1000, 800, 600, 500, 400, 300, 200, 100, 50];

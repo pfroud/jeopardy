@@ -14,13 +14,15 @@ interface Statistics {
 }
 
 export type TeamState =
-    "buzzers-off" | // game has not started
+    "idle" | // the question has not been presented to the players yet
     "operator-is-reading-question" |
     "can-answer" | //operator is done reading the question
     "answering" |
     "already-answered-this-clue" |
-    "lockout" //team buzzed while operator was reading the question
+    "lockout" | //team buzzed while operator was reading the question
+    "other-team-is-answering"
     ;
+
 
 
 export interface TeamSavedInLocalStorage {
@@ -30,6 +32,10 @@ export interface TeamSavedInLocalStorage {
 
 export class Team {
     public readonly teamName: string;
+
+    public static readonly statesWhereBuzzingDoesNotDoAnything = new Set<TeamState>([
+        "idle", "answering", "already-answered-this-clue", "other-team-is-answering"
+    ]);
 
     private money = 0;
     private countdownDotsInPresentationWindow?: HTMLTableElement;
@@ -92,8 +98,8 @@ export class Team {
         this.createElementsInPresentationWindow();
 
         // suppress TS2564 "property has no initializer and is not assigned in the constructor"
-        this.state = "buzzers-off";
-        this.setState("buzzers-off");
+        this.state = "idle";
+        this.setState("idle");
     }
 
     public handleAnswerCorrect(clue: Clue): void {

@@ -171,7 +171,7 @@ export class CountdownTimer {
             this.dotsTables.forEach(tableElement => {
                 const tds = tableElement.querySelectorAll("td");
                 if (tds.length !== 9) {
-                    console.error(`found ${tds.length} dots <td> element(s), expected exactly 9`);
+                    console.warn(`found ${tds.length} dots <td> element(s), expected exactly 9`);
                 }
                 tds.forEach(td => td.classList.add("active"));
             });
