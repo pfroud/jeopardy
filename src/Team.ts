@@ -104,7 +104,7 @@ export class Team {
 
     public handleAnswerCorrect(clue: Clue): void {
         this.stopAnswer();
-        this.audioManager.play("answerCorrect");
+        this.audioManager.answerCorrect.play();
         this.moneyAdd(clue.value);
         this.statistics.questionsBuzzedThenAnsweredRight++;
         this.hasBuzzedForCurrentQuestion = true;
@@ -112,7 +112,7 @@ export class Team {
 
     public handleAnswerIncorrectOrAnswerTimeout(clue: Clue): void {
         this.stopAnswer();
-        this.audioManager.play("answerIncorrectOrAnswerTimeout");
+        this.audioManager.answerIncorrectOrAnswerTimeout.play();
         this.moneySubtract(clue.value * this.settings.wrongAnswerPenaltyMultiplier);
         this.setState(this.settings.allowMultipleAnswersToSameQuestion ? "can-answer" : "already-answered-this-clue");
         this.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut++;

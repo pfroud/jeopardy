@@ -267,7 +267,7 @@ export class Operator {
 
 
     public playSoundQuestionTimeout(): void {
-        this.audioManager.play("questionTimeout");
+        this.audioManager.questionTimeout.play();
     }
 
     public startAnswer(keyboardEvent?: KeyboardEvent): void {
@@ -285,7 +285,7 @@ export class Operator {
         teamAnswering.startAnswer();
         this.setStatesOfTeamsNotAnswering("other-team-is-answering");
 
-        this.audioManager.play("teamBuzz");
+        this.audioManager.teamBuzz.play();
 
 
         this.divInstructions.innerHTML = "Did they answer correctly? y / n";
@@ -504,7 +504,7 @@ export class Operator {
 
             throw new Error("called handleDoneReadingClueQuestion() when presentClue is undefined");
         }
-        this.audioManager.play("doneReadingClueQuestion");
+        this.audioManager.doneReadingClueQuestion.play();
         this.trAnswer.style.display = ""; //show it by removing "display=none"
         this.divClueAnswer.innerHTML = this.presentClue.answer;
         this.divInstructions.innerHTML = "Wait for people to answer.";
@@ -681,7 +681,10 @@ export class Operator {
         this.divInstructions.innerHTML = "Game over";
 
         // First play the eight high-pitched beeps sound, then play the closing music
-        this.audioManager.play("roundEnd")?.then(() => this.audioManager.play("musicGameEnd"));
+        this.audioManager.playInOrder(
+            this.audioManager.roundEnd,
+            this.audioManager.musicGameEnd
+        );
 
         querySelectorAndCheck<HTMLDivElement>(document, "div#game-end-controls").style.display = "block";
 

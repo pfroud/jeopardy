@@ -1,8 +1,6 @@
 import { querySelectorAndCheck } from "../common";
 
 export class AudioManager {
-    private readonly audioElements: { [name: string]: HTMLAudioElement };
-
     /*
     In the Jeopardy TV show, three low-pitch beeps happens in TWO situations:
         (1) Someone buzzes but does not answer within five seconds.
@@ -16,54 +14,66 @@ export class AudioManager {
     happens only when the round runs out of time.
     Source video: https://www.youtube.com/watch?v=pFhSKPOF_lI&t=1028
     (I am using this sound correctly.)
-    */
 
-    public constructor() {
-        this.audioElements = {
-            answerCorrect: querySelectorAndCheck<HTMLAudioElement>(document, "audio#answer-correct"),
-            answerIncorrectOrAnswerTimeout: querySelectorAndCheck<HTMLAudioElement>(document, "audio#answer-incorrect"),
-            questionTimeout: querySelectorAndCheck<HTMLAudioElement>(document, "audio#question-timeout"),
-            roundEnd: querySelectorAndCheck<HTMLAudioElement>(document, "audio#round-end"),
-            teamBuzz: querySelectorAndCheck<HTMLAudioElement>(document, "audio#team-buzz"),
-            tick: querySelectorAndCheck<HTMLAudioElement>(document, "audio#tick"),
-            musicGameEnd: querySelectorAndCheck<HTMLAudioElement>(document, "audio#music-game-end"),
-            musicGameStart: querySelectorAndCheck<HTMLAudioElement>(document, "audio#music-game-start"),
-            doneReadingClueQuestion: querySelectorAndCheck<HTMLAudioElement>(document, "audio#done-reading-clue-question")
-        };
-        Object.freeze(this.audioElements);
-    }
-
-    public play(audioName: string): Promise<void> | null {
-        /*
-        If you're having trouble getting sounds to work:
+    If you're having trouble getting sounds to work:
         - If you've installed the Chrome extension called "Disable HTML5 Autoplay",
           disable it for this domain.
         - You might also want to go to Site Settings (chrome://settings/content)
           and set 'Sound' to 'Allow' for this domain.
-        */
+    */
 
-        if (!(audioName in this.audioElements)) {
-            throw new Error(`can't play audio with name "${audioName}", unknown key into the object`);
-        }
+    public readonly answerCorrect: HTMLAudioElement;
+    public readonly answerIncorrectOrAnswerTimeout: HTMLAudioElement;
+    public readonly questionTimeout: HTMLAudioElement;
+    public readonly roundEnd: HTMLAudioElement;
+    public readonly teamBuzz: HTMLAudioElement;
+    public readonly tick: HTMLAudioElement;
+    public readonly musicGameEnd: HTMLAudioElement;
+    public readonly musicGameStart: HTMLAudioElement;
+    public readonly doneReadingClueQuestion: HTMLAudioElement;
 
-        const audio = this.audioElements[audioName];
+    public constructor() {
+        this.answerCorrect = querySelectorAndCheck<HTMLAudioElement>(document, "audio#answer-correct");
+        this.answerIncorrectOrAnswerTimeout = querySelectorAndCheck<HTMLAudioElement>(document, "audio#answer-incorrect");
+        this.questionTimeout = querySelectorAndCheck<HTMLAudioElement>(document, "audio#question-timeout");
+        this.roundEnd = querySelectorAndCheck<HTMLAudioElement>(document, "audio#round-end");
+        this.teamBuzz = querySelectorAndCheck<HTMLAudioElement>(document, "audio#team-buzz");
+        this.tick = querySelectorAndCheck<HTMLAudioElement>(document, "audio#tick");
+        this.musicGameEnd = querySelectorAndCheck<HTMLAudioElement>(document, "audio#music-game-end");
+        this.musicGameStart = querySelectorAndCheck<HTMLAudioElement>(document, "audio#music-game-start");
+        this.doneReadingClueQuestion = querySelectorAndCheck<HTMLAudioElement>(document, "audio#done-reading-clue-question");
+    }
 
+    public playInOrder(...audioElements: HTMLAudioElement[]): void {
+        this.playInOrderRecursiveHelper(audioElements, 0, null);
+    }
+
+    private playInOrderRecursiveHelper(
+        allAudioElements: HTMLAudioElement[],
+        indexToPlayNow: number,
+        eventListenerToRemoveFromPreviousAudio: (() => void) | null
+    ): void {
         /*
-        The play() method returns a promise which is resolved when playback
-        has been STARTED, which is not helpful for us.
-        https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/play
-        */
-
-        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/Promise#syntax
-        const promiseExecutor = (
-            resolveFunc: () => void
-        ): void => {
-            // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/ended_event
-            audio.addEventListener("ended", () => resolveFunc());
+       The play() method returns a promise which is resolved when playback
+       has been STARTED, which is not what we want.
+       https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/play
+       
+       We want to add an event listener for when the audio has ENDED.
+       https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/ended_event
+       */
+        const onAudioEnd = (): void => {
+            if (indexToPlayNow > 0 && eventListenerToRemoveFromPreviousAudio) {
+                console.log(`removing the event listener from index ${indexToPlayNow - 1}.`);
+                allAudioElements[indexToPlayNow - 1].removeEventListener("ended", eventListenerToRemoveFromPreviousAudio);
+            }
+            if (indexToPlayNow < allAudioElements.length - 1) {
+                console.log(`calling playInOrderRecursiveHelper(allAudioElements, ${indexToPlayNow + 1}, onAudioEnd).`);
+                this.playInOrderRecursiveHelper(allAudioElements, indexToPlayNow + 1, onAudioEnd);
+            }
         };
 
-        audio.play();
-
-        return new Promise<void>(promiseExecutor);
+        allAudioElements[indexToPlayNow].addEventListener("ended", onAudioEnd);
+        console.log(`playing the audio at index ${indexToPlayNow}.`);
+        allAudioElements[indexToPlayNow].play();
     }
 }

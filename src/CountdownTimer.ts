@@ -286,7 +286,7 @@ export class CountdownTimer {
                         update (audio is not graphical). Turns out it's nontrivial to figure out when one second
                         has passed so I am leaving it in here.
                         */
-                        this.audioManager?.play("tick");
+                        this.audioManager?.tick.play();
                     }
                 });
             }
