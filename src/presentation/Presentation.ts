@@ -112,7 +112,10 @@ export class Presentation {
     }
 
     public fitClueQuestionToScreen(): void {
-        // remove font-size in the inline style property on the div, which may have been set by a previous call to this function
+        /*
+         Remove font-size in the inline style property on the div,
+         which may have been set by a previous call to this method.
+         */
         this.divSlideClueQuestion.style.fontSize = "";
 
         const heightOfMain = querySelectorAndCheck(document, "main").clientHeight;

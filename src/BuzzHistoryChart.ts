@@ -61,25 +61,37 @@ interface BuzzResultIgnore {
     readonly teamStateWhyItWasIgnored: TeamState;
 }
 
-
-
 export class BuzzHistoryChart {
+
+    private readonly margin = {
+        top: 20,
+        left: 20,
+        right: 20,
+        bottom: 20
+    };
 
     private static readonly rowHeight = 50;
     private static readonly dotRadius = 5;
     private static readonly barHeight = BuzzHistoryChart.dotRadius * 2;
-    private static readonly yForBars = (BuzzHistoryChart.rowHeight / 2) - (BuzzHistoryChart.barHeight / 2);
+    private static readonly yPositionForBars = (BuzzHistoryChart.rowHeight / 2) - (BuzzHistoryChart.barHeight / 2);
 
-    private readonly verticalLine: Selection<SVGLineElement, unknown, null, undefined>;
-    private zoomedScale: ScaleLinear<number, number>;
+    private readonly verticalLineWhenOperatorPressedSpace: Selection<SVGLineElement, unknown, null, undefined>;
+
+    /**
+     * A "scale" does linear interpolation to convert a domain to a range.
+     * For us, the domain is time (in milliseconds) and the range is screen-space pixels.
+     */
+    private readonly scaleInitial: ScaleLinear<number, number>;
+
+    private scaleWithZoomTransform: ScaleLinear<number, number>;
+
     private readonly rowsArray: Selection<SVGGElement, unknown, null, undefined>[] = [];
 
     private readonly groupXAxis: Selection<SVGGElement, unknown, null, undefined>;
 
-    private readonly scaleWithoutZoom: ScaleLinear<number, number>;
     private readonly axisGenerator: Axis<number>;
 
-    private readonly labelsWidth: number;
+    private readonly maxWidthOfTeamNameLabels: number;
 
     private history: BuzzHistoryForClue | null = null;
 
@@ -87,40 +99,34 @@ export class BuzzHistoryChart {
 
     public constructor(teams: Team[], _svg_: SVGSVGElement, lockoutDurationMillisec: number) {
         this.lockoutDurationMillisec = lockoutDurationMillisec;
-        const margin = {
-            top: 20,
-            left: 20,
-            right: 20,
-            bottom: 20
-        };
 
-        const svgWidth = 800;
-        const svgHeight = (teams.length * BuzzHistoryChart.rowHeight) + margin.top + margin.bottom + 50;
-
-        const contentWidth = svgWidth - margin.left - margin.right;
-        const contentHeight = svgHeight - margin.top - margin.bottom;
+        const svgWidth = 1300;
+        const svgHeight = (teams.length * BuzzHistoryChart.rowHeight) + this.margin.top + this.margin.bottom + 50;
 
         const svg = select(_svg_)
             .attr("width", svgWidth)
             .attr("height", svgHeight);
 
+        const contentWidth = svgWidth - this.margin.left - this.margin.right;
+        const contentHeight = svgHeight - this.margin.top - this.margin.bottom;
+
         // the content group is everything except the axis
         const groupContent = svg.append("g")
             .attr("id", "content")
-            .attr("transform", `translate(${margin.left}, ${margin.top})`);
+            .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
 
         this.groupXAxis = svg.append("g")
             .attr("id", "axis")
-            .attr("transform", `translate(${margin.left}, ${contentHeight})`);
+            .attr("transform", `translate(${this.margin.left}, ${contentHeight})`);
 
-
-        // This scale maps time (in milliseconds) to screen-space pixels
-        this.scaleWithoutZoom = scaleLinear()
+        // the domain is set in the setHistory() function
+        this.scaleInitial = scaleLinear()
             .range([0, contentWidth]);
 
-        this.zoomedScale = this.scaleWithoutZoom; //will be changed by the zoom controller
+        // the zoomed scale is changed in the handleZoom() function
+        this.scaleWithZoomTransform = this.scaleInitial;
 
-        this.axisGenerator = axisBottom<number>(this.zoomedScale)
+        this.axisGenerator = axisBottom<number>(this.scaleWithZoomTransform)
             .tickSizeOuter(0)
             .tickFormat(n => `${n} ms`);
 
@@ -135,13 +141,12 @@ export class BuzzHistoryChart {
         https://observablehq.com/@d3/pan-zoom-axes
         https://gist.github.com/jgbos/9752277
         */
-
         const handleZoom = (zoomEvent: D3ZoomEvent<SVGSVGElement, unknown>): void => {
 
-            this.zoomedScale = zoomEvent.transform.rescaleX(this.scaleWithoutZoom);
+            this.scaleWithZoomTransform = zoomEvent.transform.rescaleX(this.scaleInitial);
 
             // Change the scale which will be used by the axis generator
-            this.axisGenerator.scale(this.zoomedScale);
+            this.axisGenerator.scale(this.scaleWithZoomTransform);
 
             // Re-draw the axis
             this.groupXAxis.call(this.axisGenerator);
@@ -155,6 +160,9 @@ export class BuzzHistoryChart {
 
         svg.call(zoomController);
 
+        /////////////////////////////////////////////////////////
+        ////////////// Draw the diagram contents ////////////////
+        /////////////////////////////////////////////////////////
 
         const rowsGroup = groupContent.append("g")
             .attr("id", "rows");
@@ -187,17 +195,22 @@ export class BuzzHistoryChart {
                 .attr("stroke", "black")
                 .attr("stroke-width", 1);
 
-            // the records should go underneath the team name
+            /*
+             The buzz history records should go underneath the team name,
+             so we need to add a group to hold the records BEFORE adding
+             the team name.
+             */
             this.rowsArray[teamIndex] = group.append("g")
                 .attr("id", "records");
 
-            // Team name
+            // Add text for team name
             const textNode = group.append("text")
                 .attr("x", "10")
                 .attr("y", BuzzHistoryChart.rowHeight / 2)
                 .attr("dominant-baseline", "middle")
                 .text(`${teams[teamIndex].teamName}`);
 
+            // keep track of the maximum width of the text element
             const actualNode = textNode.node();
             if (actualNode) {
                 const textWidth = actualNode.getBBox().width;
@@ -207,15 +220,14 @@ export class BuzzHistoryChart {
             }
         }
 
-        this.labelsWidth = maxTextWidth;
+        this.maxWidthOfTeamNameLabels = maxTextWidth;
 
-        // Draw a vertical line to show when the operator pressed space
-        this.verticalLine = groupContent.append("line")
+        this.verticalLineWhenOperatorPressedSpace = groupContent.append("line")
             .attr("id", "operator-finished-reading-question")
             .attr("y1", 0)
             .attr("y2", contentHeight)
-            .attr("x1", this.zoomedScale(0))
-            .attr("x2", this.zoomedScale(0))
+            .attr("x1", this.scaleWithZoomTransform(0))
+            .attr("x2", this.scaleWithZoomTransform(0))
             .attr("stroke", "black")
             .attr("stroke-width", 1)
             .attr("visibility", "hidden");
@@ -232,10 +244,14 @@ export class BuzzHistoryChart {
 
         this.history = history;
 
-        // include time zero 
+        /////////////////////////////////////////////////////////
+        /////// Compute the time range for the X axis ///////////
+        /////////////////////////////////////////////////////////
+
+        // include time zero
         const allTimestamps: number[] = [0];
 
-        // Change all the timestamps so time zero is when the operator finished reading the question
+        // Change all the timestamps so time zero is when the operator finished reading the question.
         this.history.records.forEach(arrayOfRecordsForTeam => arrayOfRecordsForTeam.forEach(record => {
             record.startTimestamp -= this.history!.timestampWhenClueQuestionFinishedReading;
             allTimestamps.push(record.startTimestamp);
@@ -245,29 +261,26 @@ export class BuzzHistoryChart {
             }
         }));
 
+        const firstTimestamp = Math.min(...allTimestamps);
+        const lastTimestamp = Math.max(...allTimestamps);
 
-        const firstDomain = [
-            Math.min(...allTimestamps),
-            Math.max(...allTimestamps) * 1.2
-        ];
-        this.scaleWithoutZoom.domain(firstDomain);
+        /*
+        Add padding so the leftmost record doesn't overlap the label 
+        and the rightmost record isn't exactly on the edge
+        */
+        this.scaleInitial.domain([firstTimestamp * 1.3, lastTimestamp * 1.1]);
 
-        const extraSpaceForText = this.scaleWithoutZoom.invert(this.labelsWidth + 20);
-        this.scaleWithoutZoom.domain([
-            firstDomain[0] + extraSpaceForText,
-            firstDomain[1]
-        ]);
-
-        this.axisGenerator.scale(this.zoomedScale);
+        // Update the scale which the axis generator will use
+        this.axisGenerator.scale(this.scaleWithZoomTransform);
 
         // Re-draw the axis
         this.groupXAxis.call(this.axisGenerator);
 
-        this.verticalLine.attr("visibility", "visible");
-        const scaleTimeZero = this.scaleWithoutZoom(0);
-        this.verticalLine
-            .attr("x1", scaleTimeZero)
-            .attr("x2", scaleTimeZero);
+        this.verticalLineWhenOperatorPressedSpace.attr("visibility", "visible");
+        const xPositionAtTimeZero = this.scaleInitial(0);
+        this.verticalLineWhenOperatorPressedSpace
+            .attr("x1", xPositionAtTimeZero)
+            .attr("x2", xPositionAtTimeZero);
 
     }
 
@@ -276,59 +289,70 @@ export class BuzzHistoryChart {
             return;
         }
 
-        const zoomedScaleTimeZero = this.zoomedScale(0);
-        const zoomedScaleLockoutDuration = this.zoomedScale(this.lockoutDurationMillisec);
-        const lockoutBarWidth = zoomedScaleLockoutDuration - zoomedScaleTimeZero;
+        const xPositionAtTimeZero = this.scaleWithZoomTransform(0);
+        const lockoutBarWidth = this.scaleWithZoomTransform(this.lockoutDurationMillisec) - xPositionAtTimeZero;
 
-        this.verticalLine
-            .attr("x1", zoomedScaleTimeZero)
-            .attr("x2", zoomedScaleTimeZero);
+        this.verticalLineWhenOperatorPressedSpace
+            .attr("x1", xPositionAtTimeZero)
+            .attr("x2", xPositionAtTimeZero);
 
         this.history.records.forEach((recordsForTeam, teamIndex) => {
 
             const groupForTeam = this.rowsArray[teamIndex];
 
             /*
+            For information about what .data().join() means:
             https://www.d3indepth.com/datajoins/
             https://observablehq.com/@d3/selection-join
             */
 
-
             // Draw bars for buzzes that were too early
             groupForTeam
                 .selectAll("rect.too-early-start-lockout")
-                .data(recordsForTeam.filter(r => r.result?.type === "too-early-start-lockout"))
+                .data(recordsForTeam.filter(record => record.result?.type === "too-early-start-lockout"))
                 .join("rect")
                 .classed("too-early-start-lockout", true)
-                .attr("x", d => this.zoomedScale(d.startTimestamp))
-                .attr("y", BuzzHistoryChart.yForBars)
+                .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp))
+                .attr("y", BuzzHistoryChart.yPositionForBars)
                 .attr("width", lockoutBarWidth)
                 .attr("height", BuzzHistoryChart.barHeight)
                 .attr("fill", "orange")
                 .attr("stroke", "black")
                 .attr("stroke-width", 1);
 
-            const a = recordsForTeam.filter(r => r.result?.type === "start-answer") as BuzzHistoryRecord<BuzzResultStartAnswer>[];
-
+            // Draw bars for when a team started answering
             groupForTeam
                 .selectAll("rect.start-answer")
-                .data(a)
+                .data(
+                    recordsForTeam.filter(
+                        /*
+                        Need to use a type predicate (aka "user-defined type guard") for Typescript to
+                        be able to inter types from the array filter function.
+                        https://stackoverflow.com/questions/65279417/typescript-narrow-down-type-based-on-class-property-from-filter-find-etc
+                        https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates
+                        */
+                        function (record: BuzzHistoryRecord<BuzzResult>): record is BuzzHistoryRecord<BuzzResultStartAnswer> {
+                            return record.result?.type === "start-answer";
+                        }
+                    )
+                )
                 .join("rect")
                 .classed("start-answer", true)
-                .attr("x", d => this.zoomedScale(d.startTimestamp))
-                .attr("y", BuzzHistoryChart.yForBars)
-                .attr("width", d => this.zoomedScale(d.result.endTimestamp) - this.zoomedScale(d.startTimestamp))
+                .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp))
+                .attr("y", BuzzHistoryChart.yPositionForBars)
+                .attr("width", d => this.scaleWithZoomTransform(d.result.endTimestamp) - this.scaleWithZoomTransform(d.startTimestamp))
                 .attr("height", BuzzHistoryChart.barHeight)
-                .attr("fill", d => (d.result.answeredCorrectly ? "red" : "orange"))
+                .attr("fill", d => (d.result.answeredCorrectly ? "lime" : "red"))
                 .attr("stroke", "black")
                 .attr("stroke-width", 1);
 
+            // Draw a dot for every time a team pressed a buzzer
             groupForTeam
                 .selectAll("circle.buzzer-press")
                 .data(recordsForTeam)
                 .join("circle")
                 .classed("buzzer-press", true)
-                .attr("cx", d => this.zoomedScale(d.startTimestamp))
+                .attr("cx", d => this.scaleWithZoomTransform(d.startTimestamp))
                 .attr("cy", BuzzHistoryChart.rowHeight / 2)
                 .attr("r", BuzzHistoryChart.dotRadius)
                 .attr("fill", "black")

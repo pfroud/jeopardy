@@ -8,7 +8,7 @@ import { StateMachine } from "../stateMachine/StateMachine";
 import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
 import { AudioManager } from "./AudioManager";
 import { SpecialCategory } from "./specialCategories";
-import { createLineChart, createPieCharts } from "./statisticsCharts";
+import { createLineChartOfMoneyOverTime, createPieCharts } from "./statisticsCharts";
 
 interface SavedGameInLocalStorage {
     readonly gameTimerRemainingMillisec: number,
@@ -112,6 +112,7 @@ export class Operator {
         this.buttonStartGame.removeAttribute("disabled");
         this.buttonStartGame.focus();
         this.divInstructions.innerHTML = "Ready. Click the button to start the game.";
+
     }
 
     private initBuzzerFootswitchIconDisplay(): void {
@@ -119,37 +120,54 @@ export class Operator {
         Show a small picture of the footswitch used for the buzzers
         so people can verify their buzzers are working.
         */
-        const teamNumbers = new Set<string>();
+        const keyboardKeysForTeamNumbers = new Set<string>();
         for (let teamIndex = 0; teamIndex < Operator.teamCount; teamIndex++) {
-            teamNumbers.add(String(teamIndex + 1));
+            keyboardKeysForTeamNumbers.add(String(teamIndex + 1));
         }
+
+        /*
+        When a team presses the buzzer, what happens depends on what state the team is in.
+
+        For most of the team states, pressing the buzzer does not do anything. No functions
+        get called so we have to use this keyboard listener to record the history.
+
+        There are only two team states in which something interesting happens when the buzzer is pressed.
+        Both have dedicated methods in Operator which get called by the state machine:
+          - If a team buzzes when in state "operator-is-reading-question", the state machine calls operator.handleLockout().
+          - If a team buzzes when in state "can-answer", the state machine calls operator.startAnswer().
+        */
+        const teamStatesWhereBuzzingDoesSomething = new Set<TeamState>([
+            "operator-is-reading-question", "can-answer"
+        ]);
 
         window.addEventListener("keydown", keyboardEvent => {
             const keyboardKey = keyboardEvent.key;
-            if (this.teamArray && teamNumbers.has(keyboardKey)) {
+            if (this.teamArray && keyboardKeysForTeamNumbers.has(keyboardKey)) {
                 const teamIndex = Number(keyboardKey) - 1;
                 const team = this.teamArray[teamIndex];
                 team.showKeyDown();
 
-                const state = team.getState();
+                const teamState = team.getState();
 
-                if (this.presentClue && Team.statesWhereBuzzingDoesNotDoAnything.has(state)) {
-                    this.presentClue.buzzHistory.records[teamIndex].push({
-                        startTimestamp: Date.now(),
-                        result: {
-                            type: "ignored",
-                            teamStateWhyItWasIgnored: state
-                        }
-                    });
+                if (this.presentClue) {
+                    if (teamStatesWhereBuzzingDoesSomething.has(teamState)) {
+                        // Do not do anything. The history will be recorded by a dedicated method in Operator.
+                    } else {
+                        this.presentClue.buzzHistory.records[teamIndex].push({
+                            startTimestamp: Date.now(),
+                            result: {
+                                type: "ignored",
+                                teamStateWhyItWasIgnored: teamState
+                            }
+                        });
+                    }
                 }
-
-
             }
         });
 
         window.addEventListener("keyup", keyboardEvent => {
             const keyboardKey = keyboardEvent.key;
-            if (this.teamArray && teamNumbers.has(keyboardKey)) {
+            if (this.teamArray && keyboardKeysForTeamNumbers.has(keyboardKey)) {
                 const teamIndex = Number(keyboardKey) - 1;
                 const team = this.teamArray[teamIndex];
                 team.showKeyUp();
@@ -181,6 +199,8 @@ export class Operator {
             throw new Error("called handleAnswerWrongOrTimeout() when presentClue is undefined");
         }
         this.teamPresentlyAnswering?.handleAnswerIncorrectOrAnswerTimeout(this.presentClue);
+
+        // finish adding info to object which was started when the buzzer was pressed (in method startAnswer())
         this.populateBuzzHistoryRecordForActiveAnswerAndSave(false);
 
         this.stateMachine?.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
@@ -681,7 +701,7 @@ export class Operator {
         this.presentation?.hideHeaderAndFooter();
         if (this.presentation && this.teamArray) {
             createPieCharts(this, this.presentation.getDivForPieCharts(), this.teamArray);
-            createLineChart(this.presentation.getDivForLineChart(), this.presentation.getDivForLineChartLegend(), this.teamArray);
+            createLineChartOfMoneyOverTime(this.presentation.getDivForLineChart(), this.presentation.getDivForLineChartLegend(), this.teamArray);
         }
     }
 

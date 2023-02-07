@@ -15,15 +15,13 @@ interface Statistics {
 
 export type TeamState =
     "idle" | // the question has not been presented to the players yet
-    "operator-is-reading-question" |
+    "operator-is-reading-question" | //pressing the buzzer in this state will result in lockout
     "can-answer" | //operator is done reading the question
     "answering" |
     "already-answered-this-clue" |
     "lockout" | //team buzzed while operator was reading the question
     "other-team-is-answering"
     ;
-
-
 
 export interface TeamSavedInLocalStorage {
     readonly money: number;
@@ -32,10 +30,6 @@ export interface TeamSavedInLocalStorage {
 
 export class Team {
     public readonly teamName: string;
-
-    public static readonly statesWhereBuzzingDoesNotDoAnything = new Set<TeamState>([
-        "idle", "answering", "already-answered-this-clue", "other-team-is-answering"
-    ]);
 
     private money = 0;
     private countdownDotsInPresentationWindow?: HTMLTableElement;

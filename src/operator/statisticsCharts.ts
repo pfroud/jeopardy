@@ -8,20 +8,20 @@ export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElem
     const questionCount = operator.getQuestionCount();
 
     teams.forEach(team => {
-        const chartContainer = document.createElement("div");
-        chartContainer.className = "team-pie-chart";
-        divForPieCharts.appendChild(chartContainer);
+        const containerForTeamPieChart = document.createElement("div");
+        containerForTeamPieChart.className = "team-pie-chart";
+        divForPieCharts.appendChild(containerForTeamPieChart);
 
-        const chartTitleDiv = document.createElement("div");
-        chartTitleDiv.className = "chart-title";
-        chartTitleDiv.innerText = team.teamName;
-        chartContainer.appendChild(chartTitleDiv);
+        const titleDiv = document.createElement("div");
+        titleDiv.className = "chart-title";
+        titleDiv.innerText = team.teamName;
+        containerForTeamPieChart.appendChild(titleDiv);
 
         const chartData: Chartist.PieChartData = {
             series: []
         };
 
-        const seriesToAdd = [{
+        const seriesToPotentiallyAdd = [{
             value: team.statistics.questionsNotBuzzed,
             className: "not-buzzed"
         }, {
@@ -32,7 +32,7 @@ export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElem
             className: "buzzed-then-answered-wrong-or-timed-out"
         }];
         // only add if non-zero
-        seriesToAdd.forEach(candidate => { if (candidate.value > 0) chartData.series.push(candidate); });
+        seriesToPotentiallyAdd.forEach(candidate => { if (candidate.value > 0) chartData.series.push(candidate); });
 
         if (chartData.series.length === 0) {
             return;
@@ -84,14 +84,14 @@ export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElem
             labelPosition: "center"
         };
 
-        const pieChart = new Chartist.PieChart(chartContainer, chartData, chartOptions);
+        const pieChart = new Chartist.PieChart(containerForTeamPieChart, chartData, chartOptions);
 
         /*
-        If any of the series fills the entire pie chart, Chartist puts the label in the center
+        If any of the series is 100%, Chartist puts the label in the center
         of the chart, but we already put our own label for "Team #" in the center. In that 
         case we will manually move the Chartist label.
         */
-        const needToManuallyMoveLabel = seriesToAdd.map(obj => obj.value).some(n => n === questionCount);
+        const needToManuallyMoveLabel = seriesToPotentiallyAdd.map(obj => obj.value).some(n => n === questionCount);
         if (needToManuallyMoveLabel) {
             pieChart.on("created", () => {
                 const svgCreatedByChartist = querySelectorSVGAndCheck(document, "svg");
@@ -101,7 +101,7 @@ export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElem
     });
 }
 
-export function createLineChart(divForLineChart: HTMLDivElement, legendContainer: HTMLDivElement, teams: Team[]): void {
+export function createLineChartOfMoneyOverTime(divForLineChart: HTMLDivElement, legendContainer: HTMLDivElement, teams: Team[]): void {
 
     interface XYPoint {
         x: number;
@@ -164,29 +164,33 @@ export function createLineChart(divForLineChart: HTMLDivElement, legendContainer
 
         const svgWidth = 50;
         const svgHeight = 20;
+
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svg.classList.add("ct-chart-line");
         svg.setAttribute("width", `${svgWidth}px`);
         svg.setAttribute("height", `${svgHeight}px`);
         legendRow.appendChild(svg);
 
-        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        group.classList.add("ct-series");
-        group.classList.add(`team-${teamIdx + 1}`);
-        svg.appendChild(group);
+        const svgGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        svgGroup.classList.add("ct-series");
+        svgGroup.classList.add(`team-${teamIdx + 1}`);
+        svg.appendChild(svgGroup);
 
-        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.classList.add("ct-line");
-        path.setAttribute("d", `M0,${svgHeight / 2} L${svgWidth},${svgHeight / 2}`);
-        group.appendChild(path);
+        const xCenter = svgWidth / 2;
+        const yCenter = svgHeight / 2;
+
+        const svgPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        svgPath.classList.add("ct-line");
+        svgPath.setAttribute("d", `M0,${yCenter} L${svgWidth},${yCenter}`);
+        svgGroup.appendChild(svgPath);
 
         const point = document.createElementNS("http://www.w3.org/2000/svg", "line");
         point.classList.add("ct-point");
-        point.setAttribute("x1", String(svgWidth / 2));
-        point.setAttribute("y1", String(svgHeight / 2));
-        point.setAttribute("x2", String(svgWidth / 2));
-        point.setAttribute("y2", String(svgHeight / 2));
-        group.appendChild(point);
+        point.setAttribute("x1", String(xCenter));
+        point.setAttribute("x2", String(xCenter));
+        point.setAttribute("y1", String(yCenter));
+        point.setAttribute("y2", String(yCenter));
+        svgGroup.appendChild(point);
 
         legendRow.append(teams[teamIdx].teamName);
 

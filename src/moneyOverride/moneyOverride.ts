@@ -35,59 +35,57 @@ document.addEventListener("DOMContentLoaded", function () {
         const team = teamArray[teamIndex];
         const dollarValues = [1000, 800, 600, 500, 400, 300, 200, 100, 50];
 
-        const tableRow = document.createElement("tr");
-        table.appendChild(tableRow);
+        const tableRowForTeam = document.createElement("tr");
+        table.appendChild(tableRowForTeam);
 
         // create text showing the team name
         const tdTeamName = document.createElement("td");
         tdTeamName.classList.add("team-name");
         tdTeamName.innerHTML = team.teamName;
-        tableRow.appendChild(tdTeamName);
+        tableRowForTeam.appendChild(tdTeamName);
 
-        // create text input field
+        // create buttons to subtract money
+        dollarValues.forEach(function (dollarValue) {
+            const tableCellSubtractMoney = document.createElement("td");
+            tableRowForTeam.appendChild(tableCellSubtractMoney);
+
+            const buttonSubtractMoney = document.createElement("button");
+            buttonSubtractMoney.classList.add("money-change");
+            buttonSubtractMoney.innerHTML = `-$${dollarValue}`;
+            buttonSubtractMoney.addEventListener("click", () => {
+                team.moneySubtract(dollarValue, false);
+                textInput.value = String(team.getMoney());
+            });
+            tableCellSubtractMoney.appendChild(buttonSubtractMoney);
+        });
+
+        // create text input field to type in a dollar value
+        const tableCellPresentValue = document.createElement("td");
+        tableCellPresentValue.classList.add("present-value");
+        tableCellPresentValue.append(document.createTextNode("$"));
         const textInput = document.createElement("input");
         textInput.setAttribute("type", "text");
         textInput.value = String(team.getMoney());
         textInput.addEventListener("input", function () {
             team.moneySet(Number(textInput.value), false);
         });
-
-        // create buttons to subtract money
-        dollarValues.forEach(function (dollarValue) {
-            const cell = document.createElement("td");
-            tableRow.appendChild(cell);
-
-            const button = document.createElement("button");
-            button.classList.add("money-change");
-            button.innerHTML = `-$${dollarValue}`;
-            button.addEventListener("click", () => {
-                team.moneySubtract(dollarValue, false);
-                textInput.value = String(team.getMoney());
-            });
-            cell.appendChild(button);
-        });
-
-        // add text input field to the table
-        const tdPresentValue = document.createElement("td");
-        tdPresentValue.classList.add("present-value");
-        tdPresentValue.append(document.createTextNode("$"));
-        tdPresentValue.appendChild(textInput);
-        tableRow.appendChild(tdPresentValue);
+        tableCellPresentValue.appendChild(textInput);
+        tableRowForTeam.appendChild(tableCellPresentValue);
 
         // create buttons to add money
         dollarValues.reverse();
         dollarValues.forEach(function (dollarValue) {
-            const cell = document.createElement("td");
-            tableRow.appendChild(cell);
+            const tableCellAddMoney = document.createElement("td");
+            tableRowForTeam.appendChild(tableCellAddMoney);
 
-            const button = document.createElement("button");
-            button.classList.add("money-change");
-            button.innerHTML = `+$${dollarValue}`;
-            button.addEventListener("click", () => {
+            const buttonAddMoney = document.createElement("button");
+            buttonAddMoney.classList.add("money-change");
+            buttonAddMoney.innerHTML = `+$${dollarValue}`;
+            buttonAddMoney.addEventListener("click", () => {
                 team.moneyAdd(dollarValue, false);
                 textInput.value = String(team.getMoney());
             });
-            cell.appendChild(button);
+            tableCellAddMoney.appendChild(buttonAddMoney);
         });
 
     }

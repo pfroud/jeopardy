@@ -46,7 +46,10 @@ export class Clue {
         };
 
         function getEmpty2DArray(size: number): BuzzHistoryRecord<BuzzResult>[][] {
-            // do not use Array.fill() because then every array element will refer to that argument
+            /*
+             Do not use array.fill([]) because it creates one new empty array and sets
+             all the elements to that empty array.
+             */
             const rv = new Array<BuzzHistoryRecord<BuzzResult>[]>(size);
             for (let teamIdx = 0; teamIdx < size; teamIdx++) {
                 rv[teamIdx] = [];
