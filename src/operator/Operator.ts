@@ -288,8 +288,6 @@ export class Operator {
         this.audioManager.teamBuzz.play();
 
 
-        this.divInstructions.innerHTML = "Did they answer correctly? y / n";
-
         this.buzzHistoryRecordForActiveAnswer = {
             startTimestamp: Date.now(),
             result: {
@@ -335,7 +333,6 @@ export class Operator {
         this.divClueValue.innerHTML = `$${clue.value}`;
         this.divClueAirdate.innerHTML = clue.airdate.getFullYear().toString();
         this.trAnswer.style.display = "none";
-        this.divInstructions.innerHTML = "Read aloud the category and dollar value.";
     }
 
     private setPresentClue(clue: Clue): void {
@@ -361,7 +358,6 @@ export class Operator {
         ): void => {
             this.buttonStartGame.blur();
             this.trQuestion.style.display = "none";
-            this.divInstructions.innerHTML = "Loading clue...";
 
             this.setPresentClue(
                 new Clue(
@@ -427,7 +423,6 @@ export class Operator {
         ): void => {
             this.buttonStartGame.blur();
             this.trQuestion.style.display = "none";
-            this.divInstructions.innerHTML = "Loading clue...";
             fetchClueHelper.call(this, resolveFunc, rejectFunc, 1, 5);
         };
         return new Promise<void>(promiseExecutor);
@@ -488,8 +483,6 @@ export class Operator {
         */
         this.setAllTeamsState("operator-is-reading-question");
 
-        this.divInstructions.innerHTML = "Read the question out loud. Buzzers open when you press space.";
-
         this.divClueQuestion.innerHTML = this.presentClue.getQuestionHtmlWithSubjectInBold();
         this.trQuestion.style.display = ""; //show it by removing "display=none"
         this.trAnswer.style.display = "none";
@@ -507,7 +500,6 @@ export class Operator {
         this.audioManager.doneReadingClueQuestion.play();
         this.trAnswer.style.display = ""; //show it by removing "display=none"
         this.divClueAnswer.innerHTML = this.presentClue.answer;
-        this.divInstructions.innerHTML = "Wait for people to answer.";
         this.setAllTeamsState("can-answer");
         this.buttonSkipClue.setAttribute("disabled", "disabled");
 
@@ -531,7 +523,6 @@ export class Operator {
         this.stateMachine?.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
 
         this.setAllTeamsState("idle");
-        this.divInstructions.innerHTML = "Let people read the answer.";
 
         this.teamArray?.forEach(team => {
             team.updateMoneyAtEndOfRound();
@@ -678,8 +669,6 @@ export class Operator {
     public handleGameEnd(): void {
         this.gameTimer.pause();
 
-        this.divInstructions.innerHTML = "Game over";
-
         // First play the eight high-pitched beeps sound, then play the closing music
         this.audioManager.playInOrder(
             this.audioManager.roundEnd,
@@ -727,7 +716,6 @@ export class Operator {
 
     public showBuzzHistory(): void {
         if (this.presentClue && this.buzzHistoryDiagram) {
-            this.divInstructions.innerHTML = "The buzz history is showing. Press space to continue.";
             this.buzzHistoryDiagram.setHistory(this.presentClue.buzzHistory);
             this.buzzHistoryDiagram.redraw();
         }
@@ -743,6 +731,10 @@ export class Operator {
 
     public getQuestionCount(): number {
         return this.questionCount;
+    }
+
+    public setInstructions(text: string): void {
+        this.divInstructions.innerHTML = text;
     }
 
 }

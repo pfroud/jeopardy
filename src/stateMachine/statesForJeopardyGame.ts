@@ -15,6 +15,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             }],
         }, {
             name: "getClueFromJService",
+            instructions: "Loading clue...",
             presentationSlideToShow: "slide-spinner",
             transitions: [{
                 type: "promise",
@@ -32,6 +33,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             presentation window for a fixed amount of time.
             */
             name: "showClueCategoryAndValue",
+            instructions: "Read aloud the category and dollar value.",
             presentationSlideToShow: "slide-clue-category-and-value",
             transitions: [{
                 type: "timeout",
@@ -69,6 +71,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             Also the category and dollar value are shown on the presentation header.
             */
             name: "showClueQuestion",
+            instructions: "Read the question out loud. Buzzers open when you press space.",
             presentationSlideToShow: "slide-clue-question",
             onEnter: operator.fitClueQuestionToScreenInOperatorWindow.bind(operator),
             transitions: [{
@@ -91,6 +94,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             The operator has finished reading the clue question, people can press the buzzer now.
             */
             name: "waitForBuzzes",
+            instructions: "Wait for people to answer.",
             transitions: [{
                 type: "keyboard",
                 keyboardKeys: "123456789",
@@ -108,6 +112,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             A team has pressed the buzzer, now we are waiting for them to say their answer.
             */
             name: "waitForTeamAnswer",
+            instructions: "Did they answer correctly? y / n",
             onEnter: operator.startAnswer.bind(operator),
             transitions: [{
                 type: "keyboard",
@@ -137,6 +142,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             }],
         }, {
             name: "showAnswer",
+            instructions: "Let people read the answer.",
             onEnter: operator.handleShowAnswer.bind(operator),
             presentationSlideToShow: "slide-clue-answer",
             transitions: [{
@@ -147,6 +153,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             }],
         }, {
             name: "showBuzzHistory",
+            instructions: "The buzz history is showing. Press space to continue.",
             onEnter: operator.showBuzzHistory.bind(operator),
             // presentationSlideToShow: "buzz-history-chart",
             transitions: [{
@@ -164,6 +171,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             }],
         }, {
             name: "gameEnd",
+            instructions: "Game over",
             presentationSlideToShow: "slide-gameEnd-team-ranking-table",
             onEnter: operator.handleGameEnd.bind(operator),
             transitions: [{
