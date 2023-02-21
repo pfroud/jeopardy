@@ -1,0 +1,73 @@
+div#backdrop-for-popups {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    backdrop-filter: brightness(0.8) blur(2px);
+}
+
+
+div.operator-popup {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    filter: drop-shadow(5px 5px 5px gray);
+    border-radius: 20px;
+    padding: 50px;
+    z-index: 2;
+
+    .popup-title {
+        font-size: 60px;
+    }
+
+    &#buzz-history-chart-popup {
+        background: lightblue;
+
+        svg {
+            background-color: white;
+        }
+    }
+
+    &#special-category-popup {
+        background-color: lightyellow;
+        border: 1px solid yellow;
+        width: 80%;
+        height: 80%;
+
+        div#special-category-example-wrapper {
+            border: 1px solid gray;
+            padding: 20px;
+            border-radius: 10px;
+
+            table#special-category-example-table {
+                border-collapse: collapse;
+                line-height: 200%;
+
+                td:nth-of-type(1) {
+                    font-weight: bold;
+                    padding-right: 10px;
+                }
+
+            }
+        }
+
+        div#info-icon {
+            border: 10px solid blue;
+            border-radius: 50%;
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            text-align: center;
+            font-weight: bold;
+            color: blue;
+            font-size: 80px;
+            font-family: monospace;
+            margin-bottom: 10px;
+            margin-right: 20px;
+        }
+    }
+
+}

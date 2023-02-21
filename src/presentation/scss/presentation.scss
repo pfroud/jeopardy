@@ -170,6 +170,20 @@ main {
             }
         }
 
+        &#slide-buzz-history-chart svg {
+            background-color: white;
+
+            // axis text
+            text {
+                fill: black;
+            }
+
+            // axis line (path class="domain")
+            path {
+                stroke: black;
+            }
+        }
+
         &#slide-gameEnd-team-ranking-table {
             div#team-ranking {
                 font-size: 40px;

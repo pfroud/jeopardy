@@ -79,50 +79,39 @@ export class BuzzHistoryChart {
     private static readonly barHeight = BuzzHistoryChart.dotRadius * 2;
     private static readonly yPositionForBars = (BuzzHistoryChart.rowHeight / 2) - (BuzzHistoryChart.barHeight / 2);
 
-    private readonly verticalLineWhenOperatorPressedSpace: SVGLineElement;
+    private readonly allSVGs: SVGSVGElement[] = [];
 
     /**
      * A "scale" does linear interpolation to convert a domain to a range.
      * For us, the domain is time (in milliseconds) and the range is screen-space pixels.
-     */
+    */
+    // shared between both SVGs
     private readonly scaleInitial: ScaleLinear<number, number>;
-
     private scaleWithZoomTransform: ScaleLinear<number, number>;
-
-    private readonly rowsArray: Selection<SVGGElement, unknown, null, undefined>[] = [];
-
-    private readonly groupXAxis: SVGGElement;
-
     private readonly axisGenerator: Axis<number>;
-
-    private readonly maxWidthOfTeamNameLabels: number;
-
     private history: BuzzHistoryForClue | null = null;
-
     private readonly lockoutDurationMillisec: number;
 
-    public constructor(teams: Team[], svg: SVGSVGElement, lockoutDurationMillisec: number) {
+    // one for each SVG
+    private readonly xAxisGroups = new Map<
+        SVGSVGElement,
+        Selection<SVGGElement, unknown, null, undefined>
+    >;
+    private readonly verticalLines = new Map<SVGSVGElement, SVGLineElement>;
+    private readonly rowsArray = new Map<
+        SVGSVGElement,
+        Selection<SVGGElement, unknown, null, undefined>[]
+    >;
+
+
+    public constructor(teams: Team[], lockoutDurationMillisec: number, svgInOperator: SVGSVGElement, svgInPresentation: SVGSVGElement) {
         this.lockoutDurationMillisec = lockoutDurationMillisec;
 
         const svgWidth = 1300;
         const svgHeight = (teams.length * BuzzHistoryChart.rowHeight) + this.margin.top + this.margin.bottom + 50;
 
-        svg.setAttribute("width", String(svgWidth));
-        svg.setAttribute("height", String(svgHeight));
-
         const contentWidth = svgWidth - this.margin.left - this.margin.right;
         const contentHeight = svgHeight - this.margin.top - this.margin.bottom;
-
-        // the content group is everything except the axis
-        const groupContent = createSvgElement("g");
-        groupContent.setAttribute("id", "content");
-        groupContent.setAttribute("transform", `translate(${this.margin.left}, ${this.margin.top})`);
-        svg.append(groupContent);
-
-        this.groupXAxis = createSvgElement("g");
-        this.groupXAxis.setAttribute("id", "axis");
-        this.groupXAxis.setAttribute("transform", `translate(${this.margin.left}, ${contentHeight})`);
-        svg.appendChild(this.groupXAxis);
 
         // the domain is set in the setHistory() function
         this.scaleInitial = scaleLinear()
@@ -135,8 +124,96 @@ export class BuzzHistoryChart {
             .tickSizeOuter(0)
             .tickFormat(n => `${n} ms`);
 
-        const d3SelectionOfGroupXAxis = select(this.groupXAxis);
-        this.axisGenerator(d3SelectionOfGroupXAxis);
+        this.allSVGs = [svgInOperator, svgInPresentation];
+        for (const theSvg of this.allSVGs) {
+
+            theSvg.setAttribute("width", String(svgWidth));
+            theSvg.setAttribute("height", String(svgHeight));
+
+            // the content group is everything except the axis
+            const groupContent = createSvgElement("g");
+            groupContent.setAttribute("id", "content");
+            groupContent.setAttribute("transform", `translate(${this.margin.left}, ${this.margin.top})`);
+            theSvg.append(groupContent);
+
+            const groupXAxis = createSvgElement("g");
+            const d3SelectionOfGroupXAxis = select(groupXAxis);
+            this.xAxisGroups.set(theSvg, d3SelectionOfGroupXAxis);
+            groupXAxis.setAttribute("id", "axis");
+            groupXAxis.setAttribute("transform", `translate(${this.margin.left}, ${contentHeight})`);
+            theSvg.appendChild(groupXAxis);
+            this.axisGenerator(d3SelectionOfGroupXAxis);
+
+            const rowsGroup = createSvgElement("g");
+            rowsGroup.setAttribute("id", "rows");
+            groupContent.append(rowsGroup);
+
+            this.rowsArray.set(theSvg, []);
+
+            // Draw team name, horizontal line, and alternating shaded background
+            for (let teamIndex = 0; teamIndex < teams.length; teamIndex++) {
+
+                const group = createSvgElement("g");
+                group.setAttribute("id", `team-index-${teamIndex}`);
+                group.setAttribute("transform", `translate(0, ${BuzzHistoryChart.rowHeight * teamIndex})`);
+                rowsGroup.append(group);
+
+                if (teamIndex % 2 === 0) {
+                    const shadedBackground = createSvgElement("rect");
+                    shadedBackground.setAttribute("x", "0");
+                    shadedBackground.setAttribute("y", "0");
+                    shadedBackground.setAttribute("width", String(contentWidth));
+                    shadedBackground.setAttribute("height", String(BuzzHistoryChart.rowHeight));
+                    shadedBackground.setAttribute("fill", "#eee");
+                    group.appendChild(shadedBackground);
+                }
+
+                const separatorLine = createSvgElement("line");
+                separatorLine.setAttribute("x1", "0");
+                separatorLine.setAttribute("y1", String(BuzzHistoryChart.rowHeight));
+                separatorLine.setAttribute("x2", String(contentWidth));
+                separatorLine.setAttribute("y2", String(BuzzHistoryChart.rowHeight));
+                separatorLine.setAttribute("stroke", "black");
+                separatorLine.setAttribute("stroke-width", "1");
+                group.appendChild(separatorLine);
+
+                /*
+                 The buzz history records should go underneath the team name,
+                 so we need to add a group to hold the records BEFORE adding
+                 the team name.
+                 */
+                const recordsGroup = createSvgElement("g");
+                const rowsForThisSvg = this.rowsArray.get(theSvg);
+                if (!rowsForThisSvg) {
+                    throw new Error("no rows for the svg!!");
+                }
+                rowsForThisSvg[teamIndex] = select(recordsGroup);
+                recordsGroup.setAttribute("id", "records");
+                group.append(recordsGroup);
+
+                const textNode = createSvgElement("text");
+                textNode.setAttribute("x", "10");
+                textNode.setAttribute("y", String(BuzzHistoryChart.rowHeight / 2));
+                textNode.setAttribute("dominant-baseline", "middle");
+                textNode.innerHTML = `${teams[teamIndex].teamName}`;
+                group.appendChild(textNode);
+            }
+
+            const xPositionAtTimeZero = this.scaleWithZoomTransform(0);
+            const verticalLine = createSvgElement("line");
+            this.verticalLines.set(theSvg, verticalLine);
+            verticalLine.setAttribute("id", "operator-finished-reading-question");
+            verticalLine.setAttribute("y1", "0");
+            verticalLine.setAttribute("y2", String(contentHeight));
+            verticalLine.setAttribute("x1", String(xPositionAtTimeZero));
+            verticalLine.setAttribute("x2", String(xPositionAtTimeZero));
+            verticalLine.setAttribute("stroke", "black");
+            verticalLine.setAttribute("stroke-width", "1");
+            verticalLine.setAttribute("visibility", "hidden");
+            groupContent.appendChild(verticalLine);
+
+
+        }
 
         ///////////////////////////////////////////////////////////////////////////////
         ///////////////////////////////// Pan & zoom //////////////////////////////////
@@ -154,8 +231,7 @@ export class BuzzHistoryChart {
             // Change the scale which will be used by the axis generator
             this.axisGenerator.scale(this.scaleWithZoomTransform);
 
-            // Re-draw the axis
-            this.axisGenerator(d3SelectionOfGroupXAxis);
+            this.xAxisGroups.forEach(xAxisGroup => this.axisGenerator(xAxisGroup));
 
             // Re-draw the buzz history diagram
             this.redraw();
@@ -164,83 +240,8 @@ export class BuzzHistoryChart {
         const zoomController = zoom<SVGSVGElement, unknown>()
             .on("zoom", handleZoom);
 
-        const d3SelectionOfSvgElement = select(svg);
-        zoomController(d3SelectionOfSvgElement);
-
-        /////////////////////////////////////////////////////////
-        ////////////// Draw the diagram contents ////////////////
-        /////////////////////////////////////////////////////////
-
-        const rowsGroup = createSvgElement("g");
-        rowsGroup.setAttribute("id", "rows");
-        groupContent.append(rowsGroup);
-
-        let maxTextWidth = -Infinity;
-
-        // Draw team name, horizontal line, and alternating shaded background
-        for (let teamIndex = 0; teamIndex < teams.length; teamIndex++) {
-
-            const group = createSvgElement("g");
-            group.setAttribute("id", `team-index-${teamIndex}`);
-            group.setAttribute("transform", `translate(0, ${BuzzHistoryChart.rowHeight * teamIndex})`);
-            rowsGroup.append(group);
-
-            if (teamIndex % 2 === 0) {
-                const shadedBackground = createSvgElement("rect");
-                shadedBackground.setAttribute("x", "0");
-                shadedBackground.setAttribute("y", "0");
-                shadedBackground.setAttribute("width", String(contentWidth));
-                shadedBackground.setAttribute("height", String(BuzzHistoryChart.rowHeight));
-                shadedBackground.setAttribute("fill", "#eee");
-                group.appendChild(shadedBackground);
-            }
-
-            const separatorLine = createSvgElement("line");
-            separatorLine.setAttribute("x1", "0");
-            separatorLine.setAttribute("y1", String(BuzzHistoryChart.rowHeight));
-            separatorLine.setAttribute("x2", String(contentWidth));
-            separatorLine.setAttribute("y2", String(BuzzHistoryChart.rowHeight));
-            separatorLine.setAttribute("stroke", "black");
-            separatorLine.setAttribute("stroke-width", "1");
-            group.appendChild(separatorLine);
-
-            /*
-             The buzz history records should go underneath the team name,
-             so we need to add a group to hold the records BEFORE adding
-             the team name.
-             */
-            const recordsGroup = createSvgElement("g");
-            this.rowsArray[teamIndex] = select(recordsGroup);
-            recordsGroup.setAttribute("id", "records");
-            group.append(recordsGroup);
-
-            const textNode = createSvgElement("text");
-            textNode.setAttribute("x", "10");
-            textNode.setAttribute("y", String(BuzzHistoryChart.rowHeight / 2));
-            textNode.setAttribute("dominant-baseline", "middle");
-            textNode.innerHTML = `${teams[teamIndex].teamName}`;
-            group.appendChild(textNode);
-
-            // keep track of the maximum width of the text element
-            const textWidth = textNode.getBBox().width;
-            if (textWidth > maxTextWidth) {
-                maxTextWidth = textWidth;
-            }
-        }
-
-        this.maxWidthOfTeamNameLabels = maxTextWidth;
-
-        const xPositionAtTimeZero = this.scaleWithZoomTransform(0);
-        const verticalLine = this.verticalLineWhenOperatorPressedSpace = createSvgElement("line");
-        verticalLine.setAttribute("id", "operator-finished-reading-question");
-        verticalLine.setAttribute("y1", "0");
-        verticalLine.setAttribute("y2", String(contentHeight));
-        verticalLine.setAttribute("x1", String(xPositionAtTimeZero));
-        verticalLine.setAttribute("x2", String(xPositionAtTimeZero));
-        verticalLine.setAttribute("stroke", "black");
-        verticalLine.setAttribute("stroke-width", "1");
-        verticalLine.setAttribute("visibility", "hidden");
-        groupContent.appendChild(verticalLine);
+        const d3SelectionOfSvgElementInOperator = select(svgInOperator);
+        zoomController(d3SelectionOfSvgElementInOperator);
 
 
     }
@@ -278,97 +279,106 @@ export class BuzzHistoryChart {
         Add padding so the leftmost record doesn't overlap the label 
         and the rightmost record isn't exactly on the edge
         */
+        // todo add padding on the left if the min timestamp is zero
         this.scaleInitial.domain([firstTimestamp * 1.3, lastTimestamp * 1.1]);
 
         // Update the scale which the axis generator will use
         this.axisGenerator.scale(this.scaleWithZoomTransform);
 
-        // Re-draw the axis
-        const d3SelectionOfGroupXAxis = select(this.groupXAxis);
-        this.axisGenerator(d3SelectionOfGroupXAxis);
+        this.xAxisGroups.forEach(xAxisGroup => this.axisGenerator(xAxisGroup));
 
-        this.verticalLineWhenOperatorPressedSpace.setAttribute("visibility", "visible");
         const xPositionAtTimeZero = this.scaleInitial(0);
-        this.verticalLineWhenOperatorPressedSpace.setAttribute("x1", String(xPositionAtTimeZero));
-        this.verticalLineWhenOperatorPressedSpace.setAttribute("x2", String(xPositionAtTimeZero));
+        this.verticalLines.forEach(verticalLine => {
+            verticalLine.setAttribute("visibility", "visible");
+            verticalLine.setAttribute("x1", String(xPositionAtTimeZero));
+            verticalLine.setAttribute("x2", String(xPositionAtTimeZero));
+        });
 
     }
 
     public redraw(): void {
-        if (!this.history) {
-            return;
-        }
 
         const xPositionAtTimeZero = this.scaleWithZoomTransform(0);
         const lockoutBarWidth = this.scaleWithZoomTransform(this.lockoutDurationMillisec) - xPositionAtTimeZero;
 
-        this.verticalLineWhenOperatorPressedSpace.setAttribute("x1", String(xPositionAtTimeZero));
-        this.verticalLineWhenOperatorPressedSpace.setAttribute("x2", String(xPositionAtTimeZero));
-
-
-        this.history.records.forEach((recordsForTeam, teamIndex) => {
-
-            const groupForTeam = this.rowsArray[teamIndex];
-
-            /*
-            For information about what .data().join() means:
-            https://www.d3indepth.com/datajoins/
-            https://observablehq.com/@d3/selection-join
-            */
-
-
-            // Draw bars for buzzes that were too early
-            groupForTeam
-                .selectAll("rect.too-early-start-lockout")
-                .data(recordsForTeam.filter(record => record.result?.type === "too-early-start-lockout"))
-                .join("rect")
-                .classed("too-early-start-lockout", true)
-                .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp))
-                .attr("y", BuzzHistoryChart.yPositionForBars)
-                .attr("width", lockoutBarWidth)
-                .attr("height", BuzzHistoryChart.barHeight)
-                .attr("fill", "orange")
-                .attr("stroke", "black")
-                .attr("stroke-width", 1);
-
-            // Draw bars for when a team started answering
-            groupForTeam
-                .selectAll("rect.start-answer")
-                .data(
-                    recordsForTeam.filter(
-                        /*
-                        Need to use a type predicate (aka "user-defined type guard") for Typescript to
-                        be able to inter types from the array filter function.
-                        https://stackoverflow.com/questions/65279417/typescript-narrow-down-type-based-on-class-property-from-filter-find-etc
-                        https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates
-                        */
-                        function (record: BuzzHistoryRecord<BuzzResult>): record is BuzzHistoryRecord<BuzzResultStartAnswer> {
-                            return record.result?.type === "start-answer";
-                        }
-                    )
-                )
-                .join("rect")
-                .classed("start-answer", true)
-                .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp))
-                .attr("y", BuzzHistoryChart.yPositionForBars)
-                .attr("width", d => this.scaleWithZoomTransform(d.result.endTimestamp) - this.scaleWithZoomTransform(d.startTimestamp))
-                .attr("height", BuzzHistoryChart.barHeight)
-                .attr("fill", d => (d.result.answeredCorrectly ? "lime" : "red"))
-                .attr("stroke", "black")
-                .attr("stroke-width", 1);
-
-            // Draw a dot for every time a team pressed a buzzer
-            groupForTeam
-                .selectAll("circle.buzzer-press")
-                .data(recordsForTeam)
-                .join("circle")
-                .classed("buzzer-press", true)
-                .attr("cx", d => this.scaleWithZoomTransform(d.startTimestamp))
-                .attr("cy", BuzzHistoryChart.rowHeight / 2)
-                .attr("r", BuzzHistoryChart.dotRadius)
-                .attr("fill", "black")
-                .attr("stroke-width", 0);
+        this.verticalLines.forEach(verticalLine => {
+            verticalLine.setAttribute("x1", String(xPositionAtTimeZero));
+            verticalLine.setAttribute("x2", String(xPositionAtTimeZero));
         });
+
+        this.rowsArray.forEach(rowsForSVG => {
+            if (!this.history) {
+                return;
+            }
+
+            this.history.records.forEach((recordsForTeam, teamIndex) => {
+
+                const groupForTeam = rowsForSVG[teamIndex];
+
+                /*
+                For information about what .data().join() means:
+                https://www.d3indepth.com/datajoins/
+                https://observablehq.com/@d3/selection-join
+                */
+
+
+                // Draw bars for buzzes that were too early
+                groupForTeam
+                    .selectAll("rect.too-early-start-lockout")
+                    .data(recordsForTeam.filter(record => record.result?.type === "too-early-start-lockout"))
+                    .join("rect")
+                    .classed("too-early-start-lockout", true)
+                    .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp))
+                    .attr("y", BuzzHistoryChart.yPositionForBars)
+                    .attr("width", lockoutBarWidth)
+                    .attr("height", BuzzHistoryChart.barHeight)
+                    .attr("fill", "orange")
+                    .attr("stroke", "black")
+                    .attr("stroke-width", 1);
+
+                // Draw bars for when a team started answering
+                groupForTeam
+                    .selectAll("rect.start-answer")
+                    .data(
+                        recordsForTeam.filter(
+                            /*
+                            Need to use a type predicate (aka "user-defined type guard") for Typescript to
+                            be able to inter types from the array filter function.
+                            https://stackoverflow.com/questions/65279417/typescript-narrow-down-type-based-on-class-property-from-filter-find-etc
+                            https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates
+                            */
+                            function (record: BuzzHistoryRecord<BuzzResult>): record is BuzzHistoryRecord<BuzzResultStartAnswer> {
+                                return record.result?.type === "start-answer";
+                            }
+                        )
+                    )
+                    .join("rect")
+                    .classed("start-answer", true)
+                    .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp))
+                    .attr("y", BuzzHistoryChart.yPositionForBars)
+                    .attr("width", d => this.scaleWithZoomTransform(d.result.endTimestamp) - this.scaleWithZoomTransform(d.startTimestamp))
+                    .attr("height", BuzzHistoryChart.barHeight)
+                    .attr("fill", d => (d.result.answeredCorrectly ? "lime" : "red"))
+                    .attr("stroke", "black")
+                    .attr("stroke-width", 1);
+
+                // Draw a dot for every time a team pressed a buzzer
+                groupForTeam
+                    .selectAll("circle.buzzer-press")
+                    .data(recordsForTeam)
+                    .join("circle")
+                    .classed("buzzer-press", true)
+                    .attr("cx", d => this.scaleWithZoomTransform(d.startTimestamp))
+                    .attr("cy", BuzzHistoryChart.rowHeight / 2)
+                    .attr("r", BuzzHistoryChart.dotRadius)
+                    .attr("fill", "black")
+                    .attr("stroke-width", 0);
+            });
+
+        });
+
+
+
     }
 
 }

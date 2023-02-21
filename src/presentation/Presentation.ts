@@ -180,4 +180,8 @@ export class Presentation {
         this.divSpecialCategoryPopup.className = "offscreen-left";
     }
 
+    public getBuzzHistorySvg(): SVGSVGElement {
+        return querySelectorAndCheck(document, "div#slide-buzz-history-chart svg");
+    }
+
 }

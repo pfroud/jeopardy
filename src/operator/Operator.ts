@@ -37,6 +37,8 @@ export class Operator {
     private readonly specialCategoryPrompt: HTMLDivElement;
     private readonly specialCategoryTitle: HTMLSpanElement;
     private readonly specialCategoryPopup: HTMLDivElement;
+    private readonly buzzHistoryPopup: HTMLDivElement;
+    private readonly popupBackdrop: HTMLDivElement;
     private readonly gameTimer: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
     private teamArray?: Team[];
     private presentClue?: Clue;
@@ -68,10 +70,11 @@ export class Operator {
 
         this.buttonStartGame = querySelectorAndCheck(document, "button#start-game");
         this.buttonSkipClue = querySelectorAndCheck(document, "button#skip-clue");
-
+        this.popupBackdrop = querySelectorAndCheck(document, "div#backdrop-for-popups");
         this.specialCategoryPrompt = querySelectorAndCheck(document, "div#special-category-prompt");
         this.specialCategoryTitle = querySelectorAndCheck(this.specialCategoryPrompt, "span#special-category-title");
 
+        this.buzzHistoryPopup = querySelectorAndCheck(document, "div#buzz-history-chart-popup");
         this.specialCategoryPopup = querySelectorAndCheck(document, "div#special-category-popup");
 
         this.initPauseKeyboardListener();
@@ -106,7 +109,13 @@ export class Operator {
         this.stateMachine = new StateMachine(this.settings, this, this.presentation);
 
         if (this.teamArray) {
-            this.buzzHistoryDiagram = new BuzzHistoryChart(this.teamArray, querySelectorAndCheck(document, "svg#buzz-history"), this.settings.durationLockoutMillisec);
+            this.buzzHistoryDiagram = new BuzzHistoryChart(
+                this.teamArray,
+                this.settings.durationLockoutMillisec,
+                querySelectorAndCheck<SVGSVGElement>(document, "svg#buzz-history"),
+                this.presentation.getBuzzHistorySvg()
+            );
+
         }
 
         this.buttonStartGame.removeAttribute("disabled");
@@ -453,12 +462,12 @@ export class Operator {
         this.presentation?.fitClueQuestionToScreen();
     }
 
-    public showSpecialCategoryPrompt(specialCategory: SpecialCategory): void {
+    private showSpecialCategoryPrompt(specialCategory: SpecialCategory): void {
         this.specialCategoryTitle.innerHTML = specialCategory.displayName;
         this.specialCategoryPrompt.style.display = "block";
     }
 
-    public hideSpecialCategoryPrompt(): void {
+    private hideSpecialCategoryPrompt(): void {
         this.specialCategoryPrompt.style.display = "none";
         this.gameTimer.resume();
     }
@@ -473,7 +482,7 @@ export class Operator {
 
         this.presentation?.showSpecialCategoryPopup(specialCategory);
 
-        querySelectorAndCheck(this.specialCategoryPopup, "#special-category-title").innerHTML = specialCategory.displayName;
+        querySelectorAndCheck(this.specialCategoryPopup, ".popup-title").innerHTML = specialCategory.displayName;
         querySelectorAndCheck(this.specialCategoryPopup, "#special-category-description").innerHTML = specialCategory.description;
         if (specialCategory.example) {
             querySelectorAndCheck(this.specialCategoryPopup, "#special-category-example-category").innerHTML = specialCategory.example.category;
@@ -482,10 +491,12 @@ export class Operator {
         }
 
         this.specialCategoryPopup.style.display = "block";
+        this.popupBackdrop.style.display = "block";
 
     }
 
     public hideSpecialCategoryOverlay(): void {
+        this.popupBackdrop.style.display = "none";
         this.specialCategoryPopup.style.display = "none";
         this.presentation?.hideSpecialCategoryPopup();
         this.setPaused(false);
@@ -736,9 +747,18 @@ export class Operator {
 
     public showBuzzHistory(): void {
         if (this.presentClue && this.buzzHistoryDiagram) {
+
+            this.popupBackdrop.style.display = "block";
+            this.buzzHistoryPopup.style.display = "block";
+
             this.buzzHistoryDiagram.setHistory(this.presentClue.buzzHistory);
             this.buzzHistoryDiagram.redraw();
         }
+    }
+
+    public hideBuzzHistory(): void {
+        this.popupBackdrop.style.display = "none";
+        this.buzzHistoryPopup.style.display = "none";
     }
 
     public getStateMachine(): StateMachine | undefined {

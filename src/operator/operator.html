@@ -7,7 +7,7 @@
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="scss/tabs.scss">
     <link rel="stylesheet" href="scss/progressBarForOperator.scss">
-    <link rel="stylesheet" href="scss/specialCategoriesForOperator.scss">
+    <link rel="stylesheet" href="scss/popupForOperator.scss">
     <link rel="stylesheet" href="scss/operator.scss">
 </head>
 
@@ -16,9 +16,11 @@
 
     <div id="paused" style="display:none">&#9612;&#9612; PAUSED</div>
 
-    <div id="special-category-popup" style="display:none">
+    <div id="backdrop-for-popups" style="display:none"></div>
+
+    <div class="operator-popup" id="special-category-popup" style="display:none">
         <div id="info-icon">i</div>
-        <span id="special-category-title"></span>
+        <span class="popup-title"></span>
 
         <p id="special-category-description"></p>
 
@@ -45,6 +47,11 @@
         <p>Press space to close this popup.</p>
     </div>
 
+    <div class="operator-popup" id="buzz-history-chart-popup" style="display:none">
+        <div class="popup-title">Buzz history</div>
+        <p>Press space to continue the game.</p>
+        <svg id="buzz-history"></svg>
+    </div>
 
     <main>
         <input id="tab-play" type="radio" name="tabs" checked>
@@ -194,9 +201,6 @@
         <div class="tab-content" id="tab-content-developer">
             <a href="#" id="aOpenStateMachineViewer">Open state machine visualizer...</a>
         </div>
-
-        Buzz history:<br>
-        <svg id="buzz-history" width="800" height="600" style="border: 1px solid black"></svg>
 
     </main>
 

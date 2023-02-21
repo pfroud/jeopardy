@@ -24,7 +24,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 The promise does NOT pass the clue object to the state machine.
                 The clue object is only stored by the operator.
                 */
-                functionToGetPromise: operator.getClueFromJService.bind(operator),
+                functionToGetPromise: operator.getClueForTesting.bind(operator),
                 destination: "showClueCategoryAndValue"
             }],
         }, {
@@ -155,7 +155,8 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             name: "showBuzzHistory",
             instructions: "The buzz history is showing. Press space to continue.",
             onEnter: operator.showBuzzHistory.bind(operator),
-            // presentationSlideToShow: "buzz-history-chart",
+            onExit: operator.hideBuzzHistory.bind(operator),
+            presentationSlideToShow: "slide-buzz-history-chart",
             transitions: [{
                 type: "keyboard",
                 keyboardKeys: " ", //space
