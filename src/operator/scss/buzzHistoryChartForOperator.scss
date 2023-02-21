@@ -1,0 +1,54 @@
+svg#buzz-history {
+    background: white;
+
+    text.team-name {
+        fill: black;
+    }
+
+    g#axis {
+        text {
+            fill: black;
+        }
+
+        path.domain,
+        g.tick line {
+            stroke: black;
+        }
+    }
+
+    rect.row-shaded-background {
+        fill: #eee;
+    }
+
+    line.row-separator,
+    line.vertical-line {
+        stroke: black;
+        stroke-width: 1;
+    }
+
+    rect.buzz-record {
+
+        stroke: black;
+        stroke-width: 1;
+
+        &.too-early-start-lockout {
+            fill: orange;
+        }
+
+        &.answered-right {
+            fill: green;
+        }
+
+        &.answered-wrong {
+            fill: red;
+        }
+
+    }
+
+    circle.buzzer-press {
+        fill: black;
+        stroke-width: 0;
+    }
+
+
+}

@@ -23,3 +23,7 @@ export function querySelectorSVGAndCheck<K extends keyof SVGElementTagNameMap>
         throw new Error(`${parent.nodeName}.querySelector("${query}") returned null`);
     }
 }
+
+export function createSvgElement<K extends keyof SVGElementTagNameMap>(qualifiedName: K): SVGElementTagNameMap[K] {
+    return document.createElementNS<K>("http://www.w3.org/2000/svg", qualifiedName);
+}

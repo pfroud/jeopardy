@@ -3,6 +3,7 @@ import { ScaleLinear, scaleLinear } from "d3-scale";
 import { Axis, axisBottom } from "d3-axis";
 import { zoom, D3ZoomEvent } from "d3-zoom";
 import { Team, TeamState } from "./Team";
+import { createSvgElement } from "./common";
 
 
 /**
@@ -59,10 +60,6 @@ export interface BuzzResultStartAnswer {
 interface BuzzResultIgnore {
     readonly type: "ignored";
     readonly teamStateWhyItWasIgnored: TeamState;
-}
-
-function createSvgElement<K extends keyof SVGElementTagNameMap>(qualifiedName: K): SVGElementTagNameMap[K] {
-    return document.createElementNS<K>("http://www.w3.org/2000/svg", qualifiedName);
 }
 
 export class BuzzHistoryChart {
@@ -160,21 +157,20 @@ export class BuzzHistoryChart {
 
                 if (teamIndex % 2 === 0) {
                     const shadedBackground = createSvgElement("rect");
+                    shadedBackground.classList.add("row-shaded-background");
                     shadedBackground.setAttribute("x", "0");
                     shadedBackground.setAttribute("y", "0");
                     shadedBackground.setAttribute("width", String(contentWidth));
                     shadedBackground.setAttribute("height", String(BuzzHistoryChart.rowHeight));
-                    shadedBackground.setAttribute("fill", "#eee");
                     group.appendChild(shadedBackground);
                 }
 
                 const separatorLine = createSvgElement("line");
+                separatorLine.classList.add("row-separator");
                 separatorLine.setAttribute("x1", "0");
                 separatorLine.setAttribute("y1", String(BuzzHistoryChart.rowHeight));
                 separatorLine.setAttribute("x2", String(contentWidth));
                 separatorLine.setAttribute("y2", String(BuzzHistoryChart.rowHeight));
-                separatorLine.setAttribute("stroke", "black");
-                separatorLine.setAttribute("stroke-width", "1");
                 group.appendChild(separatorLine);
 
                 /*
@@ -192,6 +188,7 @@ export class BuzzHistoryChart {
                 group.append(recordsGroup);
 
                 const textNode = createSvgElement("text");
+                textNode.classList.add("team-name");
                 textNode.setAttribute("x", "10");
                 textNode.setAttribute("y", String(BuzzHistoryChart.rowHeight / 2));
                 textNode.setAttribute("dominant-baseline", "middle");
@@ -202,13 +199,12 @@ export class BuzzHistoryChart {
             const xPositionAtTimeZero = this.scaleWithZoomTransform(0);
             const verticalLine = createSvgElement("line");
             this.verticalLines.set(theSvg, verticalLine);
+            verticalLine.classList.add("vertical-line");
             verticalLine.setAttribute("id", "operator-finished-reading-question");
             verticalLine.setAttribute("y1", "0");
             verticalLine.setAttribute("y2", String(contentHeight));
             verticalLine.setAttribute("x1", String(xPositionAtTimeZero));
             verticalLine.setAttribute("x2", String(xPositionAtTimeZero));
-            verticalLine.setAttribute("stroke", "black");
-            verticalLine.setAttribute("stroke-width", "1");
             verticalLine.setAttribute("visibility", "hidden");
             groupContent.appendChild(verticalLine);
 
@@ -323,22 +319,22 @@ export class BuzzHistoryChart {
 
 
                 // Draw bars for buzzes that were too early
+                const classNameForTooEarly = "too-early-start-lockout";
                 groupForTeam
-                    .selectAll("rect.too-early-start-lockout")
+                    .selectAll(`rect.${classNameForTooEarly}`)
                     .data(recordsForTeam.filter(record => record.result?.type === "too-early-start-lockout"))
                     .join("rect")
-                    .classed("too-early-start-lockout", true)
+                    .classed("buzz-record", true)
+                    .classed(classNameForTooEarly, true)
                     .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp))
                     .attr("y", BuzzHistoryChart.yPositionForBars)
                     .attr("width", lockoutBarWidth)
-                    .attr("height", BuzzHistoryChart.barHeight)
-                    .attr("fill", "orange")
-                    .attr("stroke", "black")
-                    .attr("stroke-width", 1);
+                    .attr("height", BuzzHistoryChart.barHeight);
 
                 // Draw bars for when a team started answering
+                const classNameForStartAnswer = "start-answer";
                 groupForTeam
-                    .selectAll("rect.start-answer")
+                    .selectAll(`rect.${classNameForStartAnswer}`)
                     .data(
                         recordsForTeam.filter(
                             /*
@@ -353,26 +349,25 @@ export class BuzzHistoryChart {
                         )
                     )
                     .join("rect")
-                    .classed("start-answer", true)
+                    .classed("buzz-record", true)
+                    .classed(classNameForStartAnswer, true)
+                    .classed("answered-right", d => d.result.answeredCorrectly)
+                    .classed("answered-wrong", d => !d.result.answeredCorrectly)
                     .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp))
                     .attr("y", BuzzHistoryChart.yPositionForBars)
                     .attr("width", d => this.scaleWithZoomTransform(d.result.endTimestamp) - this.scaleWithZoomTransform(d.startTimestamp))
-                    .attr("height", BuzzHistoryChart.barHeight)
-                    .attr("fill", d => (d.result.answeredCorrectly ? "lime" : "red"))
-                    .attr("stroke", "black")
-                    .attr("stroke-width", 1);
+                    .attr("height", BuzzHistoryChart.barHeight);
 
                 // Draw a dot for every time a team pressed a buzzer
+                const classNameForBuzzerPress = "buzzer-press";
                 groupForTeam
-                    .selectAll("circle.buzzer-press")
+                    .selectAll(`circle.${classNameForBuzzerPress}`)
                     .data(recordsForTeam)
                     .join("circle")
-                    .classed("buzzer-press", true)
+                    .classed(classNameForBuzzerPress, true)
                     .attr("cx", d => this.scaleWithZoomTransform(d.startTimestamp))
                     .attr("cy", BuzzHistoryChart.rowHeight / 2)
-                    .attr("r", BuzzHistoryChart.dotRadius)
-                    .attr("fill", "black")
-                    .attr("stroke-width", 0);
+                    .attr("r", BuzzHistoryChart.dotRadius);
             });
 
         });

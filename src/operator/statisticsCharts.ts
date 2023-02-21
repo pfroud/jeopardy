@@ -1,5 +1,5 @@
 import * as Chartist from "chartist";
-import { querySelectorSVGAndCheck } from "../common";
+import { createSvgElement, querySelectorSVGAndCheck } from "../common";
 import { Team } from "../Team";
 import { Operator } from "./Operator";
 
@@ -165,13 +165,13 @@ export function createLineChartOfMoneyOverTime(divForLineChart: HTMLDivElement, 
         const svgWidth = 50;
         const svgHeight = 20;
 
-        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        const svg = createSvgElement("svg");
         svg.classList.add("ct-chart-line");
         svg.setAttribute("width", `${svgWidth}px`);
         svg.setAttribute("height", `${svgHeight}px`);
         legendRow.appendChild(svg);
 
-        const svgGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        const svgGroup = createSvgElement("g");
         svgGroup.classList.add("ct-series");
         svgGroup.classList.add(`team-${teamIdx + 1}`);
         svg.appendChild(svgGroup);
@@ -179,12 +179,12 @@ export function createLineChartOfMoneyOverTime(divForLineChart: HTMLDivElement, 
         const xCenter = svgWidth / 2;
         const yCenter = svgHeight / 2;
 
-        const svgPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        const svgPath = createSvgElement("path");
         svgPath.classList.add("ct-line");
         svgPath.setAttribute("d", `M0,${yCenter} L${svgWidth},${yCenter}`);
         svgGroup.appendChild(svgPath);
 
-        const point = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        const point = createSvgElement("line");
         point.classList.add("ct-point");
         point.setAttribute("x1", String(xCenter));
         point.setAttribute("x2", String(xCenter));
