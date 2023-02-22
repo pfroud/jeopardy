@@ -155,15 +155,13 @@ export class BuzzHistoryChart {
                 group.setAttribute("transform", `translate(0, ${BuzzHistoryChart.rowHeight * teamIndex})`);
                 rowsGroup.append(group);
 
-                if (teamIndex % 2 === 0) {
-                    const shadedBackground = createSvgElement("rect");
-                    shadedBackground.classList.add("row-shaded-background");
-                    shadedBackground.setAttribute("x", "0");
-                    shadedBackground.setAttribute("y", "0");
-                    shadedBackground.setAttribute("width", String(contentWidth));
-                    shadedBackground.setAttribute("height", String(BuzzHistoryChart.rowHeight));
-                    group.appendChild(shadedBackground);
-                }
+                const shadedBackground = createSvgElement("rect");
+                shadedBackground.classList.add(`row-shaded-background-${teamIndex % 2 === 0 ? "even" : "odd"}`);
+                shadedBackground.setAttribute("x", "0");
+                shadedBackground.setAttribute("y", "0");
+                shadedBackground.setAttribute("width", String(contentWidth));
+                shadedBackground.setAttribute("height", String(BuzzHistoryChart.rowHeight));
+                group.appendChild(shadedBackground);
 
                 const separatorLine = createSvgElement("line");
                 separatorLine.classList.add("row-separator");

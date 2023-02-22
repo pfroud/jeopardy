@@ -469,7 +469,6 @@ export class Operator {
 
     private hideSpecialCategoryPrompt(): void {
         this.specialCategoryPrompt.style.display = "none";
-        this.gameTimer.resume();
     }
 
     public showSpecialCategoryOverlay(): void {
@@ -499,7 +498,7 @@ export class Operator {
         this.popupBackdrop.style.display = "none";
         this.specialCategoryPopup.style.display = "none";
         this.presentation?.hideSpecialCategoryPopup();
-        this.setPaused(false);
+        this.gameTimer.resume();
     }
 
     public handleShowClueQuestion(): void {
@@ -747,6 +746,7 @@ export class Operator {
 
     public showBuzzHistory(): void {
         if (this.presentClue && this.buzzHistoryDiagram) {
+            this.gameTimer.pause();
 
             this.popupBackdrop.style.display = "block";
             this.buzzHistoryPopup.style.display = "block";
@@ -757,6 +757,7 @@ export class Operator {
     }
 
     public hideBuzzHistory(): void {
+        this.gameTimer.resume();
         this.popupBackdrop.style.display = "none";
         this.buzzHistoryPopup.style.display = "none";
     }

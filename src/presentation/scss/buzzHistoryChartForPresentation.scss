@@ -3,11 +3,13 @@ svg#buzz-history {
 
     text.team-name {
         fill: white;
+        font-size: 20px;
     }
 
     g#axis {
         text {
             fill: white;
+            font-size: 20px;
         }
 
         path.domain,
@@ -16,7 +18,11 @@ svg#buzz-history {
         }
     }
 
-    rect.row-shaded-background {
+    rect.row-shaded-background-even {
+        fill: #112266;
+    }
+
+    rect.row-shaded-background-odd {
         fill: #223388;
     }
 
