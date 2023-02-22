@@ -63,17 +63,14 @@ export class AudioManager {
        */
         const onAudioEnd = (): void => {
             if (indexToPlayNow > 0 && eventListenerToRemoveFromPreviousAudio) {
-                console.log(`removing the event listener from index ${indexToPlayNow - 1}.`);
                 allAudioElements[indexToPlayNow - 1].removeEventListener("ended", eventListenerToRemoveFromPreviousAudio);
             }
             if (indexToPlayNow < allAudioElements.length - 1) {
-                console.log(`calling playInOrderRecursiveHelper(allAudioElements, ${indexToPlayNow + 1}, onAudioEnd).`);
                 this.playInOrderRecursiveHelper(allAudioElements, indexToPlayNow + 1, onAudioEnd);
             }
         };
 
         allAudioElements[indexToPlayNow].addEventListener("ended", onAudioEnd);
-        console.log(`playing the audio at index ${indexToPlayNow}.`);
         allAudioElements[indexToPlayNow].play();
     }
 }

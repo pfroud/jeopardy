@@ -5,10 +5,12 @@
     <title>J operator</title>
     <meta charset="UTF-8">
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../../bower_components/chartist/dist/chartist.min.css">
     <link rel="stylesheet" href="scss/tabs.scss">
     <link rel="stylesheet" href="scss/progressBarForOperator.scss">
     <link rel="stylesheet" href="scss/popupForOperator.scss">
     <link rel="stylesheet" href="scss/buzzHistoryChartForOperator.scss">
+    <link rel="stylesheet" href="scss/statisticsChartForOperator.scss">
     <link rel="stylesheet" href="scss/operator.scss">
 </head>
 
@@ -52,6 +54,42 @@
         <div class="popup-title">Buzz history</div>
         <p>Press space to continue the game.</p>
         <svg id="buzz-history"></svg>
+    </div>
+
+    <div class="operator-popup" id="statistics-chart-popup" data-show-game-end-item="team-ranking-table"
+        style="display:none">
+
+        <div id="game-end-controls" style="display:none">
+            Click these buttons to change what's showing in the presentation window:<br>
+            <button id="show-team-ranking-table">Show team ranking table</button>&ensp;
+            <button id="show-money-over-time-line-chart">Show line chart of money over time</button>&ensp;
+            <button id="show-buzz-results-pie-charts">Show pie charts of buzz results</button>
+        </div>
+
+        <div id="team-ranking-wrapper"></div>
+
+        <div id="line-chart-wrapper">
+            <div id="y-axis-label">Money</div>
+            <div id="line-chart"></div>
+            <div id="line-chart-legend"></div>
+            <div id="x-axis-label">Question number</div>
+        </div>
+
+        <div id="pie-chart-wrapper">
+            <div id="pie-charts"></div>
+            <div id="pie-chart-legend">
+                <div class="pie-chart-legend-row" id="not-buzzed">
+                    <span class="color-swatch"></span> Not buzzed
+                </div>
+                <div class="pie-chart-legend-row" id="buzzed-then-answered-right">
+                    <span class="color-swatch"></span> Buzzed then answered right
+                </div>
+                <div class="pie-chart-legend-row" id="buzzed-then-answered-wrong-or-timed-out">
+                    <span class="color-swatch"></span> Buzzed then answered wrong or timed out
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <main>
@@ -119,13 +157,6 @@
                         </td>
                     </tr>
                 </table>
-            </div>
-
-            <div id="game-end-controls">
-                Click these buttons to change what's showing in the presentation window:<br>
-                <button id="show-team-ranking-table">Show team ranking table</button>&ensp;
-                <button id="show-money-over-time-line-chart">Show line chart of money over time</button>&ensp;
-                <button id="show-buzz-results-pie-charts">Show pie charts of buzz results</button>
             </div>
 
             <div id="special-category-prompt" style="display:none">

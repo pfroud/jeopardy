@@ -261,10 +261,22 @@ export class Operator {
             window.open("../stateMachineViewer", "windowStateMachineViewer", "popup")
         );
 
+        const statisticsPopup = querySelectorAndCheck(document, "div#statistics-chart-popup");
         const gameEndControls = querySelectorAndCheck(document, "div#game-end-controls");
-        querySelectorAndCheck(gameEndControls, "button#show-team-ranking-table").addEventListener("click", () => this.presentation?.showSlide("slide-gameEnd-team-ranking-table"));
-        querySelectorAndCheck(gameEndControls, "button#show-money-over-time-line-chart").addEventListener("click", () => this.presentation?.showSlide("slide-gameEnd-line-chart"));
-        querySelectorAndCheck(gameEndControls, "button#show-buzz-results-pie-charts").addEventListener("click", () => this.presentation?.showSlide("slide-gameEnd-pie-charts"));
+        querySelectorAndCheck(gameEndControls, "button#show-team-ranking-table").addEventListener("click", () => {
+            this.presentation?.showSlide("slide-gameEnd-team-ranking-table");
+            statisticsPopup.setAttribute("data-show-game-end-item", "team-ranking-table");
+        });
+
+        querySelectorAndCheck(gameEndControls, "button#show-money-over-time-line-chart").addEventListener("click", () => {
+            this.presentation?.showSlide("slide-gameEnd-line-chart");
+            statisticsPopup.setAttribute("data-show-game-end-item", "line-chart");
+        });
+
+        querySelectorAndCheck(gameEndControls, "button#show-buzz-results-pie-charts").addEventListener("click", () => {
+            this.presentation?.showSlide("slide-gameEnd-pie-charts");
+            statisticsPopup.setAttribute("data-show-game-end-item", "pie-charts");
+        });
     }
 
     private startGame(): void {
@@ -490,12 +502,12 @@ export class Operator {
         }
 
         this.specialCategoryPopup.style.display = "block";
-        this.popupBackdrop.style.display = "block";
+        this.showPopupBackdrop();
 
     }
 
     public hideSpecialCategoryOverlay(): void {
-        this.popupBackdrop.style.display = "none";
+        this.hidePopupBackdrop();
         this.specialCategoryPopup.style.display = "none";
         this.presentation?.hideSpecialCategoryPopup();
         this.gameTimer.resume();
@@ -705,17 +717,34 @@ export class Operator {
             this.audioManager.musicGameEnd
         );
 
-        querySelectorAndCheck<HTMLDivElement>(document, "div#game-end-controls").style.display = "block";
-
-        this.createTeamRankingTable();
         this.presentation?.hideHeaderAndFooter();
-        if (this.presentation && this.teamArray) {
-            createPieCharts(this, this.presentation.getDivForPieCharts(), this.teamArray);
-            createLineChartOfMoneyOverTime(this.presentation.getDivForLineChart(), this.presentation.getDivForLineChartLegend(), this.teamArray);
+
+        this.showPopupBackdrop();
+        querySelectorAndCheck<HTMLDivElement>(document, "div#game-end-controls").style.display = "block";
+        querySelectorAndCheck<HTMLDivElement>(document, "div#statistics-chart-popup").style.display = "block";
+
+        const teamRankingTableHtml = this.getTeamRankingTableHtml();
+        querySelectorAndCheck(document, "div#team-ranking-wrapper").innerHTML = teamRankingTableHtml;
+        this.presentation?.setTeamRankingHtml(teamRankingTableHtml);
+
+        if (this.teamArray) {
+
+            createPieCharts(this, querySelectorAndCheck(document, "div#pie-charts"), this.teamArray);
+
+            createLineChartOfMoneyOverTime(
+                querySelectorAndCheck(document, "div#line-chart"),
+                querySelectorAndCheck(document, "div#line-chart-legend"),
+                this.teamArray
+            );
+
+            if (this.presentation) {
+                createPieCharts(this, this.presentation.getDivForPieCharts(), this.teamArray);
+                createLineChartOfMoneyOverTime(this.presentation.getDivForLineChart(), this.presentation.getDivForLineChartLegend(), this.teamArray);
+            }
         }
     }
 
-    private createTeamRankingTable(): void {
+    private getTeamRankingTableHtml(): string {
         if (!this.teamArray) {
             throw new Error("called createTeamRankingTable() when teamArray is undefined");
         }
@@ -741,14 +770,14 @@ export class Operator {
 
         html.push("</tbody></table>");
 
-        this.presentation?.setTeamRankingHtml(html.join(""));
+        return html.join("");
     }
 
     public showBuzzHistory(): void {
         if (this.presentClue && this.buzzHistoryDiagram) {
             this.gameTimer.pause();
 
-            this.popupBackdrop.style.display = "block";
+            this.showPopupBackdrop();
             this.buzzHistoryPopup.style.display = "block";
 
             this.buzzHistoryDiagram.setHistory(this.presentClue.buzzHistory);
@@ -756,9 +785,18 @@ export class Operator {
         }
     }
 
+    private showPopupBackdrop(): void {
+        this.popupBackdrop.style.display = "block";
+    }
+
+    private hidePopupBackdrop(): void {
+        this.popupBackdrop.style.display = "none";
+    }
+
+
     public hideBuzzHistory(): void {
         this.gameTimer.resume();
-        this.popupBackdrop.style.display = "none";
+        this.hidePopupBackdrop();
         this.buzzHistoryPopup.style.display = "none";
     }
 

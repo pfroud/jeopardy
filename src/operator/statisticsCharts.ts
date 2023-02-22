@@ -94,7 +94,7 @@ export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElem
         const needToManuallyMoveLabel = seriesToPotentiallyAdd.map(obj => obj.value).some(n => n === questionCount);
         if (needToManuallyMoveLabel) {
             pieChart.on("created", () => {
-                const svgCreatedByChartist = querySelectorSVGAndCheck(document, "svg");
+                const svgCreatedByChartist = querySelectorSVGAndCheck(containerForTeamPieChart, "svg");
                 querySelectorSVGAndCheck(svgCreatedByChartist, "text").setAttribute("dy", "20");
             });
         }

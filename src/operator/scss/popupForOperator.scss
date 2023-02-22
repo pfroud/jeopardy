@@ -23,6 +23,71 @@ div.operator-popup {
         font-size: 60px;
     }
 
+    &#statistics-chart-popup {
+        background: white;
+        width: 85%;
+
+        div#game-end-controls {
+            margin-bottom: 40px;
+        }
+
+        div#team-ranking-wrapper table {
+
+            td {
+                font-size: 40px;
+                padding-right: 60px;
+
+                &:nth-of-type(2) {
+                    text-align: right;
+                }
+            }
+
+        }
+
+        &[data-show-game-end-item="team-ranking-table"] {
+            div#team-ranking-wrapper {
+                display: block;
+            }
+
+            div#line-chart-wrapper {
+                display: none;
+            }
+
+            div#pie-chart-wrapper {
+                display: none;
+            }
+        }
+
+        &[data-show-game-end-item="line-chart"] {
+            div#team-ranking-wrapper {
+                display: none;
+            }
+
+            div#line-chart-wrapper {
+                display: block;
+            }
+
+            div#pie-chart-wrapper {
+                display: none;
+            }
+        }
+
+        &[data-show-game-end-item="pie-charts"] {
+            div#team-ranking-wrapper {
+                display: none;
+            }
+
+            div#line-chart-wrapper {
+                display: none;
+            }
+
+            div#pie-chart-wrapper {
+                display: block;
+            }
+        }
+
+    }
+
     &#buzz-history-chart-popup {
         background: lightblue;
 

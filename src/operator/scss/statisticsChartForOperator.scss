@@ -5,7 +5,7 @@ or
 "bower_components/chartist/dist/chartist.min.css"
 */
 
-div.presentation-slide#slide-gameEnd-pie-charts {
+div#statistics-chart-popup div#pie-chart-wrapper {
     div#pie-charts {
         // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout
         display: grid;
@@ -14,15 +14,18 @@ div.presentation-slide#slide-gameEnd-pie-charts {
         div.team-pie-chart {
             padding: 10px;
             position: relative;
+            text-align: center;
 
             svg.ct-chart-donut {
                 g.ct-series {
                     &.not-buzzed path.ct-slice-donut {
                         stroke: gray;
                     }
+
                     &.buzzed-then-answered-right path.ct-slice-donut {
                         stroke: green;
                     }
+
                     &.buzzed-then-answered-wrong-or-timed-out path.ct-slice-donut {
                         stroke: red;
                     }
@@ -63,9 +66,11 @@ div.presentation-slide#slide-gameEnd-pie-charts {
             &#not-buzzed span.color-swatch {
                 background-color: gray;
             }
+
             &#buzzed-then-answered-right span.color-swatch {
                 background-color: green;
             }
+
             &#buzzed-then-answered-wrong-or-timed-out span.color-swatch {
                 background-color: red;
             }
@@ -73,16 +78,20 @@ div.presentation-slide#slide-gameEnd-pie-charts {
     }
 }
 
-div#slide-gameEnd-line-chart {
+div#statistics-chart-popup div#line-chart-wrapper {
     g.ct-series {
-        $series-colors: red, orange, green, gray;
+        $series-colors: red,
+        orange,
+        green,
+        gray;
         $team-count: 8;
 
         @for $i from 0 to $team-count {
             &.team-#{$i + 1} {
-                stroke: nth($series-colors, ($i % length($series-colors)) + 1);
+                $indexStartingAtOne: ($i % length($series-colors))+1;
+                stroke: nth($series-colors, $indexStartingAtOne);
 
-                @if $i >= length($series-colors) {
+                @if $i >=length($series-colors) {
                     stroke-dasharray: 5;
                     stroke-linecap: butt;
                 }
@@ -96,10 +105,11 @@ div#slide-gameEnd-line-chart {
 
         svg.ct-chart-line {
             g.ct-grids line {
-                stroke: #ffffff88;
+                stroke: gray;
             }
+
             g.ct-labels span {
-                color: white;
+                color: black;
             }
         }
     }
