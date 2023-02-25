@@ -1,4 +1,4 @@
-import { querySelectorAndCheck } from "../common";
+import { querySelectorAndCheck } from "./common";
 
 export class AudioManager {
     /*

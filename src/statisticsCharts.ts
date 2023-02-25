@@ -1,7 +1,7 @@
 import * as Chartist from "chartist";
-import { createSvgElement, querySelectorSVGAndCheck } from "../common";
-import { Team } from "../Team";
-import { Operator } from "./Operator";
+import { createSvgElement, querySelectorSVGAndCheck } from "./common";
+import { Team } from "./Team";
+import { Operator } from "./operator/Operator";
 
 export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElement, teams: Team[]): void {
 

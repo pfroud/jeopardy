@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { BuzzHistoryForClue, BuzzHistoryRecord, BuzzResult } from "./BuzzHistoryChart";
 import { Operator } from "./operator/Operator";
-import { specialCategories, SpecialCategory } from "./operator/specialCategories";
+import { specialCategories, SpecialCategory } from "./specialCategories";
 
 export class Clue {
 

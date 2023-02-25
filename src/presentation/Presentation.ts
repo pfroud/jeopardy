@@ -1,6 +1,6 @@
 import { Operator } from "../operator/Operator";
 import { Clue } from "../Clue";
-import { SpecialCategory } from "../operator/specialCategories";
+import { SpecialCategory } from "../specialCategories";
 import { querySelectorAndCheck } from "../common";
 
 export class Presentation {

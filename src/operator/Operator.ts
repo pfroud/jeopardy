@@ -6,9 +6,9 @@ import { Presentation } from "../presentation/Presentation";
 import { Settings } from "../Settings";
 import { StateMachine } from "../stateMachine/StateMachine";
 import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
-import { AudioManager } from "./AudioManager";
-import { SpecialCategory } from "./specialCategories";
-import { createLineChartOfMoneyOverTime, createPieCharts } from "./statisticsCharts";
+import { AudioManager } from "../AudioManager";
+import { SpecialCategory } from "../specialCategories";
+import { createLineChartOfMoneyOverTime, createPieCharts } from "../statisticsCharts";
 
 interface SavedGameInLocalStorage {
     readonly gameTimerRemainingMillisec: number,

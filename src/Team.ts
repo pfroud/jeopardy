@@ -1,7 +1,7 @@
 import { Clue } from "./Clue";
 import { querySelectorAndCheck } from "./common";
 import { CountdownTimer } from "./CountdownTimer";
-import { AudioManager } from "./operator/AudioManager";
+import { AudioManager } from "./AudioManager";
 import { Operator } from "./operator/Operator";
 import { Presentation } from "./presentation/Presentation";
 import { Settings } from "./Settings";

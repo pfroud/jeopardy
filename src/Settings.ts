@@ -2,10 +2,10 @@ import { querySelectorAndCheck } from "./common";
 
 export class Settings {
     // How long to show the category in big text in the presentation window
-    public displayDurationCategoryMillisec = 5 * 1000;
+    public displayDurationCategoryMillisec = 1 * 1000;
 
     // How long to show the answer in the presentation window
-    public displayDurationAnswerMillisec = 3 * 1000;
+    public displayDurationAnswerMillisec = 1 * 1000;
 
     // How long to wait for a team to buzz
     public timeoutWaitForBuzzesMillisec = 5 * 1000;
@@ -26,7 +26,7 @@ export class Settings {
     public allowMultipleAnswersToSameQuestion = true;
 
     // Stop the game when a team reaches this much money
-    public teamMoneyWhenGameShouldEnd = 10_000;
+    public teamMoneyWhenGameShouldEnd = 800;
 
     public gameTimeLimitMillisec = 10 * 60 * 1000;
 

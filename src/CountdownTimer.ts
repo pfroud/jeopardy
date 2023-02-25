@@ -1,4 +1,4 @@
-import { AudioManager } from "./operator/AudioManager";
+import { AudioManager } from "./AudioManager";
 
 export class CountdownTimer {
 
