@@ -1,7 +1,7 @@
 import { select, Selection } from "d3-selection";
 import { ScaleLinear, scaleLinear } from "d3-scale";
 import { Axis, axisBottom } from "d3-axis";
-import { zoom, D3ZoomEvent } from "d3-zoom";
+import { zoom, D3ZoomEvent, ZoomBehavior, zoomIdentity } from "d3-zoom";
 import { Team, TeamState } from "./Team";
 import { createSvgElement } from "./common";
 
@@ -87,11 +87,13 @@ export class BuzzHistoryChart {
      * For us, the domain is time (in milliseconds) and the range is screen-space pixels.
     */
     // shared between both SVGs
-    private readonly SCALE_INITIAL: ScaleLinear<number, number>;
+    private readonly SCALE_WITHOUT_ZOOM_TRANSFORM: ScaleLinear<number, number>;
     private scaleWithZoomTransform: ScaleLinear<number, number>;
     private readonly AXIS_GENERATOR: Axis<number>;
     private history: BuzzHistoryForClue | null = null;
     private readonly LOCKOUT_DURATION_MILLISEC: number;
+    private readonly ZOOM_CONTROLLER = zoom<SVGSVGElement, unknown>();
+    private readonly SVG_IN_OPERATOR_WINDOW: Selection<SVGSVGElement, unknown, null, undefined>;
 
     // one for each SVG
     private readonly X_AXIS_GROUPS = new Map<
@@ -105,8 +107,9 @@ export class BuzzHistoryChart {
     >;
 
 
-    public constructor(teams: Team[], lockoutDurationMillisec: number, svgInOperator: SVGSVGElement, svgInPresentation: SVGSVGElement) {
+    public constructor(teams: Team[], lockoutDurationMillisec: number, svgInOperatorWindow: SVGSVGElement, svgInPresentationWindow: SVGSVGElement) {
         this.LOCKOUT_DURATION_MILLISEC = lockoutDurationMillisec;
+        this.SVG_IN_OPERATOR_WINDOW = select(svgInOperatorWindow);
 
         const svgWidth = 1000;
         const svgHeight = (teams.length * BuzzHistoryChart.ROW_HEIGHT) + this.MARGIN.top + this.MARGIN.bottom + 50;
@@ -115,18 +118,18 @@ export class BuzzHistoryChart {
         const contentHeight = svgHeight - this.MARGIN.top - this.MARGIN.bottom;
 
         // the domain is set in the setHistory() function
-        this.SCALE_INITIAL = scaleLinear()
+        this.SCALE_WITHOUT_ZOOM_TRANSFORM = scaleLinear()
             .range([0, contentWidth]);
 
         // the zoomed scale is changed in the handleZoom() function
-        this.scaleWithZoomTransform = this.SCALE_INITIAL;
+        this.scaleWithZoomTransform = this.SCALE_WITHOUT_ZOOM_TRANSFORM;
 
         this.AXIS_GENERATOR = axisBottom<number>(this.scaleWithZoomTransform)
             .tickSizeOuter(0)
             .ticks(4)
             .tickFormat(n => `${n}ms`);
 
-        this.ALL_SVGS = [svgInOperator, svgInPresentation];
+        this.ALL_SVGS = [svgInOperatorWindow, svgInPresentationWindow];
         for (const theSvg of this.ALL_SVGS) {
 
             this.createLegend(theSvg);
@@ -210,7 +213,6 @@ export class BuzzHistoryChart {
             verticalLine.setAttribute("y2", String(contentHeight));
             verticalLine.setAttribute("x1", String(xPositionAtTimeZero));
             verticalLine.setAttribute("x2", String(xPositionAtTimeZero));
-            verticalLine.setAttribute("visibility", "hidden");
             groupContent.appendChild(verticalLine);
 
 
@@ -227,7 +229,7 @@ export class BuzzHistoryChart {
         */
         const handleZoom = (zoomEvent: D3ZoomEvent<SVGSVGElement, unknown>): void => {
 
-            this.scaleWithZoomTransform = zoomEvent.transform.rescaleX(this.SCALE_INITIAL);
+            this.scaleWithZoomTransform = zoomEvent.transform.rescaleX(this.SCALE_WITHOUT_ZOOM_TRANSFORM);
 
             // Change the scale which will be used by the axis generator
             this.AXIS_GENERATOR.scale(this.scaleWithZoomTransform);
@@ -238,14 +240,12 @@ export class BuzzHistoryChart {
             this.redraw();
         };
 
-        const zoomController = zoom<SVGSVGElement, unknown>()
-            .on("zoom", handleZoom);
+        this.ZOOM_CONTROLLER.on("zoom", handleZoom);
 
-        const d3SelectionOfSvgElementInOperator = select(svgInOperator);
-        zoomController(d3SelectionOfSvgElementInOperator);
+        this.ZOOM_CONTROLLER(this.SVG_IN_OPERATOR_WINDOW);
     }
 
-    public setHistory(history: BuzzHistoryForClue): void {
+    public showNewHistory(history: BuzzHistoryForClue): void {
 
         if (history.RECORDS.length === 0) {
             console.warn("array of buzz history records is empty");
@@ -279,23 +279,17 @@ export class BuzzHistoryChart {
         and the rightmost record isn't exactly on the edge
         */
         // todo add padding on the left if the min timestamp is zero
-        this.SCALE_INITIAL.domain([firstTimestamp * 1.3, lastTimestamp * 1.1]);
+        this.SCALE_WITHOUT_ZOOM_TRANSFORM.domain([firstTimestamp * 1.3, lastTimestamp * 1.1]);
 
-        // Update the scale which the axis generator will use
-        this.AXIS_GENERATOR.scale(this.scaleWithZoomTransform);
-
-        this.X_AXIS_GROUPS.forEach(xAxisGroup => this.AXIS_GENERATOR(xAxisGroup));
-
-        const xPositionAtTimeZero = this.SCALE_INITIAL(0);
-        this.VERTICAL_LINES.forEach(verticalLine => {
-            verticalLine.setAttribute("visibility", "visible");
-            verticalLine.setAttribute("x1", String(xPositionAtTimeZero));
-            verticalLine.setAttribute("x2", String(xPositionAtTimeZero));
-        });
+        /*
+        Reset the pan & zoom. Calling transform() fires a zoom event,
+        which calls the redraw() method.
+        */
+        this.ZOOM_CONTROLLER.transform(this.SVG_IN_OPERATOR_WINDOW, zoomIdentity);
 
     }
 
-    public redraw(): void {
+    private redraw(): void {
 
         const xPositionAtTimeZero = this.scaleWithZoomTransform(0);
         const lockoutBarWidth = this.scaleWithZoomTransform(this.LOCKOUT_DURATION_MILLISEC) - xPositionAtTimeZero;

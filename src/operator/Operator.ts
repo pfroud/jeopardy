@@ -500,12 +500,12 @@ export class Operator {
         }
 
         this.DIV_SPECIAL_CATEGORY_POPUP.style.display = "block";
-        this.showPopupBackdrop();
+        this.showBackdropForPopups();
 
     }
 
     public hideSpecialCategoryOverlay(): void {
-        this.hidePopupBackdrop();
+        this.hideBackdropForPopups();
         this.DIV_SPECIAL_CATEGORY_POPUP.style.display = "none";
         this.presentation?.hideSpecialCategoryPopup();
         this.GAME_TIMER.resume();
@@ -717,7 +717,7 @@ export class Operator {
 
         this.presentation?.hideHeaderAndFooter();
 
-        this.showPopupBackdrop();
+        this.showBackdropForPopups();
         querySelectorAndCheck<HTMLDivElement>(document, "div#game-end-controls").style.display = "block";
         querySelectorAndCheck<HTMLDivElement>(document, "div#statistics-chart-popup").style.display = "block";
 
@@ -775,26 +775,25 @@ export class Operator {
         if (this.presentClue && this.buzzHistoryDiagram) {
             this.GAME_TIMER.pause();
 
-            this.showPopupBackdrop();
+            this.showBackdropForPopups();
             this.DIV_BUZZ_HISTORY_PROMPT.style.display = "block";
 
-            this.buzzHistoryDiagram.setHistory(this.presentClue.BUZZ_HISTORY);
-            this.buzzHistoryDiagram.redraw();
+            this.buzzHistoryDiagram.showNewHistory(this.presentClue.BUZZ_HISTORY);
         }
     }
 
-    private showPopupBackdrop(): void {
+    private showBackdropForPopups(): void {
         this.DIV_BACKDROP_FOR_POPUPS.style.display = "block";
     }
 
-    private hidePopupBackdrop(): void {
+    private hideBackdropForPopups(): void {
         this.DIV_BACKDROP_FOR_POPUPS.style.display = "none";
     }
 
 
     public hideBuzzHistory(): void {
         this.GAME_TIMER.resume();
-        this.hidePopupBackdrop();
+        this.hideBackdropForPopups();
         this.DIV_BUZZ_HISTORY_PROMPT.style.display = "none";
     }
 
