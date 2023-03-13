@@ -6,63 +6,63 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
 
     return [
         {
-            name: "idle",
-            presentationSlideToShow: "slide-jeopardy-logo",
-            transitions: [{
-                type: "manualTrigger",
-                triggerName: "startGame",
-                destination: "getClueFromJService"
+            NAME: "idle",
+            PRESENTATION_SLIDE_TO_SHOW: "slide-jeopardy-logo",
+            TRANSITIONS: [{
+                TYPE: "manualTrigger",
+                TRIGGER_NAME: "startGame",
+                DESTINATION: "getClueFromJService"
             }],
         }, {
-            name: "getClueFromJService",
-            instructions: "Loading clue...",
-            presentationSlideToShow: "slide-spinner",
-            transitions: [{
-                type: "promise",
+            NAME: "getClueFromJService",
+            INSTRUCTIONS: "Loading clue...",
+            PRESENTATION_SLIDE_TO_SHOW: "slide-spinner",
+            TRANSITIONS: [{
+                TYPE: "promise",
                 /*
                 The promise only tells the state machine when to go to the next state.
                 The promise does NOT pass the clue object to the state machine.
                 The clue object is only stored by the operator.
                 */
-                functionToGetPromise: operator.getClueFromJService.bind(operator),
-                destination: "showClueCategoryAndValue"
+                FUNCTION_TO_GER_PROMISE: operator.getClueFromJService.bind(operator),
+                DESTINATION: "showClueCategoryAndValue"
             }],
         }, {
             /*
             The category and dollar value are shown on in big text the center of the
             presentation window for a fixed amount of time.
             */
-            name: "showClueCategoryAndValue",
-            instructions: "Read aloud the category and dollar value.",
-            presentationSlideToShow: "slide-clue-category-and-value",
-            transitions: [{
-                type: "timeout",
-                initialDuration: settings.displayDurationCategoryMillisec,
-                behavior: CountdownBehavior.ContinueTimerUntilManuallyReset,
-                destination: "showClueQuestion",
+            NAME: "showClueCategoryAndValue",
+            INSTRUCTIONS: "Read aloud the category and dollar value.",
+            PRESENTATION_SLIDE_TO_SHOW: "slide-clue-category-and-value",
+            TRANSITIONS: [{
+                TYPE: "timeout",
+                INITIAL_DURATION: settings.displayDurationCategoryMillisec,
+                BEHAVIOR: CountdownBehavior.ContinueTimerUntilManuallyReset,
+                DESTINATION: "showClueQuestion",
                 /*
                 Don't put this as onEnter of the showClueQuestion state because it does
                 a bunch of stuff and would get called every time lockout happens
                 */
-                onTransition: operator.handleShowClueQuestion.bind(operator)
+                ON_TRANSITION: operator.handleShowClueQuestion.bind(operator)
             }, {
-                type: "keyboard",
-                keyboardKeys: " ", //space
-                destination: "showMessageForSpecialCategory",
-                guardCondition: operator.isCurrentClueSpecialCategory.bind(operator)
+                TYPE: "keyboard",
+                KEYBOARD_KEYS: " ", //space
+                DESTINATION: "showMessageForSpecialCategory",
+                GUARD_CONDITION: operator.isCurrentClueSpecialCategory.bind(operator)
             }],
         }, {
             /*
             The game is paused to display an information message about a Jeopardy category
             with special meaning (quotation marks, before & after, etc).
             */
-            name: "showMessageForSpecialCategory",
-            onEnter: operator.showSpecialCategoryOverlay.bind(operator),
-            onExit: operator.hideSpecialCategoryOverlay.bind(operator),
-            transitions: [{
-                type: "keyboard",
-                keyboardKeys: " ", //space
-                destination: "showClueCategoryAndValue"
+            NAME: "showMessageForSpecialCategory",
+            ON_ENTER: operator.showSpecialCategoryOverlay.bind(operator),
+            ON_EXIT: operator.hideSpecialCategoryOverlay.bind(operator),
+            TRANSITIONS: [{
+                TYPE: "keyboard",
+                KEYBOARD_KEYS: " ", //space
+                DESTINATION: "showClueCategoryAndValue"
             }]
         }, {
             /*
@@ -70,82 +70,82 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             game is supposed to read the question out loud and press space when done reading it.
             Also the category and dollar value are shown on the presentation header.
             */
-            name: "showClueQuestion",
-            instructions: "Read the question out loud. Buzzers open when you press space.",
-            presentationSlideToShow: "slide-clue-question",
-            onEnter: operator.fitClueQuestionToScreenInOperatorWindow.bind(operator),
-            transitions: [{
-                type: "keyboard",
-                keyboardKeys: " ", //space
-                destination: "waitForBuzzes",
+            NAME: "showClueQuestion",
+            INSTRUCTIONS: "Read the question out loud. Buzzers open when you press space.",
+            PRESENTATION_SLIDE_TO_SHOW: "slide-clue-question",
+            ON_ENTER: operator.fitClueQuestionToScreenInOperatorWindow.bind(operator),
+            TRANSITIONS: [{
+                TYPE: "keyboard",
+                KEYBOARD_KEYS: " ", //space
+                DESTINATION: "waitForBuzzes",
                 /*
                 Don't put this function as the onEnter for the waitForBuzzes state
                 because there are two other ways to enter the waitForBuzzes state.
                 */
-                onTransition: operator.handleDoneReadingClueQuestion.bind(operator)
+                ON_TRANSITION: operator.handleDoneReadingClueQuestion.bind(operator)
             }, {
-                type: "keyboard",
-                keyboardKeys: "123456789",
-                destination: "showClueQuestion",
-                onTransition: operator.handleLockout.bind(operator)
+                TYPE: "keyboard",
+                KEYBOARD_KEYS: "123456789",
+                DESTINATION: "showClueQuestion",
+                ON_TRANSITION: operator.handleLockout.bind(operator)
             }],
         }, {
             /*
             The operator has finished reading the clue question, people can press the buzzer now.
             */
-            name: "waitForBuzzes",
-            instructions: "Wait for people to answer.",
-            transitions: [{
-                type: "keyboard",
-                keyboardKeys: "123456789",
-                destination: "waitForTeamAnswer",
-                guardCondition: operator.canTeamBuzz.bind(operator)
+            NAME: "waitForBuzzes",
+            INSTRUCTIONS: "Wait for people to answer.",
+            TRANSITIONS: [{
+                TYPE: "keyboard",
+                KEYBOARD_KEYS: "123456789",
+                DESTINATION: "waitForTeamAnswer",
+                GUARD_CONDITION: operator.canTeamBuzz.bind(operator)
             }, {
-                type: "timeout",
-                destination: "showAnswer",
-                initialDuration: settings.timeoutWaitForBuzzesMillisec,
-                behavior: CountdownBehavior.ContinueTimerUntilManuallyReset,
-                onTransition: operator.playSoundQuestionTimeout.bind(operator)
+                TYPE: "timeout",
+                DESTINATION: "showAnswer",
+                INITIAL_DURATION: settings.timeoutWaitForBuzzesMillisec,
+                BEHAVIOR: CountdownBehavior.ContinueTimerUntilManuallyReset,
+                ON_TRANSITION: operator.playSoundQuestionTimeout.bind(operator)
             }],
         }, {
             /*
             A team has pressed the buzzer, now we are waiting for them to say their answer.
             */
-            name: "waitForTeamAnswer",
-            instructions: "Did they answer correctly? y / n",
-            onEnter: operator.startAnswer.bind(operator),
-            transitions: [{
-                type: "keyboard",
-                keyboardKeys: "y",
-                destination: "showAnswer",
-                onTransition: operator.handleAnswerCorrect.bind(operator)
+            NAME: "waitForTeamAnswer",
+            INSTRUCTIONS: "Did they answer correctly? y / n",
+            ON_ENTER: operator.startAnswer.bind(operator),
+            TRANSITIONS: [{
+                TYPE: "keyboard",
+                KEYBOARD_KEYS: "y",
+                DESTINATION: "showAnswer",
+                ON_TRANSITION: operator.handleAnswerCorrect.bind(operator)
             }, {
-                type: "keyboard",
-                keyboardKeys: "n",
-                destination: "answerWrongOrTimeout"
+                TYPE: "keyboard",
+                KEYBOARD_KEYS: "n",
+                DESTINATION: "answerWrongOrTimeout"
             }, {
-                type: "timeout",
-                initialDuration: settings.timeoutWaitForAnswerMillisec,
-                behavior: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
-                isWaitingForTeamToAnswerAfterBuzz: true,
-                destination: "answerWrongOrTimeout"
+                TYPE: "timeout",
+                INITIAL_DURATION: settings.timeoutWaitForAnswerMillisec,
+                BEHAVIOR: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
+                IS_WAITING_FOR_TEAM_TO_ANSWER_AFTER_BUZZ: true,
+                DESTINATION: "answerWrongOrTimeout"
             }],
         },
         {
-            name: "answerWrongOrTimeout",
-            onEnter: operator.handleAnswerWrongOrTimeout.bind(operator),
-            transitions: [{
-                type: "if",
-                condition: operator.haveAllTeamsAnswered.bind(operator),
-                then: { destination: "showAnswer" },
-                else: { destination: "waitForBuzzes" }
+            NAME: "answerWrongOrTimeout",
+            ON_ENTER: operator.handleAnswerWrongOrTimeout.bind(operator),
+            TRANSITIONS: [{
+                TYPE: "if",
+                CONDITION: operator.haveAllTeamsAnswered.bind(operator),
+                THEN: { DESTINATION: "showAnswer" },
+                ELSE: { DESTINATION: "waitForBuzzes" }
             }],
         }, {
-            name: "showAnswer",
-            instructions: "Let people read the answer. Press space to continue.",
-            onEnter: operator.handleShowAnswer.bind(operator),
-            presentationSlideToShow: "slide-clue-answer",
-            transitions: [
+            NAME: "showAnswer",
+            INSTRUCTIONS: "Let people read the answer. Press space to continue.",
+            ON_ENTER: operator.handleShowAnswer.bind(operator),
+            PRESENTATION_SLIDE_TO_SHOW: "slide-clue-answer",
+            TRANSITIONS: [
                 /*
                 {
                 type: "timeout",
@@ -155,39 +155,39 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             }
             */
                 {
-                    type: "keyboard",
-                    keyboardKeys: " ", //space
-                    destination: "showBuzzHistory"
+                    TYPE: "keyboard",
+                    KEYBOARD_KEYS: " ", //space
+                    DESTINATION: "showBuzzHistory"
                 }
             ],
         }, {
-            name: "showBuzzHistory",
-            instructions: "The buzz history is showing. Press space to continue.",
-            onEnter: operator.showBuzzHistory.bind(operator),
-            onExit: operator.hideBuzzHistory.bind(operator),
-            presentationSlideToShow: "slide-buzz-history-chart",
-            transitions: [{
-                type: "keyboard",
-                keyboardKeys: " ", //space
-                destination: "checkGameEnd"
+            NAME: "showBuzzHistory",
+            INSTRUCTIONS: "The buzz history is showing. Press space to continue.",
+            ON_ENTER: operator.showBuzzHistory.bind(operator),
+            ON_EXIT: operator.hideBuzzHistory.bind(operator),
+            PRESENTATION_SLIDE_TO_SHOW: "slide-buzz-history-chart",
+            TRANSITIONS: [{
+                TYPE: "keyboard",
+                KEYBOARD_KEYS: " ", //space
+                DESTINATION: "checkGameEnd"
             }]
         }, {
-            name: "checkGameEnd",
-            transitions: [{
-                type: "if",
-                condition: operator.shouldGameEnd.bind(operator),
-                then: { destination: "gameEnd" },
-                else: { destination: "getClueFromJService" }
+            NAME: "checkGameEnd",
+            TRANSITIONS: [{
+                TYPE: "if",
+                CONDITION: operator.shouldGameEnd.bind(operator),
+                THEN: { DESTINATION: "gameEnd" },
+                ELSE: { DESTINATION: "getClueFromJService" }
             }],
         }, {
-            name: "gameEnd",
-            instructions: "Game over",
-            presentationSlideToShow: "slide-gameEnd-team-ranking-table",
-            onEnter: operator.handleGameEnd.bind(operator),
-            transitions: [{
-                type: "manualTrigger",
-                triggerName: "reset",
-                destination: "idle"
+            NAME: "gameEnd",
+            INSTRUCTIONS: "Game over",
+            PRESENTATION_SLIDE_TO_SHOW: "slide-gameEnd-team-ranking-table",
+            ON_ENTER: operator.handleGameEnd.bind(operator),
+            TRANSITIONS: [{
+                TYPE: "manualTrigger",
+                TRIGGER_NAME: "reset",
+                DESTINATION: "idle"
             }],
         }
     ];

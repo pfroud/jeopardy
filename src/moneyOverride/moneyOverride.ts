@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // create text showing the team name
         const tdTeamName = document.createElement("td");
         tdTeamName.classList.add("team-name");
-        tdTeamName.innerHTML = team.teamName;
+        tdTeamName.innerHTML = team.TEAM_NAME;
         tableRowForTeam.appendChild(tdTeamName);
 
         // create buttons to subtract money

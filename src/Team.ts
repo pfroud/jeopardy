@@ -24,47 +24,47 @@ export type TeamState =
     ;
 
 export interface TeamSavedInLocalStorage {
-    readonly money: number;
-    readonly statistics: Statistics;
+    readonly MONEY: number;
+    readonly STATISTICS: Statistics;
 }
 
 export class Team {
-    public readonly teamName: string;
+    public readonly TEAM_NAME: string;
 
     private money = 0;
     private countdownDotsInPresentationWindow?: HTMLTableElement;
-    private readonly settings: Settings;
-    private readonly audioManager: AudioManager;
-    private readonly presentation: Presentation;
-    private readonly operator: Operator;
-    private readonly teamIdx: number;
+    private readonly SETTINGS: Settings;
+    private readonly AUDIO_MANAGER: AudioManager;
+    private readonly PRESENTATION: Presentation;
+    private readonly OPERATOR: Operator;
+    private readonly TEAM_INDEX: number;
     /** One countdown timer used to keep track of all timing for this Team */
     private countdownTimer?: CountdownTimer | null;
     private state: TeamState;
     private stateBeforeLockout?: TeamState | null;
     private progressElementInPresentationWindow?: HTMLProgressElement;
     private progressElementInOperatorWindow?: HTMLProgressElement;
-    private readonly div: {
-        readonly operator: {
+    private readonly DIV: {
+        readonly OPERATOR: {
             wrapper: HTMLDivElement | null;
             money: HTMLDivElement | null;
             teamName: HTMLDivElement | null;
             state: HTMLDivElement | null;
         };
-        readonly presentation: {
+        readonly PRESENTATION: {
             wrapper: HTMLDivElement | null;
             money: HTMLDivElement | null;
             teamName: HTMLDivElement | null;
             buzzerShow: HTMLDivElement | null;
         };
     } = {
-            operator: {
+            OPERATOR: {
                 wrapper: null,
                 money: null,
                 teamName: null,
                 state: null
             },
-            presentation: {
+            PRESENTATION: {
                 wrapper: null,
                 money: null,
                 teamName: null,
@@ -81,12 +81,13 @@ export class Team {
     };
 
     public constructor(teamIdx: number, operator: Operator, presentation: Presentation, settings: Settings, audioManager: AudioManager) {
-        this.settings = settings;
-        this.audioManager = audioManager;
-        this.teamIdx = teamIdx;
-        this.presentation = presentation;
-        this.operator = operator;
-        this.teamName = `Team ${teamIdx + 1}`;
+        this.SETTINGS = settings;
+        this.AUDIO_MANAGER = audioManager;
+        this.TEAM_INDEX = teamIdx;
+        this.PRESENTATION = presentation;
+        this.OPERATOR = operator;
+
+
 
         this.createElementsInOperatorWindow();
         this.createElementsInPresentationWindow();
@@ -98,17 +99,17 @@ export class Team {
 
     public handleAnswerCorrect(clue: Clue): void {
         this.stopAnswer();
-        this.audioManager.answerCorrect.play();
-        this.moneyAdd(clue.value);
+        this.AUDIO_MANAGER.ANSWER_CORRECT.play();
+        this.moneyAdd(clue.VALUE);
         this.statistics.questionsBuzzedThenAnsweredRight++;
         this.hasBuzzedForCurrentQuestion = true;
     }
 
     public handleAnswerIncorrectOrAnswerTimeout(clue: Clue): void {
         this.stopAnswer();
-        this.audioManager.answerIncorrectOrAnswerTimeout.play();
-        this.moneySubtract(clue.value * this.settings.wrongAnswerPenaltyMultiplier);
-        this.setState(this.settings.allowMultipleAnswersToSameQuestion ? "can-answer" : "already-answered-this-clue");
+        this.AUDIO_MANAGER.ANSWER_WRONG_OR_ANSWER_TIMEOUT.play();
+        this.moneySubtract(clue.VALUE * this.SETTINGS.wrongAnswerPenaltyMultiplier);
+        this.setState(this.SETTINGS.allowMultipleAnswersToSameQuestion ? "can-answer" : "already-answered-this-clue");
         this.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut++;
         this.hasBuzzedForCurrentQuestion = true;
     }
@@ -182,21 +183,21 @@ export class Team {
     }
 
     private updateMoneyDisplay(): void {
-        if (this.div.presentation.money) {
-            this.div.presentation.money.innerHTML = "$" + this.money.toLocaleString();
+        if (this.DIV.PRESENTATION.money) {
+            this.DIV.PRESENTATION.money.innerHTML = "$" + this.money.toLocaleString();
         }
-        if (this.div.operator.money) {
-            this.div.operator.money.innerHTML = "$" + this.money.toLocaleString();
+        if (this.DIV.OPERATOR.money) {
+            this.DIV.OPERATOR.money.innerHTML = "$" + this.money.toLocaleString();
         }
     }
 
     private createElementsInPresentationWindow(): void {
-        const divTeam = this.div.presentation.wrapper = document.createElement("div");
+        const divTeam = this.DIV.PRESENTATION.wrapper = document.createElement("div");
         divTeam.classList.add("team");
-        divTeam.setAttribute("data-team-index", String(this.teamIdx));
+        divTeam.setAttribute("data-team-index", String(this.TEAM_INDEX));
         divTeam.setAttribute("data-team-state", "");
 
-        const divBuzzerDisplay = this.div.presentation.buzzerShow = document.createElement("div");
+        const divBuzzerDisplay = this.DIV.PRESENTATION.buzzerShow = document.createElement("div");
         divBuzzerDisplay.classList.add("buzzer-show");
         divBuzzerDisplay.classList.add("not-pressed");
 
@@ -237,41 +238,41 @@ export class Team {
 
         divTeam.append(tableCountdownDots);
 
-        const divMoney = this.div.presentation.money = document.createElement("div");
+        const divMoney = this.DIV.PRESENTATION.money = document.createElement("div");
         divMoney.classList.add("team-money");
         divMoney.innerHTML = `$${this.money}`;
         divTeam.append(divMoney);
 
-        const divName = this.div.presentation.teamName = document.createElement("div");
+        const divName = this.DIV.PRESENTATION.teamName = document.createElement("div");
         divName.classList.add("team-name");
-        divName.innerHTML = this.teamName;
+        divName.innerHTML = this.TEAM_NAME;
         divTeam.append(divName);
 
         const progress = this.progressElementInPresentationWindow = document.createElement("progress");
         progress.style.display = "none";
         divTeam.append(progress);
 
-        this.presentation.appendTeamDivToFooter(divTeam);
+        this.PRESENTATION.appendTeamDivToFooter(divTeam);
 
     }
 
     private createElementsInOperatorWindow(): void {
-        const divTeam = this.div.operator.wrapper = document.createElement("div");
+        const divTeam = this.DIV.OPERATOR.wrapper = document.createElement("div");
         divTeam.classList.add("team");
-        divTeam.setAttribute("data-team-index", String(this.teamIdx));
+        divTeam.setAttribute("data-team-index", String(this.TEAM_INDEX));
         divTeam.setAttribute("data-team-state", "");
 
-        const divName = this.div.operator.teamName = document.createElement("div");
+        const divName = this.DIV.OPERATOR.teamName = document.createElement("div");
         divName.classList.add("team-name");
-        divName.innerHTML = this.teamName;
+        divName.innerHTML = this.TEAM_NAME;
         divTeam.append(divName);
 
-        const divState = this.div.operator.state = document.createElement("div");
+        const divState = this.DIV.OPERATOR.state = document.createElement("div");
         divState.classList.add("team-state");
         divState.innerHTML = this.state;
         divTeam.append(divState);
 
-        const divMoney = this.div.operator.money = document.createElement("div");
+        const divMoney = this.DIV.OPERATOR.money = document.createElement("div");
         divMoney.classList.add("team-money");
         divMoney.innerHTML = `$${this.money}`;
         divTeam.append(divMoney);
@@ -290,11 +291,11 @@ export class Team {
             this.stateBeforeLockout = targetState;
         } else {
             this.state = targetState;
-            this.div.operator.wrapper?.setAttribute("data-team-state", targetState);
-            this.div.presentation.wrapper?.setAttribute("data-team-state", targetState);
+            this.DIV.OPERATOR.wrapper?.setAttribute("data-team-state", targetState);
+            this.DIV.PRESENTATION.wrapper?.setAttribute("data-team-state", targetState);
 
-            if (this.div.operator.state) {
-                this.div.operator.state.innerHTML = targetState;
+            if (this.DIV.OPERATOR.state) {
+                this.DIV.OPERATOR.state.innerHTML = targetState;
             }
 
             if (this.countdownTimer) {
@@ -312,7 +313,7 @@ export class Team {
         this.stateBeforeLockout = this.state;
         this.setState("lockout");
 
-        const countdownShowCategory = this.countdownTimer = new CountdownTimer(this.settings.durationLockoutMillisec);
+        const countdownShowCategory = this.countdownTimer = new CountdownTimer(this.SETTINGS.durationLockoutMillisec);
         if (this.progressElementInPresentationWindow) {
             countdownShowCategory.addProgressElement(this.progressElementInPresentationWindow);
             this.progressElementInPresentationWindow.style.display = ""; //show it by removing "display=none"
@@ -347,7 +348,7 @@ export class Team {
             this.progressElementInOperatorWindow.style.display = "none";
         }
 
-        const timer = this.operator.getStateMachine()?.getCountdownTimerForState("waitForTeamAnswer");
+        const timer = this.OPERATOR.getStateMachine()?.getCountdownTimerForState("waitForTeamAnswer");
 
         if (this.countdownDotsInPresentationWindow) {
             timer?.removeDotsTable(this.countdownDotsInPresentationWindow);
@@ -358,13 +359,13 @@ export class Team {
     }
 
     public showKeyDown(): void {
-        this.div.presentation.buzzerShow?.classList.add("pressed");
-        this.div.presentation.buzzerShow?.classList.remove("not-pressed");
+        this.DIV.PRESENTATION.buzzerShow?.classList.add("pressed");
+        this.DIV.PRESENTATION.buzzerShow?.classList.remove("not-pressed");
     }
 
     public showKeyUp(): void {
-        this.div.presentation.buzzerShow?.classList.add("not-pressed");
-        this.div.presentation.buzzerShow?.classList.remove("pressed");
+        this.DIV.PRESENTATION.buzzerShow?.classList.add("not-pressed");
+        this.DIV.PRESENTATION.buzzerShow?.classList.remove("pressed");
     }
 
     public getCountdownDotsInPresentationWindow(): HTMLTableElement | undefined {
@@ -389,18 +390,18 @@ export class Team {
 
     public getObjectToSaveInLocalStorage(): TeamSavedInLocalStorage {
         return {
-            money: this.money,
-            statistics: this.statistics
+            MONEY: this.money,
+            STATISTICS: this.statistics
         };
     }
 
     public loadFromLocalStorage(source: TeamSavedInLocalStorage): void {
-        this.moneySet(source.money, false);
-        this.statistics = source.statistics;
+        this.moneySet(source.MONEY, false);
+        this.statistics = source.STATISTICS;
     }
 
     public getTeamIndex(): number {
-        return this.teamIdx;
+        return this.TEAM_INDEX;
     }
 
 

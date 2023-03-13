@@ -11,44 +11,44 @@ import { CountdownBehavior, StateMachineState, TimeoutTransition } from "./types
 
 export class StateMachine {
     private readonly DEBUG = false;
-    private readonly operator: Operator;
-    private readonly audioManager: AudioManager;
-    private readonly presentation: Presentation;
-    private readonly operatorWindowCountdownProgress: HTMLProgressElement;
-    private readonly operatorWindowCountdownText: HTMLDivElement;
-    private readonly operatorWindowDivStateName: HTMLDivElement;
-    private readonly stateMap: { [stateName: string]: StateMachineState } = {};
+    private readonly OPERATOR: Operator;
+    private readonly AUDIO_MANAGER: AudioManager;
+    private readonly PRESENTATION: Presentation;
+    private readonly OPERATOR_WINDOW_COUNTDOWN_PROGRESS: HTMLProgressElement;
+    private readonly OPERATOR_WINDOW_COUNTDOWN_TEXT: HTMLDivElement;
+    private readonly OPERATOR_WINDOW_DIV_STATE_NAME: HTMLDivElement;
+    private readonly STATE_MAP: { [stateName: string]: StateMachineState } = {};
     /**
      * Keep track of countdown timer going out of the state. In other words
      * it is the countdown timer that starts when you enter the state.
      */
-    private readonly countdownTimerLeavingState: { [stateName: string]: CountdownTimer } = {};
-    private readonly allStates: StateMachineState[];
-    private readonly tableOfAllCountdownTimers: HTMLTableElement;
+    private readonly COUNTDOWN_TIMER_LEAVING_STATE: { [stateName: string]: CountdownTimer } = {};
+    private readonly ALL_STATES: StateMachineState[];
+    private readonly TABLE_OF_ALL_COUNTDOWN_TIMERS: HTMLTableElement;
     private stateMachineViewer?: StateMachineViewer;
     private presentState: StateMachineState;
 
     public constructor(settings: Settings, operator: Operator, presentation: Presentation, audioManager: AudioManager) {
-        this.operator = operator;
-        this.presentation = presentation;
-        this.audioManager = audioManager;
+        this.OPERATOR = operator;
+        this.PRESENTATION = presentation;
+        this.AUDIO_MANAGER = audioManager;
 
-        this.operatorWindowCountdownProgress = querySelectorAndCheck(document, "div#state-machine-viz progress");
-        this.operatorWindowCountdownText = querySelectorAndCheck(document, "div#state-machine-viz div.remaining-time-text");
-        this.operatorWindowDivStateName = querySelectorAndCheck(document, "div#state-machine-viz div#state-name");
+        this.OPERATOR_WINDOW_COUNTDOWN_PROGRESS = querySelectorAndCheck(document, "div#state-machine-viz progress");
+        this.OPERATOR_WINDOW_COUNTDOWN_TEXT = querySelectorAndCheck(document, "div#state-machine-viz div.remaining-time-text");
+        this.OPERATOR_WINDOW_DIV_STATE_NAME = querySelectorAndCheck(document, "div#state-machine-viz div#state-name");
 
-        this.tableOfAllCountdownTimers = querySelectorAndCheck(document, "table#state-machine-all-countdown-timers");
+        this.TABLE_OF_ALL_COUNTDOWN_TIMERS = querySelectorAndCheck(document, "table#state-machine-all-countdown-timers");
 
         window.addEventListener("keydown", keyboardEvent => this.handleKeyboardEvent(keyboardEvent));
 
-        this.allStates = getStatesForJeopardyGame(operator, settings);
+        this.ALL_STATES = getStatesForJeopardyGame(operator, settings);
         this.validateStates();
 
-        this.presentState = this.stateMap["idle"];
+        this.presentState = this.STATE_MAP["idle"];
     }
 
     public handleStateMachineViewerReady(stateMachineViewer: StateMachineViewer): void {
-        stateMachineViewer.updateTrail(null, this.presentState.name);
+        stateMachineViewer.updateTrail(null, this.presentState.NAME);
         this.stateMachineViewer = stateMachineViewer;
     }
 
@@ -63,14 +63,14 @@ export class StateMachine {
             return;
         }
 
-        if (!this.operator.getIsPaused()) {
+        if (!this.OPERATOR.getIsPaused()) {
 
             // Search for the first transition with a keyboard transition for the key pressed.
-            for (const transition of this.presentState.transitions) {
-                if (transition.type === "keyboard" &&
-                    transition.keyboardKeys.toLowerCase().includes(keyboardEvent.key.toLowerCase())) {
+            for (const transition of this.presentState.TRANSITIONS) {
+                if (transition.TYPE === "keyboard" &&
+                    transition.KEYBOARD_KEYS.toLowerCase().includes(keyboardEvent.key.toLowerCase())) {
 
-                    if (transition.guardCondition && !transition.guardCondition(keyboardEvent)) {
+                    if (transition.GUARD_CONDITION && !transition.GUARD_CONDITION(keyboardEvent)) {
                         continue;
                     }
 
@@ -78,14 +78,14 @@ export class StateMachine {
                         console.log(`keyboard transition from keyboard key ${keyboardEvent.key}`);
                     }
 
-                    if (transition.onTransition) {
+                    if (transition.ON_TRANSITION) {
                         if (this.DEBUG) {
-                            console.log(`calling transition fn ${transition.onTransition.name}`);
+                            console.log(`calling transition fn ${transition.ON_TRANSITION.name}`);
                         }
-                        transition.onTransition(keyboardEvent);
+                        transition.ON_TRANSITION(keyboardEvent);
                     }
 
-                    this.goToState(transition.destination, keyboardEvent);
+                    this.goToState(transition.DESTINATION, keyboardEvent);
                     break;
                 }
             }
@@ -94,104 +94,104 @@ export class StateMachine {
 
     public setPaused(isPaused: boolean): void {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        this.countdownTimerLeavingState[this.presentState.name]?.setPaused(isPaused);
+        this.COUNTDOWN_TIMER_LEAVING_STATE[this.presentState.NAME]?.setPaused(isPaused);
     }
 
 
-    public manualTrigger(triggerName: string): void {
+    public manualTrigger(TRIGGER_NAME: string): void {
         // Search for the first transition which has a matching manual trigger.
-        for (const transition of this.presentState.transitions) {
-            if (transition.type === "manualTrigger" && transition.triggerName === triggerName) {
-                if (transition.guardCondition && !transition.guardCondition()) {
+        for (const transition of this.presentState.TRANSITIONS) {
+            if (transition.TYPE === "manualTrigger" && transition.TRIGGER_NAME === TRIGGER_NAME) {
+                if (transition.GUARD_CONDITION && !transition.GUARD_CONDITION()) {
                     continue;
                 }
                 if (this.DEBUG) {
-                    console.log(`Manual trigger "${triggerName}" from ${this.presentState.name} to ${transition.destination}`);
+                    console.log(`Manual trigger "${TRIGGER_NAME}" from ${this.presentState.NAME} to ${transition.DESTINATION}`);
                 }
-                this.goToState(transition.destination);
+                this.goToState(transition.DESTINATION);
                 return;
             }
         }
-        console.warn(`the present state (${this.presentState.name}) does not have any manual trigger transitions called "${triggerName}"`);
+        console.warn(`the present state (${this.presentState.NAME}) does not have any manual trigger transitions called "${TRIGGER_NAME}"`);
     }
 
     public goToState(destinationStateName: string, keyboardEvent?: KeyboardEvent): void {
-        if (!(destinationStateName in this.stateMap)) {
+        if (!(destinationStateName in this.STATE_MAP)) {
             throw new RangeError(`can't go to state named "${destinationStateName}", state not found`);
         }
 
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        this.countdownTimerLeavingState[this.presentState.name]?.pause();
+        this.COUNTDOWN_TIMER_LEAVING_STATE[this.presentState.NAME]?.pause();
 
         if (this.DEBUG) {
-            console.group(`changing states: ${this.presentState.name} --> ${destinationStateName}`);
+            console.group(`changing states: ${this.presentState.NAME} --> ${destinationStateName}`);
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////
         /////////////////// Call onExit function of the state we're leaving ////////////////////
         ////////////////////////////////////////////////////////////////////////////////////////
-        if (this.presentState.onExit) {
+        if (this.presentState.ON_EXIT) {
             if (this.DEBUG) {
-                console.log(`Running the onExit function of ${this.presentState.name}: ${this.presentState.onExit.name}`);
+                console.log(`Running the onExit function of ${this.presentState.NAME}: ${this.presentState.ON_EXIT.name}`);
             }
-            this.presentState.onExit();
+            this.presentState.ON_EXIT();
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////// Change the state ///////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////////////////////
         const previousState = this.presentState;
-        this.presentState = this.stateMap[destinationStateName];
-        this.operatorWindowDivStateName.innerHTML = destinationStateName;
+        this.presentState = this.STATE_MAP[destinationStateName];
+        this.OPERATOR_WINDOW_DIV_STATE_NAME.innerHTML = destinationStateName;
         if (this.stateMachineViewer) {
-            this.stateMachineViewer.updateTrail(previousState.name, this.presentState.name);
+            this.stateMachineViewer.updateTrail(previousState.NAME, this.presentState.NAME);
         }
 
 
         ///////////////////////////////////////////////////////////////////////////////////
         ////////////////////////// Change presentation slide //////////////////////////////
         ///////////////////////////////////////////////////////////////////////////////////
-        if (this.presentState.presentationSlideToShow) {
-            if (this.presentation.allSlideNames.has(this.presentState.presentationSlideToShow)) {
+        if (this.presentState.PRESENTATION_SLIDE_TO_SHOW) {
+            if (this.PRESENTATION.ALL_SLIDE_NAMES.has(this.presentState.PRESENTATION_SLIDE_TO_SHOW)) {
                 if (this.DEBUG) {
-                    console.log(`Showing presentation slide "${this.presentState.presentationSlideToShow}"`);
+                    console.log(`Showing presentation slide "${this.presentState.PRESENTATION_SLIDE_TO_SHOW}"`);
                 }
-                this.presentation.showSlide(this.presentState.presentationSlideToShow);
+                this.PRESENTATION.showSlide(this.presentState.PRESENTATION_SLIDE_TO_SHOW);
             } else {
-                console.warn(`entering state "${this.presentState.name}": can't show slide "${this.presentState.presentationSlideToShow}", slide not found`);
+                console.warn(`entering state "${this.presentState.NAME}": can't show slide "${this.presentState.PRESENTATION_SLIDE_TO_SHOW}", slide not found`);
             }
         }
 
-        if (this.presentState.instructions) {
-            this.operator.setInstructions(this.presentState.instructions);
+        if (this.presentState.INSTRUCTIONS) {
+            this.OPERATOR.setInstructions(this.presentState.INSTRUCTIONS);
         }
 
         ///////////////////////////////////////////////////////////////////////////////
         /////////////////////////// Call onEnter function /////////////////////////////
         ///////////////////////////////////////////////////////////////////////////////
-        if (this.presentState.onEnter) {
+        if (this.presentState.ON_ENTER) {
             if (this.DEBUG) {
-                console.log(`Running the onEnter function on ${this.presentState.name}: ${this.presentState.onEnter.name}`);
+                console.log(`Running the onEnter function on ${this.presentState.NAME}: ${this.presentState.ON_ENTER.name}`);
             }
-            this.presentState.onEnter(keyboardEvent);
+            this.presentState.ON_ENTER(keyboardEvent);
         }
 
 
         //////////////////////////////////////////////////////////////////////
         ///////////////////// Start countdown timer ///////// ////////////////
         //////////////////////////////////////////////////////////////////////
-        const transitionArray = this.presentState.transitions;
+        const transitionArray = this.presentState.TRANSITIONS;
         let foundCountdownTimer = false;
         // Search for the first timeout transition.
         for (const transition of transitionArray) {
-            if (transition.type === "timeout") {
-                if (transition.guardCondition && !transition.guardCondition()) {
+            if (transition.TYPE === "timeout") {
+                if (transition.GUARD_CONDITION && !transition.GUARD_CONDITION()) {
                     continue;
                 }
 
-                const countdownTimer = this.countdownTimerLeavingState[this.presentState.name];
+                const countdownTimer = this.COUNTDOWN_TIMER_LEAVING_STATE[this.presentState.NAME];
 
-                if (transition.behavior === CountdownBehavior.ResetTimerEveryTimeYouEnterTheState) {
+                if (transition.BEHAVIOR === CountdownBehavior.ResetTimerEveryTimeYouEnterTheState) {
                     countdownTimer.reset();
                 }
 
@@ -203,11 +203,11 @@ export class StateMachine {
                 - In the operator window: use a second <progress> element, instead of using the same one that shows
                     how much time is left for teams to buzz in.
                 */
-                if (transition.isWaitingForTeamToAnswerAfterBuzz) {
+                if (transition.IS_WAITING_FOR_TEAM_TO_ANSWER_AFTER_BUZZ) {
                     if (keyboardEvent) {
 
                         const teamIndex = Number(keyboardEvent.key) - 1;
-                        const team = this.operator.getTeam(teamIndex);
+                        const team = this.OPERATOR.getTeam(teamIndex);
                         if (team) {
                             const dotsInPresentationWindow = team.getCountdownDotsInPresentationWindow();
                             if (dotsInPresentationWindow) {
@@ -224,15 +224,15 @@ export class StateMachine {
                         console.error("keyboardEvent is undefined when transition.isWaitingForTeamToAnswerAfterBuzz is true");
                     }
 
-                    if (transition.behavior !== CountdownBehavior.ResetTimerEveryTimeYouEnterTheState) {
-                        console.warn(`in state ${this.presentState.name}: transition to ${transition.destination}: dots table and progress element will be repeatedly added to the countdown timer`);
+                    if (transition.BEHAVIOR !== CountdownBehavior.ResetTimerEveryTimeYouEnterTheState) {
+                        console.warn(`in state ${this.presentState.NAME}: transition to ${transition.DESTINATION}: dots table and progress element will be repeatedly added to the countdown timer`);
                     }
 
                 }
 
                 countdownTimer.startOrResume();
 
-                this.operatorWindowDivStateName.innerHTML = destinationStateName + " &rarr; " + transition.destination;
+                this.OPERATOR_WINDOW_DIV_STATE_NAME.innerHTML = destinationStateName + " &rarr; " + transition.DESTINATION;
                 // We could support multiple timeout transitions, although I have no need to
                 foundCountdownTimer = true;
                 break;
@@ -240,13 +240,13 @@ export class StateMachine {
         }
         if (!foundCountdownTimer) {
             // remove text on the right which shows time left
-            this.operatorWindowCountdownText.innerHTML = "";
+            this.OPERATOR_WINDOW_COUNTDOWN_TEXT.innerHTML = "";
 
             // remove green bar in operator window
-            this.operatorWindowCountdownProgress.setAttribute("value", "0");
+            this.OPERATOR_WINDOW_COUNTDOWN_PROGRESS.setAttribute("value", "0");
 
             // remove red bar in presentation window
-            this.presentation.getProgressElementForStateMachine().setAttribute("value", "0");
+            this.PRESENTATION.getProgressElementForStateMachine().setAttribute("value", "0");
         }
 
         //////////////////////////////////////////////////////////////
@@ -254,13 +254,13 @@ export class StateMachine {
         //////////////////////////////////////////////////////////////
         // Search for the first promise transition.
         for (const transition of transitionArray) {
-            if (transition.type === "promise") {
-                if (transition.guardCondition && !transition.guardCondition()) {
+            if (transition.TYPE === "promise") {
+                if (transition.GUARD_CONDITION && !transition.GUARD_CONDITION()) {
                     continue;
                 }
-                const thePromise: Promise<void> = transition.functionToGetPromise();
+                const thePromise: Promise<void> = transition.FUNCTION_TO_GER_PROMISE();
                 thePromise.then(
-                    () => this.goToState(transition.destination)
+                    () => this.goToState(transition.DESTINATION)
                 ).catch(
                     (err: Error) => {
                         alert(`promise rejected: ${err.message}`);
@@ -281,28 +281,28 @@ export class StateMachine {
         ////////////////////////////////////////////////////////////////
         // Search for the first if transition.
         for (const transition of transitionArray) {
-            if (transition.type === "if") {
+            if (transition.TYPE === "if") {
                 if (this.DEBUG) {
-                    console.log(`Transition type if: the condition function is ${transition.condition.name}`);
+                    console.log(`Transition type if: the condition function is ${transition.CONDITION.name}`);
                 }
-                if (transition.condition()) {
-                    if (transition.then.onTransition) {
+                if (transition.CONDITION()) {
+                    if (transition.THEN.ON_TRANSITION) {
                         if (this.DEBUG) {
-                            console.log(`Running the then.onTransition function of ${this.presentState.name}: ${transition.then.onTransition.name}`);
+                            console.log(`Running the then.ON_TRANSITION function of ${this.presentState.NAME}: ${transition.THEN.ON_TRANSITION.name}`);
                         }
-                        transition.then.onTransition();
+                        transition.THEN.ON_TRANSITION();
 
                     }
-                    this.goToState(transition.then.destination, keyboardEvent);
+                    this.goToState(transition.THEN.DESTINATION, keyboardEvent);
                 } else {
-                    if (transition.else.onTransition) {
+                    if (transition.ELSE.ON_TRANSITION) {
                         if (this.DEBUG) {
-                            console.log(`Running the else.onTransitionThen function of ${this.presentState.name}: ${transition.else.onTransition.name}`);
+                            console.log(`Running the else.ON_TRANSITIONThen function of ${this.presentState.NAME}: ${transition.ELSE.ON_TRANSITION.name}`);
                         }
-                        transition.else.onTransition();
+                        transition.ELSE.ON_TRANSITION();
 
                     }
-                    this.goToState(transition.else.destination, keyboardEvent);
+                    this.goToState(transition.ELSE.DESTINATION, keyboardEvent);
                 }
             }
             // We could support multiple if transitions, although I have no need to
@@ -315,11 +315,11 @@ export class StateMachine {
 
     private createCountdownTimerForTransition(timeoutTransition: TimeoutTransition): CountdownTimer {
 
-        const countdownTimer = new CountdownTimer(timeoutTransition.initialDuration, this.audioManager);
+        const countdownTimer = new CountdownTimer(timeoutTransition.INITIAL_DURATION, this.AUDIO_MANAGER);
 
         countdownTimer.onFinished = (): void => {
-            timeoutTransition.onTransition?.();
-            this.goToState(timeoutTransition.destination);
+            timeoutTransition.ON_TRANSITION?.();
+            this.goToState(timeoutTransition.DESTINATION);
         };
 
         /*
@@ -330,10 +330,10 @@ export class StateMachine {
         - In the operator window: use a second <progress> element, instead of using the same one that shows
             how much time is left for teams to buzz in.
         */
-        if (!timeoutTransition.isWaitingForTeamToAnswerAfterBuzz) {
-            countdownTimer.addTextElement(this.operatorWindowCountdownText);
-            countdownTimer.addProgressElement(this.presentation.getProgressElementForStateMachine());
-            countdownTimer.addProgressElement(this.operatorWindowCountdownProgress);
+        if (!timeoutTransition.IS_WAITING_FOR_TEAM_TO_ANSWER_AFTER_BUZZ) {
+            countdownTimer.addTextElement(this.OPERATOR_WINDOW_COUNTDOWN_TEXT);
+            countdownTimer.addProgressElement(this.PRESENTATION.getProgressElementForStateMachine());
+            countdownTimer.addProgressElement(this.OPERATOR_WINDOW_COUNTDOWN_PROGRESS);
         }
 
 
@@ -344,41 +344,41 @@ export class StateMachine {
     private validateStates(): void {
 
         // Pass one of two: populate the stateMap, and validate the presentation slide names are available.
-        this.allStates.forEach((state: StateMachineState) => {
-            this.stateMap[state.name] = state;
+        this.ALL_STATES.forEach((state: StateMachineState) => {
+            this.STATE_MAP[state.NAME] = state;
 
-            if (state.presentationSlideToShow &&
-                !this.presentation.allSlideNames.has(state.presentationSlideToShow)) {
-                console.warn(`state "${state.name}": showSlide: unknown slide "${state.presentationSlideToShow}"`);
+            if (state.PRESENTATION_SLIDE_TO_SHOW &&
+                !this.PRESENTATION.ALL_SLIDE_NAMES.has(state.PRESENTATION_SLIDE_TO_SHOW)) {
+                console.warn(`state "${state.NAME}": showSlide: unknown slide "${state.PRESENTATION_SLIDE_TO_SHOW}"`);
             }
 
         }, this);
 
         // Pass two of two: validate all the transitions, and create countdown timers for timeout transitions.
-        this.allStates.forEach((state: StateMachineState) => {
+        this.ALL_STATES.forEach((state: StateMachineState) => {
 
             const keyboardKeysUsedInTransitionsFromThisState: { [keyboardKey: string]: number } = {};
 
             let stateHasTimeoutTransition = false;
 
-            state.transitions.forEach((transition, transitionIndex) => {
+            state.TRANSITIONS.forEach((transition, transitionIndex) => {
 
                 // Verify all the destination states exist.
-                if (transition.type !== "if") {
-                    if (!(transition.destination in this.stateMap)) {
-                        printWarning(state.name, transitionIndex,
-                            `unknown destination state "${transition.destination}"`);
+                if (transition.TYPE !== "if") {
+                    if (!(transition.DESTINATION in this.STATE_MAP)) {
+                        printWarning(state.NAME, transitionIndex,
+                            `unknown DESTINATION state "${transition.DESTINATION}"`);
                     }
                 }
 
-                switch (transition.type) {
+                switch (transition.TYPE) {
                     case "keyboard": {
                         // Verify each keyboard key is not used in multiple transitions leaving this state.
-                        const keyboardKeys: string = transition.keyboardKeys;
+                        const keyboardKeys: string = transition.KEYBOARD_KEYS;
                         for (let i = 0; i < keyboardKeys.length; i++) {
                             const keyboardKey = keyboardKeys.charAt(i);
                             if (keyboardKey in keyboardKeysUsedInTransitionsFromThisState) {
-                                printWarning(state.name, transitionIndex,
+                                printWarning(state.NAME, transitionIndex,
                                     `keyboard key "${keyboardKey}" was already used in a transition from this state with index ${keyboardKeysUsedInTransitionsFromThisState[keyboardKey]}`);
                             } else {
                                 keyboardKeysUsedInTransitionsFromThisState[keyboardKey] = transitionIndex;
@@ -389,14 +389,14 @@ export class StateMachine {
                     }
 
                     case "if": {
-                        // Verify destination states exist.
-                        if (!(transition.then.destination in this.stateMap)) {
-                            printWarning(state.name, transitionIndex,
-                                `unknown 'then' state "${transition.then.destination}"`);
+                        // Verify DESTINATION states exist.
+                        if (!(transition.THEN.DESTINATION in this.STATE_MAP)) {
+                            printWarning(state.NAME, transitionIndex,
+                                `unknown 'then' state "${transition.THEN.DESTINATION}"`);
                         }
-                        if (!(transition.else.destination in this.stateMap)) {
-                            printWarning(state.name, transitionIndex,
-                                `unknown 'else' state "${transition.else.destination}"`);
+                        if (!(transition.ELSE.DESTINATION in this.STATE_MAP)) {
+                            printWarning(state.NAME, transitionIndex,
+                                `unknown 'else' state "${transition.ELSE.DESTINATION}"`);
                         }
                         break;
                     }
@@ -405,18 +405,18 @@ export class StateMachine {
                     case "timeout": {
 
                         if (stateHasTimeoutTransition) {
-                            printWarning(state.name, transitionIndex,
+                            printWarning(state.NAME, transitionIndex,
                                 "multiple timeout transitions leaving a state is not supported (because the countdownTimerForState map uses the state name as the key)");
                         }
 
                         const countdownTimer = this.createCountdownTimerForTransition(transition);
 
                         // create a progress element in the operator page - probably only needed for debugging
-                        this.countdownTimerLeavingState[state.name] = countdownTimer;
+                        this.COUNTDOWN_TIMER_LEAVING_STATE[state.NAME] = countdownTimer;
                         const tr = document.createElement("tr");
 
                         const tdStateLabel = document.createElement("td");
-                        tdStateLabel.innerHTML = `(${transition.behavior}) ${state.name} &rarr; ${transition.destination} `;
+                        tdStateLabel.innerHTML = `(${transition.BEHAVIOR}) ${state.NAME} &rarr; ${transition.DESTINATION} `;
                         tr.appendChild(tdStateLabel);
 
                         const tdProgressElement = document.createElement("td");
@@ -431,7 +431,7 @@ export class StateMachine {
                         tr.appendChild(tdRemainingTimeText);
 
 
-                        this.tableOfAllCountdownTimers.appendChild(tr);
+                        this.TABLE_OF_ALL_COUNTDOWN_TIMERS.appendChild(tr);
                         stateHasTimeoutTransition = true;
                         break;
                     }
@@ -448,7 +448,7 @@ export class StateMachine {
     }
 
     public getAllStates(): StateMachineState[] {
-        return this.allStates;
+        return this.ALL_STATES;
     }
 
     public getPresentState(): StateMachineState {
@@ -456,7 +456,7 @@ export class StateMachine {
     }
 
     public getCountdownTimerForState(stateName: string): CountdownTimer {
-        return this.countdownTimerLeavingState[stateName];
+        return this.COUNTDOWN_TIMER_LEAVING_STATE[stateName];
     }
 
 }

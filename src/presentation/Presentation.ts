@@ -4,50 +4,50 @@ import { SpecialCategory } from "../specialCategories";
 import { querySelectorAndCheck } from "../common";
 
 export class Presentation {
-    public readonly allSlideNames = new Set<string>();
+    public readonly ALL_SLIDE_NAMES = new Set<string>();
 
-    private readonly header: HTMLElement; // there's no HTMLHeaderElement
-    private readonly spanClueCategoryInHeader: HTMLSpanElement;
-    private readonly spanClueMoneyInHeader: HTMLSpanElement;
-    private readonly spanClueAirdateInHeader: HTMLSpanElement;
+    private readonly HEADER: HTMLElement; // there's no HTMLHeaderElement
+    private readonly SPAN_CLUE_CATEGORY_IN_HEADER: HTMLSpanElement;
+    private readonly SPAN_CLUE_MONEY_IN_HEADER: HTMLSpanElement;
+    private readonly SPAN_CLUE_AIRDATE_IN_HEADER: HTMLSpanElement;
 
-    private readonly divSlideClueQuestion: HTMLDivElement;
-    private readonly divClueCategoryBig: HTMLDivElement;
-    private readonly divClueValueBig: HTMLDivElement;
-    private readonly divClueAirdateBig: HTMLDivElement;
-    private readonly divSlideClueAnswerText: HTMLDivElement;
+    private readonly DIV_SLIDE_CLUE_QUESTION: HTMLDivElement;
+    private readonly DIV_CLUE_CATEGORY_BIG: HTMLDivElement;
+    private readonly DIV_CLUE_VALUE_BIG: HTMLDivElement;
+    private readonly DIV_CLUE_AIRDATE_BIG: HTMLDivElement;
+    private readonly DIV_SLIDE_CLUE_ANSWER_TEXT: HTMLDivElement;
 
-    private readonly divSpecialCategoryBackdrop: HTMLDivElement;
-    private readonly divSpecialCategoryPopup: HTMLDivElement;
+    private readonly DIV_BACKDROP_FOR_POPUPS: HTMLDivElement;
+    private readonly DIV_SPECIAL_CATEGORY_POPUP: HTMLDivElement;
 
-    private readonly divPaused: HTMLDivElement;
-    private readonly footer: HTMLElement;
-    private readonly progressElementForStateMachine: HTMLProgressElement;
-    private readonly progressElementForGameTimer: HTMLProgressElement;
-    private readonly allSlideDivs: { [slideName: string]: HTMLDivElement } = {};
+    private readonly DIV_PAUSED: HTMLDivElement;
+    private readonly FOOTER: HTMLElement;
+    private readonly PROGRESS_ELEMENT_FOR_STATE_MACHINE: HTMLProgressElement;
+    private readonly PROGRESS_ELEMENT_FOR_GAME_TIMER: HTMLProgressElement;
+    private readonly ALL_SLIDE_DIVS: { [slideName: string]: HTMLDivElement } = {};
     private visibleSlideDiv?: HTMLDivElement;
 
     public constructor(operator: Operator) {
-        this.header = querySelectorAndCheck(document, "header");
-        this.spanClueCategoryInHeader = querySelectorAndCheck(this.header, "span#clue-category-in-header");
-        this.spanClueMoneyInHeader = querySelectorAndCheck(this.header, "span#clue-value-in-header");
-        this.spanClueAirdateInHeader = querySelectorAndCheck(this.header, "span#clue-airdate-in-header");
-        this.progressElementForGameTimer = querySelectorAndCheck(this.header, "progress#game-timer");
-        this.progressElementForStateMachine = querySelectorAndCheck(this.header, "progress#state-machine");
+        this.HEADER = querySelectorAndCheck(document, "header");
+        this.SPAN_CLUE_CATEGORY_IN_HEADER = querySelectorAndCheck(this.HEADER, "span#clue-category-in-header");
+        this.SPAN_CLUE_MONEY_IN_HEADER = querySelectorAndCheck(this.HEADER, "span#clue-value-in-header");
+        this.SPAN_CLUE_AIRDATE_IN_HEADER = querySelectorAndCheck(this.HEADER, "span#clue-airdate-in-header");
+        this.PROGRESS_ELEMENT_FOR_GAME_TIMER = querySelectorAndCheck(this.HEADER, "progress#game-timer");
+        this.PROGRESS_ELEMENT_FOR_STATE_MACHINE = querySelectorAndCheck(this.HEADER, "progress#state-machine");
 
-        this.divSlideClueQuestion = querySelectorAndCheck(document, "div#slide-clue-question");
-        this.divSlideClueAnswerText = querySelectorAndCheck(document, "div#slide-clue-answer div#clue-answer-text");
+        this.DIV_SLIDE_CLUE_QUESTION = querySelectorAndCheck(document, "div#slide-clue-question");
+        this.DIV_SLIDE_CLUE_ANSWER_TEXT = querySelectorAndCheck(document, "div#slide-clue-answer div#clue-answer-text");
 
-        this.divClueCategoryBig = querySelectorAndCheck(document, "div#clue-category-big");
-        this.divClueValueBig = querySelectorAndCheck(document, "div#clue-value-big");
-        this.divClueAirdateBig = querySelectorAndCheck(document, "div#clue-airdate-big");
+        this.DIV_CLUE_CATEGORY_BIG = querySelectorAndCheck(document, "div#clue-category-big");
+        this.DIV_CLUE_VALUE_BIG = querySelectorAndCheck(document, "div#clue-value-big");
+        this.DIV_CLUE_AIRDATE_BIG = querySelectorAndCheck(document, "div#clue-airdate-big");
 
-        this.divSpecialCategoryBackdrop = querySelectorAndCheck(document, "div#special-category-backdrop");
-        this.divSpecialCategoryPopup = querySelectorAndCheck(document, "div#special-category-popup");
+        this.DIV_BACKDROP_FOR_POPUPS = querySelectorAndCheck(document, "div#special-category-backdrop");
+        this.DIV_SPECIAL_CATEGORY_POPUP = querySelectorAndCheck(document, "div#special-category-popup");
 
-        this.divPaused = querySelectorAndCheck(document, "div#paused");
+        this.DIV_PAUSED = querySelectorAndCheck(document, "div#paused");
 
-        this.footer = querySelectorAndCheck(document, "footer");
+        this.FOOTER = querySelectorAndCheck(document, "footer");
 
         this.initSlides();
 
@@ -61,24 +61,24 @@ export class Presentation {
         // select divs where the id property starts with "slide-"
         document.querySelectorAll<HTMLDivElement>('div[id ^= "slide-"')
             .forEach(div => {
-                this.allSlideNames.add(div.id);
-                this.allSlideDivs[div.id] = div;
+                this.ALL_SLIDE_NAMES.add(div.id);
+                this.ALL_SLIDE_DIVS[div.id] = div;
             });
-        Object.freeze(this.allSlideNames);
-        Object.freeze(this.allSlideDivs);
+        Object.freeze(this.ALL_SLIDE_NAMES);
+        Object.freeze(this.ALL_SLIDE_DIVS);
 
     }
 
     public getProgressElementForStateMachine(): HTMLProgressElement {
-        return this.progressElementForStateMachine;
+        return this.PROGRESS_ELEMENT_FOR_STATE_MACHINE;
     }
 
     public getProgressElementForGameTimer(): HTMLProgressElement {
-        return this.progressElementForGameTimer;
+        return this.PROGRESS_ELEMENT_FOR_GAME_TIMER;
     }
 
     public showSlide(slideName: string): void {
-        if (this.allSlideNames.has(slideName)) {
+        if (this.ALL_SLIDE_NAMES.has(slideName)) {
             if (this.visibleSlideDiv) {
                 /*
                 The display style is set to "none" in the CSS file.
@@ -87,28 +87,28 @@ export class Presentation {
                 */
                 this.visibleSlideDiv.style.display = "";
             }
-            const targetSlide: HTMLDivElement = this.allSlideDivs[slideName];
+            const targetSlide: HTMLDivElement = this.ALL_SLIDE_DIVS[slideName];
             targetSlide.style.display = "block";
             this.visibleSlideDiv = targetSlide;
         } else {
             throw new RangeError(
-                `slide name "${slideName}" not in known slides: ${Object.keys(this.allSlideDivs).toString()}`
+                `slide name "${slideName}" not in known slides: ${Object.keys(this.ALL_SLIDE_DIVS).toString()}`
             );
         }
     }
 
     public setClue(clue: Clue): void {
-        this.spanClueCategoryInHeader.innerHTML = clue.category.title;
-        this.spanClueMoneyInHeader.innerHTML = `$${clue.value}`;
-        this.spanClueAirdateInHeader.innerHTML = `(${clue.airdate.getFullYear()})`;
+        this.SPAN_CLUE_CATEGORY_IN_HEADER.innerHTML = clue.CATEGORY.TITLE;
+        this.SPAN_CLUE_MONEY_IN_HEADER.innerHTML = `$${clue.VALUE}`;
+        this.SPAN_CLUE_AIRDATE_IN_HEADER.innerHTML = `(${clue.AIRDATE.getFullYear()})`;
 
-        this.divClueCategoryBig.innerHTML = clue.category.title;
-        this.divClueValueBig.innerHTML = `$${clue.value}`;
-        this.divClueAirdateBig.innerHTML = `Airdate: ${clue.airdate.getFullYear()}`;
+        this.DIV_CLUE_CATEGORY_BIG.innerHTML = clue.CATEGORY.TITLE;
+        this.DIV_CLUE_VALUE_BIG.innerHTML = `$${clue.VALUE}`;
+        this.DIV_CLUE_AIRDATE_BIG.innerHTML = `Airdate: ${clue.AIRDATE.getFullYear()}`;
 
-        this.divSlideClueQuestion.innerHTML = clue.question;
+        this.DIV_SLIDE_CLUE_QUESTION.innerHTML = clue.QUESTION;
 
-        this.divSlideClueAnswerText.innerHTML = clue.answer;
+        this.DIV_SLIDE_CLUE_ANSWER_TEXT.innerHTML = clue.ANSWER;
     }
 
     public fitClueQuestionToScreen(): void {
@@ -116,21 +116,21 @@ export class Presentation {
          Remove font-size in the inline style property on the div,
          which may have been set by a previous call to this method.
          */
-        this.divSlideClueQuestion.style.fontSize = "";
+        this.DIV_SLIDE_CLUE_QUESTION.style.fontSize = "";
 
         const heightOfMain = querySelectorAndCheck(document, "main").clientHeight;
-        while (this.divSlideClueQuestion.clientHeight > heightOfMain) {
-            const oldFontSizeString = window.getComputedStyle(this.divSlideClueQuestion).getPropertyValue("font-size");
+        while (this.DIV_SLIDE_CLUE_QUESTION.clientHeight > heightOfMain) {
+            const oldFontSizeString = window.getComputedStyle(this.DIV_SLIDE_CLUE_QUESTION).getPropertyValue("font-size");
             const oldFontSize = Number(oldFontSizeString.replace("px", ""));
             const newFontSize = oldFontSize - 10;
 
             // set font-size in the inline style property on the div
-            this.divSlideClueQuestion.style.fontSize = `${newFontSize}px`;
+            this.DIV_SLIDE_CLUE_QUESTION.style.fontSize = `${newFontSize}px`;
         }
     }
 
     public setPaused(isPaused: boolean): void {
-        this.divPaused.style.display = isPaused ? "" : "none";
+        this.DIV_PAUSED.style.display = isPaused ? "" : "none";
     }
 
     public setTeamRankingHtml(htmlString: string): void {
@@ -154,30 +154,30 @@ export class Presentation {
     }
 
     public clearFooter(): void {
-        this.footer.innerHTML = "";
+        this.FOOTER.innerHTML = "";
     }
 
     public appendTeamDivToFooter(divForTeam: HTMLDivElement): void {
-        this.footer.append(divForTeam);
+        this.FOOTER.append(divForTeam);
     }
 
     public showSpecialCategoryPopup(specialCategory: SpecialCategory): void {
 
-        querySelectorAndCheck(this.divSpecialCategoryPopup, "#special-category-title").innerHTML = specialCategory.displayName;
-        querySelectorAndCheck(this.divSpecialCategoryPopup, "#special-category-description").innerHTML = specialCategory.description;
-        if (specialCategory.example) {
-            querySelectorAndCheck(this.divSpecialCategoryPopup, "#special-category-example-category").innerHTML = specialCategory.example.category;
-            querySelectorAndCheck(this.divSpecialCategoryPopup, "#special-category-example-question").innerHTML = specialCategory.example.question;
-            querySelectorAndCheck(this.divSpecialCategoryPopup, "#special-category-example-answer").innerHTML = specialCategory.example.answer;
+        querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-title").innerHTML = specialCategory.DISPLAY_NAME;
+        querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-description").innerHTML = specialCategory.DESCRIPTION;
+        if (specialCategory.EXAMPLE) {
+            querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-category").innerHTML = specialCategory.EXAMPLE.CATEGORY;
+            querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-question").innerHTML = specialCategory.EXAMPLE.QUESTION;
+            querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-answer").innerHTML = specialCategory.EXAMPLE.ANSWER;
         }
 
-        this.divSpecialCategoryBackdrop.className = "blurred";
-        this.divSpecialCategoryPopup.className = "visible-centered";
+        this.DIV_BACKDROP_FOR_POPUPS.className = "blurred";
+        this.DIV_SPECIAL_CATEGORY_POPUP.className = "visible-centered";
     }
 
     public hideSpecialCategoryPopup(): void {
-        this.divSpecialCategoryBackdrop.className = "not-blurred";
-        this.divSpecialCategoryPopup.className = "offscreen-left";
+        this.DIV_BACKDROP_FOR_POPUPS.className = "not-blurred";
+        this.DIV_SPECIAL_CATEGORY_POPUP.className = "offscreen-left";
     }
 
     public getBuzzHistorySvg(): SVGSVGElement {

@@ -22,26 +22,26 @@ export class AudioManager {
           and set 'Sound' to 'Allow' for this domain.
     */
 
-    public readonly answerCorrect: HTMLAudioElement;
-    public readonly answerIncorrectOrAnswerTimeout: HTMLAudioElement;
-    public readonly questionTimeout: HTMLAudioElement;
-    public readonly roundEnd: HTMLAudioElement;
-    public readonly teamBuzz: HTMLAudioElement;
-    public readonly tick: HTMLAudioElement;
-    public readonly musicGameEnd: HTMLAudioElement;
-    public readonly musicGameStart: HTMLAudioElement;
-    public readonly doneReadingClueQuestion: HTMLAudioElement;
+    public readonly ANSWER_CORRECT: HTMLAudioElement;
+    public readonly ANSWER_WRONG_OR_ANSWER_TIMEOUT: HTMLAudioElement;
+    public readonly QUESTION_TIMEOUT: HTMLAudioElement;
+    public readonly ROUND_END: HTMLAudioElement;
+    public readonly TEAM_BUZZ: HTMLAudioElement;
+    public readonly TICK: HTMLAudioElement;
+    public readonly MUSIC_GAME_END: HTMLAudioElement;
+    public readonly MUSIC_GAME_START: HTMLAudioElement;
+    public readonly DONE_READING_CLUE_QUESTION: HTMLAudioElement;
 
     public constructor() {
-        this.answerCorrect = querySelectorAndCheck<HTMLAudioElement>(document, "audio#answer-correct");
-        this.answerIncorrectOrAnswerTimeout = querySelectorAndCheck<HTMLAudioElement>(document, "audio#answer-incorrect");
-        this.questionTimeout = querySelectorAndCheck<HTMLAudioElement>(document, "audio#question-timeout");
-        this.roundEnd = querySelectorAndCheck<HTMLAudioElement>(document, "audio#round-end");
-        this.teamBuzz = querySelectorAndCheck<HTMLAudioElement>(document, "audio#team-buzz");
-        this.tick = querySelectorAndCheck<HTMLAudioElement>(document, "audio#tick");
-        this.musicGameEnd = querySelectorAndCheck<HTMLAudioElement>(document, "audio#music-game-end");
-        this.musicGameStart = querySelectorAndCheck<HTMLAudioElement>(document, "audio#music-game-start");
-        this.doneReadingClueQuestion = querySelectorAndCheck<HTMLAudioElement>(document, "audio#done-reading-clue-question");
+        this.ANSWER_CORRECT = querySelectorAndCheck<HTMLAudioElement>(document, "audio#answer-correct");
+        this.ANSWER_WRONG_OR_ANSWER_TIMEOUT = querySelectorAndCheck<HTMLAudioElement>(document, "audio#answer-incorrect");
+        this.QUESTION_TIMEOUT = querySelectorAndCheck<HTMLAudioElement>(document, "audio#question-timeout");
+        this.ROUND_END = querySelectorAndCheck<HTMLAudioElement>(document, "audio#round-end");
+        this.TEAM_BUZZ = querySelectorAndCheck<HTMLAudioElement>(document, "audio#team-buzz");
+        this.TICK = querySelectorAndCheck<HTMLAudioElement>(document, "audio#tick");
+        this.MUSIC_GAME_END = querySelectorAndCheck<HTMLAudioElement>(document, "audio#music-game-end");
+        this.MUSIC_GAME_START = querySelectorAndCheck<HTMLAudioElement>(document, "audio#music-game-start");
+        this.DONE_READING_CLUE_QUESTION = querySelectorAndCheck<HTMLAudioElement>(document, "audio#done-reading-clue-question");
     }
 
     public playInOrder(...audioElements: HTMLAudioElement[]): void {

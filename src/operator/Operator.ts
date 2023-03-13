@@ -11,35 +11,35 @@ import { SpecialCategory } from "../specialCategories";
 import { createLineChartOfMoneyOverTime, createPieCharts } from "../statisticsCharts";
 
 interface SavedGameInLocalStorage {
-    readonly gameTimerRemainingMillisec: number,
-    readonly teams: readonly TeamSavedInLocalStorage[]
+    readonly GAME_TIMER_REMAINING_MILLISEC: number,
+    readonly TEAMS: readonly TeamSavedInLocalStorage[]
     // todo save the settings
 }
 
 export class Operator {
-    public static teamCount = 5; //not readonly because it can change if we load a game from localStorage
-    private static readonly localStorageKey = "jeopardy";
+    public static teamCount = 7; //not readonly because it can change if we load a game from localStorage
+    private static readonly LOCAL_STORAGE_KEY = "jeopardy";
 
-    private readonly audioManager: AudioManager;
-    private readonly settings: Settings;
-    private readonly divClueWrapper: HTMLDivElement;
-    private readonly divClueQuestion: HTMLDivElement;
-    private readonly divClueValue: HTMLDivElement;
-    private readonly divClueCategory: HTMLDivElement;
-    private readonly divClueAnswer: HTMLDivElement;
-    private readonly divClueAirdate: HTMLDivElement;
-    private readonly trQuestion: HTMLTableRowElement;
-    private readonly trAnswer: HTMLTableRowElement;
-    private readonly divPaused: HTMLDivElement;
-    private readonly divInstructions: HTMLDivElement;
-    private readonly buttonStartGame: HTMLButtonElement;
-    private readonly buttonSkipClue: HTMLButtonElement;
-    private readonly specialCategoryPrompt: HTMLDivElement;
-    private readonly specialCategoryTitle: HTMLSpanElement;
-    private readonly specialCategoryPopup: HTMLDivElement;
-    private readonly buzzHistoryPopup: HTMLDivElement;
-    private readonly popupBackdrop: HTMLDivElement;
-    private readonly gameTimer: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
+    private readonly AUDIO_MANAGER: AudioManager;
+    private readonly SETTINGS: Settings;
+    private readonly DIV_CLUE_WRAPPER: HTMLDivElement;
+    private readonly DIV_CLUE_QUESTION: HTMLDivElement;
+    private readonly DIV_CLUE_VALUE: HTMLDivElement;
+    private readonly DIV_CLUE_CATEGORY: HTMLDivElement;
+    private readonly DIV_CLUE_ANSWER: HTMLDivElement;
+    private readonly DIV_CLUE_AIRDATE: HTMLDivElement;
+    private readonly TR_QUESTION: HTMLTableRowElement;
+    private readonly TR_ANSWER: HTMLTableRowElement;
+    private readonly DIV_PAUSED: HTMLDivElement;
+    private readonly DIV_INSTRUCTIONS: HTMLDivElement;
+    private readonly BUTTON_START_GAME: HTMLButtonElement;
+    private readonly BUTTON_SKIP_CLUE: HTMLButtonElement;
+    private readonly DIV_SPECIAL_CATEGORY_PROMPT: HTMLDivElement;
+    private readonly SPAN_SPECIAL_CATEGORY_TITLE: HTMLSpanElement;
+    private readonly DIV_SPECIAL_CATEGORY_POPUP: HTMLDivElement;
+    private readonly DIV_BUZZ_HISTORY_PROMPT: HTMLDivElement;
+    private readonly DIV_BACKDROP_FOR_POPUPS: HTMLDivElement;
+    private readonly GAME_TIMER: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
     private teamArray?: Team[];
     private presentClue?: Clue;
     private presentation?: Presentation;
@@ -52,38 +52,38 @@ export class Operator {
     private buzzHistoryDiagram: BuzzHistoryChart | undefined;
 
     public constructor(audioManager: AudioManager, settings: Settings) {
-        this.audioManager = audioManager;
-        this.settings = settings;
+        this.AUDIO_MANAGER = audioManager;
+        this.SETTINGS = settings;
 
-        this.divClueWrapper = querySelectorAndCheck(document, "div#clue-wrapper");
-        this.divClueQuestion = querySelectorAndCheck(document, "div#div-clue-question");
-        this.divClueValue = querySelectorAndCheck(document, "div#div-clue-value");
-        this.divClueCategory = querySelectorAndCheck(document, "div#div-clue-category");
-        this.divClueAnswer = querySelectorAndCheck(document, "div#div-clue-answer");
-        this.divClueAirdate = querySelectorAndCheck(document, "div#div-clue-airdate");
+        this.DIV_CLUE_WRAPPER = querySelectorAndCheck(document, "div#clue-wrapper");
+        this.DIV_CLUE_QUESTION = querySelectorAndCheck(document, "div#div-clue-question");
+        this.DIV_CLUE_VALUE = querySelectorAndCheck(document, "div#div-clue-value");
+        this.DIV_CLUE_CATEGORY = querySelectorAndCheck(document, "div#div-clue-category");
+        this.DIV_CLUE_ANSWER = querySelectorAndCheck(document, "div#div-clue-answer");
+        this.DIV_CLUE_AIRDATE = querySelectorAndCheck(document, "div#div-clue-airdate");
 
-        this.trQuestion = querySelectorAndCheck(document, "tr#tr-clue-question");
-        this.trAnswer = querySelectorAndCheck(document, "tr#tr-clue-answer");
+        this.TR_QUESTION = querySelectorAndCheck(document, "tr#tr-clue-question");
+        this.TR_ANSWER = querySelectorAndCheck(document, "tr#tr-clue-answer");
 
-        this.divPaused = querySelectorAndCheck(document, "div#paused");
-        this.divInstructions = querySelectorAndCheck(document, "div#instructions");
+        this.DIV_PAUSED = querySelectorAndCheck(document, "div#paused");
+        this.DIV_INSTRUCTIONS = querySelectorAndCheck(document, "div#instructions");
 
-        this.buttonStartGame = querySelectorAndCheck(document, "button#start-game");
-        this.buttonSkipClue = querySelectorAndCheck(document, "button#skip-clue");
-        this.popupBackdrop = querySelectorAndCheck(document, "div#backdrop-for-popups");
-        this.specialCategoryPrompt = querySelectorAndCheck(document, "div#special-category-prompt");
-        this.specialCategoryTitle = querySelectorAndCheck(this.specialCategoryPrompt, "span#special-category-title");
+        this.BUTTON_START_GAME = querySelectorAndCheck(document, "button#start-game");
+        this.BUTTON_SKIP_CLUE = querySelectorAndCheck(document, "button#skip-clue");
+        this.DIV_BACKDROP_FOR_POPUPS = querySelectorAndCheck(document, "div#backdrop-for-popups");
+        this.DIV_SPECIAL_CATEGORY_PROMPT = querySelectorAndCheck(document, "div#special-category-prompt");
+        this.SPAN_SPECIAL_CATEGORY_TITLE = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_PROMPT, "span#special-category-title");
 
-        this.buzzHistoryPopup = querySelectorAndCheck(document, "div#buzz-history-chart-popup");
-        this.specialCategoryPopup = querySelectorAndCheck(document, "div#special-category-popup");
+        this.DIV_BUZZ_HISTORY_PROMPT = querySelectorAndCheck(document, "div#buzz-history-chart-popup");
+        this.DIV_SPECIAL_CATEGORY_POPUP = querySelectorAndCheck(document, "div#special-category-popup");
 
         this.initPauseKeyboardListener();
         this.initMouseListeners();
         this.lookForSavedGame();
 
-        this.gameTimer = new CountdownTimer(this.settings.gameTimeLimitMillisec);
-        this.gameTimer.addProgressElement(querySelectorAndCheck(document, "div#game-timer progress"));
-        this.gameTimer.addTextElement(querySelectorAndCheck(document, "div#game-timer div.remaining-time-text"));
+        this.GAME_TIMER = new CountdownTimer(this.SETTINGS.gameTimeLimitMillisec);
+        this.GAME_TIMER.addProgressElement(querySelectorAndCheck(document, "div#game-timer progress"));
+        this.GAME_TIMER.addTextElement(querySelectorAndCheck(document, "div#game-timer div.remaining-time-text"));
 
         window.open("../presentation/presentation.html", "windowPresentation");
 
@@ -104,23 +104,23 @@ export class Operator {
 
         this.initBuzzerFootswitchIconDisplay();
 
-        this.gameTimer.addProgressElement(this.presentation.getProgressElementForGameTimer());
+        this.GAME_TIMER.addProgressElement(this.presentation.getProgressElementForGameTimer());
 
-        this.stateMachine = new StateMachine(this.settings, this, this.presentation, this.audioManager);
+        this.stateMachine = new StateMachine(this.SETTINGS, this, this.presentation, this.AUDIO_MANAGER);
 
         if (this.teamArray) {
             this.buzzHistoryDiagram = new BuzzHistoryChart(
                 this.teamArray,
-                this.settings.durationLockoutMillisec,
+                this.SETTINGS.durationLockoutMillisec,
                 querySelectorAndCheck<SVGSVGElement>(document, "svg#buzz-history"),
                 this.presentation.getBuzzHistorySvg()
             );
 
         }
 
-        this.buttonStartGame.removeAttribute("disabled");
-        this.buttonStartGame.focus();
-        this.divInstructions.innerHTML = "Ready. Click the button to start the game.";
+        this.BUTTON_START_GAME.removeAttribute("disabled");
+        this.BUTTON_START_GAME.focus();
+        this.DIV_INSTRUCTIONS.innerHTML = "Ready. Click the button to start the game.";
 
     }
 
@@ -162,11 +162,11 @@ export class Operator {
                     if (teamStatesWhereBuzzingDoesSomething.has(teamState)) {
                         // Do not do anything. The history will be recorded by a dedicated method in Operator.
                     } else {
-                        this.presentClue.buzzHistory.records[teamIndex].push({
+                        this.presentClue.BUZZ_HISTORY.RECORDS[teamIndex].push({
                             startTimestamp: Date.now(),
-                            result: {
-                                type: "ignored",
-                                teamStateWhyItWasIgnored: teamState
+                            RESULT: {
+                                TYPE: "ignored",
+                                TEAM_STATE_WHY_IT_WAS_IGNORED: teamState
                             }
                         });
                     }
@@ -236,10 +236,10 @@ export class Operator {
 
     private populateBuzzHistoryRecordForActiveAnswerAndSave(answeredCorrectly: boolean): void {
         if (this.presentClue && this.buzzHistoryRecordForActiveAnswer && this.teamPresentlyAnswering) {
-            this.buzzHistoryRecordForActiveAnswer.result.endTimestamp = Date.now();
-            this.buzzHistoryRecordForActiveAnswer.result.answeredCorrectly = answeredCorrectly;
+            this.buzzHistoryRecordForActiveAnswer.RESULT.endTimestamp = Date.now();
+            this.buzzHistoryRecordForActiveAnswer.RESULT.answeredCorrectly = answeredCorrectly;
 
-            this.presentClue.buzzHistory.records[this.teamPresentlyAnswering.getTeamIndex()]
+            this.presentClue.BUZZ_HISTORY.RECORDS[this.teamPresentlyAnswering.getTeamIndex()]
                 .push(this.buzzHistoryRecordForActiveAnswer);
 
             this.buzzHistoryRecordForActiveAnswer = undefined;
@@ -247,9 +247,9 @@ export class Operator {
     }
 
     private initMouseListeners(): void {
-        this.buttonStartGame.addEventListener("click", () => this.startGame());
+        this.BUTTON_START_GAME.addEventListener("click", () => this.startGame());
 
-        this.buttonSkipClue.addEventListener("click", () => this.skipClue());
+        this.BUTTON_SKIP_CLUE.addEventListener("click", () => this.skipClue());
 
         querySelectorAndCheck(document, "a#aMoneyOverride").addEventListener("click", () =>
             window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney"));
@@ -279,15 +279,15 @@ export class Operator {
 
     private startGame(): void {
         this.stateMachine?.manualTrigger("startGame");
-        this.buttonStartGame.setAttribute("disabled", "disabled");
-        this.gameTimer.start();
+        this.BUTTON_START_GAME.setAttribute("disabled", "disabled");
+        this.GAME_TIMER.start();
     }
 
 
     public skipClue(): void {
         this.setAllTeamsState("idle", true); // the second argument is endLockout
-        this.buttonSkipClue.setAttribute("disabled", "disabled");
-        this.buttonSkipClue.blur();
+        this.BUTTON_SKIP_CLUE.setAttribute("disabled", "disabled");
+        this.BUTTON_SKIP_CLUE.blur();
         this.stateMachine?.goToState("getClueFromJService");
     }
 
@@ -300,13 +300,13 @@ export class Operator {
         querySelectorAndCheck(document, "footer").innerHTML = "";
         this.presentation.clearFooter();
         for (let teamIndex = 0; teamIndex < teamCount; teamIndex++) {
-            this.teamArray[teamIndex] = new Team(teamIndex, this, this.presentation, this.settings, this.audioManager);
+            this.teamArray[teamIndex] = new Team(teamIndex, this, this.presentation, this.SETTINGS, this.AUDIO_MANAGER);
         }
     }
 
 
     public playSoundQuestionTimeout(): void {
-        this.audioManager.questionTimeout.play();
+        this.AUDIO_MANAGER.QUESTION_TIMEOUT.play();
     }
 
     public startAnswer(keyboardEvent?: KeyboardEvent): void {
@@ -324,13 +324,13 @@ export class Operator {
         teamAnswering.startAnswer();
         this.setStatesOfTeamsNotAnswering("other-team-is-answering");
 
-        this.audioManager.teamBuzz.play();
+        this.AUDIO_MANAGER.TEAM_BUZZ.play();
 
 
         this.buzzHistoryRecordForActiveAnswer = {
             startTimestamp: Date.now(),
-            result: {
-                type: "start-answer",
+            RESULT: {
+                TYPE: "start-answer",
                 answeredCorrectly: false,
                 endTimestamp: NaN
             }
@@ -341,8 +341,8 @@ export class Operator {
         if (!this.teamArray) {
             throw new Error("called shouldGameEnd() when teamArray is undefined");
         }
-        return this.gameTimer.getIsFinished() ||
-            this.teamArray.some(team => team.getMoney() >= this.settings.teamMoneyWhenGameShouldEnd);
+        return this.GAME_TIMER.getIsFinished() ||
+            this.teamArray.some(team => team.getMoney() >= this.SETTINGS.teamMoneyWhenGameShouldEnd);
     }
 
     public handleLockout(keyboardEvent: KeyboardEvent): void {
@@ -354,9 +354,9 @@ export class Operator {
         const team = this.teamArray[teamIndex];
         team.canBeLockedOut() && team.startLockout();
 
-        this.presentClue?.buzzHistory.records[teamIndex].push({
+        this.presentClue?.BUZZ_HISTORY.RECORDS[teamIndex].push({
             startTimestamp: Date.now(),
-            result: { type: "too-early-start-lockout" }
+            RESULT: { TYPE: "too-early-start-lockout" }
         });
 
     }
@@ -367,11 +367,11 @@ export class Operator {
         This function only shows the airdate, category, and dollar value to the operator.
         The state machine will show the clue question after a timeout.
         */
-        this.divClueWrapper.style.display = ""; //show it by removing "display=none"
-        this.divClueCategory.innerHTML = clue.category.title;
-        this.divClueValue.innerHTML = `$${clue.value}`;
-        this.divClueAirdate.innerHTML = clue.airdate.getFullYear().toString();
-        this.trAnswer.style.display = "none";
+        this.DIV_CLUE_WRAPPER.style.display = ""; //show it by removing "display=none"
+        this.DIV_CLUE_CATEGORY.innerHTML = clue.CATEGORY.TITLE;
+        this.DIV_CLUE_VALUE.innerHTML = `$${clue.VALUE}`;
+        this.DIV_CLUE_AIRDATE.innerHTML = clue.AIRDATE.getFullYear().toString();
+        this.TR_ANSWER.style.display = "none";
     }
 
     private setPresentClue(clue: Clue): void {
@@ -379,13 +379,13 @@ export class Operator {
         this.showClueToOperator(clue);
         this.presentation?.setClue(clue);
 
-        if (clue.category.specialCategory) {
-            this.showSpecialCategoryPrompt(clue.category.specialCategory);
+        if (clue.CATEGORY.specialCategory) {
+            this.showSpecialCategoryPrompt(clue.CATEGORY.specialCategory);
         }
     }
 
     public isCurrentClueSpecialCategory(): boolean {
-        return this.presentClue?.category.specialCategory !== null;
+        return this.presentClue?.CATEGORY.specialCategory !== null;
     }
 
     public getClueForTesting(): Promise<void> {
@@ -395,8 +395,8 @@ export class Operator {
         const promiseExecutor = (
             resolveFunc: () => void,
         ): void => {
-            this.buttonStartGame.blur();
-            this.trQuestion.style.display = "none";
+            this.BUTTON_START_GAME.blur();
+            this.TR_QUESTION.style.display = "none";
 
             this.setPresentClue(
                 new Clue(
@@ -460,8 +460,8 @@ export class Operator {
             resolveFunc: () => void,
             rejectFunc: (rejectReason: Error) => void
         ): void => {
-            this.buttonStartGame.blur();
-            this.trQuestion.style.display = "none";
+            this.BUTTON_START_GAME.blur();
+            this.TR_QUESTION.style.display = "none";
             fetchClueHelper.call(this, resolveFunc, rejectFunc, 1, 5);
         };
         return new Promise<void>(promiseExecutor);
@@ -473,42 +473,42 @@ export class Operator {
     }
 
     private showSpecialCategoryPrompt(specialCategory: SpecialCategory): void {
-        this.specialCategoryTitle.innerHTML = specialCategory.displayName;
-        this.specialCategoryPrompt.style.display = "block";
+        this.SPAN_SPECIAL_CATEGORY_TITLE.innerHTML = specialCategory.DISPLAY_NAME;
+        this.DIV_SPECIAL_CATEGORY_PROMPT.style.display = "block";
     }
 
     private hideSpecialCategoryPrompt(): void {
-        this.specialCategoryPrompt.style.display = "none";
+        this.DIV_SPECIAL_CATEGORY_PROMPT.style.display = "none";
     }
 
     public showSpecialCategoryOverlay(): void {
-        this.gameTimer.pause();
+        this.GAME_TIMER.pause();
 
-        const specialCategory = this.presentClue?.category.specialCategory;
+        const specialCategory = this.presentClue?.CATEGORY.specialCategory;
         if (!specialCategory) {
             throw new Error("called showSpecialCategoryOverlay() when the present clue does not have a special category");
         }
 
         this.presentation?.showSpecialCategoryPopup(specialCategory);
 
-        querySelectorAndCheck(this.specialCategoryPopup, ".popup-title").innerHTML = specialCategory.displayName;
-        querySelectorAndCheck(this.specialCategoryPopup, "#special-category-description").innerHTML = specialCategory.description;
-        if (specialCategory.example) {
-            querySelectorAndCheck(this.specialCategoryPopup, "#special-category-example-category").innerHTML = specialCategory.example.category;
-            querySelectorAndCheck(this.specialCategoryPopup, "#special-category-example-question").innerHTML = specialCategory.example.question;
-            querySelectorAndCheck(this.specialCategoryPopup, "#special-category-example-answer").innerHTML = specialCategory.example.answer;
+        querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, ".popup-title").innerHTML = specialCategory.DISPLAY_NAME;
+        querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-description").innerHTML = specialCategory.DESCRIPTION;
+        if (specialCategory.EXAMPLE) {
+            querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-category").innerHTML = specialCategory.EXAMPLE.CATEGORY;
+            querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-question").innerHTML = specialCategory.EXAMPLE.QUESTION;
+            querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-answer").innerHTML = specialCategory.EXAMPLE.ANSWER;
         }
 
-        this.specialCategoryPopup.style.display = "block";
+        this.DIV_SPECIAL_CATEGORY_POPUP.style.display = "block";
         this.showPopupBackdrop();
 
     }
 
     public hideSpecialCategoryOverlay(): void {
         this.hidePopupBackdrop();
-        this.specialCategoryPopup.style.display = "none";
+        this.DIV_SPECIAL_CATEGORY_POPUP.style.display = "none";
         this.presentation?.hideSpecialCategoryPopup();
-        this.gameTimer.resume();
+        this.GAME_TIMER.resume();
     }
 
     public handleShowClueQuestion(): void {
@@ -523,11 +523,11 @@ export class Operator {
         */
         this.setAllTeamsState("operator-is-reading-question");
 
-        this.divClueQuestion.innerHTML = this.presentClue.getQuestionHtmlWithSubjectInBold();
-        this.trQuestion.style.display = ""; //show it by removing "display=none"
-        this.trAnswer.style.display = "none";
+        this.DIV_CLUE_QUESTION.innerHTML = this.presentClue.getQuestionHtmlWithSubjectInBold();
+        this.TR_QUESTION.style.display = ""; //show it by removing "display=none"
+        this.TR_ANSWER.style.display = "none";
 
-        this.buttonSkipClue.removeAttribute("disabled");
+        this.BUTTON_SKIP_CLUE.removeAttribute("disabled");
 
         this.hideSpecialCategoryPrompt();
     }
@@ -537,18 +537,18 @@ export class Operator {
 
             throw new Error("called handleDoneReadingClueQuestion() when presentClue is undefined");
         }
-        this.audioManager.doneReadingClueQuestion.play();
-        this.trAnswer.style.display = ""; //show it by removing "display=none"
-        this.divClueAnswer.innerHTML = this.presentClue.answer;
+        this.AUDIO_MANAGER.DONE_READING_CLUE_QUESTION.play();
+        this.TR_ANSWER.style.display = ""; //show it by removing "display=none"
+        this.DIV_CLUE_ANSWER.innerHTML = this.presentClue.ANSWER;
         this.setAllTeamsState("can-answer");
-        this.buttonSkipClue.setAttribute("disabled", "disabled");
+        this.BUTTON_SKIP_CLUE.setAttribute("disabled", "disabled");
 
         this.stateMachine?.getCountdownTimerForState("waitForBuzzes").reset();
 
         this.teamArray?.forEach(team => team.hasBuzzedForCurrentQuestion = false);
 
         if (this.presentClue) {
-            this.presentClue.buzzHistory.timestampWhenClueQuestionFinishedReading = Date.now();
+            this.presentClue.BUZZ_HISTORY.timestampWhenClueQuestionFinishedReading = Date.now();
         }
     }
 
@@ -596,7 +596,7 @@ export class Operator {
         if (!this.teamArray) {
             return false;
         }
-        if (this.settings.allowMultipleAnswersToSameQuestion) {
+        if (this.SETTINGS.allowMultipleAnswersToSameQuestion) {
             // allow teams to keep answering until time runs out
             return false;
         } else {
@@ -611,9 +611,9 @@ export class Operator {
 
     public setPaused(isPaused: boolean): void {
         this.isPaused = isPaused;
-        this.divPaused.style.display = isPaused ? "" : "none";
+        this.DIV_PAUSED.style.display = isPaused ? "" : "none";
         this.stateMachine?.setPaused(isPaused);
-        this.gameTimer.setPaused(isPaused);
+        this.GAME_TIMER.setPaused(isPaused);
         this.teamArray?.forEach(team => team.setPaused(isPaused));
         this.presentation?.setPaused(isPaused);
     }
@@ -636,7 +636,7 @@ export class Operator {
 
         const divSavedGame = querySelectorAndCheck<HTMLDivElement>(document, "div#tab-content-load-game");
 
-        const rawLocalStorageResult = window.localStorage.getItem(Operator.localStorageKey);
+        const rawLocalStorageResult = window.localStorage.getItem(Operator.LOCAL_STORAGE_KEY);
         if (rawLocalStorageResult === null) {
             divMessage.innerHTML = "No saved game found in localStorage.";
             return;
@@ -651,7 +651,7 @@ export class Operator {
 
         const tableRowTeamNumber = document.createElement("tr");
         tableDetails.appendChild(tableRowTeamNumber);
-        for (let teamIdx = 0; teamIdx < parsedJson.teams.length; teamIdx++) {
+        for (let teamIdx = 0; teamIdx < parsedJson.TEAMS.length; teamIdx++) {
             const cellTeamNumber = document.createElement("td");
             cellTeamNumber.innerHTML = `Team ${teamIdx + 1}`;
             tableRowTeamNumber.appendChild(cellTeamNumber);
@@ -659,9 +659,9 @@ export class Operator {
 
         const tableRowTeamMoney = document.createElement("tr");
         tableDetails.appendChild(tableRowTeamMoney);
-        for (const team of parsedJson.teams) {
+        for (const team of parsedJson.TEAMS) {
             const cellTeamMoney = document.createElement("td");
-            cellTeamMoney.innerHTML = `$${team.money}`;
+            cellTeamMoney.innerHTML = `$${team.MONEY}`;
             tableRowTeamMoney.appendChild(cellTeamMoney);
         }
 
@@ -671,7 +671,7 @@ export class Operator {
         });
         querySelectorAndCheck(document, "button#saved-game-delete").addEventListener("click", function () {
             if (window.confirm("Delete the saved game?")) {
-                window.localStorage.removeItem(Operator.localStorageKey);
+                window.localStorage.removeItem(Operator.LOCAL_STORAGE_KEY);
                 divSavedGame.style.display = "none";
             }
         });
@@ -682,11 +682,11 @@ export class Operator {
             throw new Error("called saveGame() when teamArray is undefined");
         }
         const objectToSave: SavedGameInLocalStorage = {
-            gameTimerRemainingMillisec: this.gameTimer.getRemainingMillisec(),
-            teams: this.teamArray.map(t => t.getObjectToSaveInLocalStorage())
+            GAME_TIMER_REMAINING_MILLISEC: this.GAME_TIMER.getRemainingMillisec(),
+            TEAMS: this.teamArray.map(t => t.getObjectToSaveInLocalStorage())
         };
 
-        window.localStorage.setItem(Operator.localStorageKey,
+        window.localStorage.setItem(Operator.LOCAL_STORAGE_KEY,
             JSON.stringify(objectToSave)
         );
         //TODO save the settings
@@ -694,11 +694,11 @@ export class Operator {
 
     private loadGame(parsedJson: SavedGameInLocalStorage): void {
 
-        this.gameTimer.setRemainingMillisec(parsedJson.gameTimerRemainingMillisec);
+        this.GAME_TIMER.setRemainingMillisec(parsedJson.GAME_TIMER_REMAINING_MILLISEC);
 
-        this.initTeams(parsedJson.teams.length);
-        for (let teamIdx = 0; teamIdx < parsedJson.teams.length; teamIdx++) {
-            this.teamArray![teamIdx].loadFromLocalStorage(parsedJson.teams[teamIdx]);
+        this.initTeams(parsedJson.TEAMS.length);
+        for (let teamIdx = 0; teamIdx < parsedJson.TEAMS.length; teamIdx++) {
+            this.teamArray![teamIdx].loadFromLocalStorage(parsedJson.TEAMS[teamIdx]);
         }
 
         if (this.shouldGameEnd()) {
@@ -707,12 +707,12 @@ export class Operator {
     }
 
     public handleGameEnd(): void {
-        this.gameTimer.pause();
+        this.GAME_TIMER.pause();
 
         // First play the eight high-pitched beeps sound, then play the closing music
-        this.audioManager.playInOrder(
-            this.audioManager.roundEnd,
-            this.audioManager.musicGameEnd
+        this.AUDIO_MANAGER.playInOrder(
+            this.AUDIO_MANAGER.ROUND_END,
+            this.AUDIO_MANAGER.MUSIC_GAME_END
         );
 
         this.presentation?.hideHeaderAndFooter();
@@ -760,7 +760,7 @@ export class Operator {
         shallowCopy.forEach(team => {
             html.push(
                 "<tr>" +
-                "<td>" + team.teamName + "</td>" +
+                "<td>" + team.TEAM_NAME + "</td>" +
                 "<td>$" + team.getMoney().toLocaleString() + "</td>" +
                 "</tr>"
             );
@@ -773,29 +773,29 @@ export class Operator {
 
     public showBuzzHistory(): void {
         if (this.presentClue && this.buzzHistoryDiagram) {
-            this.gameTimer.pause();
+            this.GAME_TIMER.pause();
 
             this.showPopupBackdrop();
-            this.buzzHistoryPopup.style.display = "block";
+            this.DIV_BUZZ_HISTORY_PROMPT.style.display = "block";
 
-            this.buzzHistoryDiagram.setHistory(this.presentClue.buzzHistory);
+            this.buzzHistoryDiagram.setHistory(this.presentClue.BUZZ_HISTORY);
             this.buzzHistoryDiagram.redraw();
         }
     }
 
     private showPopupBackdrop(): void {
-        this.popupBackdrop.style.display = "block";
+        this.DIV_BACKDROP_FOR_POPUPS.style.display = "block";
     }
 
     private hidePopupBackdrop(): void {
-        this.popupBackdrop.style.display = "none";
+        this.DIV_BACKDROP_FOR_POPUPS.style.display = "none";
     }
 
 
     public hideBuzzHistory(): void {
-        this.gameTimer.resume();
+        this.GAME_TIMER.resume();
         this.hidePopupBackdrop();
-        this.buzzHistoryPopup.style.display = "none";
+        this.DIV_BUZZ_HISTORY_PROMPT.style.display = "none";
     }
 
     public getStateMachine(): StateMachine | undefined {
@@ -811,7 +811,7 @@ export class Operator {
     }
 
     public setInstructions(text: string): void {
-        this.divInstructions.innerHTML = text;
+        this.DIV_INSTRUCTIONS.innerHTML = text;
     }
 
 }

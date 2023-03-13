@@ -21,98 +21,98 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
     stateArray.forEach((state: StateMachineState) => {
 
 
-        let stateLabel = "<b>" + state.name + "</b>";
-        if (state.onEnter) {
-            stateLabel += "<br/>onEnter: " + state.onEnter.name.replace("bound ", "") + "()";
+        let stateLabel = "<b>" + state.NAME + "</b>";
+        if (state.ON_ENTER) {
+            stateLabel += "<br/>onEnter: " + state.ON_ENTER.name.replace("bound ", "") + "()";
         }
-        if (state.onExit) {
-            stateLabel += "<br/>onExit: " + state.onExit.name.replace("bound ", "") + "()";
+        if (state.ON_EXIT) {
+            stateLabel += "<br/>onExit: " + state.ON_EXIT.name.replace("bound ", "") + "()";
         }
-        dotFileLines.push(`\t${state.name} [label= < ${stateLabel} >, id="${state.name}"];`);
+        dotFileLines.push(`\t${state.NAME} [label= < ${stateLabel} >, id="${state.NAME}"];`);
 
-        state.transitions.forEach((transition) => {
+        state.TRANSITIONS.forEach((transition) => {
 
 
-            switch (transition.type) {
+            switch (transition.TYPE) {
                 case "keyboard": {
                     let transitionLabel = "keyboard: ";
-                    if (transition.keyboardKeys === " ") {
+                    if (transition.KEYBOARD_KEYS === " ") {
                         transitionLabel += "space";
                     } else {
-                        transitionLabel += '\\"' + transition.keyboardKeys + '\\"';
+                        transitionLabel += '\\"' + transition.KEYBOARD_KEYS + '\\"';
                     }
 
-                    if (transition.guardCondition) {
-                        transitionLabel += ` [${transition.guardCondition.name.replace("bound ", "")}] `;
+                    if (transition.GUARD_CONDITION) {
+                        transitionLabel += ` [${transition.GUARD_CONDITION.name.replace("bound ", "")}] `;
                     }
 
-                    if (transition.onTransition) {
-                        transitionLabel += ` / ${transition.onTransition.name.replace("bound ", "")}()`;
+                    if (transition.ON_TRANSITION) {
+                        transitionLabel += ` / ${transition.ON_TRANSITION.name.replace("bound ", "")}()`;
                     }
 
-                    const transitionID = `${state.name}_to_${transition.destination}`;
+                    const transitionID = `${state.NAME}_to_${transition.DESTINATION}`;
 
-                    dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${transitionLabel}", id="${transitionID}"];`);
+                    dotFileLines.push(`\t${state.NAME} -> ${transition.DESTINATION} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
 
                 }
                 case "promise": {
-                    let transitionLabel = transition.type.toString();
-                    if (transition.guardCondition) {
-                        transitionLabel += ` [${transition.guardCondition.name.replace("bound ", "")}] `;
+                    let transitionLabel = transition.TYPE.toString();
+                    if (transition.GUARD_CONDITION) {
+                        transitionLabel += ` [${transition.GUARD_CONDITION.name.replace("bound ", "")}] `;
                     }
-                    const transitionID = `${state.name}_to_${transition.destination}`;
-                    dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${transitionLabel}", id="${transitionID}"];`);
+                    const transitionID = `${state.NAME}_to_${transition.DESTINATION}`;
+                    dotFileLines.push(`\t${state.NAME} -> ${transition.DESTINATION} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
                 }
                 case "timeout": {
-                    let transitionLabel = transition.type.toString() + ": ";
+                    let transitionLabel = transition.TYPE.toString() + ": ";
 
-                    transitionLabel += `${transition.behavior} ${transition.initialDuration} ms`;
+                    transitionLabel += `${transition.BEHAVIOR} ${transition.INITIAL_DURATION} ms`;
 
-                    if (transition.guardCondition) {
-                        transitionLabel += ` [${transition.guardCondition.name.replace("bound ", "")}] `;
+                    if (transition.GUARD_CONDITION) {
+                        transitionLabel += ` [${transition.GUARD_CONDITION.name.replace("bound ", "")}] `;
                     }
 
-                    if (transition.onTransition) {
-                        transitionLabel += ` / ${transition.onTransition.name.replace("bound ", "")}()`;
+                    if (transition.ON_TRANSITION) {
+                        transitionLabel += ` / ${transition.ON_TRANSITION.name.replace("bound ", "")}()`;
                     }
 
-                    const transitionID = `${state.name}_to_${transition.destination}`;
-                    dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${transitionLabel}", id="${transitionID}"];`);
+                    const transitionID = `${state.NAME}_to_${transition.DESTINATION}`;
+                    dotFileLines.push(`\t${state.NAME} -> ${transition.DESTINATION} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
                 }
                 case "manualTrigger": {
-                    let transitionLabel = transition.type.toString() + ': \\"' + transition.triggerName.replace("manualTrigger_", "") + '\\"';
-                    if (transition.guardCondition) {
-                        transitionLabel += ` [${transition.guardCondition.name.replace("bound ", "")}] `;
+                    let transitionLabel = transition.TYPE.toString() + ': \\"' + transition.TRIGGER_NAME.replace("manualTrigger_", "") + '\\"';
+                    if (transition.GUARD_CONDITION) {
+                        transitionLabel += ` [${transition.GUARD_CONDITION.name.replace("bound ", "")}] `;
                     }
-                    if (transition.onTransition) {
-                        transitionLabel += ` / ${transition.onTransition.name.replace("bound ", "")}()`;
+                    if (transition.ON_TRANSITION) {
+                        transitionLabel += ` / ${transition.ON_TRANSITION.name.replace("bound ", "")}()`;
                     }
 
-                    const transitionID = `${state.name}_to_${transition.destination}`;
-                    dotFileLines.push(`\t${state.name} -> ${transition.destination} [label="${transitionLabel}", id="${transitionID}"];`);
+                    const transitionID = `${state.NAME}_to_${transition.DESTINATION}`;
+                    dotFileLines.push(`\t${state.NAME} -> ${transition.DESTINATION} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
                 }
 
                 case "if": {
-                    const condition = transition.condition.name.replace("bound ", "");
+                    const condition = transition.CONDITION.name.replace("bound ", "");
 
                     let labelThen = "if(" + condition + ")";
-                    if (transition.then.onTransition) {
-                        labelThen += ` / ${transition.then.onTransition.name.replace("bound ", "")}()`;
+                    if (transition.THEN.ON_TRANSITION) {
+                        labelThen += ` / ${transition.THEN.ON_TRANSITION.name.replace("bound ", "")}()`;
                     }
-                    const idThen = `${state.name}_to_${transition.then.destination}`;
+                    const idThen = `${state.NAME}_to_${transition.THEN.DESTINATION}`;
 
                     let labelElse = "if(!" + condition + ")";
-                    if (transition.else.onTransition) {
-                        labelElse += ` / ${transition.else.onTransition.name.replace("bound ", "")}()`;
+                    if (transition.ELSE.ON_TRANSITION) {
+                        labelElse += ` / ${transition.ELSE.ON_TRANSITION.name.replace("bound ", "")}()`;
                     }
-                    const idElse = `${state.name}_to_${transition.else.destination}`;
+                    const idElse = `${state.NAME}_to_${transition.ELSE.DESTINATION}`;
 
-                    dotFileLines.push(`\t${state.name} -> ${transition.then.destination} [label="${labelThen}", id="${idThen}"];`);
-                    dotFileLines.push(`\t${state.name} -> ${transition.else.destination} [label="${labelElse}", id="${idElse}"];`);
+                    dotFileLines.push(`\t${state.NAME} -> ${transition.THEN.DESTINATION} [label="${labelThen}", id="${idThen}"];`);
+                    dotFileLines.push(`\t${state.NAME} -> ${transition.ELSE.DESTINATION} [label="${labelElse}", id="${idElse}"];`);
                     break;
                 }
 

@@ -14,7 +14,7 @@ export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElem
 
         const titleDiv = document.createElement("div");
         titleDiv.className = "chart-title";
-        titleDiv.innerText = team.teamName;
+        titleDiv.innerText = team.TEAM_NAME;
         containerForTeamPieChart.appendChild(titleDiv);
 
         const chartData: Chartist.PieChartData = {
@@ -192,7 +192,7 @@ export function createLineChartOfMoneyOverTime(divForLineChart: HTMLDivElement, 
         point.setAttribute("y2", String(yCenter));
         svgGroup.appendChild(point);
 
-        legendRow.append(teams[teamIdx].teamName);
+        legendRow.append(teams[teamIdx].TEAM_NAME);
 
         legendContainer.appendChild(legendRow);
 

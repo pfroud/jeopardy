@@ -13,12 +13,12 @@ export class StateMachineViewer {
     private static readonly TRAIL_COLORS = ["red", "orange", "yellow"];
     private static readonly TRAIL_LENGTH = StateMachineViewer.TRAIL_COLORS.length;
 
-    private readonly svg: SVGElement;
-    private readonly stateTrail: SVGGElement[] = [];
-    private readonly transitionTrail: SVGGElement[] = [];
+    private readonly SVG: SVGElement;
+    private readonly STATE_TRAIL: SVGGElement[] = [];
+    private readonly TRANSITION_TRAIL: SVGGElement[] = [];
 
     public constructor(svgElement: SVGSVGElement) {
-        this.svg = svgElement;
+        this.SVG = svgElement;
 
         this.createStyleElementInSVG();
     }
@@ -48,7 +48,7 @@ export class StateMachineViewer {
 
 
         styleElement.textContent = lines.join("\n");
-        this.svg.appendChild(styleElement);
+        this.SVG.appendChild(styleElement);
     }
 
     public updateTrail(previousStateName: string | null, newStateName: string): void {
@@ -57,39 +57,39 @@ export class StateMachineViewer {
             console.log(`stateMachineViewer: ${previousStateName} --> ${newStateName}`);
         }
 
-        const svgGroupForState = this.svg.querySelector<SVGGElement>(`g#${newStateName}`);
+        const svgGroupForState = this.SVG.querySelector<SVGGElement>(`g#${newStateName}`);
         if (svgGroupForState) {
 
             // add element to the beginning of the array
-            this.stateTrail.unshift(svgGroupForState);
+            this.STATE_TRAIL.unshift(svgGroupForState);
 
-            if (this.stateTrail.length > StateMachineViewer.TRAIL_LENGTH) {
+            if (this.STATE_TRAIL.length > StateMachineViewer.TRAIL_LENGTH) {
                 // remove the last element from the array
-                this.stateTrail.pop()?.removeAttribute(StateMachineViewer.ATTRIBUTE_STATE_TRAIL_INDEX);
+                this.STATE_TRAIL.pop()?.removeAttribute(StateMachineViewer.ATTRIBUTE_STATE_TRAIL_INDEX);
             }
 
             // update the indexes
-            for (let trailIdx = 0; trailIdx < this.stateTrail.length; trailIdx++) {
-                this.stateTrail[trailIdx].setAttribute(StateMachineViewer.ATTRIBUTE_STATE_TRAIL_INDEX, trailIdx.toString());
+            for (let trailIdx = 0; trailIdx < this.STATE_TRAIL.length; trailIdx++) {
+                this.STATE_TRAIL[trailIdx].setAttribute(StateMachineViewer.ATTRIBUTE_STATE_TRAIL_INDEX, trailIdx.toString());
             }
 
         }
 
         if (previousStateName) {
-            const groupForTransition = this.svg.querySelector<SVGGElement>(`g#${previousStateName}_to_${newStateName}`);
+            const groupForTransition = this.SVG.querySelector<SVGGElement>(`g#${previousStateName}_to_${newStateName}`);
             if (groupForTransition) {
 
                 // add element to the beginning of the  array
-                this.transitionTrail.unshift(groupForTransition);
+                this.TRANSITION_TRAIL.unshift(groupForTransition);
 
-                if (this.transitionTrail.length > StateMachineViewer.TRAIL_LENGTH) {
+                if (this.TRANSITION_TRAIL.length > StateMachineViewer.TRAIL_LENGTH) {
                     // remove the last element of the array
-                    this.transitionTrail.pop()?.removeAttribute(StateMachineViewer.ATTRIBUTE_TRANSITION_TRAIL_INDEX);
+                    this.TRANSITION_TRAIL.pop()?.removeAttribute(StateMachineViewer.ATTRIBUTE_TRANSITION_TRAIL_INDEX);
                 }
 
                 // update indexes
-                for (let trailIdx = 0; trailIdx < this.transitionTrail.length; trailIdx++) {
-                    this.transitionTrail[trailIdx].setAttribute(StateMachineViewer.ATTRIBUTE_TRANSITION_TRAIL_INDEX, trailIdx.toString());
+                for (let trailIdx = 0; trailIdx < this.TRANSITION_TRAIL.length; trailIdx++) {
+                    this.TRANSITION_TRAIL[trailIdx].setAttribute(StateMachineViewer.ATTRIBUTE_TRANSITION_TRAIL_INDEX, trailIdx.toString());
                 }
             }
         }

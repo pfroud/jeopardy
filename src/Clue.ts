@@ -9,39 +9,39 @@ import { specialCategories, SpecialCategory } from "./specialCategories";
 export class Clue {
 
     /** The phrase read aloud by the person operating the game */
-    public readonly question: string;
+    public readonly QUESTION: string;
 
     /** The correct response a player needs to say to get money */
-    public readonly answer: string;
+    public readonly ANSWER: string;
 
-    public readonly value: number;
-    public readonly airdate: Date;
-    public readonly category: {
-        title: string;
+    public readonly VALUE: number;
+    public readonly AIRDATE: Date;
+    public readonly CATEGORY: {
+        readonly TITLE: string;
         specialCategory: SpecialCategory | null;
     }
 
-    public readonly buzzHistory: BuzzHistoryForClue;
+    public readonly BUZZ_HISTORY: BuzzHistoryForClue;
 
     public constructor(xhrResponse: string) {
         const parsedJson = JSON.parse(xhrResponse)[0];
 
-        this.answer = cleanString(parsedJson.answer);
-        this.question = cleanString(parsedJson.question);
-        this.value = parsedJson.value;
+        this.ANSWER = cleanString(parsedJson.answer);
+        this.QUESTION = cleanString(parsedJson.question);
+        this.VALUE = parsedJson.value;
 
         // example of what format the airdate is in: "2013-01-25T12:00:00.000Z"
-        this.airdate = new Date(parsedJson.airdate);
+        this.AIRDATE = new Date(parsedJson.airdate);
 
-        this.category = {
-            title: cleanString(parsedJson.category.title),
+        this.CATEGORY = {
+            TITLE: cleanString(parsedJson.category.title),
             specialCategory: null
         };
 
         this.checkSpecialCategory();
 
-        this.buzzHistory = {
-            records: getEmpty2DArray(Operator.teamCount),
+        this.BUZZ_HISTORY = {
+            RECORDS: getEmpty2DArray(Operator.teamCount),
             timestampWhenClueQuestionFinishedReading: NaN
         };
 
@@ -115,20 +115,20 @@ export class Clue {
         const regex = /\b((this)|(these)|(her)|(his)|(she)|(he)|(here))\b/ig;
 
         // "$&" is the matched substring
-        return this.question.replace(regex, '<span class="clue-keyword">$&</span>');
+        return this.QUESTION.replace(regex, '<span class="clue-keyword">$&</span>');
 
     }
 
     public isValid(): boolean {
-        return this.value !== null &&
-            this.value > 0 &&
-            this.question !== null &&
-            this.question.length > 0 &&
-            this.question !== "=" &&
-            this.answer.length > 0 &&
-            this.category !== null &&
-            this.category.title.length > 0 &&
-            this.category.title !== "=";
+        return this.VALUE !== null &&
+            this.VALUE > 0 &&
+            this.QUESTION !== null &&
+            this.QUESTION.length > 0 &&
+            this.QUESTION !== "=" &&
+            this.ANSWER.length > 0 &&
+            this.CATEGORY !== null &&
+            this.CATEGORY.TITLE.length > 0 &&
+            this.CATEGORY.TITLE !== "=";
     }
 
     public hasMultimedia(): boolean {
@@ -137,7 +137,7 @@ export class Clue {
         TV show. The J Archive does not have the audio or video, so we need to
         skip those clues.
         */
-        const question = this.question.toLowerCase();
+        const question = this.QUESTION.toLowerCase();
         const termsForMultimedia = ["seen here", "heard here"];
         return termsForMultimedia.some(term => question.includes(term));
     }
@@ -145,12 +145,12 @@ export class Clue {
     private checkSpecialCategory(): void {
         // search for the first one which matches
         for (const specialCategory of specialCategories) {
-            if (specialCategory.categoryTitleMatches.test(this.category.title)) {
-                this.category.specialCategory = specialCategory;
+            if (specialCategory.CATEGORY_TITLE_MATCHES.test(this.CATEGORY.TITLE)) {
+                this.CATEGORY.specialCategory = specialCategory;
                 return;
             }
         }
-        this.category.specialCategory = null;
+        this.CATEGORY.specialCategory = null;
     }
 
 

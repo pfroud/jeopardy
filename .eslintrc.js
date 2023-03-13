@@ -39,7 +39,10 @@ module.exports = // https://eslint.org/docs/user-guide/configuring/
     "rules": {
         "consistent-return": "error", // https://eslint.org/docs/rules/consistent-return
         "default-case-last": "warn", // https://eslint.org/docs/rules/default-case-last
-        "new-cap": "error", // https://eslint.org/docs/rules/new-cap
+        // https://eslint.org/docs/rules/new-cap
+        "new-cap": ["error",
+            { "capIsNewExceptionPattern": "[A-Z_]+" } // allow all-uppercase
+        ],
         "no-array-constructor": "warn", // https://eslint.org/docs/rules/no-array-constructor   
         "no-confusing-arrow": "warn", // https://eslint.org/docs/rules/no-confusing-arrow
         "no-invalid-this": "error", // https://eslint.org/docs/rules/no-invalid-this
@@ -61,10 +64,19 @@ module.exports = // https://eslint.org/docs/user-guide/configuring/
         "@typescript-eslint/no-floating-promises": "off", // https://typescript-eslint.io/rules/no-floating-promises/
         "@typescript-eslint/no-non-null-assertion": "off", // https://typescript-eslint.io/rules/no-non-null-assertion
         "@typescript-eslint/no-unnecessary-condition": "off", //https://typescript-eslint.io/rules/no-unnecessary-condition/
+        // https://typescript-eslint.io/rules/naming-convention/
+        "@typescript-eslint/naming-convention": [
+            "warn",
+            {
+                "selector": ["property", "memberLike"],
+                "modifiers": ["readonly"],
+                "format": ["UPPER_CASE"]
+            }
+        ],
         //
         /*
-        I actually want to use the explicit any type to set globals
-        https: //typescript-eslint.io/rules/no-explicit-any/
+        I actually want to use the explicit any type to set globals.
+        https://typescript-eslint.io/rules/no-explicit-any/
         */
         "@typescript-eslint/no-explicit-any": "off",
         //

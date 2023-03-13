@@ -5,13 +5,14 @@
         "dist": true
     },
     "cSpell.words": [
-        "aduh", //author of https://github.com/aduh95/viz.js
+        "aduh",
         "Airdate",
+        "fontname",
         "Footswitch",
         "Froud",
         "millisec",
-        "rarr", //html &rarr; right arrow
+        "rarr",
         "stylesheet",
-        "fontname"
+        "SVGS"
     ]
 }
