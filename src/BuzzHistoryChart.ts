@@ -76,6 +76,10 @@ export class BuzzHistoryChart {
     private static readonly barHeight = BuzzHistoryChart.dotRadius * 2;
     private static readonly yPositionForBars = (BuzzHistoryChart.rowHeight / 2) - (BuzzHistoryChart.barHeight / 2);
 
+    private static readonly classNameForBuzzerPress = "buzzer-press";
+    private static readonly classNameForStartAnswer = "start-answer";
+    private static readonly classNameForTooEarlyStartLockout = "too-early-start-lockout";
+
     private readonly allSVGs: SVGSVGElement[] = [];
 
     /**
@@ -316,24 +320,22 @@ export class BuzzHistoryChart {
                 https://observablehq.com/@d3/selection-join
                 */
 
-
                 // Draw bars for buzzes that were too early
-                const classNameForTooEarly = "too-early-start-lockout";
                 groupForTeam
-                    .selectAll(`rect.${classNameForTooEarly}`)
+                    .selectAll(`rect.${BuzzHistoryChart.classNameForTooEarlyStartLockout}`)
                     .data(recordsForTeam.filter(record => record.result?.type === "too-early-start-lockout"))
                     .join("rect")
                     .classed("buzz-record", true)
-                    .classed(classNameForTooEarly, true)
+                    .classed(BuzzHistoryChart.classNameForTooEarlyStartLockout, true)
                     .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp))
                     .attr("y", BuzzHistoryChart.yPositionForBars)
                     .attr("width", lockoutBarWidth)
                     .attr("height", BuzzHistoryChart.barHeight);
 
                 // Draw bars for when a team started answering
-                const classNameForStartAnswer = "start-answer";
+
                 groupForTeam
-                    .selectAll(`rect.${classNameForStartAnswer}`)
+                    .selectAll(`rect.${BuzzHistoryChart.classNameForStartAnswer}`)
                     .data(
                         recordsForTeam.filter(
                             /*
@@ -349,7 +351,7 @@ export class BuzzHistoryChart {
                     )
                     .join("rect")
                     .classed("buzz-record", true)
-                    .classed(classNameForStartAnswer, true)
+                    .classed(BuzzHistoryChart.classNameForStartAnswer, true)
                     .classed("answered-right", d => d.result.answeredCorrectly)
                     .classed("answered-wrong", d => !d.result.answeredCorrectly)
                     .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp))
@@ -358,12 +360,12 @@ export class BuzzHistoryChart {
                     .attr("height", BuzzHistoryChart.barHeight);
 
                 // Draw a dot for every time a team pressed a buzzer
-                const classNameForBuzzerPress = "buzzer-press";
+
                 groupForTeam
-                    .selectAll(`circle.${classNameForBuzzerPress}`)
+                    .selectAll(`circle.${BuzzHistoryChart.classNameForBuzzerPress}`)
                     .data(recordsForTeam)
                     .join("circle")
-                    .classed(classNameForBuzzerPress, true)
+                    .classed(BuzzHistoryChart.classNameForBuzzerPress, true)
                     .attr("cx", d => this.scaleWithZoomTransform(d.startTimestamp))
                     .attr("cy", BuzzHistoryChart.rowHeight / 2)
                     .attr("r", BuzzHistoryChart.dotRadius);
