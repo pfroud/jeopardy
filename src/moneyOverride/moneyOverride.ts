@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     window.opener.addEventListener("unload", () => close());
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-type-assertion
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-type-assertion, @typescript-eslint/no-explicit-any
     const operator = (window.opener as any).operator as Operator;
     if (!operator) {
         document.body.innerHTML = "no window.opener.operator";

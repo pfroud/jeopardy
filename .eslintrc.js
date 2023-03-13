@@ -73,21 +73,5 @@ module.exports = // https://eslint.org/docs/user-guide/configuring/
                 "format": ["UPPER_CASE"]
             }
         ],
-        //
-        /*
-        I actually want to use the explicit any type to set globals.
-        https://typescript-eslint.io/rules/no-explicit-any/
-        */
-        "@typescript-eslint/no-explicit-any": "off",
-        //
-        /*  
-        Turn off the no-shadow rule in ESLint then turn it on for TSLint,
-        otherwise it will flag every enum as "already declared in the upper scope".
-        https://stackoverflow.com/a/64745652
-        */
-        "no-shadow": "off",
-        "@typescript-eslint/no-shadow": [
-            "error"
-        ]
     }
 };

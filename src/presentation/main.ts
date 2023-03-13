@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-type-assertion
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-type-assertion, @typescript-eslint/no-explicit-any
     const operator = (window.opener as any).operator as Operator;
     if (!operator) {
         document.body.innerHTML = "no window.opener.operator";
@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Add global variable so we can access the presentation instance in the web browser debugger.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
     (window as any).presentation = new Presentation(operator);
 
 });
