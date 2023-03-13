@@ -790,7 +790,6 @@ export class Operator {
         this.DIV_BACKDROP_FOR_POPUPS.style.display = "none";
     }
 
-
     public hideBuzzHistory(): void {
         this.GAME_TIMER.resume();
         this.hideBackdropForPopups();
@@ -811,6 +810,14 @@ export class Operator {
 
     public setInstructions(text: string): void {
         this.DIV_INSTRUCTIONS.innerHTML = text;
+    }
+
+    public shouldShowBuzzHistory(): boolean {
+        if (this.teamArray) {
+            return this.teamArray.some(t => t.hasBuzzedForCurrentQuestion);
+        } else {
+            throw new Error("called shouldShowBuzzHistory() when teamArray is undefined");
+        }
     }
 
 }

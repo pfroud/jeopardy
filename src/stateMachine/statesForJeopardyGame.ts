@@ -157,9 +157,17 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 {
                     TYPE: "keyboard",
                     KEYBOARD_KEYS: " ", //space
-                    DESTINATION: "showBuzzHistory"
+                    DESTINATION: "maybeShowBuzzHistory"
                 }
             ],
+        }, {
+            NAME: "maybeShowBuzzHistory",
+            TRANSITIONS: [{
+                TYPE: "if",
+                CONDITION: operator.shouldShowBuzzHistory.bind(operator),
+                THEN: { DESTINATION: "showBuzzHistory" },
+                ELSE: { DESTINATION: "checkGameEnd" }
+            }]
         }, {
             NAME: "showBuzzHistory",
             INSTRUCTIONS: "The buzz history is showing. Press space to continue.",
