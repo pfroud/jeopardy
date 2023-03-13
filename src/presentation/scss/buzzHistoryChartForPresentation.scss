@@ -38,15 +38,15 @@ svg#buzz-history {
         stroke-width: 1;
 
         &.too-early-start-lockout {
-            fill: darkorange;
+            fill: orange;
         }
 
         &.answered-right {
-            fill: darkgreen;
+            fill: green;
         }
 
         &.answered-wrong {
-            fill: darkred;
+            fill: red;
         }
 
     }

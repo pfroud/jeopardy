@@ -251,8 +251,6 @@ export class Operator {
 
         this.buttonSkipClue.addEventListener("click", () => this.skipClue());
 
-        querySelectorAndCheck(document, "a#aMoneyOverride").addEventListener("click", () => console.log("asdf"));
-
         querySelectorAndCheck(document, "a#aMoneyOverride").addEventListener("click", () =>
             window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney"));
 

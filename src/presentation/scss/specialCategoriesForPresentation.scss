@@ -26,10 +26,11 @@ div#special-category-popup {
     filter: drop-shadow(3px 3px 3px black);
     left: 50%;
     top: 50%;
-    width: 80%;
+    width: 90%;
     height: 80%;
     z-index: 2;
     transition: transform 1s ease;
+    font-size: 30px;
 
     &.visible-centered {
         transform: translate(-50%, -50%);

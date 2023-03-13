@@ -104,7 +104,7 @@ export class BuzzHistoryChart {
     public constructor(teams: Team[], lockoutDurationMillisec: number, svgInOperator: SVGSVGElement, svgInPresentation: SVGSVGElement) {
         this.lockoutDurationMillisec = lockoutDurationMillisec;
 
-        const svgWidth = 1300;
+        const svgWidth = 1000;
         const svgHeight = (teams.length * BuzzHistoryChart.rowHeight) + this.margin.top + this.margin.bottom + 50;
 
         const contentWidth = svgWidth - this.margin.left - this.margin.right;
@@ -119,7 +119,8 @@ export class BuzzHistoryChart {
 
         this.axisGenerator = axisBottom<number>(this.scaleWithZoomTransform)
             .tickSizeOuter(0)
-            .tickFormat(n => `${n} ms`);
+            .ticks(4)
+            .tickFormat(n => `${n}ms`);
 
         this.allSVGs = [svgInOperator, svgInPresentation];
         for (const theSvg of this.allSVGs) {

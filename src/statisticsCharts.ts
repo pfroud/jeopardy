@@ -43,8 +43,8 @@ export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElem
         You have to find the section called "declaration defaultOptions" and click the "show code" button!!
          */
         const chartOptions: Chartist.PieChartOptions = {
-            width: "200px",
-            height: "200px",
+            width: "180px",
+            height: "180px",
             donut: true,
             donutWidth: "40%",
             //
@@ -145,7 +145,7 @@ export function createLineChartOfMoneyOverTime(divForLineChart: HTMLDivElement, 
             labelInterpolationFnc: value => "$" + value.toLocaleString()
         },
         lineSmooth: false,
-        width: "900px",
+        width: "800px",
         height: "500px"
 
     };
