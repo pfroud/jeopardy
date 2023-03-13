@@ -145,12 +145,21 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             instructions: "Let people read the answer. Press space to continue.",
             onEnter: operator.handleShowAnswer.bind(operator),
             presentationSlideToShow: "slide-clue-answer",
-            transitions: [{
+            transitions: [
+                /*
+                {
                 type: "timeout",
                 initialDuration: settings.displayDurationAnswerMillisec,
                 behavior: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
                 destination: "showBuzzHistory"
-            }],
+            }
+            */
+                {
+                    type: "keyboard",
+                    keyboardKeys: " ", //space
+                    destination: "showBuzzHistory"
+                }
+            ],
         }, {
             name: "showBuzzHistory",
             instructions: "The buzz history is showing. Press space to continue.",
