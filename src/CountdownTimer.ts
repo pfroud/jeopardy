@@ -286,7 +286,11 @@ export class CountdownTimer {
                         update (audio is not graphical). Turns out it's nontrivial to figure out when one second
                         has passed so I am leaving it in here.
                         */
-                        this.audioManager?.tick.play();
+                        if (this.audioManager) {
+                            this.audioManager?.tick.play();
+                        } else {
+                            console.warn("dotsTable is true but no audioManager");
+                        }
                     }
                 });
             }

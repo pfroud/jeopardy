@@ -106,7 +106,7 @@ export class Operator {
 
         this.gameTimer.addProgressElement(this.presentation.getProgressElementForGameTimer());
 
-        this.stateMachine = new StateMachine(this.settings, this, this.presentation);
+        this.stateMachine = new StateMachine(this.settings, this, this.presentation, this.audioManager);
 
         if (this.teamArray) {
             this.buzzHistoryDiagram = new BuzzHistoryChart(

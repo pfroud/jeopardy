@@ -1,3 +1,4 @@
+import { AudioManager } from "../AudioManager";
 import { querySelectorAndCheck } from "../common";
 import { CountdownTimer } from "../CountdownTimer";
 import { Operator } from "../operator/Operator";
@@ -11,6 +12,7 @@ import { CountdownBehavior, StateMachineState, TimeoutTransition } from "./types
 export class StateMachine {
     private readonly DEBUG = false;
     private readonly operator: Operator;
+    private readonly audioManager: AudioManager;
     private readonly presentation: Presentation;
     private readonly operatorWindowCountdownProgress: HTMLProgressElement;
     private readonly operatorWindowCountdownText: HTMLDivElement;
@@ -26,9 +28,10 @@ export class StateMachine {
     private stateMachineViewer?: StateMachineViewer;
     private presentState: StateMachineState;
 
-    public constructor(settings: Settings, operator: Operator, presentation: Presentation) {
+    public constructor(settings: Settings, operator: Operator, presentation: Presentation, audioManager: AudioManager) {
         this.operator = operator;
         this.presentation = presentation;
+        this.audioManager = audioManager;
 
         this.operatorWindowCountdownProgress = querySelectorAndCheck(document, "div#state-machine-viz progress");
         this.operatorWindowCountdownText = querySelectorAndCheck(document, "div#state-machine-viz div.remaining-time-text");
@@ -311,7 +314,7 @@ export class StateMachine {
 
     private createCountdownTimerForTransition(timeoutTransition: TimeoutTransition): CountdownTimer {
 
-        const countdownTimer = new CountdownTimer(timeoutTransition.initialDuration);
+        const countdownTimer = new CountdownTimer(timeoutTransition.initialDuration, this.audioManager);
 
         countdownTimer.onFinished = (): void => {
             timeoutTransition.onTransition?.();
