@@ -67,7 +67,8 @@ export class StateMachine {
 
             // Search for the first transition with a keyboard transition for the key pressed.
             for (const transition of this.presentState.transitions) {
-                if (transition.type === "keyboard" && transition.keyboardKeys.includes(keyboardEvent.key)) {
+                if (transition.type === "keyboard" &&
+                    transition.keyboardKeys.toLowerCase().includes(keyboardEvent.key.toLowerCase())) {
 
                     if (transition.guardCondition && !transition.guardCondition(keyboardEvent)) {
                         continue;
