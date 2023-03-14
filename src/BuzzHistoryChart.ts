@@ -337,8 +337,7 @@ export class BuzzHistoryChart {
         /////// Compute the time range for the X axis ///////////
         /////////////////////////////////////////////////////////
 
-        // include time zero
-        const allTimestamps: number[] = [0];
+        const allTimestamps: number[] = [];
 
         // Change all the timestamps so time zero is when the operator finished reading the question.
         this.history.RECORDS.forEach(arrayOfRecordsForTeam => arrayOfRecordsForTeam.forEach(record => {
@@ -354,11 +353,20 @@ export class BuzzHistoryChart {
         const lastTimestamp = Math.max(...allTimestamps);
 
         /*
+        The first timestamp will be greater than zero if there were no early buzzes (because
+        we previously changed all the timestamps to be relative to when the operator finished
+        reading the question).
+        In that case, the vertical bar for when the operator finished reading the
+        question would be off screen on the left. So we will set the domain minimum to be a
+        negative number, which will make the vertical bar be on the right of the labels.
+        */
+        const domainMinToUse = (firstTimestamp > 0) ? -(lastTimestamp / 10) : firstTimestamp;
+
+        /*
         Add padding so the leftmost record doesn't overlap the label 
         and the rightmost record isn't exactly on the edge
         */
-        // todo add padding on the left if the min timestamp is zero
-        this.SCALE_WITHOUT_ZOOM_TRANSFORM.domain([firstTimestamp * 1.3, lastTimestamp * 1.1]);
+        this.SCALE_WITHOUT_ZOOM_TRANSFORM.domain([domainMinToUse * 1.3, lastTimestamp * 1.1]);
 
         /*
         Reset the pan & zoom. Calling transform() fires a zoom event,
