@@ -1,14 +1,16 @@
 svg#buzz-history {
     background: none;
 
-    text.team-name {
+    text {
         fill: white;
-        font-size: 20px;
+
+        &.team-name {
+            font-size: 20px;
+        }
     }
 
     g#axis {
         text {
-            fill: white;
             font-size: 20px;
         }
 

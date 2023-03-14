@@ -1,7 +1,7 @@
 import { select, Selection } from "d3-selection";
 import { ScaleLinear, scaleLinear } from "d3-scale";
 import { Axis, axisBottom } from "d3-axis";
-import { zoom, D3ZoomEvent, ZoomBehavior, zoomIdentity } from "d3-zoom";
+import { zoom, D3ZoomEvent, zoomIdentity } from "d3-zoom";
 import { Team, TeamState } from "./Team";
 import { createSvgElement } from "./common";
 
@@ -64,12 +64,18 @@ interface BuzzResultIgnore {
 
 export class BuzzHistoryChart {
 
-    private readonly MARGIN = {
-        top: 20,
-        left: 20,
-        right: 20,
-        bottom: 20
-    };
+    private readonly SVG_MARGIN = {
+        TOP: 20,
+        LEFT: 20,
+        RIGHT: 20,
+        BOTTOM: 20
+    } as const;
+
+    private readonly LEGEND_HEIGHT = 30;
+    private readonly LEGEND_PADDING = 40;
+
+    private readonly CONTENT_WIDTH: number;
+    private readonly CONTENT_HEIGHT: number;
 
     private static readonly ROW_HEIGHT = 50;
     private static readonly DOT_RADIUS = 5;
@@ -79,6 +85,8 @@ export class BuzzHistoryChart {
     private static readonly CLASS_NAME_FOR_BUZZER_PRESS = "buzzer-press";
     private static readonly CLASS_NAME_FOR_START_ANSWER = "start-answer";
     private static readonly CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT = "too-early-start-lockout";
+    private static readonly CLASS_NAME_FOR_ANSWERED_RIGHT = "answered-right";
+    private static readonly CLASS_NAME_FOR_ANSWERED_WRONG = "answered-wrong";
 
     private readonly ALL_SVGS: SVGSVGElement[] = [];
 
@@ -112,14 +120,14 @@ export class BuzzHistoryChart {
         this.SVG_IN_OPERATOR_WINDOW = select(svgInOperatorWindow);
 
         const svgWidth = 1000;
-        const svgHeight = (teams.length * BuzzHistoryChart.ROW_HEIGHT) + this.MARGIN.top + this.MARGIN.bottom + 50;
+        const svgHeight = (teams.length * BuzzHistoryChart.ROW_HEIGHT) + this.SVG_MARGIN.TOP + this.SVG_MARGIN.BOTTOM + 30 + this.LEGEND_HEIGHT + this.LEGEND_PADDING;
 
-        const contentWidth = svgWidth - this.MARGIN.left - this.MARGIN.right;
-        const contentHeight = svgHeight - this.MARGIN.top - this.MARGIN.bottom;
+        this.CONTENT_WIDTH = svgWidth - this.SVG_MARGIN.LEFT - this.SVG_MARGIN.RIGHT;
+        this.CONTENT_HEIGHT = svgHeight - this.SVG_MARGIN.TOP - this.SVG_MARGIN.BOTTOM - this.LEGEND_HEIGHT - this.LEGEND_PADDING;
 
         // the domain is set in the setHistory() function
         this.SCALE_WITHOUT_ZOOM_TRANSFORM = scaleLinear()
-            .range([0, contentWidth]);
+            .range([0, this.CONTENT_WIDTH]);
 
         // the zoomed scale is changed in the handleZoom() function
         this.scaleWithZoomTransform = this.SCALE_WITHOUT_ZOOM_TRANSFORM;
@@ -132,22 +140,22 @@ export class BuzzHistoryChart {
         this.ALL_SVGS = [svgInOperatorWindow, svgInPresentationWindow];
         for (const theSvg of this.ALL_SVGS) {
 
-            this.createLegend(theSvg);
-
             theSvg.setAttribute("width", String(svgWidth));
             theSvg.setAttribute("height", String(svgHeight));
+
+            this.createLegend(theSvg);
 
             // the content group is everything except the axis
             const groupContent = createSvgElement("g");
             groupContent.setAttribute("id", "content");
-            groupContent.setAttribute("transform", `translate(${this.MARGIN.left}, ${this.MARGIN.top})`);
+            groupContent.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.SVG_MARGIN.TOP})`);
             theSvg.append(groupContent);
 
             const groupXAxis = createSvgElement("g");
             const d3SelectionOfGroupXAxis = select(groupXAxis);
             this.X_AXIS_GROUPS.set(theSvg, d3SelectionOfGroupXAxis);
             groupXAxis.setAttribute("id", "axis");
-            groupXAxis.setAttribute("transform", `translate(${this.MARGIN.left}, ${contentHeight})`);
+            groupXAxis.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
             theSvg.appendChild(groupXAxis);
             this.AXIS_GENERATOR(d3SelectionOfGroupXAxis);
 
@@ -169,7 +177,7 @@ export class BuzzHistoryChart {
                 shadedBackground.classList.add(`row-shaded-background-${teamIndex % 2 === 0 ? "even" : "odd"}`);
                 shadedBackground.setAttribute("x", "0");
                 shadedBackground.setAttribute("y", "0");
-                shadedBackground.setAttribute("width", String(contentWidth));
+                shadedBackground.setAttribute("width", String(this.CONTENT_WIDTH));
                 shadedBackground.setAttribute("height", String(BuzzHistoryChart.ROW_HEIGHT));
                 group.appendChild(shadedBackground);
 
@@ -177,7 +185,7 @@ export class BuzzHistoryChart {
                 separatorLine.classList.add("row-separator");
                 separatorLine.setAttribute("x1", "0");
                 separatorLine.setAttribute("y1", String(BuzzHistoryChart.ROW_HEIGHT));
-                separatorLine.setAttribute("x2", String(contentWidth));
+                separatorLine.setAttribute("x2", String(this.CONTENT_WIDTH));
                 separatorLine.setAttribute("y2", String(BuzzHistoryChart.ROW_HEIGHT));
                 group.appendChild(separatorLine);
 
@@ -210,7 +218,7 @@ export class BuzzHistoryChart {
             verticalLine.classList.add("vertical-line");
             verticalLine.setAttribute("id", "operator-finished-reading-question");
             verticalLine.setAttribute("y1", "0");
-            verticalLine.setAttribute("y2", String(contentHeight));
+            verticalLine.setAttribute("y2", String(this.CONTENT_HEIGHT));
             verticalLine.setAttribute("x1", String(xPositionAtTimeZero));
             verticalLine.setAttribute("x2", String(xPositionAtTimeZero));
             groupContent.appendChild(verticalLine);
@@ -218,10 +226,81 @@ export class BuzzHistoryChart {
 
         }
 
-        ///////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////// Pan & zoom //////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////
+        this.initPanZoomController();
 
+    }
+
+    private createLegend(svgToCreateLegendIn: SVGSVGElement): void {
+        const legendGroup = createSvgElement("g");
+        legendGroup.setAttribute("id", "legend");
+        legendGroup.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.SVG_MARGIN.TOP + this.CONTENT_HEIGHT + this.LEGEND_PADDING})`);
+
+        /*
+            const background = createSvgElement("rect");
+            background.setAttribute("width", String(this.CONTENT_WIDTH));
+            background.setAttribute("height", String(this.LEGEND_HEIGHT));
+            background.setAttribute("x", "0");
+            background.setAttribute("y", "0");
+            background.setAttribute("fill", "#ffdddd88");
+            legendGroup.appendChild(background);
+            */
+
+        const yPositionForText = 20;
+        const yPositionForBottomRow = 25;
+
+        const createText = (x: number, content: string): void => {
+            const theText = createSvgElement("text");
+            theText.setAttribute("x", String(x));
+            theText.setAttribute("y", String(yPositionForText));
+            theText.innerHTML = content;
+            legendGroup.appendChild(theText);
+        };
+
+        const createRect = (x: number, className: string): void => {
+            const theRect = createSvgElement("rect");
+            theRect.classList.add("buzz-record");
+            theRect.classList.add(className);
+            theRect.setAttribute("width", "100");
+            theRect.setAttribute("height", String(BuzzHistoryChart.BAR_HEIGHT));
+            theRect.setAttribute("x", String(x));
+            theRect.setAttribute("y", String(yPositionForBottomRow));
+            legendGroup.appendChild(theRect);
+        };
+
+        const createCircle = (cx: number): void => {
+            const theCircle = createSvgElement("circle");
+            theCircle.classList.add(BuzzHistoryChart.CLASS_NAME_FOR_BUZZER_PRESS);
+            theCircle.setAttribute("cx", String(cx));
+            theCircle.setAttribute("cy", String(yPositionForBottomRow + (BuzzHistoryChart.DOT_RADIUS / 2)));
+            theCircle.setAttribute("r", String(BuzzHistoryChart.DOT_RADIUS));
+            legendGroup.appendChild(theCircle);
+        };
+
+        const itemsCount = 4;
+        const fractionOfWidth = this.CONTENT_WIDTH / itemsCount;
+
+        const xPositionOfCircleLegendItem = 10;
+        createText(xPositionOfCircleLegendItem, "Buzzer press");
+        createCircle(xPositionOfCircleLegendItem + (BuzzHistoryChart.DOT_RADIUS / 2) + 4);
+
+
+        const rectanglesToAdd = [
+            { label: "Too early (lockout)", xOffsetToLookLinedUp: 4, className: BuzzHistoryChart.CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT },
+            { label: "Answered right", xOffsetToLookLinedUp: 1, className: BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_RIGHT },
+            { label: "Answered wrong", xOffsetToLookLinedUp: 1, className: BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_WRONG }
+        ];
+
+        for (let i = 0; i < rectanglesToAdd.length; i++) {
+            const xPosition = fractionOfWidth * (i + 1);
+            const rectToAdd = rectanglesToAdd[i];
+            createText(xPosition, rectToAdd.label);
+            createRect(xPosition + rectToAdd.xOffsetToLookLinedUp, rectToAdd.className);
+        }
+
+        svgToCreateLegendIn.appendChild(legendGroup);
+    }
+
+    private initPanZoomController(): void {
         /*
         https://www.d3indepth.com/zoom-and-pan/
         https://observablehq.com/@d3/pan-zoom-axes
@@ -346,8 +425,8 @@ export class BuzzHistoryChart {
                     .join("rect")
                     .classed("buzz-record", true)
                     .classed(BuzzHistoryChart.CLASS_NAME_FOR_START_ANSWER, true)
-                    .classed("answered-right", d => d.RESULT.answeredCorrectly)
-                    .classed("answered-wrong", d => !d.RESULT.answeredCorrectly)
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_RIGHT, d => d.RESULT.answeredCorrectly)
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_WRONG, d => !d.RESULT.answeredCorrectly)
                     .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp))
                     .attr("y", BuzzHistoryChart.Y_POSITION_FOR_BARS)
                     .attr("width", d => this.scaleWithZoomTransform(d.RESULT.endTimestamp) - this.scaleWithZoomTransform(d.startTimestamp))
