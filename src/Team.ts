@@ -119,7 +119,7 @@ export class Team {
             this.animateMoneyChange(this.money + amountAdd);
         } else {
             this.money += amountAdd;
-            this.updateMoneyDisplay();
+            this.setMoneyDisplay(this.money);
         }
 
     }
@@ -129,42 +129,43 @@ export class Team {
             this.animateMoneyChange(this.money - amountSubtract);
         } else {
             this.money -= amountSubtract;
-            this.updateMoneyDisplay();
+            this.setMoneyDisplay(this.money);
         }
     }
 
     public moneySet(newMoney: number, animate = true): void {
         if (animate) {
             this.animateMoneyChange(newMoney);
-
         } else {
             this.money = newMoney;
-            this.updateMoneyDisplay();
+            this.setMoneyDisplay(this.money);
         }
     }
 
     private animateMoneyChange(targetMoney: number): void {
-
         if (this.money === targetMoney) {
             return;
         }
 
+        let moneyDisplayedOnScreen = this.money;
+        this.money = targetMoney;
+
         const DOLLAR_CHANGE_PER_STEP = 100;
         const DELAY_BETWEEN_STEPS_MILLISEC = 50;
-        const DIRECTION_MULTIPLIER = targetMoney > this.money ? 1 : -1;
+        const DIRECTION_MULTIPLIER = (targetMoney > moneyDisplayedOnScreen) ? 1 : -1;
 
         const handleTimeout = (): void => {
-            const difference = Math.abs(targetMoney - this.money);
+            const difference = Math.abs(targetMoney - moneyDisplayedOnScreen);
 
             // teams could loose $50 if the guessing penalty is 0.5, for example
             if (difference >= DOLLAR_CHANGE_PER_STEP) {
-                this.money += DIRECTION_MULTIPLIER * DOLLAR_CHANGE_PER_STEP;
+                moneyDisplayedOnScreen += DIRECTION_MULTIPLIER * DOLLAR_CHANGE_PER_STEP;
             } else {
-                this.money += DIRECTION_MULTIPLIER * difference;
+                moneyDisplayedOnScreen += DIRECTION_MULTIPLIER * difference;
             }
 
-            this.updateMoneyDisplay();
-            if (this.money !== targetMoney) {
+            this.setMoneyDisplay(moneyDisplayedOnScreen);
+            if (moneyDisplayedOnScreen !== targetMoney) {
                 setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MILLISEC, this);
             }
 
@@ -182,12 +183,12 @@ export class Team {
         this.countdownTimer?.setPaused(isPaused);
     }
 
-    private updateMoneyDisplay(): void {
+    private setMoneyDisplay(value: number): void {
         if (this.DIV.PRESENTATION.money) {
-            this.DIV.PRESENTATION.money.innerHTML = "$" + this.money.toLocaleString();
+            this.DIV.PRESENTATION.money.innerHTML = "$" + value.toLocaleString();
         }
         if (this.DIV.OPERATOR.money) {
-            this.DIV.OPERATOR.money.innerHTML = "$" + this.money.toLocaleString();
+            this.DIV.OPERATOR.money.innerHTML = "$" + value.toLocaleString();
         }
     }
 

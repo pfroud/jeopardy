@@ -136,7 +136,8 @@ export function createLineChartOfMoneyOverTime(divForLineChart: HTMLDivElement, 
         axisX: {
             showGrid: false,
             type: Chartist.AutoScaleAxis,
-            onlyInteger: true
+            onlyInteger: true,
+            labelInterpolationFnc: n => (n as number) + 1
         },
         axisY: {
             showGrid: true,
