@@ -10,13 +10,26 @@ svg#buzz-history {
     }
 
     g#axis {
-        text {
+        g.tick text {
             font-size: 20px;
         }
 
         path.domain,
         g.tick line {
             stroke: white;
+        }
+    }
+
+    g#grid {
+
+        g.tick text,
+        path.domain {
+            display: none;
+        }
+
+        g.tick line {
+            stroke: gray;
+            stroke-dasharray: 2, 2;
         }
     }
 
@@ -32,6 +45,11 @@ svg#buzz-history {
     line.vertical-line {
         stroke: white;
         stroke-width: 1;
+    }
+
+    g.annotation line {
+        stroke-linecap: round;
+        stroke: white;
     }
 
     rect.buzz-record {

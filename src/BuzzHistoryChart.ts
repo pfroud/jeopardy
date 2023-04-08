@@ -100,8 +100,15 @@ export class BuzzHistoryChart {
     private static readonly CLASS_NAME_FOR_ANSWERED_RIGHT = "answered-right";
     private static readonly CLASS_NAME_FOR_ANSWERED_WRONG = "answered-wrong";
     private static readonly CLASS_NAME_FOR_ANNOTATION_GROUP = "annotation";
+    private static readonly CLASS_NAME_FOR_ANNOTATION_ARROW_BODY = "annotation-arrow-body";
+    private static readonly CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_LEFT = "annotation-arrowhead-top-left";
+    private static readonly CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_LEFT = "annotation-arrowhead-bottom-left";
+    private static readonly CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_RIGHT = "annotation-arrowhead-top-right";
+    private static readonly CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_RIGHT = "annotation-arrowhead-bottom-right";
 
-    private static readonly ANNOTATION_RANGE_MILLISEC = 500;
+    private static readonly ANNOTATION_RANGE_MILLISEC = 100;
+    private static readonly ANNOTATION_ARROWHEAD_SIZE = 5;
+
     /**
      * The first index is the team index. Then the second list is annotations for that team.
      */
@@ -267,16 +274,6 @@ export class BuzzHistoryChart {
         legendGroup.setAttribute("id", "legend");
         legendGroup.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.SVG_MARGIN.TOP + this.CONTENT_HEIGHT + this.LEGEND_PADDING})`);
 
-        /*
-            const background = createSvgElement("rect");
-            background.setAttribute("width", String(this.CONTENT_WIDTH));
-            background.setAttribute("height", String(this.LEGEND_HEIGHT));
-            background.setAttribute("x", "0");
-            background.setAttribute("y", "0");
-            background.setAttribute("fill", "#ffdddd88");
-            legendGroup.appendChild(background);
-            */
-
         const yPositionForText = 20;
         const yPositionForBottomRow = 25;
 
@@ -347,20 +344,22 @@ export class BuzzHistoryChart {
     }
 
 
-    /**
-     * The input is the present zoom scale factor. The output is the tick count for the axis.
-     */
+    /** The input is the present zoom scale factor. The output is the tick count for the axis. */
     private readonly ZOOM_TO_AXIS_TICK_COUNT_FUNCTION = BuzzHistoryChart.getClampedLineFunction(
-        4, 4,  // at 1x zoom and below, set the tick count to 4
-        6, 8   // at 4x zoom and above, set the tick count to 8
+        4, 4,  // at 4x zoom and below, set the tick count to 4
+        6, 8   // at 6x zoom and above, set the tick count to 8
     );
 
-    /**
-     * The input is the present zoom scale factor. The output is opacity for the grid.
-     */
-    private readonly ZOOM_TO_GRID_OPACITY_FUNCTION = BuzzHistoryChart.getClampedLineFunction(
-        20, 0.0, // at 3x zoom and below, set the opacity to 0.0
-        30, 1.0  // at 4x zoom and above, set the opacity to 1.0
+    /** The input is the present zoom scale factor. The output is opacity for the gridlines. */
+    private readonly ZOOM_TO_GRIDLINE_OPACITY_FUNCTION = BuzzHistoryChart.getClampedLineFunction(
+        20, 0.0, // at 20x zoom and below, set the grid opacity to 0.0
+        30, 1.0  // at 30x zoom and above, set the grid opacity to 1.0
+    );
+
+    /** The input is the present zoom scale factor. The output is opacity for the annotations. */
+    private readonly ZOOM_TO_ANNOTATION_OPACITY_FUNCTION = BuzzHistoryChart.getClampedLineFunction(
+        2, 0.0, // at 2x zoom and below, set the annotation opacity to 0.0
+        4, 1.0  // at 4x zoom and above, set the annotation opacity to 1.0
     );
 
     private initPanZoomController(): void {
@@ -414,11 +413,17 @@ export class BuzzHistoryChart {
 
             // Draw vertical grid lines
             this.AXIS_GENERATOR.tickSizeInner(-this.CONTENT_HEIGHT);
-            const gridOpacity = this.ZOOM_TO_GRID_OPACITY_FUNCTION(zoomEvent);
+            const gridOpacity = this.ZOOM_TO_GRIDLINE_OPACITY_FUNCTION(zoomEvent);
             this.VERTICAL_GRIDLINE_GROUPS.forEach(gridGroup => {
                 this.AXIS_GENERATOR(gridGroup);
                 gridGroup.attr("opacity", gridOpacity);
             });
+
+            const annotationOpacity = this.ZOOM_TO_ANNOTATION_OPACITY_FUNCTION(zoomEvent);
+            this.ALL_SVGS.forEach(
+                svg => svg.querySelectorAll("g.annotation").forEach(
+                    annotationGroup => annotationGroup.setAttribute("opacity", String(annotationOpacity)))
+            );
 
             // Re-draw the buzz history diagram
             this.redraw();
@@ -429,16 +434,16 @@ export class BuzzHistoryChart {
         this.ZOOM_CONTROLLER(this.SVG_IN_OPERATOR_WINDOW);
     }
 
-    private doAnnotations(): void {
+    private calculateAnnotations(): void {
         if (!this.history) {
             throw new Error("called doAnnotations with no history");
         }
 
-        // TODO do I need to add the team numebr into the record interface?
-        const anseringRecords = this.history.RECORDS.flat().filter(record => record.RESULT.TYPE === "start-answer")
+        // TODO do I need to add the team number into the record interface?
+        const answeringRecords = this.history.RECORDS.flat().filter(record => record.RESULT.TYPE === "start-answer")
             .sort((a, b) => a.startTimestamp - b.startTimestamp);
 
-        const firstAnswer = anseringRecords[0];
+        const firstAnswer = answeringRecords[0];
 
         for (let teamIdx = 0; teamIdx < this.history.RECORDS.length; teamIdx++) {
 
@@ -456,7 +461,7 @@ export class BuzzHistoryChart {
                 const record = records[recordIdx];
                 const difference = record.startTimestamp - firstAnswer.startTimestamp;
                 if (
-                    record.RESULT.TYPE === "ignored" // buzzes that happened when someone else was ansering
+                    record.RESULT.TYPE === "ignored" // buzzes that happened when someone else was answering
                     && difference <= BuzzHistoryChart.ANNOTATION_RANGE_MILLISEC
                 ) {
                     this.ANNOTATIONS[teamIdx].push({
@@ -540,7 +545,7 @@ export class BuzzHistoryChart {
         const firstTimestamp = Math.min(...allTimestamps);
         const lastTimestamp = Math.max(...allTimestamps);
 
-        this.doAnnotations();
+        this.calculateAnnotations();
 
         /*
         The first timestamp will be greater than zero if there were no early buzzes (because
@@ -609,8 +614,8 @@ export class BuzzHistoryChart {
                     .data(
                         recordsForTeam.filter(
                             /*
-                            Need to use a type predicate (aka "user-defined type guard") for Typescript to
-                            be able to inter types from the array filter function.
+                            Need to use a type predicate (aka "user-defined type guard") for
+                            Typescript to be able to infer types from the array filter function.
                             https://stackoverflow.com/questions/65279417/typescript-narrow-down-type-based-on-class-property-from-filter-find-etc
                             https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates
                             */
@@ -639,43 +644,75 @@ export class BuzzHistoryChart {
                     .attr("cy", BuzzHistoryChart.ROW_HEIGHT / 2)
                     .attr("r", BuzzHistoryChart.DOT_RADIUS);
 
-
+                // Draw annotations
                 const annotationForThisTeam = this.ANNOTATIONS[teamIndex];
-                const groups = groupForTeam
+                const annotationGroups = groupForTeam
                     .selectAll(`g.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_GROUP}`)
                     .data(annotationForThisTeam)
                     .join("g")
                     .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_GROUP, true);
 
-                groups
-                    .selectAll("line")
+                const arrowY = (BuzzHistoryChart.ROW_HEIGHT / 2) + 15;
+
+                // draw the body of the arrow
+                annotationGroups
+                    .selectAll(`line.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROW_BODY}`)
                     .data(annotationForThisTeam)
                     .join("line")
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROW_BODY, true)
                     .attr("x1", d => this.scaleWithZoomTransform(d.startTimestamp))
                     .attr("x2", d => this.scaleWithZoomTransform(d.endTimestamp))
-                    .attr("y1", (BuzzHistoryChart.ROW_HEIGHT / 2) + 15)
-                    .attr("y2", (BuzzHistoryChart.ROW_HEIGHT / 2) + 15)
-                    .attr("stroke", "black")
-                    .attr("stroke-width", "2");
+                    .attr("y1", arrowY)
+                    .attr("y2", arrowY);
 
-                groups
+                // draw the arrowhead
+                annotationGroups
+                    .selectAll(`line.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_LEFT}`)
+                    .data(annotationForThisTeam)
+                    .join("line")
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_LEFT, true)
+                    .attr("x1", d => this.scaleWithZoomTransform(d.startTimestamp))
+                    .attr("x2", d => this.scaleWithZoomTransform(d.startTimestamp) + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE)
+                    .attr("y1", arrowY)
+                    .attr("y2", arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE);
+                annotationGroups
+                    .selectAll(`line.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_LEFT}`)
+                    .data(annotationForThisTeam)
+                    .join("line")
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_LEFT, true)
+                    .attr("x1", d => this.scaleWithZoomTransform(d.startTimestamp))
+                    .attr("x2", d => this.scaleWithZoomTransform(d.startTimestamp) + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE)
+                    .attr("y1", arrowY)
+                    .attr("y2", arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE);
+                annotationGroups
+                    .selectAll(`line.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_RIGHT}`)
+                    .data(annotationForThisTeam)
+                    .join("line")
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_RIGHT, true)
+                    .attr("x1", d => this.scaleWithZoomTransform(d.endTimestamp))
+                    .attr("x2", d => this.scaleWithZoomTransform(d.endTimestamp) - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE)
+                    .attr("y1", arrowY)
+                    .attr("y2", arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE);
+                annotationGroups
+                    .selectAll(`line.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_RIGHT}`)
+                    .data(annotationForThisTeam)
+                    .join("line")
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_RIGHT, true)
+                    .attr("x1", d => this.scaleWithZoomTransform(d.endTimestamp))
+                    .attr("x2", d => this.scaleWithZoomTransform(d.endTimestamp) - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE)
+                    .attr("y1", arrowY)
+                    .attr("y2", arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE);
+
+                // draw annotation text
+                annotationGroups
                     .selectAll("text")
                     .data(annotationForThisTeam)
                     .join("text")
-                    .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp))
+                    .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp) + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE)
                     .attr("y", (BuzzHistoryChart.ROW_HEIGHT / 2) + 20)
-                    .attr("fill", "black")
                     .attr("font-size", "12")
                     .text(d => d.message);
 
-                /*
-                 Not sure how to do stuff inside the <g> using data join.
-                 We need to:
-                  - draw a line (with arrows)
-                  - draw the text
-                  - if the annotation starts in a different team, draw a line going
-                  between this team and the other team
-                  */
 
             });
 
