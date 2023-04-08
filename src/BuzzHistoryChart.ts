@@ -21,7 +21,7 @@ export interface BuzzHistoryForClue {
 /**
  * One BuzzHistoryRecord corresponds to one press of the physical buzzer button.
  */
-export interface BuzzHistoryRecord<R> {
+export interface BuzzHistoryRecord<R extends BuzzResult> {
     startTimestamp: number;
     readonly RESULT: R;
 }
@@ -62,6 +62,18 @@ interface BuzzResultIgnore {
     readonly TEAM_STATE_WHY_IT_WAS_IGNORED: TeamState;
 }
 
+interface Annotation {
+    startTimestamp: number;
+    endTimestamp: number;
+    message: string;
+    /**
+     * If not defined, then this Annotation starts and ends in the 
+     * same team.
+     * If defined, then this Annotation starts in the specified team.
+     */
+    teamIndexWhereStartTimestampHappened?: number;
+}
+
 export class BuzzHistoryChart {
 
     private readonly SVG_MARGIN = {
@@ -87,6 +99,13 @@ export class BuzzHistoryChart {
     private static readonly CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT = "too-early-start-lockout";
     private static readonly CLASS_NAME_FOR_ANSWERED_RIGHT = "answered-right";
     private static readonly CLASS_NAME_FOR_ANSWERED_WRONG = "answered-wrong";
+    private static readonly CLASS_NAME_FOR_ANNOTATION_GROUP = "annotation";
+
+    private static readonly ANNOTATION_RANGE_MILLISEC = 500;
+    /**
+     * The first index is the team index. Then the second list is annotations for that team.
+     */
+    private readonly ANNOTATIONS: Annotation[][] = [];
 
     private readonly ALL_SVGS: SVGSVGElement[] = [];
 
@@ -324,6 +343,89 @@ export class BuzzHistoryChart {
         this.ZOOM_CONTROLLER(this.SVG_IN_OPERATOR_WINDOW);
     }
 
+    private doAnnotations(): void {
+        if (!this.history) {
+            throw new Error("called doAnnotations with no history");
+        }
+
+        // TODO do I need to add the team numebr into the record interface?
+        const anseringRecords = this.history.RECORDS.flat().filter(record => record.RESULT.TYPE === "start-answer")
+            .sort((a, b) => a.startTimestamp - b.startTimestamp);
+
+        const firstAnswer = anseringRecords[0];
+
+        for (let teamIdx = 0; teamIdx < this.history.RECORDS.length; teamIdx++) {
+
+            // clear previous annotations
+            this.ANNOTATIONS[teamIdx] = [];
+
+            const records = this.history.RECORDS[teamIdx];
+
+            /*
+            Find the EARLIEST record which is AFTER the operator finishing 
+            reading the clue question, and within annotation range.
+            */
+            // eslint-disable-next-line @typescript-eslint/prefer-for-of
+            for (let recordIdx = 0; recordIdx < records.length; recordIdx++) {
+                const record = records[recordIdx];
+                const difference = record.startTimestamp - firstAnswer.startTimestamp;
+                if (
+                    record.RESULT.TYPE === "ignored" // buzzes that happened when someone else was ansering
+                    && difference <= BuzzHistoryChart.ANNOTATION_RANGE_MILLISEC
+                ) {
+                    this.ANNOTATIONS[teamIdx].push({
+                        startTimestamp: firstAnswer.startTimestamp,
+                        endTimestamp: record.startTimestamp,
+                        message: `${difference} millisec too late`
+                    });
+                    break;
+                }
+            }
+
+            /*
+            Find the LATEST record which is BEFORE the operator finishing 
+            reading the clue question, and within the annotation range.
+            */
+            // eslint-disable-next-line @typescript-eslint/prefer-for-of
+            for (let recordIdx = records.length - 1; recordIdx >= 0; recordIdx--) {
+                const record = records[recordIdx];
+                if (record.startTimestamp < 0
+                    && record.startTimestamp >= -BuzzHistoryChart.ANNOTATION_RANGE_MILLISEC
+                    && record.RESULT.TYPE === "too-early-start-lockout"
+                ) {
+                    this.ANNOTATIONS[teamIdx].push({
+                        startTimestamp: record.startTimestamp,
+                        endTimestamp: 0, //the time when the operator finished reading the clue question
+                        message: `${-record.startTimestamp} millisec too early`
+                    });
+                    break;
+                }
+            }
+        }
+
+        /*
+        Now I want to:
+        - find the first record which starts the answer
+        - then search for records which are within the range of that timestamp
+        - then I need to add some stuff to the Annotation interface so that
+            we can indicate that the start or end time comes from a different team
+
+            Team A    o=========       answer
+            Team B    |  o===          lockout
+                      |  |
+                      <-->
+                     "n millisec too late"
+
+        The index in RECORDS should be the team where the message is drawn.
+        Then I can add another property in the Annotation interface to
+        specify the team index where one side of the arrow should go to.
+        Will it always be the left side which goes to a different team?
+        For now I think so, that's fine for testing it.
+        */
+
+
+    }
+
     public showNewHistory(history: BuzzHistoryForClue): void {
 
         if (history.RECORDS.length === 0) {
@@ -351,6 +453,8 @@ export class BuzzHistoryChart {
 
         const firstTimestamp = Math.min(...allTimestamps);
         const lastTimestamp = Math.max(...allTimestamps);
+
+        this.doAnnotations();
 
         /*
         The first timestamp will be greater than zero if there were no early buzzes (because
@@ -414,7 +518,6 @@ export class BuzzHistoryChart {
                     .attr("height", BuzzHistoryChart.BAR_HEIGHT);
 
                 // Draw bars for when a team started answering
-
                 groupForTeam
                     .selectAll(`rect.${BuzzHistoryChart.CLASS_NAME_FOR_START_ANSWER}`)
                     .data(
@@ -441,7 +544,6 @@ export class BuzzHistoryChart {
                     .attr("height", BuzzHistoryChart.BAR_HEIGHT);
 
                 // Draw a dot for every time a team pressed a buzzer
-
                 groupForTeam
                     .selectAll(`circle.${BuzzHistoryChart.CLASS_NAME_FOR_BUZZER_PRESS}`)
                     .data(recordsForTeam)
@@ -450,11 +552,48 @@ export class BuzzHistoryChart {
                     .attr("cx", d => this.scaleWithZoomTransform(d.startTimestamp))
                     .attr("cy", BuzzHistoryChart.ROW_HEIGHT / 2)
                     .attr("r", BuzzHistoryChart.DOT_RADIUS);
+
+
+                const annotationForThisTeam = this.ANNOTATIONS[teamIndex];
+                const groups = groupForTeam
+                    .selectAll(`g.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_GROUP}`)
+                    .data(annotationForThisTeam)
+                    .join("g")
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_GROUP, true);
+
+                groups
+                    .selectAll("line")
+                    .data(annotationForThisTeam)
+                    .join("line")
+                    .attr("x1", d => this.scaleWithZoomTransform(d.startTimestamp))
+                    .attr("x2", d => this.scaleWithZoomTransform(d.endTimestamp))
+                    .attr("y1", (BuzzHistoryChart.ROW_HEIGHT / 2) + 15)
+                    .attr("y2", (BuzzHistoryChart.ROW_HEIGHT / 2) + 15)
+                    .attr("stroke", "black")
+                    .attr("stroke-width", "2");
+
+                groups
+                    .selectAll("text")
+                    .data(annotationForThisTeam)
+                    .join("text")
+                    .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp))
+                    .attr("y", (BuzzHistoryChart.ROW_HEIGHT / 2) + 20)
+                    .attr("fill", "black")
+                    .attr("font-size", "12")
+                    .text(d => d.message);
+
+                /*
+                 Not sure how to do stuff inside the <g> using data join.
+                 We need to:
+                  - draw a line (with arrows)
+                  - draw the text
+                  - if the annotation starts in a different team, draw a line going
+                  between this team and the other team
+                  */
+
             });
 
         });
-
-
 
     }
 
