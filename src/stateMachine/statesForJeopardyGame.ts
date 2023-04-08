@@ -24,7 +24,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 The promise does NOT pass the clue object to the state machine.
                 The clue object is only stored by the operator.
                 */
-                FUNCTION_TO_GER_PROMISE: operator.getClueFromJService.bind(operator),
+                FUNCTION_TO_GET_PROMISE: operator.getClueFromJService.bind(operator),
                 DESTINATION: "showClueCategoryAndValue"
             }],
         }, {

@@ -258,7 +258,7 @@ export class StateMachine {
                 if (transition.GUARD_CONDITION && !transition.GUARD_CONDITION()) {
                     continue;
                 }
-                const thePromise: Promise<void> = transition.FUNCTION_TO_GER_PROMISE();
+                const thePromise: Promise<void> = transition.FUNCTION_TO_GET_PROMISE();
                 thePromise.then(
                     () => this.goToState(transition.DESTINATION)
                 ).catch(

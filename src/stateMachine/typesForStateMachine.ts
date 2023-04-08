@@ -32,7 +32,7 @@ export interface IfTransition {
 
 export interface PromiseTransition {
     readonly TYPE: "promise";
-    readonly FUNCTION_TO_GER_PROMISE: () => Promise<void>;
+    readonly FUNCTION_TO_GET_PROMISE: () => Promise<void>;
     readonly DESTINATION: string;
     readonly GUARD_CONDITION?: () => boolean;
 }
