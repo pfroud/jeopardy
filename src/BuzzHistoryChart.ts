@@ -127,6 +127,10 @@ export class BuzzHistoryChart {
         SVGSVGElement,
         Selection<SVGGElement, unknown, null, undefined>
     >;
+    private readonly VERTICAL_GRIDLINE_GROUPS = new Map<
+        SVGSVGElement,
+        Selection<SVGGElement, unknown, null, undefined>
+    >;
     private readonly VERTICAL_LINES = new Map<SVGSVGElement, SVGLineElement>;
     private readonly ROWS_ARRAY = new Map<
         SVGSVGElement,
@@ -153,7 +157,6 @@ export class BuzzHistoryChart {
 
         this.AXIS_GENERATOR = axisBottom<number>(this.scaleWithZoomTransform)
             .tickSizeOuter(0)
-            .ticks(4)
             .tickFormat(n => `${n}ms`);
 
         this.ALL_SVGS = [svgInOperatorWindow, svgInPresentationWindow];
@@ -170,13 +173,23 @@ export class BuzzHistoryChart {
             groupContent.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.SVG_MARGIN.TOP})`);
             theSvg.append(groupContent);
 
-            const groupXAxis = createSvgElement("g");
-            const d3SelectionOfGroupXAxis = select(groupXAxis);
-            this.X_AXIS_GROUPS.set(theSvg, d3SelectionOfGroupXAxis);
-            groupXAxis.setAttribute("id", "axis");
-            groupXAxis.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
-            theSvg.appendChild(groupXAxis);
-            this.AXIS_GENERATOR(d3SelectionOfGroupXAxis);
+            {
+                const groupXAxis = createSvgElement("g");
+                const d3SelectionOfGroupXAxis = select(groupXAxis);
+                this.X_AXIS_GROUPS.set(theSvg, d3SelectionOfGroupXAxis);
+                groupXAxis.setAttribute("id", "axis");
+                groupXAxis.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
+                theSvg.appendChild(groupXAxis);
+            }
+
+            {
+                const groupXGrid = createSvgElement("g");
+                const d3SelectionOfGroupXGrid = select(groupXGrid);
+                this.VERTICAL_GRIDLINE_GROUPS.set(theSvg, d3SelectionOfGroupXGrid);
+                groupXGrid.setAttribute("id", "grid");
+                groupXGrid.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
+                theSvg.appendChild(groupXGrid);
+            }
 
             const rowsGroup = createSvgElement("g");
             rowsGroup.setAttribute("id", "rows");
@@ -319,6 +332,37 @@ export class BuzzHistoryChart {
         svgToCreateLegendIn.appendChild(legendGroup);
     }
 
+    private static getClampedLineFunction(x1: number, y1: number, x2: number, y2: number):
+        (zoomEvent: D3ZoomEvent<SVGSVGElement, unknown>) => number {
+        return zoomEvent => {
+            const linear = y1 + ((y2 - y1) / (x2 - x1)) * (zoomEvent.transform.k - x1);
+            if (linear < y1) {
+                return y1;
+            } else if (linear > y2) {
+                return y2;
+            } else {
+                return linear;
+            }
+        };
+    }
+
+
+    /**
+     * The input is the present zoom scale factor. The output is the tick count for the axis.
+     */
+    private readonly ZOOM_TO_AXIS_TICK_COUNT_FUNCTION = BuzzHistoryChart.getClampedLineFunction(
+        4, 4,  // at 1x zoom and below, set the tick count to 4
+        6, 8   // at 4x zoom and above, set the tick count to 8
+    );
+
+    /**
+     * The input is the present zoom scale factor. The output is opacity for the grid.
+     */
+    private readonly ZOOM_TO_GRID_OPACITY_FUNCTION = BuzzHistoryChart.getClampedLineFunction(
+        20, 0.0, // at 3x zoom and below, set the opacity to 0.0
+        30, 1.0  // at 4x zoom and above, set the opacity to 1.0
+    );
+
     private initPanZoomController(): void {
         /*
         https://www.d3indepth.com/zoom-and-pan/
@@ -329,10 +373,52 @@ export class BuzzHistoryChart {
 
             this.scaleWithZoomTransform = zoomEvent.transform.rescaleX(this.SCALE_WITHOUT_ZOOM_TRANSFORM);
 
-            // Change the scale which will be used by the axis generator
+            /*
+            Normally you would just call 
+                myAxisGenerator.ticks(n)
+            to set how many ticks you want to be generated.
+            (It actually is a hint to the tick algorithm, so it might not return
+            exactly n ticks.)
+
+            But if you zoom in enough, eventually it will produce ticks with non-
+            integer, values which I don't want. Apparently the way around that is to
+            get the ticks from the scale, filter it, then pass the result into the
+            axis generator.
+
+            Solution from here although due to a new D3 version it doesn't work exactly:
+            https://stackoverflow.com/a/56821215/7376577
+            */
+            const allTicks = this.scaleWithZoomTransform.ticks(this.ZOOM_TO_AXIS_TICK_COUNT_FUNCTION(zoomEvent));
+            const onlyIntegerTicks = allTicks.filter(n => Number.isInteger(n));
+            this.AXIS_GENERATOR.tickValues(onlyIntegerTicks);
+
+            // Set the scale which will be used by the axis generator
             this.AXIS_GENERATOR.scale(this.scaleWithZoomTransform);
 
+            /*
+            We are going to use one axis generator to draw two things:
+                (1) the X axis
+                (2) vertical grid lines.
+
+            To do that we will change the tickSizeInner setting. The default
+            is six which makes normal looking axis ticks. Then we set it to
+            a negative number which makes the lines go up instead of down.
+
+            The axis generator still generates text labels for the grid
+            so those are hidden using CSS.
+            */
+
+            // Draw the X axis
+            this.AXIS_GENERATOR.tickSizeInner(6);
             this.X_AXIS_GROUPS.forEach(xAxisGroup => this.AXIS_GENERATOR(xAxisGroup));
+
+            // Draw vertical grid lines
+            this.AXIS_GENERATOR.tickSizeInner(-this.CONTENT_HEIGHT);
+            const gridOpacity = this.ZOOM_TO_GRID_OPACITY_FUNCTION(zoomEvent);
+            this.VERTICAL_GRIDLINE_GROUPS.forEach(gridGroup => {
+                this.AXIS_GENERATOR(gridGroup);
+                gridGroup.attr("opacity", gridOpacity);
+            });
 
             // Re-draw the buzz history diagram
             this.redraw();
