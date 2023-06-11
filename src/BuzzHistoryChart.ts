@@ -21,7 +21,7 @@ export interface BuzzHistoryForClue {
 /**
  * One BuzzHistoryRecord corresponds to one press of the physical buzzer button.
  */
-export interface BuzzHistoryRecord<R> {
+export interface BuzzHistoryRecord<R extends BuzzResult> {
     startTimestamp: number;
     readonly RESULT: R;
 }
@@ -62,6 +62,18 @@ interface BuzzResultIgnore {
     readonly TEAM_STATE_WHY_IT_WAS_IGNORED: TeamState;
 }
 
+interface Annotation {
+    startTimestamp: number;
+    endTimestamp: number;
+    message: string;
+    /**
+     * If not defined, then this Annotation starts and ends in the 
+     * same team.
+     * If defined, then this Annotation starts in the specified team.
+     */
+    teamIndexWhereStartTimestampHappened?: number;
+}
+
 export class BuzzHistoryChart {
 
     private readonly SVG_MARGIN = {
@@ -87,6 +99,20 @@ export class BuzzHistoryChart {
     private static readonly CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT = "too-early-start-lockout";
     private static readonly CLASS_NAME_FOR_ANSWERED_RIGHT = "answered-right";
     private static readonly CLASS_NAME_FOR_ANSWERED_WRONG = "answered-wrong";
+    private static readonly CLASS_NAME_FOR_ANNOTATION_GROUP = "annotation";
+    private static readonly CLASS_NAME_FOR_ANNOTATION_ARROW_BODY = "annotation-arrow-body";
+    private static readonly CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_LEFT = "annotation-arrowhead-top-left";
+    private static readonly CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_LEFT = "annotation-arrowhead-bottom-left";
+    private static readonly CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_RIGHT = "annotation-arrowhead-top-right";
+    private static readonly CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_RIGHT = "annotation-arrowhead-bottom-right";
+
+    private static readonly ANNOTATION_RANGE_MILLISEC = 100;
+    private static readonly ANNOTATION_ARROWHEAD_SIZE = 5;
+
+    /**
+     * The first index is the team index. Then the second list is annotations for that team.
+     */
+    private readonly ANNOTATIONS: Annotation[][] = [];
 
     private readonly ALL_SVGS: SVGSVGElement[] = [];
 
@@ -105,6 +131,10 @@ export class BuzzHistoryChart {
 
     // one for each SVG
     private readonly X_AXIS_GROUPS = new Map<
+        SVGSVGElement,
+        Selection<SVGGElement, unknown, null, undefined>
+    >;
+    private readonly VERTICAL_GRIDLINE_GROUPS = new Map<
         SVGSVGElement,
         Selection<SVGGElement, unknown, null, undefined>
     >;
@@ -134,7 +164,6 @@ export class BuzzHistoryChart {
 
         this.AXIS_GENERATOR = axisBottom<number>(this.scaleWithZoomTransform)
             .tickSizeOuter(0)
-            .ticks(4)
             .tickFormat(n => `${n}ms`);
 
         this.ALL_SVGS = [svgInOperatorWindow, svgInPresentationWindow];
@@ -151,13 +180,23 @@ export class BuzzHistoryChart {
             groupContent.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.SVG_MARGIN.TOP})`);
             theSvg.append(groupContent);
 
-            const groupXAxis = createSvgElement("g");
-            const d3SelectionOfGroupXAxis = select(groupXAxis);
-            this.X_AXIS_GROUPS.set(theSvg, d3SelectionOfGroupXAxis);
-            groupXAxis.setAttribute("id", "axis");
-            groupXAxis.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
-            theSvg.appendChild(groupXAxis);
-            this.AXIS_GENERATOR(d3SelectionOfGroupXAxis);
+            {
+                const groupXAxis = createSvgElement("g");
+                const d3SelectionOfGroupXAxis = select(groupXAxis);
+                this.X_AXIS_GROUPS.set(theSvg, d3SelectionOfGroupXAxis);
+                groupXAxis.setAttribute("id", "axis");
+                groupXAxis.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
+                theSvg.appendChild(groupXAxis);
+            }
+
+            {
+                const groupXGrid = createSvgElement("g");
+                const d3SelectionOfGroupXGrid = select(groupXGrid);
+                this.VERTICAL_GRIDLINE_GROUPS.set(theSvg, d3SelectionOfGroupXGrid);
+                groupXGrid.setAttribute("id", "grid");
+                groupXGrid.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
+                theSvg.appendChild(groupXGrid);
+            }
 
             const rowsGroup = createSvgElement("g");
             rowsGroup.setAttribute("id", "rows");
@@ -235,16 +274,6 @@ export class BuzzHistoryChart {
         legendGroup.setAttribute("id", "legend");
         legendGroup.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.SVG_MARGIN.TOP + this.CONTENT_HEIGHT + this.LEGEND_PADDING})`);
 
-        /*
-            const background = createSvgElement("rect");
-            background.setAttribute("width", String(this.CONTENT_WIDTH));
-            background.setAttribute("height", String(this.LEGEND_HEIGHT));
-            background.setAttribute("x", "0");
-            background.setAttribute("y", "0");
-            background.setAttribute("fill", "#ffdddd88");
-            legendGroup.appendChild(background);
-            */
-
         const yPositionForText = 20;
         const yPositionForBottomRow = 25;
 
@@ -300,6 +329,39 @@ export class BuzzHistoryChart {
         svgToCreateLegendIn.appendChild(legendGroup);
     }
 
+    private static getClampedLineFunction(x1: number, y1: number, x2: number, y2: number):
+        (zoomEvent: D3ZoomEvent<SVGSVGElement, unknown>) => number {
+        return zoomEvent => {
+            const linear = y1 + ((y2 - y1) / (x2 - x1)) * (zoomEvent.transform.k - x1);
+            if (linear < y1) {
+                return y1;
+            } else if (linear > y2) {
+                return y2;
+            } else {
+                return linear;
+            }
+        };
+    }
+
+
+    /** The input is the present zoom scale factor. The output is the tick count for the axis. */
+    private readonly ZOOM_TO_AXIS_TICK_COUNT_FUNCTION = BuzzHistoryChart.getClampedLineFunction(
+        4, 4,  // at 4x zoom and below, set the tick count to 4
+        6, 8   // at 6x zoom and above, set the tick count to 8
+    );
+
+    /** The input is the present zoom scale factor. The output is opacity for the gridlines. */
+    private readonly ZOOM_TO_GRIDLINE_OPACITY_FUNCTION = BuzzHistoryChart.getClampedLineFunction(
+        20, 0.0, // at 20x zoom and below, set the grid opacity to 0.0
+        30, 1.0  // at 30x zoom and above, set the grid opacity to 1.0
+    );
+
+    /** The input is the present zoom scale factor. The output is opacity for the annotations. */
+    private readonly ZOOM_TO_ANNOTATION_OPACITY_FUNCTION = BuzzHistoryChart.getClampedLineFunction(
+        2, 0.0, // at 2x zoom and below, set the annotation opacity to 0.0
+        4, 1.0  // at 4x zoom and above, set the annotation opacity to 1.0
+    );
+
     private initPanZoomController(): void {
         /*
         https://www.d3indepth.com/zoom-and-pan/
@@ -310,10 +372,58 @@ export class BuzzHistoryChart {
 
             this.scaleWithZoomTransform = zoomEvent.transform.rescaleX(this.SCALE_WITHOUT_ZOOM_TRANSFORM);
 
-            // Change the scale which will be used by the axis generator
+            /*
+            Normally you would just call 
+                myAxisGenerator.ticks(n)
+            to set how many ticks you want to be generated.
+            (It actually is a hint to the tick algorithm, so it might not return
+            exactly n ticks.)
+
+            But if you zoom in enough, eventually it will produce ticks with non-
+            integer, values which I don't want. Apparently the way around that is to
+            get the ticks from the scale, filter it, then pass the result into the
+            axis generator.
+
+            Solution from here although due to a new D3 version it doesn't work exactly:
+            https://stackoverflow.com/a/56821215/7376577
+            */
+            const allTicks = this.scaleWithZoomTransform.ticks(this.ZOOM_TO_AXIS_TICK_COUNT_FUNCTION(zoomEvent));
+            const onlyIntegerTicks = allTicks.filter(n => Number.isInteger(n));
+            this.AXIS_GENERATOR.tickValues(onlyIntegerTicks);
+
+            // Set the scale which will be used by the axis generator
             this.AXIS_GENERATOR.scale(this.scaleWithZoomTransform);
 
+            /*
+            We are going to use one axis generator to draw two things:
+                (1) the X axis
+                (2) vertical grid lines.
+
+            To do that we will change the tickSizeInner setting. The default
+            is six which makes normal looking axis ticks. Then we set it to
+            a negative number which makes the lines go up instead of down.
+
+            The axis generator still generates text labels for the grid
+            so those are hidden using CSS.
+            */
+
+            // Draw the X axis
+            this.AXIS_GENERATOR.tickSizeInner(6);
             this.X_AXIS_GROUPS.forEach(xAxisGroup => this.AXIS_GENERATOR(xAxisGroup));
+
+            // Draw vertical grid lines
+            this.AXIS_GENERATOR.tickSizeInner(-this.CONTENT_HEIGHT);
+            const gridOpacity = this.ZOOM_TO_GRIDLINE_OPACITY_FUNCTION(zoomEvent);
+            this.VERTICAL_GRIDLINE_GROUPS.forEach(gridGroup => {
+                this.AXIS_GENERATOR(gridGroup);
+                gridGroup.attr("opacity", gridOpacity);
+            });
+
+            const annotationOpacity = this.ZOOM_TO_ANNOTATION_OPACITY_FUNCTION(zoomEvent);
+            this.ALL_SVGS.forEach(
+                svg => svg.querySelectorAll("g.annotation").forEach(
+                    annotationGroup => annotationGroup.setAttribute("opacity", String(annotationOpacity)))
+            );
 
             // Re-draw the buzz history diagram
             this.redraw();
@@ -322,6 +432,89 @@ export class BuzzHistoryChart {
         this.ZOOM_CONTROLLER.on("zoom", handleZoom);
 
         this.ZOOM_CONTROLLER(this.SVG_IN_OPERATOR_WINDOW);
+    }
+
+    private calculateAnnotations(): void {
+        if (!this.history) {
+            throw new Error("called doAnnotations with no history");
+        }
+
+        // TODO do I need to add the team number into the record interface?
+        const answeringRecords = this.history.RECORDS.flat().filter(record => record.RESULT.TYPE === "start-answer")
+            .sort((a, b) => a.startTimestamp - b.startTimestamp);
+
+        const firstAnswer = answeringRecords[0];
+
+        for (let teamIdx = 0; teamIdx < this.history.RECORDS.length; teamIdx++) {
+
+            // clear previous annotations
+            this.ANNOTATIONS[teamIdx] = [];
+
+            const records = this.history.RECORDS[teamIdx];
+
+            /*
+            Find the EARLIEST record which is AFTER the operator finishing 
+            reading the clue question, and within annotation range.
+            */
+            // eslint-disable-next-line @typescript-eslint/prefer-for-of
+            for (let recordIdx = 0; recordIdx < records.length; recordIdx++) {
+                const record = records[recordIdx];
+                const difference = record.startTimestamp - firstAnswer.startTimestamp;
+                if (
+                    record.RESULT.TYPE === "ignored" // buzzes that happened when someone else was answering
+                    && difference <= BuzzHistoryChart.ANNOTATION_RANGE_MILLISEC
+                ) {
+                    this.ANNOTATIONS[teamIdx].push({
+                        startTimestamp: firstAnswer.startTimestamp,
+                        endTimestamp: record.startTimestamp,
+                        message: `${difference} millisec too late`
+                    });
+                    break;
+                }
+            }
+
+            /*
+            Find the LATEST record which is BEFORE the operator finishing 
+            reading the clue question, and within the annotation range.
+            */
+            // eslint-disable-next-line @typescript-eslint/prefer-for-of
+            for (let recordIdx = records.length - 1; recordIdx >= 0; recordIdx--) {
+                const record = records[recordIdx];
+                if (record.startTimestamp < 0
+                    && record.startTimestamp >= -BuzzHistoryChart.ANNOTATION_RANGE_MILLISEC
+                    && record.RESULT.TYPE === "too-early-start-lockout"
+                ) {
+                    this.ANNOTATIONS[teamIdx].push({
+                        startTimestamp: record.startTimestamp,
+                        endTimestamp: 0, //the time when the operator finished reading the clue question
+                        message: `${-record.startTimestamp} millisec too early`
+                    });
+                    break;
+                }
+            }
+        }
+
+        /*
+        Now I want to:
+        - find the first record which starts the answer
+        - then search for records which are within the range of that timestamp
+        - then I need to add some stuff to the Annotation interface so that
+            we can indicate that the start or end time comes from a different team
+
+            Team A    o=========       answer
+            Team B    |  o===          lockout
+                      |  |
+                      <-->
+                     "n millisec too late"
+
+        The index in RECORDS should be the team where the message is drawn.
+        Then I can add another property in the Annotation interface to
+        specify the team index where one side of the arrow should go to.
+        Will it always be the left side which goes to a different team?
+        For now I think so, that's fine for testing it.
+        */
+
+
     }
 
     public showNewHistory(history: BuzzHistoryForClue): void {
@@ -351,6 +544,8 @@ export class BuzzHistoryChart {
 
         const firstTimestamp = Math.min(...allTimestamps);
         const lastTimestamp = Math.max(...allTimestamps);
+
+        this.calculateAnnotations();
 
         /*
         The first timestamp will be greater than zero if there were no early buzzes (because
@@ -414,14 +609,13 @@ export class BuzzHistoryChart {
                     .attr("height", BuzzHistoryChart.BAR_HEIGHT);
 
                 // Draw bars for when a team started answering
-
                 groupForTeam
                     .selectAll(`rect.${BuzzHistoryChart.CLASS_NAME_FOR_START_ANSWER}`)
                     .data(
                         recordsForTeam.filter(
                             /*
-                            Need to use a type predicate (aka "user-defined type guard") for Typescript to
-                            be able to inter types from the array filter function.
+                            Need to use a type predicate (aka "user-defined type guard") for
+                            Typescript to be able to infer types from the array filter function.
                             https://stackoverflow.com/questions/65279417/typescript-narrow-down-type-based-on-class-property-from-filter-find-etc
                             https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates
                             */
@@ -441,7 +635,6 @@ export class BuzzHistoryChart {
                     .attr("height", BuzzHistoryChart.BAR_HEIGHT);
 
                 // Draw a dot for every time a team pressed a buzzer
-
                 groupForTeam
                     .selectAll(`circle.${BuzzHistoryChart.CLASS_NAME_FOR_BUZZER_PRESS}`)
                     .data(recordsForTeam)
@@ -450,11 +643,80 @@ export class BuzzHistoryChart {
                     .attr("cx", d => this.scaleWithZoomTransform(d.startTimestamp))
                     .attr("cy", BuzzHistoryChart.ROW_HEIGHT / 2)
                     .attr("r", BuzzHistoryChart.DOT_RADIUS);
+
+                // Draw annotations
+                const annotationForThisTeam = this.ANNOTATIONS[teamIndex];
+                const annotationGroups = groupForTeam
+                    .selectAll(`g.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_GROUP}`)
+                    .data(annotationForThisTeam)
+                    .join("g")
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_GROUP, true);
+
+                const arrowY = (BuzzHistoryChart.ROW_HEIGHT / 2) + 15;
+
+                // draw the body of the arrow
+                annotationGroups
+                    .selectAll(`line.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROW_BODY}`)
+                    .data(annotationForThisTeam)
+                    .join("line")
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROW_BODY, true)
+                    .attr("x1", d => this.scaleWithZoomTransform(d.startTimestamp))
+                    .attr("x2", d => this.scaleWithZoomTransform(d.endTimestamp))
+                    .attr("y1", arrowY)
+                    .attr("y2", arrowY);
+
+                // draw the arrowhead
+                annotationGroups
+                    .selectAll(`line.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_LEFT}`)
+                    .data(annotationForThisTeam)
+                    .join("line")
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_LEFT, true)
+                    .attr("x1", d => this.scaleWithZoomTransform(d.startTimestamp))
+                    .attr("x2", d => this.scaleWithZoomTransform(d.startTimestamp) + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE)
+                    .attr("y1", arrowY)
+                    .attr("y2", arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE);
+                annotationGroups
+                    .selectAll(`line.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_LEFT}`)
+                    .data(annotationForThisTeam)
+                    .join("line")
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_LEFT, true)
+                    .attr("x1", d => this.scaleWithZoomTransform(d.startTimestamp))
+                    .attr("x2", d => this.scaleWithZoomTransform(d.startTimestamp) + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE)
+                    .attr("y1", arrowY)
+                    .attr("y2", arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE);
+                annotationGroups
+                    .selectAll(`line.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_RIGHT}`)
+                    .data(annotationForThisTeam)
+                    .join("line")
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_RIGHT, true)
+                    .attr("x1", d => this.scaleWithZoomTransform(d.endTimestamp))
+                    .attr("x2", d => this.scaleWithZoomTransform(d.endTimestamp) - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE)
+                    .attr("y1", arrowY)
+                    .attr("y2", arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE);
+                annotationGroups
+                    .selectAll(`line.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_RIGHT}`)
+                    .data(annotationForThisTeam)
+                    .join("line")
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_RIGHT, true)
+                    .attr("x1", d => this.scaleWithZoomTransform(d.endTimestamp))
+                    .attr("x2", d => this.scaleWithZoomTransform(d.endTimestamp) - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE)
+                    .attr("y1", arrowY)
+                    .attr("y2", arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE);
+
+                // draw annotation text
+                annotationGroups
+                    .selectAll("text")
+                    .data(annotationForThisTeam)
+                    .join("text")
+                    .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp) + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE)
+                    .attr("y", (BuzzHistoryChart.ROW_HEIGHT / 2) + 20)
+                    .attr("font-size", "12")
+                    .text(d => d.message);
+
+
             });
 
         });
-
-
 
     }
 
