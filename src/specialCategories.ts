@@ -16,15 +16,6 @@ export interface SpecialCategory {
 
 export const specialCategories: SpecialCategory[] = [
     {
-        DISPLAY_NAME: "Quotation-mark categories",
-        CATEGORY_TITLE_MATCHES: /"|“|”/,  // match quotation mark and curly quotes
-        DESCRIPTION: "The correct answer contains the letter(s) in quotes.",
-        EXAMPLE: {
-            CATEGORY: "\"AFTER\" CLASS",
-            QUESTION: "A small earthquake or tremor that occurs following a major one.",
-            ANSWER: "Aftershock"
-        }
-    }, {
         DISPLAY_NAME: "Crossword clue categories",
         CATEGORY_TITLE_MATCHES: /CROSSWORD CLUE/i,
         DESCRIPTION: "The category gives the first letter of the correct answer. The clue gives the number of letters in the correct answer.",
@@ -172,5 +163,14 @@ export const specialCategories: SpecialCategory[] = [
         DISPLAY_NAME: "Potpourri, hodgepodge, goulash, leftovers",
         CATEGORY_TITLE_MATCHES: /(POTPOURRI)|(HODGEPODGE)|(GOULASH)|(LEFTOVERS)/i,
         DESCRIPTION: "It can be anything."
+    }, {
+        DISPLAY_NAME: "Quotation-mark categories",
+        CATEGORY_TITLE_MATCHES: /"|“|”/,  // match quotation mark and curly quotes
+        DESCRIPTION: "The correct answer contains the letter(s) in quotes.",
+        EXAMPLE: {
+            CATEGORY: "\"AFTER\" CLASS",
+            QUESTION: "A small earthquake or tremor that occurs following a major one.",
+            ANSWER: "Aftershock"
+        }
     }
 ];
