@@ -160,8 +160,8 @@ export const specialCategories: SpecialCategory[] = [
             ANSWER: "ore / oar"
         }
     }, {
-        DISPLAY_NAME: "Potpourri, hodgepodge, goulash, leftovers",
-        CATEGORY_TITLE_MATCHES: /(POTPOURRI)|(HODGEPODGE)|(GOULASH)|(LEFTOVERS)/i,
+        DISPLAY_NAME: "Potpourri, hodgepodge, goulash, leftovers, mixed bag",
+        CATEGORY_TITLE_MATCHES: /(POTPOURRI)|(HODGEPODGE)|(GOULASH)|(LEFTOVERS)|(MIXED BAG)/i,
         DESCRIPTION: "It can be anything."
     }, {
         DISPLAY_NAME: "Quotation-mark categories",
