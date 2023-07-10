@@ -142,6 +142,15 @@ export const specialCategories: SpecialCategory[] = [
             ANSWER: "proctor & gamble"
         }
     }, {
+        DISPLAY_NAME: "Non-potent potables",
+        CATEGORY_TITLE_MATCHES: /NON-?POTENT POTABLES/i,
+        DESCRIPTION: "The correct answer is a non-alcoholic beverage.",
+        EXAMPLE: {
+            CATEGORY: "NONPOTENT POTABLES",
+            QUESTION: "This sparkling liquid named for a German town was a forerunner of soda pop.",
+            ANSWER: "Seltzer"
+        }
+    }, {
         DISPLAY_NAME: "Potent potables",
         CATEGORY_TITLE_MATCHES: /POTENT POTABLE/i,
         DESCRIPTION: "The correct answer is an alcoholic drink.",
