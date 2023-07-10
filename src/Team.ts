@@ -80,6 +80,10 @@ export class Team {
         moneyAtEndOfEachRound: []
     };
 
+    // You can add items here to give teams custom names.
+    private readonly TEAM_NUMBER_TO_TEAM_NAME: { [teamNumber: number]: string } = {
+    };
+
     public constructor(teamIdx: number, operator: Operator, presentation: Presentation, settings: Settings, audioManager: AudioManager) {
         this.SETTINGS = settings;
         this.AUDIO_MANAGER = audioManager;
@@ -87,7 +91,12 @@ export class Team {
         this.PRESENTATION = presentation;
         this.OPERATOR = operator;
 
-
+        const teamNumber = teamIdx + 1;
+        if (teamNumber in this.TEAM_NUMBER_TO_TEAM_NAME) {
+            this.TEAM_NAME = this.TEAM_NUMBER_TO_TEAM_NAME[teamNumber];
+        } else {
+            this.TEAM_NAME = `Team ${teamIdx + 1}`;
+        }
 
         this.createElementsInOperatorWindow();
         this.createElementsInPresentationWindow();
