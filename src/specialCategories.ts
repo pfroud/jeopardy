@@ -35,7 +35,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "\"Words in\" categories",
-        CATEGORY_TITLE_MATCHES: /WORDS IN/i,
+        CATEGORY_TITLE_MATCHES: /WORDS (THAT ARE)? IN/i,
         DESCRIPTION: "The correct answer can be formed from the word in the category title. Not in order, do not need to use all of them.",
         EXAMPLE: {
             CATEGORY: "WORDS IN SEPTEMBER",
