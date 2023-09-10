@@ -652,7 +652,7 @@ export class BuzzHistoryChart {
                     .join("g")
                     .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_GROUP, true);
 
-                const arrowY = (BuzzHistoryChart.ROW_HEIGHT / 2) + 15;
+                const arrowY = (BuzzHistoryChart.ROW_HEIGHT / 2) + 9;
 
                 // draw the body of the arrow
                 annotationGroups
@@ -709,7 +709,7 @@ export class BuzzHistoryChart {
                     .data(annotationForThisTeam)
                     .join("text")
                     .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp) + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE)
-                    .attr("y", (BuzzHistoryChart.ROW_HEIGHT / 2) + 20)
+                    .attr("y", (BuzzHistoryChart.ROW_HEIGHT / 2) + 22)
                     .attr("font-size", "12")
                     .text(d => d.message);
 
