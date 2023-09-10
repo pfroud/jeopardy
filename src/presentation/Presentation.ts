@@ -166,18 +166,23 @@ export class Presentation {
         querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-title").innerHTML = specialCategory.DISPLAY_NAME;
         querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-description").innerHTML = specialCategory.DESCRIPTION;
         if (specialCategory.EXAMPLE) {
+            this.DIV_SPECIAL_CATEGORY_POPUP.classList.remove("no-example");
             querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-category").innerHTML = specialCategory.EXAMPLE.CATEGORY;
             querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-question").innerHTML = specialCategory.EXAMPLE.QUESTION;
             querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-answer").innerHTML = specialCategory.EXAMPLE.ANSWER;
+        } else {
+            this.DIV_SPECIAL_CATEGORY_POPUP.classList.add("no-example");
         }
 
         this.DIV_BACKDROP_FOR_POPUPS.className = "blurred";
-        this.DIV_SPECIAL_CATEGORY_POPUP.className = "visible-centered";
+        this.DIV_SPECIAL_CATEGORY_POPUP.classList.remove("offscreen-left");
+        this.DIV_SPECIAL_CATEGORY_POPUP.classList.add("visible-centered");
     }
 
     public hideSpecialCategoryPopup(): void {
         this.DIV_BACKDROP_FOR_POPUPS.className = "not-blurred";
-        this.DIV_SPECIAL_CATEGORY_POPUP.className = "offscreen-left";
+        this.DIV_SPECIAL_CATEGORY_POPUP.classList.remove("visible-centered");
+        this.DIV_SPECIAL_CATEGORY_POPUP.classList.add("offscreen-left");
     }
 
     public getBuzzHistorySvg(): SVGSVGElement {

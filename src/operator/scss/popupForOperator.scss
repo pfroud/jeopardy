@@ -102,6 +102,14 @@ div.operator-popup {
         width: 80%;
         height: 80%;
 
+        &.no-example {
+
+            p#special-category-example-title,
+            div#special-category-example-wrapper {
+                display: none;
+            }
+        }
+
         div#special-category-example-wrapper {
             border: 1px solid gray;
             padding: 20px;

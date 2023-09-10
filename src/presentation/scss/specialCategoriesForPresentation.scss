@@ -32,6 +32,14 @@ div#special-category-popup {
     transition: transform 1s ease;
     font-size: 30px;
 
+    &.no-example {
+
+        p#special-category-example-title,
+        div#special-category-example-wrapper {
+            display: none;
+        }
+    }
+
     &.visible-centered {
         transform: translate(-50%, -50%);
     }

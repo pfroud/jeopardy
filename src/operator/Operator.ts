@@ -496,9 +496,12 @@ export class Operator {
         querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, ".popup-title").innerHTML = specialCategory.DISPLAY_NAME;
         querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-description").innerHTML = specialCategory.DESCRIPTION;
         if (specialCategory.EXAMPLE) {
+            this.DIV_SPECIAL_CATEGORY_POPUP.classList.remove("no-example");
             querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-category").innerHTML = specialCategory.EXAMPLE.CATEGORY;
             querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-question").innerHTML = specialCategory.EXAMPLE.QUESTION;
             querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-answer").innerHTML = specialCategory.EXAMPLE.ANSWER;
+        } else {
+            this.DIV_SPECIAL_CATEGORY_POPUP.classList.add("no-example");
         }
 
         this.DIV_SPECIAL_CATEGORY_POPUP.style.display = "block";
