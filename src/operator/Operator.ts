@@ -423,8 +423,8 @@ export class Operator {
             // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
             const xhr = new XMLHttpRequest();
             // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/From
-            xhr.setRequestHeader("From", "pfroud@gmail.com");
             xhr.open("GET", "http://jservice.io/api/random");
+            xhr.setRequestHeader("From", "pfroud@gmail.com");
             xhr.addEventListener("load", () => {
 
                 if (xhr.status !== 200) {
