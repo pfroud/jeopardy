@@ -1,0 +1,90 @@
+progress {
+    /* https://css-tricks.com/html5-progress-element/ */
+
+    /* first, turn off the built-in default style */
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    border: none;
+
+    --color-normal-background: lightgray;
+    --color-normal-foreground: limegreen;
+
+    --color-paused-foreground: darkgreen;
+
+    --color-lockout-foreground: red;
+
+    --color-lockout-paused-foreground: darkred;
+
+    &[value] {
+        &::-webkit-progress-bar {
+            /* background of bar in Chrome */
+            background-color: var(--color-normal-background);
+        }
+
+        &::-moz-progress-bar {
+            /* foreground of bar in Firefox */
+            background-color: var(--color-normal-foreground);
+        }
+
+        &::-webkit-progress-value {
+            /* foreground of bar in Chrome */
+            background-color: var(--color-normal-foreground);
+        }
+
+        &.paused {
+            &::-webkit-progress-value {
+                /* foreground of bar in Chrome */
+                background-color: var(--color-paused-foreground);
+            }
+
+            &::-moz-progress-bar {
+                /* foreground of bar in Firefox */
+                background-color: var(--color-paused-foreground);
+            }
+        }
+
+        &.lockout {
+            &::-moz-progress-bar {
+                /* foreground of bar in Firefox */
+                background-color: var(--color-lockout-foreground);
+            }
+
+            &::-webkit-progress-value {
+                /* foreground of bar in Chrome */
+                background-color: var(--color-lockout-foreground);
+            }
+
+            &.paused {
+                &::-webkit-progress-value {
+                    /* foreground of bar in Chrome */
+                    background-color: var(--color-lockout-paused-foreground);
+                }
+
+                &::-moz-progress-bar {
+                    /* foreground of bar in Firefox */
+                    background-color: var(--color-lockout-paused-foreground);
+                }
+            }
+        }
+    }
+
+    &:not([value]) {
+        &::-webkit-progress-bar {
+            /* try colors here https://codepen.io/chriscoyier/pen/lAkyo */
+            --color1: #ddd;
+            --color2: #eee;
+            --size: 10px;
+
+            /* https://www.pexels.com/blog/css-only-loaders/ */
+            /* https://codepen.io/brunjo/pen/azdWjY */
+            background-image: repeating-linear-gradient(
+                -45deg,
+                var(--color1),
+                var(--color1) var(--size),
+                var(--color2) var(--size),
+                var(--color2) calc(2 * var(--size)) /* determines size */
+            );
+        }
+    }
+}

@@ -1,5 +1,5 @@
-// https://codepen.io/oknoblich/pen/tfjFl
-// Now is an error 404. Author was Oliver Knoblich.
+/* https://codepen.io/oknoblich/pen/tfjFl */
+/* Now is an error 404. Author was Oliver Knoblich. */
 
 div.tab-content {
     display: none;
@@ -8,21 +8,21 @@ div.tab-content {
 }
 
 label[for^="tab"] {
-    $color-inactive: #bbb;
+    --color-inactive: #bbb;
 
     display: inline-block;
     margin: 0 0 -1px;
     padding: 0px 10px 0px;
     text-align: center;
-    color: $color-inactive;
-    border: 1px solid $color-inactive;
+    color: var(--color-inactive);
+    border: 1px solid --color-inactive;
     border-bottom: none;
     border-radius: 4px 4px 0px 0px;
 
     &:hover {
-        $color-inactive-hover: #777;
-        color: $color-inactive-hover;
-        border-color: $color-inactive-hover;
+        --color-inactive-hover: #777;
+        color: var(--color-inactive-hover);
+        border-color: var(--color-inactive-hover);
         cursor: pointer;
     }
 }
