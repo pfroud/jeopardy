@@ -1,8 +1,27 @@
+:root {
+    --light-foreground-color: #ddd;
+}
+
 body {
     font-family: sans-serif;
     overflow-x: hidden;
-    font-size: 20px;
+    --font-size: 20px;
+    font-size: var(--font-size);
+
+    background: #222;
+    color: var(--light-foreground-color);
+
 }
+
+/*
+a[href] {
+    color: #1e8ad6;
+}
+
+a[href]:hover {
+    color: #3ba0e6;
+}
+*/
 
 main {
     line-height: 150%;
@@ -13,22 +32,21 @@ main {
     }
 
     input[type="checkbox"] {
-        width: 20px;
-        height: 20px;
+        width: var(--font-size);
+        height: var(--font-size);
     }
 
     div.tab-content {
 
         /**************************************************/
-        &#tab-content-load-game {
-            table#saved-game-details {
-                border-collapse: collapse;
+        &#tab-content-load-game table#saved-game-details {
+            border-collapse: collapse;
 
-                td {
-                    border: 1px solid black;
-                    padding: 5px 10px 5px 10px;
-                }
+            td {
+                border: 1px solid var(--light-foreground-color);
+                padding: 5px 10px 5px 10px;
             }
+
         }
 
         /**************************************************/
@@ -38,7 +56,7 @@ main {
             }
 
             div#clue-wrapper {
-                border: 1px solid black;
+                border: 1px solid var(--light-foreground-color);
                 border-radius: 30px;
                 padding: 20px;
 
@@ -48,10 +66,10 @@ main {
             }
 
             div#special-category-prompt {
-                background-color: yellow;
+                background-color: #999900;
                 padding: 10px;
                 margin-top: 10px;
-                border: 1px solid #a8b115;
+                border: 1px solid #c7d11e;
                 border-radius: 5px;
             }
 
@@ -85,17 +103,16 @@ main {
         }
 
         /**************************************************/
-        &.content-game-settings {
-            table#table-settings {
-                td {
-                    padding-bottom: 20px;
-                }
-
-                input[type="number"] {
-                    width: 100px;
-                    text-align: right;
-                }
+        &.content-game-settings table#table-settings {
+            td {
+                padding-bottom: 20px;
             }
+
+            input[type="number"] {
+                width: 100px;
+                text-align: right;
+            }
+
         }
 
         /**************************************************/
