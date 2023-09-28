@@ -5,7 +5,7 @@ This stylesheet gets added with the Chartist stylesheet:
 
 div.presentation-slide#slide-gameEnd-pie-charts {
     div#pie-charts {
-        // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout
+        /* https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout */
         display: grid;
         grid-template-columns: 1fr 1fr 1fr 1fr;
 
@@ -38,7 +38,7 @@ div.presentation-slide#slide-gameEnd-pie-charts {
             }
 
             div.chart-title {
-                // https://stackoverflow.com/a/23703655
+                /* https://stackoverflow.com/a/23703655 */
                 position: absolute;
                 top: 50%;
                 left: 50%;
@@ -77,19 +77,32 @@ div.presentation-slide#slide-gameEnd-pie-charts {
 
 div#slide-gameEnd-line-chart {
     g.ct-series {
-        $series-colors: red, orange, green, gray;
-        $team-count: 8;
+        &.team-1,
+        &.team-5 {
+            stroke: red;
+        }
 
-        @for $i from 0 to $team-count {
-            &.team-#{$i + 1} {
-                $indexStartingAtOne: ($i % length($series-colors))+1;
-                stroke: nth($series-colors, $indexStartingAtOne);
+        &.team-2,
+        &.team-6 {
+            stroke: orange;
+        }
 
-                @if $i >=length($series-colors) {
-                    stroke-dasharray: 5;
-                    stroke-linecap: butt;
-                }
-            }
+        &.team-3,
+        &.team-7 {
+            stroke: green;
+        }
+
+        &.team-4,
+        &.team-8 {
+            stroke: gray;
+        }
+
+        &.team-5,
+        &.team-6,
+        &.team-7,
+        &.team-8 {
+            stroke-dasharray: 5;
+            stroke-linecap: butt;
         }
     }
 

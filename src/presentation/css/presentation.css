@@ -1,21 +1,14 @@
-$height-header: 80px;
-$height-footer: 180px;
+:root {
+    /* https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties#using_the_root_pseudo-class */
 
-@function create-repeated-shadow($count) {
-    $result: "";
-    @for $i from 0 to $count {
-        $size: ($i + 1) * 2 + 1;
-        $result: $result + $size + "px " + $size + "px 0px black";
-        @if $i + 1 < $count {
-            $result: $result + ", ";
-        }
-    }
-    @return unquote($result);
+    --height-header: 80px;
+    --height-footer: 180px;
+
+    --color-money: #e3a147;
+    --color-airdate: #8e99d8;
+
+    --text-shadow-big: 3px 3px #000, 5px 5px #000, 7px 7px #000, 9px 9px #000, 11px 11px #000;
 }
-$text-shadow-big: create-repeated-shadow(5);
-
-$color-money: #e3a147;
-$color-airdate: #8e99d8;
 
 body {
     height: 100vh;
@@ -30,7 +23,7 @@ body {
 }
 
 div#spinner {
-    // https://projects.lukehaas.me/css-loaders/
+    /* https://projects.lukehaas.me/css-loaders/ */
     border: 10px solid rgba(255, 255, 255, 0.2);
     border-left-color: white;
     animation: spin 0.5s infinite linear;
@@ -39,11 +32,14 @@ div#spinner {
     height: 250px;
     box-sizing: border-box;
 }
+
 @keyframes spin {
-    // https://projects.lukehaas.me/css-loaders/
+
+    /* https://projects.lukehaas.me/css-loaders/ */
     0% {
         transform: rotate(0deg);
     }
+
     100% {
         transform: rotate(360deg);
     }
@@ -60,29 +56,29 @@ div#paused {
     padding: 20px;
     border: 1px solid darkorange;
 
-    // shadow on the text inside the div
+    /* shadow on the text inside the div */
     text-shadow: 3px 3px rgba(0, 0, 0, 0.2);
 
-    // shadow on the entire div
+    /* shadow on the entire div */
     filter: drop-shadow(10px 13px rgba(0, 0, 0, 0.4));
 }
 
 header {
-    height: $height-header;
+    height: var(--height-header);
     font-family: swiss911;
     font-size: 60px;
     letter-spacing: 2px;
-    text-shadow: $text-shadow-big;
+    text-shadow: var(--text-shadow-big);
     padding-top: 5px;
     text-transform: uppercase;
 
     span#clue-airdate-in-header {
-        color: $color-airdate;
+        color: var(--color-airdate);
         font-size: 75%;
     }
 
     span#clue-value-in-header {
-        color: $color-money;
+        color: var(--color-money);
         position: absolute;
         right: 8px;
     }
@@ -103,7 +99,7 @@ header {
 }
 
 main {
-    height: calc(100vh - #{$height-header} - #{$height-footer});
+    height: calc(100vh - var(--height-header) - var(--height-footer));
     display: flex;
     justify-content: center;
     align-items: center;
@@ -113,14 +109,14 @@ main {
         display: none;
 
         &#slide-jeopardy-logo {
-            // need special treatment to get the logo and shadow to center
+            /* need special treatment to get the logo and shadow to center */
             width: 100%;
             height: 100%;
 
             img {
                 position: absolute;
 
-                // https://stackoverflow.com/a/17624161
+                /* https://stackoverflow.com/a/17624161 */
                 left: 0;
                 right: 0;
                 top: 0;
@@ -137,17 +133,17 @@ main {
 
         &#slide-clue-category-and-value {
             font-family: swiss911;
-            text-shadow: $text-shadow-big;
+            text-shadow: var(--text-shadow-big);
             font-size: 80px;
             text-align: center;
             text-transform: uppercase;
 
             div#clue-value-big {
-                color: $color-money;
+                color: var(--color-money);
             }
 
             div#clue-airdate-big {
-                color: $color-airdate;
+                color: var(--color-airdate);
                 font-size: 75%;
             }
         }
@@ -157,7 +153,7 @@ main {
             font-family: korinna;
             font-size: 80px;
             text-transform: uppercase;
-            text-shadow: $text-shadow-big;
+            text-shadow: var(--text-shadow-big);
             word-spacing: 10px;
         }
 
@@ -173,10 +169,12 @@ main {
         &#slide-gameEnd-team-ranking-table {
             div#team-ranking {
                 font-size: 40px;
-                text-shadow: $text-shadow-big;
+                text-shadow: var(--text-shadow-big);
+
                 p {
                     text-align: center;
                 }
+
                 table td {
                     padding-right: 60px;
 
@@ -197,7 +195,7 @@ footer {
     position: absolute;
     bottom: 0px;
     left: 0px;
-    height: $height-footer;
+    height: var(--height-footer);
 
     div.team {
         padding: 10px;
@@ -238,6 +236,7 @@ footer {
             margin-right: auto;
             border-collapse: collapse;
             margin-bottom: 10px;
+
             td {
                 border: 2px solid gray;
                 width: 30px;
@@ -255,14 +254,16 @@ footer {
 
         div.buzzer-show {
             img {
-                // TODO why do we need to set the z-index?
+                /* TODO why do we need to set the z-index? */
                 z-index: -2;
                 width: 100px;
                 margin-bottom: 5px;
             }
+
             &.not-pressed img.buzzer-pressed {
                 display: none;
             }
+
             &.pressed img.buzzer-not-pressed {
                 display: none;
             }

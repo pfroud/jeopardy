@@ -26,7 +26,6 @@
   "devDependencies": {
     "@aduh95/viz.js": "^3.7.0",
     "@parcel/transformer-css": "^2.9.3",
-    "@parcel/transformer-sass": "^2.9.3",
     "@types/d3-axis": "^3.0.2",
     "@types/d3-scale": "^4.0.3",
     "@types/d3-selection": "^3.0.4",
@@ -36,7 +35,6 @@
     "@typescript-eslint/parser": "^6.7.3",
     "eslint": "^8.50.0",
     "parcel": "^2.6.2",
-    "sass": "^1.68.0",
     "typescript": "^5.2.2"
   },
   "dependencies": {

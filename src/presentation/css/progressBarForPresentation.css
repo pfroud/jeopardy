@@ -7,14 +7,14 @@ progress {
     appearance: none !important;
     border: none;
 
-    --color-normal-background: lightgray;
-    --color-normal-foreground: limegreen;
+    --color-normal-background: #0066ff;
+    --color-normal-foreground: red;
 
-    --color-paused-foreground: darkgreen;
+    --color-paused-foreground: darkred;
 
-    --color-lockout-foreground: red;
+    --color-lockout-foreground: orange;
 
-    --color-lockout-paused-foreground: darkred;
+    --color-lockout-paused-foreground: purple;
 
     &[value] {
         &::-webkit-progress-bar {
@@ -85,10 +85,7 @@ progress {
             var(--color2) calc(2 * var(--size)) /* determines size */
         );
 
-        &::-webkit-progress-bar {
-            background-image: var(--the-gradient);
-        }
-
+        &::-webkit-progress-bar,
         &::-moz-progress-bar {
             background-image: var(--the-gradient);
         }
