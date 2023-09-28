@@ -78,6 +78,7 @@ div#statistics-chart-popup div#pie-chart-wrapper {
 
 div#statistics-chart-popup div#line-chart-wrapper {
     g.ct-series {
+
         &.team-1,
         &.team-5 {
             stroke: red;

@@ -77,13 +77,13 @@ progress {
         --color1: #ddd;
         --color2: #eee;
         --size: 10px;
-        --the-gradient: repeating-linear-gradient(
-            -45deg,
-            var(--color1),
-            var(--color1) var(--size),
-            var(--color2) var(--size),
-            var(--color2) calc(2 * var(--size)) /* determines size */
-        );
+        --the-gradient: repeating-linear-gradient(-45deg,
+                var(--color1),
+                var(--color1) var(--size),
+                var(--color2) var(--size),
+                var(--color2) calc(2 * var(--size))
+                /* determines size */
+            );
 
         &::-webkit-progress-bar,
         &::-moz-progress-bar {

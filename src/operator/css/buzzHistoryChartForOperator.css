@@ -19,6 +19,7 @@ svg#buzz-history {
     }
 
     g#grid {
+
         g.tick text,
         path.domain {
             display: none;

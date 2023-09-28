@@ -30,7 +30,7 @@ label[for^="tab"] {
 input[type="radio"] {
     display: none;
 
-    &:checked + label {
+    &:checked+label {
         color: black;
         border: 1px solid black;
         border-bottom: 2px solid #fff;
@@ -40,11 +40,11 @@ input[type="radio"] {
         }
     }
 
-    &#tab-music:checked ~ div#tab-content-music,
-    &#tab-play:checked ~ div#tab-content-play,
-    &#tab-developer:checked ~ div#tab-content-developer,
-    &#tab-load-game:checked ~ div#tab-content-load-game,
-    &#tab-game-settings:checked ~ div#tab-content-game-settings {
+    &#tab-music:checked~div#tab-content-music,
+    &#tab-play:checked~div#tab-content-play,
+    &#tab-developer:checked~div#tab-content-developer,
+    &#tab-load-game:checked~div#tab-content-load-game,
+    &#tab-game-settings:checked~div#tab-content-game-settings {
         display: block;
     }
 }

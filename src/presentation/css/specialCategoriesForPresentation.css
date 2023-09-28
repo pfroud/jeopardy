@@ -33,6 +33,7 @@ div#special-category-popup {
     font-size: 30px;
 
     &.no-example {
+
         p#special-category-example-title,
         div#special-category-example-wrapper {
             display: none;
