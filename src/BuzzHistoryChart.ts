@@ -180,23 +180,19 @@ export class BuzzHistoryChart {
             groupContent.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.SVG_MARGIN.TOP})`);
             theSvg.append(groupContent);
 
-            {
                 const groupXAxis = createSvgElement("g");
                 const d3SelectionOfGroupXAxis = select(groupXAxis);
                 this.X_AXIS_GROUPS.set(theSvg, d3SelectionOfGroupXAxis);
                 groupXAxis.setAttribute("id", "axis");
                 groupXAxis.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
                 theSvg.appendChild(groupXAxis);
-            }
 
-            {
                 const groupXGrid = createSvgElement("g");
                 const d3SelectionOfGroupXGrid = select(groupXGrid);
                 this.VERTICAL_GRIDLINE_GROUPS.set(theSvg, d3SelectionOfGroupXGrid);
                 groupXGrid.setAttribute("id", "grid");
                 groupXGrid.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
                 theSvg.appendChild(groupXGrid);
-            }
 
             const rowsGroup = createSvgElement("g");
             rowsGroup.setAttribute("id", "rows");
@@ -480,7 +476,8 @@ export class BuzzHistoryChart {
             // eslint-disable-next-line @typescript-eslint/prefer-for-of
             for (let recordIdx = records.length - 1; recordIdx >= 0; recordIdx--) {
                 const record = records[recordIdx];
-                if (record.startTimestamp < 0
+                if (
+                    record.startTimestamp < 0
                     && record.startTimestamp >= -BuzzHistoryChart.ANNOTATION_RANGE_MILLISEC
                     && record.RESULT.TYPE === "too-early-start-lockout"
                 ) {

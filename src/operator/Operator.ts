@@ -161,6 +161,8 @@ export class Operator {
                 if (this.presentClue) {
                     if (teamStatesWhereBuzzingDoesSomething.has(teamState)) {
                         // Do not do anything. The history will be recorded by a dedicated method in Operator.
+                    } else if (teamState === "idle") {
+                        // Ignore, we don't need it to appear in the history chart.
                     } else {
                         this.presentClue.BUZZ_HISTORY.RECORDS[teamIndex].push({
                             startTimestamp: Date.now(),
