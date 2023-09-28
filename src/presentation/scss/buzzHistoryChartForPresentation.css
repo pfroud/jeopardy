@@ -21,7 +21,6 @@ svg#buzz-history {
     }
 
     g#grid {
-
         g.tick text,
         path.domain {
             display: none;
@@ -53,7 +52,6 @@ svg#buzz-history {
     }
 
     rect.buzz-record {
-
         stroke: white;
         stroke-width: 1;
 
@@ -68,13 +66,10 @@ svg#buzz-history {
         &.answered-wrong {
             fill: red;
         }
-
     }
 
     circle.buzzer-press {
         fill: white;
         stroke-width: 0;
     }
-
-
 }

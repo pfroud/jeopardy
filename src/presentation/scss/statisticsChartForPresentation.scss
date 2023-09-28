@@ -77,10 +77,7 @@ div.presentation-slide#slide-gameEnd-pie-charts {
 
 div#slide-gameEnd-line-chart {
     g.ct-series {
-        $series-colors: red,
-        orange,
-        green,
-        gray;
+        $series-colors: red, orange, green, gray;
         $team-count: 8;
 
         @for $i from 0 to $team-count {

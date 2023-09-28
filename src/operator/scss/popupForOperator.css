@@ -8,7 +8,6 @@ div#backdrop-for-popups {
     backdrop-filter: brightness(0.8) blur(2px);
 }
 
-
 div.operator-popup {
     position: absolute;
     left: 50%;
@@ -32,7 +31,6 @@ div.operator-popup {
         }
 
         div#team-ranking-wrapper table {
-
             td {
                 font-size: 40px;
                 padding-right: 60px;
@@ -41,7 +39,6 @@ div.operator-popup {
                     text-align: right;
                 }
             }
-
         }
 
         &[data-show-game-end-item="team-ranking-table"] {
@@ -85,7 +82,6 @@ div.operator-popup {
                 display: block;
             }
         }
-
     }
 
     &#buzz-history-chart-popup {
@@ -103,7 +99,6 @@ div.operator-popup {
         height: 80%;
 
         &.no-example {
-
             p#special-category-example-title,
             div#special-category-example-wrapper {
                 display: none;
@@ -123,7 +118,6 @@ div.operator-popup {
                     font-weight: bold;
                     padding-right: 10px;
                 }
-
             }
         }
 
@@ -142,5 +136,4 @@ div.operator-popup {
             margin-right: 20px;
         }
     }
-
 }

@@ -78,10 +78,7 @@ div#statistics-chart-popup div#pie-chart-wrapper {
 
 div#statistics-chart-popup div#line-chart-wrapper {
     g.ct-series {
-        $series-colors: red,
-        orange,
-        green,
-        gray;
+        $series-colors: red, orange, green, gray;
         $team-count: 8;
 
         @for $i from 0 to $team-count {
