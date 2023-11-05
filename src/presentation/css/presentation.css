@@ -158,7 +158,7 @@ main {
         }
 
         &#slide-clue-answer {
-            text-shadow: create-repeated-shadow(4);
+            text-shadow: var(--text-shadow-big);
             font-size: 60px;
 
             div#clue-answer-text {
