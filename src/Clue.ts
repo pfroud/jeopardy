@@ -88,6 +88,8 @@ export class Clue {
             "MÃ©lisande"       --> "Mélisande"
             "Ãle de la CitÃ©" --> "Île de la Cité"
             "lycÃ©e"           --> "lycée"
+            "idÃ©e"            --> "idée"
+            "macramÃ©"         --> "macramé"
     
             But it does not work on:
             "espaãol"
