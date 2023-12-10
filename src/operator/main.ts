@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Add global variable so we can access the operator instance in the web browser debugger.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
     (window as any).operator = new Operator(audioManager, settings);
 
 });
