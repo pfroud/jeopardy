@@ -5,15 +5,16 @@ div#backdrop-for-popups {
     top: 0;
     left: 0;
     z-index: 1;
-    backdrop-filter: brightness(0.8) blur(2px);
+    backdrop-filter: brightness(0.8) blur(3px);
 }
 
 div.operator-popup {
     position: absolute;
+    color: var(--dark-background-color);
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    filter: drop-shadow(5px 5px 5px gray);
+    filter: drop-shadow(5px 5px 5px #111);
     border-radius: 20px;
     padding: 50px;
     z-index: 2;
@@ -23,7 +24,7 @@ div.operator-popup {
     }
 
     &#statistics-chart-popup {
-        background: white;
+        background: #dddddd;
         width: 85%;
 
         div#game-end-controls {
@@ -85,7 +86,7 @@ div.operator-popup {
     }
 
     &#buzz-history-chart-popup {
-        background: lightblue;
+        background: #88cccc;
 
         svg {
             background-color: white;
@@ -93,7 +94,7 @@ div.operator-popup {
     }
 
     &#special-category-popup {
-        background-color: lightyellow;
+        background: #dddd11;
         border: 1px solid yellow;
         width: 80%;
         height: 80%;
@@ -123,14 +124,15 @@ div.operator-popup {
         }
 
         div#info-icon {
-            border: 10px solid blue;
+            --blue: #1111cc;
+            border: 10px solid var(--blue);
             border-radius: 50%;
             display: inline-block;
             width: 100px;
             height: 100px;
             text-align: center;
             font-weight: bold;
-            color: blue;
+            color: var(--blue);
             font-size: 80px;
             font-family: monospace;
             margin-bottom: 10px;
