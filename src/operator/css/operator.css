@@ -1,5 +1,6 @@
 :root {
     --light-foreground-color: #ddd;
+    --dark-background-color: #222;
 }
 
 body {
@@ -8,20 +9,10 @@ body {
     --font-size: 20px;
     font-size: var(--font-size);
 
-    background: #222;
+    background: var(--dark-background-color);
     color: var(--light-foreground-color);
 
 }
-
-/*
-a[href] {
-    color: #1e8ad6;
-}
-
-a[href]:hover {
-    color: #3ba0e6;
-}
-*/
 
 main {
     line-height: 150%;
@@ -31,23 +22,18 @@ main {
         font-size: inherit;
     }
 
+    input[type="number"],
+    input[type="text"] {
+        background: var(--dark-background-color);
+        color: var(--light-foreground-color);
+    }
+
     input[type="checkbox"] {
         width: var(--font-size);
         height: var(--font-size);
     }
 
     div.tab-content {
-
-        /**************************************************/
-        &#tab-content-load-game table#saved-game-details {
-            border-collapse: collapse;
-
-            td {
-                border: 1px solid var(--light-foreground-color);
-                padding: 5px 10px 5px 10px;
-            }
-
-        }
 
         /**************************************************/
         &#tab-content-play {
@@ -99,6 +85,35 @@ main {
             div#game-end-controls {
                 margin-top: 30px;
                 margin-bottom: 40px;
+            }
+        }
+
+        /**************************************************/
+        &#tab-content-team-setup {
+
+            input[type="number"]#team-count {
+                width: 50px;
+            }
+
+            table {
+                border-collapse: collapse;
+
+                td {
+                    border: 1px solid var(--light-foreground-color);
+                    padding: 5px 10px 5px 10px;
+                }
+            }
+
+
+        }
+
+        /**************************************************/
+        &#tab-content-load-game table#saved-game-details {
+            border-collapse: collapse;
+
+            td {
+                border: 1px solid var(--light-foreground-color);
+                padding: 5px 10px 5px 10px;
             }
         }
 

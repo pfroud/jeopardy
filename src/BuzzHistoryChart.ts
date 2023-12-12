@@ -143,6 +143,7 @@ export class BuzzHistoryChart {
         SVGSVGElement,
         Selection<SVGGElement, unknown, null, undefined>[]
     >;
+    private readonly TEAM_NAME_TEXT_ELEMENTS = new Map<SVGSVGElement, SVGTextElement[]>();
 
 
     public constructor(teams: Team[], lockoutDurationMillisec: number, svgInOperatorWindow: SVGSVGElement, svgInPresentationWindow: SVGSVGElement) {
@@ -168,6 +169,7 @@ export class BuzzHistoryChart {
 
         this.ALL_SVGS = [svgInOperatorWindow, svgInPresentationWindow];
         for (const theSvg of this.ALL_SVGS) {
+            theSvg.innerHTML = "";
 
             theSvg.setAttribute("width", String(svgWidth));
             theSvg.setAttribute("height", String(svgHeight));
@@ -180,25 +182,26 @@ export class BuzzHistoryChart {
             groupContent.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.SVG_MARGIN.TOP})`);
             theSvg.append(groupContent);
 
-                const groupXAxis = createSvgElement("g");
-                const d3SelectionOfGroupXAxis = select(groupXAxis);
-                this.X_AXIS_GROUPS.set(theSvg, d3SelectionOfGroupXAxis);
-                groupXAxis.setAttribute("id", "axis");
-                groupXAxis.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
-                theSvg.appendChild(groupXAxis);
+            const groupXAxis = createSvgElement("g");
+            const d3SelectionOfGroupXAxis = select(groupXAxis);
+            this.X_AXIS_GROUPS.set(theSvg, d3SelectionOfGroupXAxis);
+            groupXAxis.setAttribute("id", "axis");
+            groupXAxis.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
+            theSvg.appendChild(groupXAxis);
 
-                const groupXGrid = createSvgElement("g");
-                const d3SelectionOfGroupXGrid = select(groupXGrid);
-                this.VERTICAL_GRIDLINE_GROUPS.set(theSvg, d3SelectionOfGroupXGrid);
-                groupXGrid.setAttribute("id", "grid");
-                groupXGrid.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
-                theSvg.appendChild(groupXGrid);
+            const groupXGrid = createSvgElement("g");
+            const d3SelectionOfGroupXGrid = select(groupXGrid);
+            this.VERTICAL_GRIDLINE_GROUPS.set(theSvg, d3SelectionOfGroupXGrid);
+            groupXGrid.setAttribute("id", "grid");
+            groupXGrid.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
+            theSvg.appendChild(groupXGrid);
 
             const rowsGroup = createSvgElement("g");
             rowsGroup.setAttribute("id", "rows");
             groupContent.append(rowsGroup);
 
             this.ROWS_ARRAY.set(theSvg, []);
+            this.TEAM_NAME_TEXT_ELEMENTS.set(theSvg, []);
 
             // Draw team name, horizontal line, and alternating shaded background
             for (let teamIndex = 0; teamIndex < teams.length; teamIndex++) {
@@ -243,8 +246,13 @@ export class BuzzHistoryChart {
                 textNode.setAttribute("x", "10");
                 textNode.setAttribute("y", String(BuzzHistoryChart.ROW_HEIGHT / 2));
                 textNode.setAttribute("dominant-baseline", "middle");
-                textNode.innerHTML = `${teams[teamIndex].TEAM_NAME}`;
+                textNode.innerHTML = `${teams[teamIndex].getTeamName()}`;
                 group.appendChild(textNode);
+                const teamNameTextElementsForThisSvg = this.TEAM_NAME_TEXT_ELEMENTS.get(theSvg);
+                if (!teamNameTextElementsForThisSvg) {
+                    throw new Error("array of SVG <text> elements for this SVG is null or undefined");
+                }
+                teamNameTextElementsForThisSvg.push(textNode);
             }
 
             const xPositionAtTimeZero = this.scaleWithZoomTransform(0);
@@ -263,6 +271,16 @@ export class BuzzHistoryChart {
 
         this.initPanZoomController();
 
+    }
+
+    public setTeamName(idx: number, name: string): void {
+        this.ALL_SVGS.forEach(svg => {
+            const teamNameTextElementsForThisSvg = this.TEAM_NAME_TEXT_ELEMENTS.get(svg);
+            if (!teamNameTextElementsForThisSvg) {
+                throw new Error("array of SVG <text> elements for this SVG is null or undefined");
+            }
+            teamNameTextElementsForThisSvg[idx].innerHTML = name;
+        });
     }
 
     private createLegend(svgToCreateLegendIn: SVGSVGElement): void {

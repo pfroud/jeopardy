@@ -1,5 +1,9 @@
-/* https://codepen.io/oknoblich/pen/tfjFl */
-/* Now is an error 404. Author was Oliver Knoblich. */
+/*
+https://codepen.io/oknoblich/pen/tfjFl
+Now is an error 404. Author was Oliver Knoblich.
+Archive.org link sort of works:
+https: //web.archive.org/web/20190205041122/https://codepen.io/oknoblich/pen/tfjFl
+*/
 
 div.tab-content {
     display: none;
@@ -40,11 +44,12 @@ input[type="radio"] {
         }
     }
 
-    &#tab-music:checked~div#tab-content-music,
     &#tab-play:checked~div#tab-content-play,
-    &#tab-developer:checked~div#tab-content-developer,
+    &#tab-team-setup:checked~div#tab-content-team-setup,
     &#tab-load-game:checked~div#tab-content-load-game,
-    &#tab-game-settings:checked~div#tab-content-game-settings {
+    &#tab-music:checked~div#tab-content-music,
+    &#tab-game-settings:checked~div#tab-content-game-settings,
+    &#tab-developer:checked~div#tab-content-developer {
         display: block;
     }
 }

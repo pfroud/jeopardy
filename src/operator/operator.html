@@ -102,6 +102,9 @@
         <input id="tab-play" type="radio" name="tabs" checked>
         <label for="tab-play">Play</label>
 
+        <input id="tab-team-setup" type="radio" name="tabs">
+        <label for="tab-team-setup">Team setup</label>
+
         <input id="tab-load-game" type="radio" name="tabs">
         <label for="tab-load-game">Load game</label>
 
@@ -186,6 +189,27 @@
             <p style="text-align: right">
                 <a href="#" id="aMoneyOverride">Override money...</a>
             <p>
+
+        </div>
+        <!-- ================================================================================================== -->
+        <div class="tab-content" id="tab-content-team-setup">
+
+            How many teams:
+            <input id="team-count" type="number" min="1" max="8">
+            <button id="apply-team-count">Apply</button>
+            <p></p>
+
+            <table id="team-names">
+                <thead>
+                    <tr>
+                        <td>Team number</td>
+                        <td>Team name</td>
+                    </tr>
+                </thead>
+                <tbody>
+                <tbody>
+            </table>
+            <button id="reset-team-names">Reset team names to default</button>
 
         </div>
         <!-- ================================================================================================== -->

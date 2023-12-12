@@ -18,12 +18,12 @@ export class Clue {
     public readonly AIRDATE: Date;
     public readonly CATEGORY: {
         readonly TITLE: string;
-        specialCategory: SpecialCategory | null;
-    }
+        specialCategory: SpecialCategory | null
+    };
 
     public readonly BUZZ_HISTORY: BuzzHistoryForClue;
 
-    public constructor(xhrResponse: string) {
+    public constructor(operator: Operator, xhrResponse: string) {
         const parsedJson = JSON.parse(xhrResponse)[0];
 
         this.ANSWER = cleanString(parsedJson.answer);
@@ -41,7 +41,7 @@ export class Clue {
         this.checkSpecialCategory();
 
         this.BUZZ_HISTORY = {
-            RECORDS: getEmpty2DArray(Operator.teamCount),
+            RECORDS: getEmpty2DArray(operator.teamCount),
             timestampWhenClueQuestionFinishedReading: NaN
         };
 

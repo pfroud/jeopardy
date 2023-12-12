@@ -25,11 +25,12 @@ export type TeamState =
 
 export interface TeamSavedInLocalStorage {
     readonly MONEY: number;
+    readonly TEAM_NAME: string;
     readonly STATISTICS: Statistics;
 }
 
 export class Team {
-    public readonly TEAM_NAME: string;
+    private teamName: string;
 
     private money = 0;
     private countdownDotsInPresentationWindow?: HTMLTableElement;
@@ -80,10 +81,6 @@ export class Team {
         moneyAtEndOfEachRound: []
     };
 
-    // You can add items here to give teams custom names.
-    private readonly TEAM_NUMBER_TO_TEAM_NAME: { [teamNumber: number]: string } = {
-    };
-
     public constructor(teamIdx: number, operator: Operator, presentation: Presentation, settings: Settings, audioManager: AudioManager) {
         this.SETTINGS = settings;
         this.AUDIO_MANAGER = audioManager;
@@ -92,11 +89,7 @@ export class Team {
         this.OPERATOR = operator;
 
         const teamNumber = teamIdx + 1;
-        if (teamNumber in this.TEAM_NUMBER_TO_TEAM_NAME) {
-            this.TEAM_NAME = this.TEAM_NUMBER_TO_TEAM_NAME[teamNumber];
-        } else {
-            this.TEAM_NAME = `Team ${teamIdx + 1}`;
-        }
+        this.teamName = `Team ${teamNumber}`;
 
         this.createElementsInOperatorWindow();
         this.createElementsInPresentationWindow();
@@ -130,7 +123,16 @@ export class Team {
             this.money += amountAdd;
             this.setMoneyDisplay(this.money);
         }
+    }
 
+    public getTeamName(): string {
+        return this.teamName;
+    }
+
+    public setTeamName(newName: string): void {
+        this.teamName = newName;
+        this.DIV.OPERATOR.teamName!.innerText = newName;
+        this.DIV.PRESENTATION.teamName!.innerText = newName;
     }
 
     public moneySubtract(amountSubtract: number, animate = true): void {
@@ -255,7 +257,7 @@ export class Team {
 
         const divName = this.DIV.PRESENTATION.teamName = document.createElement("div");
         divName.classList.add("team-name");
-        divName.innerHTML = this.TEAM_NAME;
+        divName.innerHTML = this.teamName;
         divTeam.append(divName);
 
         const progress = this.progressElementInPresentationWindow = document.createElement("progress");
@@ -274,7 +276,7 @@ export class Team {
 
         const divName = this.DIV.OPERATOR.teamName = document.createElement("div");
         divName.classList.add("team-name");
-        divName.innerHTML = this.TEAM_NAME;
+        divName.innerHTML = this.teamName;
         divTeam.append(divName);
 
         const divState = this.DIV.OPERATOR.state = document.createElement("div");
@@ -401,6 +403,7 @@ export class Team {
     public getObjectToSaveInLocalStorage(): TeamSavedInLocalStorage {
         return {
             MONEY: this.money,
+            TEAM_NAME: this.teamName,
             STATISTICS: this.statistics
         };
     }
@@ -408,6 +411,7 @@ export class Team {
     public loadFromLocalStorage(source: TeamSavedInLocalStorage): void {
         this.moneySet(source.MONEY, false);
         this.statistics = source.STATISTICS;
+        this.setTeamName(source.TEAM_NAME);
     }
 
     public getTeamIndex(): number {

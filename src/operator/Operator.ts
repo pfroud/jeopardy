@@ -17,7 +17,7 @@ interface SavedGameInLocalStorage {
 }
 
 export class Operator {
-    public static teamCount = 7; //not readonly because it can change if we load a game from localStorage
+    public teamCount = 4;
     private static readonly LOCAL_STORAGE_KEY = "jeopardy";
 
     private readonly AUDIO_MANAGER: AudioManager;
@@ -40,7 +40,9 @@ export class Operator {
     private readonly DIV_BUZZ_HISTORY_PROMPT: HTMLDivElement;
     private readonly DIV_BACKDROP_FOR_POPUPS: HTMLDivElement;
     private readonly GAME_TIMER: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
+    private readonly KEYBOARD_KEYS_FOR_TEAM_NUMBERS = new Set<string>();
     private teamArray?: Team[];
+    private teamNameInputElements?: HTMLInputElement[];
     private presentClue?: Clue;
     private presentation?: Presentation;
     private isPaused = false;
@@ -100,23 +102,13 @@ export class Operator {
         */
         window.focus();
         this.presentation = presentationInstanceFromOtherWindow;
-        this.initTeams(Operator.teamCount);
+        this.initTeams();
 
-        this.initBuzzerFootswitchIconDisplay();
+        this.initKeyboardListenersForBuzzerFootswitchIcons();
 
         this.GAME_TIMER.addProgressElement(this.presentation.getProgressElementForGameTimer());
 
         this.stateMachine = new StateMachine(this.SETTINGS, this, this.presentation, this.AUDIO_MANAGER);
-
-        if (this.teamArray) {
-            this.buzzHistoryDiagram = new BuzzHistoryChart(
-                this.teamArray,
-                this.SETTINGS.durationLockoutMillisec,
-                querySelectorAndCheck<SVGSVGElement>(document, "svg#buzz-history"),
-                this.presentation.getBuzzHistorySvg()
-            );
-
-        }
 
         this.BUTTON_START_GAME.removeAttribute("disabled");
         this.BUTTON_START_GAME.focus();
@@ -124,17 +116,10 @@ export class Operator {
 
     }
 
-    private initBuzzerFootswitchIconDisplay(): void {
+    private initKeyboardListenersForBuzzerFootswitchIcons(): void {
         /*
-        Show a small picture of the footswitch used for the buzzers
-        so people can verify their buzzers are working.
-        */
-        const keyboardKeysForTeamNumbers = new Set<string>();
-        for (let teamIndex = 0; teamIndex < Operator.teamCount; teamIndex++) {
-            keyboardKeysForTeamNumbers.add(String(teamIndex + 1));
-        }
+        Show a small picture of the footswitch used for the buzzers so people can verify their buzzers are working.
 
-        /*
         When a team presses the buzzer, what happens depends on what state the team is in.
 
         For most of the team states, pressing the buzzer does not do anything. No functions
@@ -151,7 +136,7 @@ export class Operator {
 
         window.addEventListener("keydown", keyboardEvent => {
             const keyboardKey = keyboardEvent.key;
-            if (this.teamArray && keyboardKeysForTeamNumbers.has(keyboardKey)) {
+            if (this.teamArray && this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.has(keyboardKey)) {
                 const teamIndex = Number(keyboardKey) - 1;
                 const team = this.teamArray[teamIndex];
                 team.showKeyDown();
@@ -178,7 +163,7 @@ export class Operator {
 
         window.addEventListener("keyup", keyboardEvent => {
             const keyboardKey = keyboardEvent.key;
-            if (this.teamArray && keyboardKeysForTeamNumbers.has(keyboardKey)) {
+            if (this.teamArray && this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.has(keyboardKey)) {
                 const teamIndex = Number(keyboardKey) - 1;
                 const team = this.teamArray[teamIndex];
                 team.showKeyUp();
@@ -188,7 +173,7 @@ export class Operator {
 
     private initPauseKeyboardListener(): void {
         window.addEventListener("keydown", keyboardEvent => {
-            if (keyboardEvent.key === "p") {
+            if (keyboardEvent.key === "p" && document.activeElement?.tagName !== "INPUT") {
                 this.togglePaused();
             }
         });
@@ -229,7 +214,7 @@ export class Operator {
         }
 
         const indexOfTeamPresentlyAnswering = this.teamPresentlyAnswering.getTeamIndex();
-        for (let i = 0; i < Operator.teamCount; i++) {
+        for (let i = 0; i < this.teamCount; i++) {
             if (i !== indexOfTeamPresentlyAnswering) {
                 this.teamArray[i].setState(targetState);
             }
@@ -277,6 +262,28 @@ export class Operator {
             this.presentation?.showSlide("slide-gameEnd-pie-charts");
             statisticsPopup.setAttribute("data-show-game-end-item", "pie-charts");
         });
+
+        const teamCountNumberInput = querySelectorAndCheck<HTMLInputElement>(document, "input#team-count");
+        teamCountNumberInput.value = String(this.teamCount);
+        querySelectorAndCheck(document, "button#apply-team-count").addEventListener("click", () => {
+            const newTeamCount = Number(teamCountNumberInput.value);
+            if (newTeamCount !== this.teamCount) {
+                this.teamCount = newTeamCount;
+                this.initTeams();
+            }
+        });
+
+        querySelectorAndCheck(document, "button#reset-team-names").addEventListener("click", () => {
+            if (this.teamArray && this.teamNameInputElements) {
+                if (window.confirm("Erase all the team names and reset them all to default?")) {
+                    for (let teamIdx = 0; teamIdx < this.teamCount; teamIdx++) {
+                        const name = `Team ${teamIdx + 1}`;
+                        this.teamNameInputElements[teamIdx].value = name;
+                        this.teamArray[teamIdx].setTeamName(name);
+                    }
+                }
+            }
+        });
     }
 
     private startGame(): void {
@@ -293,17 +300,56 @@ export class Operator {
         this.stateMachine?.goToState("getClueFromJService");
     }
 
-    private initTeams(teamCount: number): void {
+    private initTeams(): void {
         if (!this.presentation) {
             throw new Error("called initTeams() when presentation is undefined");
         }
 
-        this.teamArray = new Array<Team>(teamCount);
+        const table = querySelectorAndCheck(document, "table#team-names tbody");
+        table.innerHTML = "";
+
+        this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.clear();
+        for (let teamIndex = 0; teamIndex < this.teamCount; teamIndex++) {
+            this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.add(String(teamIndex + 1));
+        }
+
+        this.teamArray = [];
+        this.teamNameInputElements = [];
         querySelectorAndCheck(document, "footer").innerHTML = "";
         this.presentation.clearFooter();
-        for (let teamIndex = 0; teamIndex < teamCount; teamIndex++) {
-            this.teamArray[teamIndex] = new Team(teamIndex, this, this.presentation, this.SETTINGS, this.AUDIO_MANAGER);
+        for (let teamIndex = 0; teamIndex < this.teamCount; teamIndex++) {
+            const newTeam = new Team(teamIndex, this, this.presentation, this.SETTINGS, this.AUDIO_MANAGER);
+            this.teamArray.push(newTeam);
+
+            const tr = document.createElement("tr");
+
+            const tdTeamNumber = document.createElement("td");
+            tdTeamNumber.innerText = String(teamIndex + 1);
+            tr.append(tdTeamNumber);
+
+            const tdTeamNameInputContainer = document.createElement("td");
+            const inputTeamName = document.createElement("input");
+            inputTeamName.type = "text";
+            inputTeamName.value = newTeam.getTeamName();
+            inputTeamName.addEventListener("input", () => {
+                const newName = inputTeamName.value;
+                newTeam.setTeamName(newName);
+                this.buzzHistoryDiagram?.setTeamName(teamIndex, newName);
+            });
+            this.teamNameInputElements.push(inputTeamName);
+            tdTeamNameInputContainer.append(inputTeamName);
+            tr.append(tdTeamNameInputContainer);
+
+            table.append(tr);
         }
+
+        this.buzzHistoryDiagram = new BuzzHistoryChart(
+            this.teamArray,
+            this.SETTINGS.durationLockoutMillisec,
+            querySelectorAndCheck<SVGSVGElement>(document, "svg#buzz-history"),
+            this.presentation.getBuzzHistorySvg()
+        );
+
     }
 
 
@@ -401,7 +447,7 @@ export class Operator {
             this.TR_QUESTION.style.display = "none";
 
             this.setPresentClue(
-                new Clue(
+                new Clue(this,
                     '[{"id":25876,"answer":"the booster","question":"The first stage of a rocket","value":600,"airdate":"2016-04-20T19:00:00.000Z","created_at":"2022-07-27T22:54:33.633Z","updated_at":"2022-07-27T22:54:33.633Z","category_id":4710,"game_id":5255,"invalid_count":null,"category":{"id":4710,"title":"spacecraft\\" types","created_at":"2022-07-27T22:54:33.521Z","updated_at":"2022-07-27T22:54:33.521Z","clues_count":5}}]'
                 )
             );
@@ -434,7 +480,7 @@ export class Operator {
                 }
 
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                const clue = new Clue(xhr.response);
+                const clue = new Clue(this, xhr.response);
 
                 if (clue.isValid() && !clue.hasMultimedia()) {
 
@@ -592,7 +638,7 @@ export class Operator {
         }
         const teamNumber = Number(keyboardEvent.key);
         const teamIndex = teamNumber - 1;
-        if (teamIndex > Operator.teamCount - 1) {
+        if (teamIndex > this.teamCount - 1) {
             return false;
         } else {
             return this.teamArray[teamIndex].canBuzz();
@@ -658,19 +704,19 @@ export class Operator {
 
         const tableRowTeamNumber = document.createElement("tr");
         tableDetails.appendChild(tableRowTeamNumber);
-        for (let teamIdx = 0; teamIdx < parsedJson.TEAMS.length; teamIdx++) {
+        parsedJson.TEAMS.forEach(team => {
             const cellTeamNumber = document.createElement("td");
-            cellTeamNumber.innerHTML = `Team ${teamIdx + 1}`;
+            cellTeamNumber.innerHTML = team.TEAM_NAME
             tableRowTeamNumber.appendChild(cellTeamNumber);
-        }
+        });
 
         const tableRowTeamMoney = document.createElement("tr");
         tableDetails.appendChild(tableRowTeamMoney);
-        for (const team of parsedJson.TEAMS) {
+        parsedJson.TEAMS.forEach(team => {
             const cellTeamMoney = document.createElement("td");
             cellTeamMoney.innerHTML = `$${team.MONEY}`;
             tableRowTeamMoney.appendChild(cellTeamMoney);
-        }
+        });
 
         querySelectorAndCheck(document, "button#saved-game-load").addEventListener("click", () => {
             this.loadGame(parsedJson);
@@ -703,9 +749,12 @@ export class Operator {
 
         this.GAME_TIMER.setRemainingMillisec(parsedJson.GAME_TIMER_REMAINING_MILLISEC);
 
-        this.initTeams(parsedJson.TEAMS.length);
-        for (let teamIdx = 0; teamIdx < parsedJson.TEAMS.length; teamIdx++) {
-            this.teamArray![teamIdx].loadFromLocalStorage(parsedJson.TEAMS[teamIdx]);
+        this.teamCount = parsedJson.TEAMS.length;
+        this.initTeams();
+        for (let teamIdx = 0; teamIdx < this.teamCount; teamIdx++) {
+            const team = parsedJson.TEAMS[teamIdx];
+            this.teamArray![teamIdx].loadFromLocalStorage(team);
+            this.buzzHistoryDiagram?.setTeamName(teamIdx, team.TEAM_NAME);
         }
 
         if (this.shouldGameEnd()) {
@@ -767,7 +816,7 @@ export class Operator {
         shallowCopy.forEach(team => {
             html.push(
                 "<tr>" +
-                "<td>" + team.TEAM_NAME + "</td>" +
+                "<td>" + team.getTeamName() + "</td>" +
                 "<td>$" + team.getMoney().toLocaleString() + "</td>" +
                 "</tr>"
             );

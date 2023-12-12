@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     const table = querySelectorAndCheck(document, "table tbody");
-    for (let teamIndex = 0; teamIndex < Operator.teamCount; teamIndex++) {
+    for (let teamIndex = 0; teamIndex < operator.teamCount; teamIndex++) {
         createTableRow(teamIndex);
     }
 
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // create text showing the team name
         const tdTeamName = document.createElement("td");
         tdTeamName.classList.add("team-name");
-        tdTeamName.innerHTML = team.TEAM_NAME;
+        tdTeamName.innerHTML = team.getTeamName();
         tableRowForTeam.appendChild(tdTeamName);
 
         // create buttons to subtract money
