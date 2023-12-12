@@ -9,7 +9,7 @@ progress {
 
     --background: #0066ff;
     --foreground-default: red;
-    --foreground--paused: darkred;
+    --foreground-paused: darkred;
     --foreground-lockout: orange;
     --foreground-lockout-and-paused: purple;
 
