@@ -85,6 +85,18 @@ div#statistics-chart-popup div#pie-chart-wrapper {
 div#statistics-chart-popup div#line-chart-wrapper {
     g.ct-series {
 
+        &.zero {
+
+            path.ct-line {
+                stroke: black;
+                stroke-dasharray: 5;
+            }
+
+            line.ct-point {
+                display: none;
+            }
+        }
+
         &.team-1,
         &.team-5 {
             stroke: red;
@@ -120,7 +132,8 @@ div#statistics-chart-popup div#line-chart-wrapper {
 
         svg.ct-chart-line {
             g.ct-grids line {
-                stroke: gray;
+                stroke: #aaa;
+                stroke-dasharray: 3;
             }
 
             g.ct-labels span {

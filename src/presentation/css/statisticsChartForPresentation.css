@@ -78,6 +78,18 @@ div.presentation-slide#slide-gameEnd-pie-charts {
 div#slide-gameEnd-line-chart {
     g.ct-series {
 
+        &.zero {
+
+            path.ct-line {
+                stroke: white;
+                stroke-dasharray: 5;
+            }
+
+            line.ct-point {
+                display: none;
+            }
+        }
+
         &.team-1,
         &.team-5 {
             stroke: red;
@@ -113,7 +125,8 @@ div#slide-gameEnd-line-chart {
 
         svg.ct-chart-line {
             g.ct-grids line {
-                stroke: #ffffff88;
+                stroke: #9999ff88;
+                stroke-dasharray: 3;
             }
 
             g.ct-labels span {

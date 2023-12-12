@@ -124,6 +124,22 @@ export function createLineChartOfMoneyOverTime(divForLineChart: HTMLDivElement, 
         );
 
 
+    if (teams.some(team => team.statistics.moneyAtEndOfEachRound.some(money => money < 0))) {
+        // Add a horizontal line at $0.
+        const maxIndex = teams[0].statistics.moneyAtEndOfEachRound.length - 1;
+        const seriesData: LineChartSeriesData = {
+            className: "zero",
+            data: [{
+                x: 0,
+                y: 0
+            }, {
+                x: maxIndex,
+                y: 0
+            }]
+        };
+        lineChartDataForAllTeams.push(seriesData);
+    }
+
     const chartData: Chartist.LineChartData = {
         series: lineChartDataForAllTeams
     };
