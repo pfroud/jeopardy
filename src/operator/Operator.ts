@@ -436,27 +436,21 @@ export class Operator {
         return this.presentClue?.CATEGORY.specialCategory !== null;
     }
 
-    public getClueForTesting(): Promise<void> {
+    public getClue(): void {
 
         this.stateMachine?.getCountdownTimerForState("showClueCategoryAndValue").reset();
 
-        const promiseExecutor = (
-            resolveFunc: () => void,
-        ): void => {
-            this.BUTTON_START_GAME.blur();
-            this.TR_QUESTION.style.display = "none";
+        this.BUTTON_START_GAME.blur();
+        this.TR_QUESTION.style.display = "none";
 
-            this.setPresentClue(
-                new Clue(this,
-                    '[{"id":25876,"answer":"the booster","question":"The first stage of a rocket","value":600,"airdate":"2016-04-20T19:00:00.000Z","created_at":"2022-07-27T22:54:33.633Z","updated_at":"2022-07-27T22:54:33.633Z","category_id":4710,"game_id":5255,"invalid_count":null,"category":{"id":4710,"title":"spacecraft\\" types","created_at":"2022-07-27T22:54:33.521Z","updated_at":"2022-07-27T22:54:33.521Z","clues_count":5}}]'
-                )
-            );
-            resolveFunc();
-
-        };
-        return new Promise<void>(promiseExecutor);
+        this.setPresentClue(
+            new Clue(this,
+                '[{"id":25876,"answer":"the booster","question":"The first stage of a rocket","value":600,"airdate":"2016-04-20T19:00:00.000Z","created_at":"2022-07-27T22:54:33.633Z","updated_at":"2022-07-27T22:54:33.633Z","category_id":4710,"game_id":5255,"invalid_count":null,"category":{"id":4710,"title":"spacecraft\\" types","created_at":"2022-07-27T22:54:33.521Z","updated_at":"2022-07-27T22:54:33.521Z","clues_count":5}}]'
+            )
+        );
     }
 
+    /*
     public getClueFromJService(): Promise<void> {
 
         this.stateMachine?.getCountdownTimerForState("showClueCategoryAndValue").reset();
@@ -500,11 +494,6 @@ export class Operator {
         };
 
 
-        /*
-        The promise only tells the state machine when to go to the next state.
-        The promise does NOT pass the clue object to the state machine.
-        The clue object is only stored by the operator.
-        */
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/Promise#syntax
         const promiseExecutor = (
             resolveFunc: () => void,
@@ -517,6 +506,7 @@ export class Operator {
         return new Promise<void>(promiseExecutor);
 
     }
+    */
 
     public fitClueQuestionToScreenInOperatorWindow(): void {
         this.presentation?.fitClueQuestionToScreen();

@@ -56,15 +56,6 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     break;
 
                 }
-                case "promise": {
-                    let transitionLabel = transition.TYPE.toString();
-                    if (transition.GUARD_CONDITION) {
-                        transitionLabel += ` [${transition.GUARD_CONDITION.name.replace("bound ", "")}] `;
-                    }
-                    const transitionID = `${state.NAME}_to_${transition.DESTINATION}`;
-                    dotFileLines.push(`\t${state.NAME} -> ${transition.DESTINATION} [label="${transitionLabel}", id="${transitionID}"];`);
-                    break;
-                }
                 case "timeout": {
                     let transitionLabel = transition.TYPE.toString() + ": ";
 

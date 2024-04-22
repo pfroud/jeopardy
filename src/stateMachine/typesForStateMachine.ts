@@ -7,7 +7,7 @@ export interface StateMachineState {
     readonly TRANSITIONS: StateMachineTransition[];
 }
 
-export type StateMachineTransition = ManualTransition | IfTransition | PromiseTransition | TimeoutTransition | KeyboardTransition;
+export type StateMachineTransition = ManualTransition | IfTransition | TimeoutTransition | KeyboardTransition;
 
 export interface ManualTransition {
     readonly TYPE: "manualTrigger";
@@ -28,13 +28,6 @@ export interface IfTransition {
         readonly DESTINATION: string;
         readonly ON_TRANSITION?: () => void;
     };
-}
-
-export interface PromiseTransition {
-    readonly TYPE: "promise";
-    readonly FUNCTION_TO_GET_PROMISE: () => Promise<void>;
-    readonly DESTINATION: string;
-    readonly GUARD_CONDITION?: () => boolean;
 }
 
 export interface TimeoutTransition {

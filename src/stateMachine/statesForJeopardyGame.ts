@@ -11,20 +11,6 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             TRANSITIONS: [{
                 TYPE: "manualTrigger",
                 TRIGGER_NAME: "startGame",
-                DESTINATION: "getClueFromJService"
-            }],
-        }, {
-            NAME: "getClueFromJService",
-            INSTRUCTIONS: "Loading clue...",
-            PRESENTATION_SLIDE_TO_SHOW: "slide-spinner",
-            TRANSITIONS: [{
-                TYPE: "promise",
-                /*
-                The promise only tells the state machine when to go to the next state.
-                The promise does NOT pass the clue object to the state machine.
-                The clue object is only stored by the operator.
-                */
-                FUNCTION_TO_GET_PROMISE: operator.getClueFromJService.bind(operator),
                 DESTINATION: "showClueCategoryAndValue"
             }],
         }, {
@@ -35,6 +21,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             NAME: "showClueCategoryAndValue",
             INSTRUCTIONS: "Read aloud the category and dollar value.",
             PRESENTATION_SLIDE_TO_SHOW: "slide-clue-category-and-value",
+            ON_ENTER: operator.getClue.bind(operator),
             TRANSITIONS: [{
                 TYPE: "timeout",
                 INITIAL_DURATION: settings.displayDurationCategoryMillisec,
@@ -185,7 +172,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 TYPE: "if",
                 CONDITION: operator.shouldGameEnd.bind(operator),
                 THEN: { DESTINATION: "gameEnd" },
-                ELSE: { DESTINATION: "getClueFromJService" }
+                ELSE: { DESTINATION: "showClueCategoryAndValue" }
             }],
         }, {
             NAME: "gameEnd",

@@ -249,29 +249,6 @@ export class StateMachine {
             this.PRESENTATION.getProgressElementForStateMachine().setAttribute("value", "0");
         }
 
-        //////////////////////////////////////////////////////////////
-        //////////////// Handle promise transition ///////////////////
-        //////////////////////////////////////////////////////////////
-        // Search for the first promise transition.
-        for (const transition of transitionArray) {
-            if (transition.TYPE === "promise") {
-                if (transition.GUARD_CONDITION && !transition.GUARD_CONDITION()) {
-                    continue;
-                }
-                const thePromise: Promise<void> = transition.FUNCTION_TO_GET_PROMISE();
-                thePromise.then(
-                    () => this.goToState(transition.DESTINATION)
-                ).catch(
-                    (err: Error) => {
-                        alert(`promise rejected: ${err.message}`);
-                        throw err;
-                    }
-                );
-                break;
-            }
-        }
-
-
         if (this.DEBUG) {
             console.groupEnd();
         }
