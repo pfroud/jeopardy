@@ -1,5 +1,5 @@
 import { Operator } from "../operator/Operator";
-import { Clue } from "../Clue";
+import { JServiceClue } from "../Clue";
 import { SpecialCategory } from "../specialCategories";
 import { querySelectorAndCheck } from "../common";
 
@@ -97,7 +97,7 @@ export class Presentation {
         }
     }
 
-    public setClue(clue: Clue): void {
+    public setClue(clue: JServiceClue): void {
         this.SPAN_CLUE_CATEGORY_IN_HEADER.innerHTML = clue.CATEGORY.TITLE;
         this.SPAN_CLUE_MONEY_IN_HEADER.innerHTML = `$${clue.VALUE}`;
         this.SPAN_CLUE_AIRDATE_IN_HEADER.innerHTML = `(${clue.AIRDATE.getFullYear()})`;

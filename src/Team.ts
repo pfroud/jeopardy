@@ -1,4 +1,4 @@
-import { Clue } from "./Clue";
+import { JServiceClue } from "./Clue";
 import { querySelectorAndCheck } from "./common";
 import { CountdownTimer } from "./CountdownTimer";
 import { AudioManager } from "./AudioManager";
@@ -99,7 +99,7 @@ export class Team {
         this.setState("idle");
     }
 
-    public handleAnswerCorrect(clue: Clue): void {
+    public handleAnswerCorrect(clue: JServiceClue): void {
         this.stopAnswer();
         this.AUDIO_MANAGER.ANSWER_CORRECT.play();
         this.moneyAdd(clue.VALUE);
@@ -107,7 +107,7 @@ export class Team {
         this.hasBuzzedForCurrentQuestion = true;
     }
 
-    public handleAnswerIncorrectOrAnswerTimeout(clue: Clue): void {
+    public handleAnswerIncorrectOrAnswerTimeout(clue: JServiceClue): void {
         this.stopAnswer();
         this.AUDIO_MANAGER.ANSWER_WRONG_OR_ANSWER_TIMEOUT.play();
         this.moneySubtract(clue.VALUE * this.SETTINGS.wrongAnswerPenaltyMultiplier);

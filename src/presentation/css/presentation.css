@@ -22,29 +22,6 @@ body {
     overflow: hidden;
 }
 
-div#spinner {
-    /* https://projects.lukehaas.me/css-loaders/ */
-    border: 10px solid rgba(255, 255, 255, 0.2);
-    border-left-color: white;
-    animation: spin 0.5s infinite linear;
-    border-radius: 50%;
-    width: 250px;
-    height: 250px;
-    box-sizing: border-box;
-}
-
-@keyframes spin {
-
-    /* https://projects.lukehaas.me/css-loaders/ */
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
 div#paused {
     background-color: #ffa900;
     color: black;

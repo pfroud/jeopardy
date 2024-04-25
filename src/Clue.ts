@@ -6,7 +6,7 @@ import { BuzzHistoryForClue, BuzzHistoryRecord, BuzzResult } from "./BuzzHistory
 import { Operator } from "./operator/Operator";
 import { specialCategories, SpecialCategory } from "./specialCategories";
 
-export class Clue {
+export class JServiceClue {
 
     /** The phrase read aloud by the person operating the game */
     public readonly QUESTION: string;

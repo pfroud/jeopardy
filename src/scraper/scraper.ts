@@ -1,5 +1,5 @@
+/*
 type Game = {
-    /** From URL */
     jArchiveGameID: number;
     showNumber: number;
     date: string;
@@ -20,6 +20,7 @@ type Category = {
 
 type Clue = {
     categoryIndex: number;
+    rowIndex: number;
     value: number;
     question: string;
     answer: string;
@@ -42,12 +43,10 @@ function main(): void {
 
     const newWindow = window.open("");
     if (newWindow) {
-        /*
-        If you do
-            document.head.title = "abc";
-        then the result is
-            <head title="abc">
-        */
+        //If you do
+        //    document.head.title = "abc";
+        //then the result is
+        //   <head title="abc">
         newWindow.document.head.innerHTML = "<title>Scraped</title>";
         newWindow.document.body.innerHTML = `<pre style="color:white">${JSON.stringify(result, null, 2)}</pre>`;
 
@@ -64,7 +63,10 @@ function parseTable(type: RoundType, table: HTMLTableElement): Round {
         clues: []
     };
 
-    const rows = Array.from(table.querySelectorAll("tr"));
+    const rows = Array.from(table.querySelectorAll(":scope>tbody>tr"));
+    if (rows.length !== 6) {
+        throw new Error(`got ${rows.length} row(s), expected exactly 6`);
+    }
 
     const categoryRow = rows[0];
     rv.categories =
@@ -79,9 +81,9 @@ function parseTable(type: RoundType, table: HTMLTableElement): Round {
 
     const clueRows = rows.slice(1);
 
-    clueRows.forEach(clueRow => {
+    clueRows.forEach((clueRow, rowIndex) => {
         clueRow.querySelectorAll<HTMLTableCellElement>("td.clue").forEach(
-            (tdClue, index) => {
+            (tdClue, categoryIndex) => {
 
                 // https://stackoverflow.com/a/17206138/7376577
                 const directChildrenRowsOfTdClue = tdClue.querySelectorAll(":scope>table>tbody>tr");
@@ -98,7 +100,8 @@ function parseTable(type: RoundType, table: HTMLTableElement): Round {
                 const answer = clueRow.querySelector<HTMLTableCellElement>("td.clue_text em.correct_response")!.innerText;
 
                 rv.clues.push({
-                    categoryIndex: index,
+                    categoryIndex: categoryIndex,
+                    rowIndex: rowIndex,
                     value: value,
                     question: question,
                     answer: answer
@@ -109,3 +112,5 @@ function parseTable(type: RoundType, table: HTMLTableElement): Round {
     return rv;
 
 }
+
+*/

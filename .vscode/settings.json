@@ -14,5 +14,6 @@
         "rarr",
         "stylesheet",
         "SVGS"
-    ]
+    ],
+    "html.format.unformattedContentDelimiter": "<!-- formatter-disable -->"
 }

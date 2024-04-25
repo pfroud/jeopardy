@@ -1,0 +1,25 @@
+table#gameBoard {
+    border-collapse: collapse;
+    table-layout: fixed;
+    width: 100%;
+
+    td {
+        border: 1px solid var(--light-foreground-color);
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    tr.clues td {
+
+        &.avail:hover {
+            background-color: darkgoldenrod;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+    }
+
+    tr#categories {
+        height: 70px;
+    }
+}
