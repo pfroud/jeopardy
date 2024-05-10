@@ -11,13 +11,15 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             TRANSITIONS: [{
                 TYPE: "manualTrigger",
                 TRIGGER_NAME: "startGame",
-                DESTINATION: "showClueCategoryAndValue"
+                DESTINATION: "showGameBoard"
             }],
         },
         {
             NAME: "showGameBoard",
-            PRESENTATION_SLIDE_TO_SHOW: "gameBoard",
-            ON_ENTER: operator.getClue.bind(operator),
+            INSTRUCTIONS: "Click on a clue in the game board.",
+            PRESENTATION_SLIDE_TO_SHOW: "slide-game-board",
+            ON_ENTER: operator.gameBoardShow.bind(operator),
+            ON_EXIT: operator.gameBoardHide.bind(operator),
             TRANSITIONS: [{
                 TYPE: "manualTrigger",
                 TRIGGER_NAME: "userChoseClue",

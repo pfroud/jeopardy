@@ -9,12 +9,30 @@ table#gameBoard {
         vertical-align: middle;
     }
 
+    tr#categories td.abcd {
+        font-weight: bold;
+    }
+
     tr.clues td {
 
-        &.avail:hover {
-            background-color: darkgoldenrod;
-            cursor: pointer;
-            font-weight: bold;
+        &[data-clue-revealed="no"] {
+
+            /* background-color: #333; */
+
+            &:hover {
+                background-color: #444400;
+                cursor: pointer;
+                font-weight: bold;
+            }
+
+            &:active {
+                background-color: #666600;
+            }
+
+        }
+
+        &[data-clue-revealed="yes"] {
+            visibility: hidden;
         }
 
     }

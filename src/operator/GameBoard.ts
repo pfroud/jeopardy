@@ -12,6 +12,11 @@ export class GameBoard {
     /** The first row is categories. */
     private static readonly TABLE_CLUE_ROW_COUNT = GameBoard.TABLE_ROW_COUNT - 1;
 
+    /** Attribute name for whether the question behind a table cell has been revealed. */
+    private static readonly CELL_ATTRIBUTE_NAME_CLUE_REVEALED = "data-clue-revealed";
+    private static readonly CELL_ATTRIBUTE_VALUE_NOT_REVEALED = "no";
+    private static readonly CELL_ATTRIBUTE_VALUE_ALREADY_REVEALED = "yes";
+
     /** For Double Jeopardy each number is doubled. */
     private static readonly CLUE_VALUES = [200, 400, 600, 800, 1000];
     private static readonly MULTIPLIER: { [roundType in RoundType]: number } = {
@@ -51,7 +56,16 @@ export class GameBoard {
         tables.forEach(table => this.initializeTable(table));
     }
 
+    public show(): void {
+        this.TABLES.forEach(table => table.style.display = "table");
+    }
+
+    public hide(): void {
+        this.TABLES.forEach(table => table.style.display = "none");
+    }
+
     private initializeTable(tableToValidate: HTMLTableElement): void {
+        this.TABLES.add(tableToValidate);
         const trs = tableToValidate.querySelectorAll("tr");
         if (trs.length !== GameBoard.TABLE_ROW_COUNT) {
             throw new Error(`The table has ${trs.length} <tr> element(s), expected exactly ${GameBoard.TABLE_ROW_COUNT}`);
@@ -72,15 +86,34 @@ export class GameBoard {
                 const clueRowIndex = trIndex - 1; //bc the first row is categories.
                 arrayOfCluesForTr[clueRowIndex] = Array.from(tds);
                 tds.forEach((td, tdIndex) => {
-                    td.addEventListener("click", () => {
 
-                        if (this.round && this.cluesIn2DArray) {
-                            this.OPERATOR.gameBoardClueClicked(this.cluesIn2DArray[clueRowIndex][tdIndex]);
-                        }
-
-                    });
                     td.innerText = `Row ${trIndex}`;
-                    td.classList.add("avail");
+                    td.setAttribute(GameBoard.CELL_ATTRIBUTE_NAME_CLUE_REVEALED,
+                        GameBoard.CELL_ATTRIBUTE_VALUE_NOT_REVEALED);
+
+                    td.addEventListener("click", () => {
+                        if (this.round && this.cluesIn2DArray) {
+
+                            const clue = this.cluesIn2DArray[clueRowIndex][tdIndex];
+                            this.OPERATOR.gameBoardClueClicked(
+                                clue,
+                                this.round.categories[clue.categoryIndex].name,
+                                GameBoard.CLUE_VALUES[clue.rowIndex] * GameBoard.MULTIPLIER[this.round.type]
+                            );
+
+                            td.setAttribute(GameBoard.CELL_ATTRIBUTE_NAME_CLUE_REVEALED,
+                                GameBoard.CELL_ATTRIBUTE_VALUE_ALREADY_REVEALED);
+                        }
+                    });
+
+
+                    const tds = this.CATEGORY_CELLS.get(tableToValidate);
+                    td.addEventListener("mouseenter", () => {
+                        tds![tdIndex].classList.add("abcd");
+                    });
+                    td.addEventListener("mouseleave", () => {
+                        tds![tdIndex].classList.remove("abcd");
+                    });
                 });
 
             }
@@ -116,13 +149,21 @@ export class GameBoard {
     private setClueValues(roundType: RoundType): void {
         this.CLUE_CELLS.forEach(cellsForTable => {
             for (let rowIndex = 0; rowIndex < GameBoard.TABLE_CLUE_ROW_COUNT; rowIndex++) {
-                cellsForTable[rowIndex].forEach(td => td.innerText = `$${GameBoard.CLUE_VALUES[rowIndex] * GameBoard.MULTIPLIER[roundType]}`);
+                cellsForTable[rowIndex].forEach(td => td.innerText =
+                    `$${GameBoard.CLUE_VALUES[rowIndex] * GameBoard.MULTIPLIER[roundType]}`);
             }
         });
     }
 
     public resetCluesAvailability(): void {
-        this.CLUE_CELLS.forEach(cellsForTable => cellsForTable.forEach(cellsInRow => cellsInRow.forEach(cell => cell.classList.add("avail"))));
+        this.CLUE_CELLS.forEach(cellsForTable =>
+            cellsForTable.forEach(cellsInRow =>
+                cellsInRow.forEach(cell =>
+                    cell.setAttribute(GameBoard.CELL_ATTRIBUTE_NAME_CLUE_REVEALED,
+                        GameBoard.CELL_ATTRIBUTE_VALUE_NOT_REVEALED)
+                )
+            )
+        );
     }
 
 }

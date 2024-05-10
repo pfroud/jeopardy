@@ -55,6 +55,8 @@ export class Operator {
 
     private buzzHistoryDiagram: BuzzHistoryChart | undefined;
 
+    private readonly GAME_BOARD;
+
     public constructor(audioManager: AudioManager, settings: Settings) {
         this.AUDIO_MANAGER = audioManager;
         this.SETTINGS = settings;
@@ -89,21 +91,16 @@ export class Operator {
         this.GAME_TIMER.addProgressElement(querySelectorAndCheck(document, "div#game-timer progress"));
         this.GAME_TIMER.addTextElement(querySelectorAndCheck(document, "div#game-timer div.remaining-time-text"));
 
-        // window.open("../presentation/presentation.html", "windowPresentation");
+        window.open("../presentation/presentation.html", "windowPresentation");
 
-        const gameBoard = new GameBoard(this, querySelectorAndCheck<HTMLTableElement>(document, "table#gameBoard"));
-        gameBoard.setRound(SCRAPED_GAME.rounds[0]);
+        this.GAME_BOARD = new GameBoard(this, querySelectorAndCheck<HTMLTableElement>(document, "table#gameBoard"));
+        this.GAME_BOARD.setRound(SCRAPED_GAME.rounds[0]);
 
         /*
         The rest of the initialization happens in this.handlePresentationReady(),
         which gets called by the Presentation instance in the window we opened.
         */
     }
-
-    public gameBoardClueClicked(clue: ScrapedClue): void {
-        console.log(`clicked on row ${clue.rowIndex}, category ${clue.categoryIndex}`);
-    }
-
 
     public handlePresentationReady(presentationInstanceFromOtherWindow: Presentation): void {
         /* 
@@ -427,7 +424,7 @@ export class Operator {
         this.DIV_CLUE_WRAPPER.style.display = ""; //show it by removing "display=none"
         this.DIV_CLUE_CATEGORY.innerHTML = clue.CATEGORY.TITLE;
         this.DIV_CLUE_VALUE.innerHTML = `$${clue.VALUE}`;
-        this.DIV_CLUE_AIRDATE.innerHTML = clue.AIRDATE.getFullYear().toString();
+        // this.DIV_CLUE_AIRDATE.innerHTML = clue.AIRDATE.getFullYear().toString();
         this.TR_ANSWER.style.display = "none";
     }
 
@@ -445,18 +442,25 @@ export class Operator {
         return this.presentClue?.CATEGORY.specialCategory !== null;
     }
 
-    public getClue(): void {
+    public gameBoardShow(): void {
+        this.GAME_BOARD.show();
+    }
+
+    public gameBoardHide(): void {
+        this.GAME_BOARD.hide();
+    }
+
+    public gameBoardClueClicked(clue: ScrapedClue, category: string, value: number): void {
+        console.log(`clicked on row ${clue.rowIndex}, category ${clue.categoryIndex}`);
 
         this.stateMachine?.getCountdownTimerForState("showClueCategoryAndValue").reset();
 
         this.BUTTON_START_GAME.blur();
         this.TR_QUESTION.style.display = "none";
 
-        this.setPresentClue(
-            new JServiceClue(this,
-                '[{"id":25876,"answer":"the booster","question":"The first stage of a rocket","value":600,"airdate":"2016-04-20T19:00:00.000Z","created_at":"2022-07-27T22:54:33.633Z","updated_at":"2022-07-27T22:54:33.633Z","category_id":4710,"game_id":5255,"invalid_count":null,"category":{"id":4710,"title":"spacecraft\\" types","created_at":"2022-07-27T22:54:33.521Z","updated_at":"2022-07-27T22:54:33.521Z","clues_count":5}}]'
-            )
-        );
+        this.setPresentClue(new JServiceClue(this, clue, category, value));
+
+        this.stateMachine?.manualTrigger("userChoseClue");
     }
 
     /*

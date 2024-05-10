@@ -100,11 +100,11 @@ export class Presentation {
     public setClue(clue: JServiceClue): void {
         this.SPAN_CLUE_CATEGORY_IN_HEADER.innerHTML = clue.CATEGORY.TITLE;
         this.SPAN_CLUE_MONEY_IN_HEADER.innerHTML = `$${clue.VALUE}`;
-        this.SPAN_CLUE_AIRDATE_IN_HEADER.innerHTML = `(${clue.AIRDATE.getFullYear()})`;
+        // this.SPAN_CLUE_AIRDATE_IN_HEADER.innerHTML = `(${clue.AIRDATE.getFullYear()})`;
 
         this.DIV_CLUE_CATEGORY_BIG.innerHTML = clue.CATEGORY.TITLE;
         this.DIV_CLUE_VALUE_BIG.innerHTML = `$${clue.VALUE}`;
-        this.DIV_CLUE_AIRDATE_BIG.innerHTML = `Airdate: ${clue.AIRDATE.getFullYear()}`;
+        // this.DIV_CLUE_AIRDATE_BIG.innerHTML = `Airdate: ${clue.AIRDATE.getFullYear()}`;
 
         this.DIV_SLIDE_CLUE_QUESTION.innerHTML = clue.QUESTION;
 

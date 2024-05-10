@@ -1,8 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { BuzzHistoryForClue, BuzzHistoryRecord, BuzzResult } from "./BuzzHistoryChart";
+import { ScrapedClue } from "./games";
 import { Operator } from "./operator/Operator";
 import { specialCategories, SpecialCategory } from "./specialCategories";
 
@@ -15,7 +12,7 @@ export class JServiceClue {
     public readonly ANSWER: string;
 
     public readonly VALUE: number;
-    public readonly AIRDATE: Date;
+    // public readonly AIRDATE: Date;
     public readonly CATEGORY: {
         readonly TITLE: string;
         specialCategory: SpecialCategory | null
@@ -23,18 +20,17 @@ export class JServiceClue {
 
     public readonly BUZZ_HISTORY: BuzzHistoryForClue;
 
-    public constructor(operator: Operator, xhrResponse: string) {
-        const parsedJson = JSON.parse(xhrResponse)[0];
+    public constructor(operator: Operator, input: ScrapedClue, category: string, value: number) {
 
-        this.ANSWER = cleanString(parsedJson.answer);
-        this.QUESTION = cleanString(parsedJson.question);
-        this.VALUE = parsedJson.value;
+        this.ANSWER = input.answer;
+        this.QUESTION = input.question;
+        this.VALUE = value;
 
         // example of what format the airdate is in: "2013-01-25T12:00:00.000Z"
-        this.AIRDATE = new Date(parsedJson.airdate);
+        // this.AIRDATE = new Date(parsedJson.airdate);
 
         this.CATEGORY = {
-            TITLE: cleanString(parsedJson.category.title),
+            TITLE: category,
             specialCategory: null
         };
 
@@ -55,55 +51,6 @@ export class JServiceClue {
                 rv[teamIdx] = [];
             }
             return rv;
-        }
-
-        function cleanString(rawString: string): string {
-            const withoutBackslashes = rawString.replace(/\\/g, "");
-            try {
-                const decoded = decodeUTF8(withoutBackslashes);
-                if (withoutBackslashes !== decoded) {
-                    console.group("UTF-8 decode success");
-                    console.log("Before:");
-                    console.log(withoutBackslashes);
-                    console.log("After:");
-                    console.log(decoded);
-                    console.groupEnd();
-                }
-                return decoded;
-            } catch (error) {
-                console.group("UTF-8 decode failed");
-                console.warn("The error was:");
-                console.warn(error);
-                console.warn("The original response from JService was:");
-                console.warn(xhrResponse);
-                console.groupEnd();
-                return withoutBackslashes;
-            }
-        }
-
-        function decodeUTF8(rawString: string): string {
-
-            /*
-            Fixes strings like:
-            "MÃ©lisande"       --> "Mélisande"
-            "Ãle de la CitÃ©" --> "Île de la Cité"
-            "lycÃ©e"           --> "lycée"
-            "idÃ©e"            --> "idée"
-            "macramÃ©"         --> "macramé"
-    
-            But it does not work on:
-            "espaãol"
-            */
-
-            // https://developer.chrome.com/blog/how-to-convert-arraybuffer-to-and-from-string/
-            const arrayBuffer = new ArrayBuffer(rawString.length);
-            const uint8Array = new Uint8Array(arrayBuffer);
-            for (let i = 0, strLen = rawString.length; i < strLen; i++) {
-                uint8Array[i] = rawString.charCodeAt(i);
-            }
-
-            const textDecoder = new TextDecoder("utf-8", { fatal: true });
-            return textDecoder.decode(arrayBuffer);
         }
 
     }

@@ -29,6 +29,10 @@ label[for^="tab"] {
         border-color: var(--color-inactive-hover);
         cursor: pointer;
     }
+
+    &:active {
+        background-color: #333;
+    }
 }
 
 input[type="radio"] {
