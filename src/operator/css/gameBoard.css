@@ -9,7 +9,7 @@ table#gameBoard {
         vertical-align: middle;
     }
 
-    tr#categories td.abcd {
+    tr#categories td.mouse-is-over {
         font-weight: bold;
     }
 

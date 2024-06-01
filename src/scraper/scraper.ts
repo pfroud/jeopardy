@@ -1,8 +1,9 @@
-/*
 type Game = {
+    /** From game_id in URL */
     jArchiveGameID: number;
+    /** From the header in the webpage */
     showNumber: number;
-    date: string;
+    airdate: string;
     rounds: Round[];
 }
 
@@ -10,20 +11,27 @@ type RoundType = "single" | "double";
 type Round = {
     type: RoundType;
     categories: Category[];
-    clues: Clue[];
+    /**
+     * This 2D array follows the structure of an HTML table.
+     * The first array index is the row index.
+     * The second array index is the column index.
+     * */
+    clues: ScrapedClue[][];
 }
 
 type Category = {
     name: string;
-    comments: string | undefined;
+    /** A few categories have a comment from the host explaining the meaning of the category name. */
+    comments?: string;
 }
 
-type Clue = {
+type ScrapedClue = {
     categoryIndex: number;
+    // The category string or object is not included in this object
     rowIndex: number;
-    value: number;
     question: string;
     answer: string;
+    // The value is NOT included here, it comes from from the round type (singel vs double) and the row index.
 }
 
 
@@ -34,83 +42,90 @@ function main(): void {
     const result: Game = {
         jArchiveGameID: Number(window.location.search.replace("?game_id=", "")),
         showNumber: Number(h1Text?.match(/Show #(\d+)/)![1]),
-        date: h1Text.split(" - ")[1],
+        airdate: h1Text.split(" - ")[1],
         rounds: [
-            parseTable("single", document.querySelector<HTMLTableElement>("div#jeopardy_round table.round")!),
-            parseTable("double", document.querySelector<HTMLTableElement>("div#double_jeopardy_round table.round")!),
+            parseTableForRound("single", document.querySelector<HTMLTableElement>("div#jeopardy_round table.round")!),
+            parseTableForRound("double", document.querySelector<HTMLTableElement>("div#double_jeopardy_round table.round")!),
         ]
     };
 
-    const newWindow = window.open("");
-    if (newWindow) {
-        //If you do
-        //    document.head.title = "abc";
-        //then the result is
-        //   <head title="abc">
-        newWindow.document.head.innerHTML = "<title>Scraped</title>";
-        newWindow.document.body.innerHTML = `<pre style="color:white">${JSON.stringify(result, null, 2)}</pre>`;
+    const outputWindow = window.open("");
+    if (outputWindow) {
+        /*
+        Set the window title.
+        If you do
+            document.head.title = "abc";
+        then it sets the title attribute of the <head> tag:
+           <head title="abc">
+        */
+        outputWindow.document.head.innerHTML = "<title>Scraped</title>";
+        outputWindow.document.body.innerHTML = `<pre style="color:white">${JSON.stringify(result, null, 2)}</pre>`;
 
     }
 
 }
 main();
 
-function parseTable(type: RoundType, table: HTMLTableElement): Round {
+function parseTableForRound(roundType: RoundType, table: HTMLTableElement): Round {
 
-    const rv: Round = {
-        type: type,
-        categories: [],
-        clues: []
-    };
+    /*
+    About the :scope pseudo-class:
+    https://developer.mozilla.org/en-US/docs/Web/CSS/:scope
 
-    const rows = Array.from(table.querySelectorAll(":scope>tbody>tr"));
+    About the > combinator (it does direct children):
+    https://developer.mozilla.org/en-US/docs/Web/CSS/Child_combinator
+
+    From https://stackoverflow.com/a/17206138/7376577
+    */
+
+    const rows = Array.from(table.querySelectorAll<HTMLTableRowElement>(":scope>tbody>tr"));
     if (rows.length !== 6) {
         throw new Error(`got ${rows.length} row(s), expected exactly 6`);
     }
 
     const categoryRow = rows[0];
-    rv.categories =
+    const categories =
         Array.from(categoryRow.querySelectorAll<HTMLTableCellElement>("td.category")).
             map(td => {
-                const comments = td.querySelector<HTMLTableCellElement>("td.category_comments")!.innerText.trim();
-                return {
-                    name: td.querySelector<HTMLTableCellElement>("td.category_name")!.innerText,
-                    comments: comments.length > 0 ? comments : undefined
+                const rv: Category = {
+                    name: td.querySelector<HTMLTableCellElement>("td.category_name")!.innerText
                 };
-            });
-
-    const clueRows = rows.slice(1);
-
-    clueRows.forEach((clueRow, rowIndex) => {
-        clueRow.querySelectorAll<HTMLTableCellElement>("td.clue").forEach(
-            (tdClue, categoryIndex) => {
-
-                // https://stackoverflow.com/a/17206138/7376577
-                const directChildrenRowsOfTdClue = tdClue.querySelectorAll(":scope>table>tbody>tr");
-                if (directChildrenRowsOfTdClue.length !== 2) {
-                    throw new Error(`the td.clue has ${directChildrenRowsOfTdClue.length} trs, expected exactly 2`);
+                const commentsString = td.querySelector<HTMLTableCellElement>("td.category_comments")!.innerText.trim();
+                if (commentsString.length > 0) {
+                    rv.comments = commentsString;
                 }
-
-                const headerRow = directChildrenRowsOfTdClue[0];
-                const value = Number(headerRow.querySelector<HTMLTableCellElement>('table.clue_header td[class^="clue_value"]')!
-                    .innerText.replace("$", "").replace("DD: ", "").replace(",", ""));
-
-                const clueRow = directChildrenRowsOfTdClue[1];
-                const question = clueRow.querySelector<HTMLTableCellElement>('td.clue_text:not([display="none"])')!.innerText;
-                const answer = clueRow.querySelector<HTMLTableCellElement>("td.clue_text em.correct_response")!.innerText;
-
-                rv.clues.push({
-                    categoryIndex: categoryIndex,
-                    rowIndex: rowIndex,
-                    value: value,
-                    question: question,
-                    answer: answer
-                });
+                return rv;
             });
-    });
 
-    return rv;
+
+    const clueRows = rows.slice(1); //skip the first item in the list, it is the row of categories.
+
+    const clues = clueRows.map((clueRow: HTMLTableRowElement, rowIndex): ScrapedClue[] =>
+        Array.from(clueRow.querySelectorAll<HTMLTableCellElement>("td.clue")).map((tdClue: HTMLTableCellElement, categoryIndex): ScrapedClue => {
+            const directChildrenRowsOfTdClue = tdClue.querySelectorAll(":scope>table>tbody>tr");
+            if (directChildrenRowsOfTdClue.length !== 2) {
+                throw new Error(`the td.clue has ${directChildrenRowsOfTdClue.length} trs, expected exactly 2`);
+            }
+
+            const clueRow = directChildrenRowsOfTdClue[1];
+            const question = clueRow.querySelector<HTMLTableCellElement>('td.clue_text:not([display="none"])')!.innerText;
+            const answer = clueRow.querySelector<HTMLTableCellElement>("td.clue_text em.correct_response")!.innerText;
+
+            return {
+                categoryIndex: categoryIndex,
+                rowIndex: rowIndex,
+                question: question,
+                answer: answer
+            };
+        })
+
+    );
+
+    return {
+        type: roundType,
+        categories: categories,
+        clues: clues
+    };
 
 }
 
-*/
