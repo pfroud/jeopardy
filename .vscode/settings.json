@@ -4,13 +4,20 @@
         ".parcel-cache": true,
         "dist": true
     },
+    "files.readonlyInclude": {
+        "src/scraper/*.js": true
+    },
     "cSpell.words": [
         "aduh",
         "Airdate",
+        "darkreader",
         "fontname",
         "Footswitch",
         "Froud",
+        "GRIDLINE",
+        "gridlines",
         "millisec",
+        "NONPOTENT",
         "rarr",
         "stylesheet",
         "SVGS"

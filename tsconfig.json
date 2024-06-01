@@ -5,14 +5,15 @@
         "target": "ES2021", // https://www.typescriptlang.org/tsconfig#target
         "strict": true, // https://www.typescriptlang.org/tsconfig#strict
         "sourceMap": true, // https://www.typescriptlang.org/tsconfig#sourceMap
+        "allowUnreachableCode": false, // https://www.typescriptlang.org/tsconfig#allowUnreachableCode
+        "allowUnusedLabels": false, // https://www.typescriptlang.org/tsconfig#allowUnusedLabels
+        "exactOptionalPropertyTypes": true, // https://www.typescriptlang.org/tsconfig#exactOptionalPropertyTypes
+        "noFallthroughCasesInSwitch": true, // https://www.typescriptlang.org/tsconfig/#noFallthroughCasesInSwitch
         "noImplicitAny": true, // https://www.typescriptlang.org/tsconfig#noImplicitAny
         "noImplicitOverride": true, // https://www.typescriptlang.org/tsconfig#noImplicitOverride
         "noImplicitReturns": true, // https://www.typescriptlang.org/tsconfig#noImplicitReturns
         "noImplicitThis": true, // https://www.typescriptlang.org/tsconfig#noImplicitThis
         "noPropertyAccessFromIndexSignature": true, // https://www.typescriptlang.org/tsconfig#noPropertyAccessFromIndexSignature
-        "allowUnreachableCode": false, // https://www.typescriptlang.org/tsconfig#allowUnreachableCode
-        "allowUnusedLabels": false, // https://www.typescriptlang.org/tsconfig#allowUnusedLabels
-        "exactOptionalPropertyTypes": true, // https://www.typescriptlang.org/tsconfig#exactOptionalPropertyTypes
         //
         // https://parceljs.org/languages/typescript/#isolatedmodules
         // https://www.typescriptlang.org/tsconfig#isolatedModules

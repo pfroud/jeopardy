@@ -463,63 +463,6 @@ export class Operator {
         this.stateMachine?.manualTrigger("userChoseClue");
     }
 
-    /*
-    public getClueFromJService(): Promise<void> {
-
-        this.stateMachine?.getCountdownTimerForState("showClueCategoryAndValue").reset();
-
-        // Use a recursive helper function so we can do retries.
-        const fetchClueHelper = (
-            promiseResolveFunc: () => void,
-            promiseRejectFunc: (rejectReason: Error) => void,
-            tryNum: number,
-            maxTries: number
-        ): void => {
-            // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
-            const xhr = new XMLHttpRequest();
-            // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/From
-            xhr.open("GET", "http://jservice.io/api/random");
-            xhr.setRequestHeader("From", "pfroud@gmail.com");
-            xhr.addEventListener("load", () => {
-
-                if (xhr.status !== 200) {
-                    alert(`Error ${xhr.status}: ${xhr.statusText}`);
-                }
-
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                const clue = new Clue(this, xhr.response);
-
-                if (clue.isValid() && !clue.hasMultimedia()) {
-
-                    this.setPresentClue(clue);
-
-                    // we don't need to return the clue object to the state machine
-                    promiseResolveFunc();
-                } else {
-                    if (tryNum < maxTries) {
-                        fetchClueHelper.call(this, promiseResolveFunc, promiseRejectFunc, tryNum + 1, maxTries);
-                    } else {
-                        promiseRejectFunc(new Error(`couldn't fetch clue after ${maxTries} tries`));
-                    }
-                }
-            });
-            xhr.send();
-        };
-
-
-        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/Promise#syntax
-        const promiseExecutor = (
-            resolveFunc: () => void,
-            rejectFunc: (rejectReason: Error) => void
-        ): void => {
-            this.BUTTON_START_GAME.blur();
-            this.TR_QUESTION.style.display = "none";
-            fetchClueHelper.call(this, resolveFunc, rejectFunc, 1, 5);
-        };
-        return new Promise<void>(promiseExecutor);
-
-    }
-    */
 
     public fitClueQuestionToScreenInOperatorWindow(): void {
         this.presentation?.fitClueQuestionToScreen();

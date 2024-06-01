@@ -21,12 +21,12 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
     stateArray.forEach((state: StateMachineState) => {
 
 
-        let stateLabel = "<b>" + state.NAME + "</b>";
+        let stateLabel = `<b>${state.NAME}</b>`;
         if (state.ON_ENTER) {
-            stateLabel += "<br/>onEnter: " + state.ON_ENTER.name.replace("bound ", "") + "()";
+            stateLabel += `<br/>onEnter: ${state.ON_ENTER.name.replace("bound ", "")}()`;
         }
         if (state.ON_EXIT) {
-            stateLabel += "<br/>onExit: " + state.ON_EXIT.name.replace("bound ", "") + "()";
+            stateLabel += `<br/>onExit: ${state.ON_EXIT.name.replace("bound ", "")}()`;
         }
         dotFileLines.push(`\t${state.NAME} [label= < ${stateLabel} >, id="${state.NAME}"];`);
 
@@ -39,7 +39,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     if (transition.KEYBOARD_KEYS === " ") {
                         transitionLabel += "space";
                     } else {
-                        transitionLabel += '\\"' + transition.KEYBOARD_KEYS + '\\"';
+                        transitionLabel += `\\"${transition.KEYBOARD_KEYS}\\"`;
                     }
 
                     if (transition.GUARD_CONDITION) {
@@ -57,7 +57,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
 
                 }
                 case "timeout": {
-                    let transitionLabel = transition.TYPE.toString() + ": ";
+                    let transitionLabel = `${transition.TYPE.toString()}: `;
 
                     transitionLabel += `${transition.BEHAVIOR} ${transition.INITIAL_DURATION} ms`;
 
@@ -74,7 +74,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     break;
                 }
                 case "manualTrigger": {
-                    let transitionLabel = transition.TYPE.toString() + ': \\"' + transition.TRIGGER_NAME.replace("manualTrigger_", "") + '\\"';
+                    let transitionLabel = `${transition.TYPE.toString()}: \\"${transition.TRIGGER_NAME.replace("manualTrigger_", "")}\\"`;
                     if (transition.GUARD_CONDITION) {
                         transitionLabel += ` [${transition.GUARD_CONDITION.name.replace("bound ", "")}] `;
                     }
@@ -90,13 +90,13 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                 case "if": {
                     const condition = transition.CONDITION.name.replace("bound ", "");
 
-                    let labelThen = "if(" + condition + ")";
+                    let labelThen = `if(${condition})`;
                     if (transition.THEN.ON_TRANSITION) {
                         labelThen += ` / ${transition.THEN.ON_TRANSITION.name.replace("bound ", "")}()`;
                     }
                     const idThen = `${state.NAME}_to_${transition.THEN.DESTINATION}`;
 
-                    let labelElse = "if(!" + condition + ")";
+                    let labelElse = `if(!${condition})`;
                     if (transition.ELSE.ON_TRANSITION) {
                         labelElse += ` / ${transition.ELSE.ON_TRANSITION.name.replace("bound ", "")}()`;
                     }

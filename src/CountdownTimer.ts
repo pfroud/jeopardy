@@ -226,7 +226,7 @@ export class CountdownTimer {
             const date = new Date(this.remainingMillisec);
             newText = `${date.getMinutes()} min ${date.getSeconds()} sec`;
         } else {
-            newText = remainingSeconds.toFixed(1) + " sec";
+            newText = `${remainingSeconds.toFixed(1)} sec`;
         }
 
         this.TEXT_ELEMENTS.forEach(elem => elem.innerHTML = newText);

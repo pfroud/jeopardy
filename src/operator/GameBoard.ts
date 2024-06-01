@@ -121,12 +121,12 @@ export class GameBoard {
                     });
 
 
-                    const tds = this.CATEGORY_CELLS.get(table);
+                    const tdsForMouseover = this.CATEGORY_CELLS.get(table);
                     td.addEventListener("mouseenter", () => {
-                        tds![tdIndex].classList.add("mouse-is-over");
+                        tdsForMouseover![tdIndex].classList.add("mouse-is-over");
                     });
                     td.addEventListener("mouseleave", () => {
-                        tds![tdIndex].classList.remove("mouse-is-over");
+                        tdsForMouseover![tdIndex].classList.remove("mouse-is-over");
                     });
                 });
 

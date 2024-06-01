@@ -37,33 +37,39 @@ module.exports = // https://eslint.org/docs/user-guide/configuring/
     //
     // https://eslint.org/docs/user-guide/configuring/rules
     "rules": {
+        "array-callback-return": "warn", // https://eslint.org/docs/latest/rules/array-callback-return
         "consistent-return": "error", // https://eslint.org/docs/rules/consistent-return
         "default-case-last": "warn", // https://eslint.org/docs/rules/default-case-last
-        // https://eslint.org/docs/rules/new-cap
-        "new-cap": ["error",
+        "dot-notation": "warn", // https://eslint.org/docs/latest/rules/dot-notation
+        "eqeqeq": "warn", // https://eslint.org/docs/latest/rules/eqeqeq
+        "new-cap": ["error", // https://eslint.org/docs/rules/new-cap
             { "capIsNewExceptionPattern": "[A-Z_]+" } // allow all-uppercase
         ],
         "no-array-constructor": "warn", // https://eslint.org/docs/rules/no-array-constructor   
         "no-confusing-arrow": "warn", // https://eslint.org/docs/rules/no-confusing-arrow
+        "no-debugger": "warn", // https://eslint.org/docs/latest/rules/no-debugger
+        "no-empty": "warn", // https://eslint.org/docs/rules/no-empty
+        "no-empty-function": "off", // https://eslint.org/docs/latest/rules/no-empty-function
         "no-invalid-this": "error", // https://eslint.org/docs/rules/no-invalid-this
         "no-loop-func": "error", // https://eslint.org/docs/rules/no-loop-func
         "no-param-reassign": "error", // https://eslint.org/docs/rules/no-param-reassign
-        "no-throw-literal": "error", // https://eslint.org/docs/rules/no-throw-literal
-        "prefer-promise-reject-errors": "error", // https://eslint.org/docs/rules/prefer-promise-reject-errors
-        "semi": "warn", //semicolon https://eslint.org/docs/rules/semi
-        "no-empty": "warn", // https://eslint.org/docs/rules/no-empty
-        "no-template-curly-in-string": "warn", // https://eslint.org/docs/latest/rules/no-template-curly-in-string
-        "array-callback-return": "warn", // https://eslint.org/docs/latest/rules/array-callback-return
         "no-promise-executor-return": "warn", // https://eslint.org/docs/latest/rules/no-promise-executor-return
-        "eqeqeq": "warn", // https://eslint.org/docs/latest/rules/eqeqeq
-        "@typescript-eslint/explicit-member-accessibility": "warn", // https://typescript-eslint.io/rules/explicit-member-accessibility/
-        "@typescript-eslint/explicit-function-return-type": "warn", // https://typescript-eslint.io/rules/explicit-function-return-type/
-        "@typescript-eslint/no-require-imports": "warn", // https://typescript-eslint.io/rules/no-require-imports/
-        "@typescript-eslint/prefer-readonly": "warn", // https://typescript-eslint.io/rules/prefer-readonly/
+        "no-shadow": "error", // https://eslint.org/docs/latest/rules/no-shadow
+        "no-template-curly-in-string": "warn", // https://eslint.org/docs/latest/rules/no-template-curly-in-string
+        "no-throw-literal": "error", // https://eslint.org/docs/rules/no-throw-literal
+        "no-useless-computed-key": "warn", // https://eslint.org/docs/latest/rules/no-useless-computed-key
+        "prefer-promise-reject-errors": "error", // https://eslint.org/docs/rules/prefer-promise-reject-errors
+        "prefer-template": "warn", //https://eslint.org/docs/latest/rules/prefer-template
+        "semi": "warn", //semicolon https://eslint.org/docs/rules/semi
         "@typescript-eslint/consistent-indexed-object-style": "off", // https://typescript-eslint.io/rules/consistent-indexed-object-style/
+        "@typescript-eslint/explicit-function-return-type": "error", // https://typescript-eslint.io/rules/explicit-function-return-type/
+        "@typescript-eslint/explicit-member-accessibility": "warn", // https://typescript-eslint.io/rules/explicit-member-accessibility/
         "@typescript-eslint/no-floating-promises": "off", // https://typescript-eslint.io/rules/no-floating-promises/
         "@typescript-eslint/no-non-null-assertion": "off", // https://typescript-eslint.io/rules/no-non-null-assertion
+        "@typescript-eslint/no-require-imports": "warn", // https://typescript-eslint.io/rules/no-require-imports/
         "@typescript-eslint/no-unnecessary-condition": "off", //https://typescript-eslint.io/rules/no-unnecessary-condition/
+        "@typescript-eslint/no-unused-vars": "warn",
+        "@typescript-eslint/prefer-readonly": "warn", // https://typescript-eslint.io/rules/prefer-readonly/
         // https://typescript-eslint.io/rules/naming-convention/
         "@typescript-eslint/naming-convention": [
             "warn",
@@ -73,5 +79,7 @@ module.exports = // https://eslint.org/docs/user-guide/configuring/
                 "format": ["UPPER_CASE"]
             }
         ],
+        "no-shadow": "off",
+        "@typescript-eslint/no-shadow": ["error"]
     }
-};
+}

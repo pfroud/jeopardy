@@ -196,10 +196,10 @@ export class Team {
 
     private setMoneyDisplay(value: number): void {
         if (this.DIV.PRESENTATION.money) {
-            this.DIV.PRESENTATION.money.innerHTML = "$" + value.toLocaleString();
+            this.DIV.PRESENTATION.money.innerHTML = `$${value.toLocaleString()}`;
         }
         if (this.DIV.OPERATOR.money) {
-            this.DIV.OPERATOR.money.innerHTML = "$" + value.toLocaleString();
+            this.DIV.OPERATOR.money.innerHTML = `$${value.toLocaleString()}`;
         }
     }
 

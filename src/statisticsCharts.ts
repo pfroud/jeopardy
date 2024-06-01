@@ -159,7 +159,7 @@ export function createLineChartOfMoneyOverTime(divForLineChart: HTMLDivElement, 
             showGrid: true,
             type: Chartist.AutoScaleAxis,
             onlyInteger: true,
-            labelInterpolationFnc: value => "$" + value.toLocaleString()
+            labelInterpolationFnc: value => `$${value.toLocaleString()}`
         },
         lineSmooth: false,
         width: "800px",

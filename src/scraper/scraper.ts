@@ -107,9 +107,9 @@ function parseTableForRound(roundType: RoundType, table: HTMLTableElement): Roun
                 throw new Error(`the td.clue has ${directChildrenRowsOfTdClue.length} trs, expected exactly 2`);
             }
 
-            const clueRow = directChildrenRowsOfTdClue[1];
-            const question = clueRow.querySelector<HTMLTableCellElement>('td.clue_text:not([display="none"])')!.innerText;
-            const answer = clueRow.querySelector<HTMLTableCellElement>("td.clue_text em.correct_response")!.innerText;
+            const childRow = directChildrenRowsOfTdClue[1];
+            const question = childRow.querySelector<HTMLTableCellElement>('td.clue_text:not([display="none"])')!.innerText;
+            const answer = childRow.querySelector<HTMLTableCellElement>("td.clue_text em.correct_response")!.innerText;
 
             return {
                 categoryIndex: categoryIndex,

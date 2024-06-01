@@ -232,7 +232,7 @@ export class StateMachine {
 
                 countdownTimer.startOrResume();
 
-                this.OPERATOR_WINDOW_DIV_STATE_NAME.innerHTML = destinationStateName + " &rarr; " + transition.DESTINATION;
+                this.OPERATOR_WINDOW_DIV_STATE_NAME.innerHTML = `${destinationStateName} &rarr; ${transition.DESTINATION}`;
                 // We could support multiple timeout transitions, although I have no need to
                 foundCountdownTimer = true;
                 break;
