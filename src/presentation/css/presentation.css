@@ -7,12 +7,14 @@
     --color-money: #e3a147;
     --color-airdate: #8e99d8;
 
-    --text-shadow-big: 3px 3px #000, 5px 5px #000, 7px 7px #000, 9px 9px #000, 11px 11px #000;
+    --text-shadow-big: 3px 3px black, 5px 5px black, 7px 7px black, 9px 9px black, 11px 11px #000;
 }
 
 body {
     height: 100vh;
     width: 100vw;
+    margin: 0px;
+    padding: 0px;
     font-family: sans-serif;
     background-color: #0b2191;
     background-image: url("../img/background.jpg");
@@ -80,7 +82,7 @@ main {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 0px 100px;
+    /* padding: 0px 100px; */
 
     div.presentation-slide {
         display: none;
@@ -160,6 +162,11 @@ main {
                     }
                 }
             }
+        }
+
+        &#slide-game-board {
+            width: 100%;
+
         }
     }
 }
@@ -264,6 +271,17 @@ body.hide-header-and-footer {
     }
 
     footer {
+        display: none;
+    }
+}
+
+body.showing-game-board header {
+    /*
+    Hide everything except the game timer
+    */
+
+    progress#state-machine,
+    span {
         display: none;
     }
 }

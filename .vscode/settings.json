@@ -22,5 +22,5 @@
         "stylesheet",
         "SVGS"
     ],
-    "html.format.unformattedContentDelimiter": "<!-- formatter-disable -->"
+    "html.format.unformattedContentDelimiter": "<!-- formatter-toggle -->"
 }

@@ -133,7 +133,7 @@ export class Presentation {
         this.DIV_PAUSED.style.display = isPaused ? "" : "none";
     }
 
-    public setTeamRankingHtml(htmlString: string): void {
+    public setGameEndTeamRankingHtml(htmlString: string): void {
         querySelectorAndCheck(document, "div#slide-gameEnd-team-ranking-table div#team-ranking").innerHTML = htmlString;
     }
 
@@ -151,6 +151,14 @@ export class Presentation {
 
     public hideHeaderAndFooter(): void {
         document.body.className = "hide-header-and-footer";
+    }
+
+    public minimizeHeader(): void {
+        document.body.classList.add("showing-game-board");
+    }
+
+    public maximizeHeader(): void {
+        document.body.classList.remove("showing-game-board");
     }
 
     public clearFooter(): void {
@@ -187,6 +195,10 @@ export class Presentation {
 
     public getBuzzHistorySvg(): SVGSVGElement {
         return querySelectorAndCheck(document, "div#slide-buzz-history-chart svg");
+    }
+
+    public getGameBoard(): HTMLTableElement {
+        return querySelectorAndCheck(document, "table#game-board");
     }
 
 }

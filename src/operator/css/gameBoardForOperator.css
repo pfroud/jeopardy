@@ -1,4 +1,4 @@
-table#gameBoard {
+table#game-board {
     border-collapse: collapse;
     table-layout: fixed;
     width: 100%;
@@ -7,10 +7,6 @@ table#gameBoard {
         border: 1px solid var(--light-foreground-color);
         text-align: center;
         vertical-align: middle;
-    }
-
-    tr#categories td.mouse-is-over {
-        font-weight: bold;
     }
 
     tr.clues td {
@@ -26,7 +22,8 @@ table#gameBoard {
             }
 
             &:active {
-                background-color: #666600;
+                background-color: white;
+                color: black;
             }
 
         }

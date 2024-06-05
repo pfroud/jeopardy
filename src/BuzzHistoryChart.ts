@@ -681,6 +681,7 @@ export class BuzzHistoryChart {
                     .attr("y2", arrowY);
 
                 // draw the arrowhead
+                // TODO use two SVG paths instead of four SVG lines
                 annotationGroups
                     .selectAll(`line.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_LEFT}`)
                     .data(annotationForThisTeam)

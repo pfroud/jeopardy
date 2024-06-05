@@ -1,0 +1,53 @@
+table#game-board {
+    border-collapse: collapse;
+    /* table-layout: fixed; */
+
+    text-shadow: 3px 3px black, 5px 5px black, 7px 7px black;
+    font-family: swiss911;
+
+    margin-left: 50px;
+    margin-right: 50px;
+
+    td {
+        border: 3px solid #000;
+        text-align: center;
+        vertical-align: middle;
+        width: calc((100vw - 100px) / 6);
+        padding: 20px 0px;
+    }
+
+
+    tr#categories {
+        font-size: 35px;
+    }
+
+    tr.clues {
+
+        color: var(--color-money);
+        letter-spacing: 2px;
+        font-size: 60px;
+
+        td {
+
+            &.hover-in-operator-window {
+                background-color: rgba(255, 255, 255, 0.4);
+                font-weight: bold;
+                color: #ffbb55;
+            }
+
+            &.active-in-operator-window {
+                background-color: white;
+                color: black;
+                text-shadow: 3px 3px lightgray, 5px 5px lightgray, 7px 7px lightgray;
+            }
+
+
+            &[data-clue-revealed="yes"] {
+                visibility: hidden;
+            }
+        }
+
+    }
+
+
+}

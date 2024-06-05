@@ -1,5 +1,5 @@
-import { Category, Round, RoundType, ScrapedClue } from "../games";
-import { Operator } from "./Operator";
+import { Category, Round, RoundType } from "./games";
+import { Operator } from "./operator/Operator";
 
 /**
  * The <table>s in the operator window and presentation windows should have the exact same
@@ -28,6 +28,8 @@ export class GameBoard {
     /** One for the operator window and one for the presentation window. */
     private readonly TABLES = new Set<HTMLTableElement>();
 
+    private presentationTable: HTMLTableElement | null = null;
+
     /** 
      * The Map key is the table in either the operator window or the presentation window.
      * The Map value is an array of table columns.
@@ -46,13 +48,8 @@ export class GameBoard {
 
     private round: Round | null = null;
 
-
-    /**
-     * @param tables the <table> in the operator window and in the presentation window.
-     */
-    public constructor(operator: Operator, ...tables: HTMLTableElement[]) {
+    public constructor(operator: Operator) {
         this.OPERATOR = operator;
-        tables.forEach(table => this.initializeTable(table));
     }
 
     public show(): void {
@@ -63,8 +60,12 @@ export class GameBoard {
         this.TABLES.forEach(table => table.style.display = "none");
     }
 
-    private initializeTable(table: HTMLTableElement): void {
+    public addTable(table: HTMLTableElement, window: "operator" | "presentation"): void {
         this.TABLES.add(table);
+
+        if (window === "presentation") {
+            this.presentationTable = table;
+        }
 
         const allRows = table.querySelectorAll("tr");
         if (allRows.length !== GameBoard.TABLE_ROW_COUNT) {
@@ -92,7 +93,7 @@ export class GameBoard {
                 const clueRowIndex = trIndex - 1;
 
                 clueCells[clueRowIndex] = Array.from(tds);
-                tds.forEach((td, tdIndex) => {
+                tds.forEach((td, columnIndex) => {
 
                     td.innerText = `Row ${trIndex}`;
                     td.setAttribute(
@@ -100,34 +101,52 @@ export class GameBoard {
                         GameBoard.CELL_ATTRIBUTE_VALUE_NOT_REVEALED_YET
                     );
 
-                    td.addEventListener("click", () => {
-                        if (this.round) {
-                            const columnIndex = tdIndex;
-                            const clue = this.round.clues[clueRowIndex][columnIndex];
-                            this.OPERATOR.gameBoardClueClicked(
-                                clue,
-                                this.round.categories[tdIndex].name,
-                                GameBoard.CLUE_VALUES[clueRowIndex] * GameBoard.MULTIPLIER[this.round.type]
-                            );
+                    if (window === "operator") {
+                        td.addEventListener("click", () => {
+                            if (this.round) {
+                                const clue = this.round.clues[clueRowIndex][columnIndex];
+                                this.OPERATOR.gameBoardClueClicked(
+                                    clue,
+                                    this.round.categories[columnIndex].name,
+                                    GameBoard.CLUE_VALUES[clueRowIndex] * GameBoard.MULTIPLIER[this.round.type]
+                                );
 
-                            td.setAttribute(
-                                GameBoard.CELL_ATTRIBUTE_NAME_IS_CLUE_REVEALED,
-                                GameBoard.CELL_ATTRIBUTE_VALUE_ALREADY_REVEALED
-                            );
+                                this.TABLES.forEach(t => this.CLUE_CELLS.get(t)![clueRowIndex][columnIndex].setAttribute(
+                                    GameBoard.CELL_ATTRIBUTE_NAME_IS_CLUE_REVEALED,
+                                    GameBoard.CELL_ATTRIBUTE_VALUE_ALREADY_REVEALED));
 
-                        } else {
-                            console.warn("clicked on a cell but the game round has not been set");
-                        }
-                    });
+                            } else {
+                                console.warn("clicked on a cell but the game round has not been set");
+                            }
+                        });
 
+                        td.addEventListener("mouseenter", () => {
+                            if (this.presentationTable) {
+                                this.CLUE_CELLS.get(this.presentationTable)![clueRowIndex][columnIndex].classList.add("hover-in-operator-window");
+                            }
+                        });
 
-                    const tdsForMouseover = this.CATEGORY_CELLS.get(table);
-                    td.addEventListener("mouseenter", () => {
-                        tdsForMouseover![tdIndex].classList.add("mouse-is-over");
-                    });
-                    td.addEventListener("mouseleave", () => {
-                        tdsForMouseover![tdIndex].classList.remove("mouse-is-over");
-                    });
+                        td.addEventListener("mouseleave", () => {
+                            if (this.presentationTable) {
+                                this.CLUE_CELLS.get(this.presentationTable)![clueRowIndex][columnIndex].classList.remove("hover-in-operator-window");
+                                this.CLUE_CELLS.get(this.presentationTable)![clueRowIndex][columnIndex].classList.remove("active-in-operator-window");
+                            }
+                        });
+
+                        td.addEventListener("mousedown", () => {
+                            if (this.presentationTable) {
+                                this.CLUE_CELLS.get(this.presentationTable)![clueRowIndex][columnIndex].classList.add("active-in-operator-window");
+                            }
+                        });
+
+                        td.addEventListener("mouseup", () => {
+                            if (this.presentationTable) {
+                                this.CLUE_CELLS.get(this.presentationTable)![clueRowIndex][columnIndex].classList.remove("active-in-operator-window");
+                            }
+                        });
+
+                    }
+
                 });
 
             }

@@ -1,16 +1,16 @@
+import { AudioManager } from "../AudioManager";
 import { BuzzHistoryChart, BuzzHistoryRecord, BuzzResultStartAnswer } from "../BuzzHistoryChart";
 import { JServiceClue } from "../Clue";
-import { querySelectorAndCheck } from "../common";
 import { CountdownTimer } from "../CountdownTimer";
-import { Presentation } from "../presentation/Presentation";
+import { GameBoard } from "../GameBoard";
 import { Settings } from "../Settings";
-import { StateMachine } from "../stateMachine/StateMachine";
 import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
-import { AudioManager } from "../AudioManager";
-import { SpecialCategory } from "../specialCategories";
-import { createLineChartOfMoneyOverTime, createPieCharts } from "../statisticsCharts";
-import { GameBoard } from "./GameBoard";
+import { querySelectorAndCheck } from "../common";
 import { SCRAPED_GAME, ScrapedClue } from "../games";
+import { Presentation } from "../presentation/Presentation";
+import { SpecialCategory } from "../specialCategories";
+import { StateMachine } from "../stateMachine/StateMachine";
+import { createLineChartOfMoneyOverTime, createPieCharts } from "../statisticsCharts";
 
 interface SavedGameInLocalStorage {
     readonly GAME_TIMER_REMAINING_MILLISEC: number,
@@ -93,8 +93,9 @@ export class Operator {
 
         window.open("../presentation/presentation.html", "windowPresentation");
 
-        this.GAME_BOARD = new GameBoard(this, querySelectorAndCheck<HTMLTableElement>(document, "table#gameBoard"));
-        this.GAME_BOARD.setRound(SCRAPED_GAME.rounds[0]);
+        this.GAME_BOARD = new GameBoard(this);
+        this.GAME_BOARD.addTable(querySelectorAndCheck<HTMLTableElement>(document, "table#game-board"), "operator");
+
 
         /*
         The rest of the initialization happens in this.handlePresentationReady(),
@@ -106,9 +107,14 @@ export class Operator {
         /* 
         This method gets called from the Presentation instance in the other window.
         */
-        window.focus();
+
+        window.focus(); //focus the operator window
+
         this.presentation = presentationInstanceFromOtherWindow;
         this.initTeams();
+
+        this.GAME_BOARD.addTable(this.presentation.getGameBoard(), "presentation");
+        this.GAME_BOARD.setRound(SCRAPED_GAME.rounds[0]);
 
         this.initKeyboardListenersForBuzzerFootswitchIcons();
 
@@ -303,7 +309,7 @@ export class Operator {
         this.setAllTeamsState("idle", true); // the second argument is endLockout
         this.BUTTON_SKIP_CLUE.setAttribute("disabled", "disabled");
         this.BUTTON_SKIP_CLUE.blur();
-        this.stateMachine?.goToState("getClueFromJService");
+        this.stateMachine?.goToState("showGameBoard");
     }
 
     private initTeams(): void {
@@ -444,10 +450,12 @@ export class Operator {
 
     public gameBoardShow(): void {
         this.GAME_BOARD.show();
+        this.presentation?.minimizeHeader();
     }
 
     public gameBoardHide(): void {
         this.GAME_BOARD.hide();
+        this.presentation?.maximizeHeader();
     }
 
     public gameBoardClueClicked(clue: ScrapedClue, category: string, value: number): void {
@@ -725,7 +733,7 @@ export class Operator {
 
         const teamRankingTableHtml = this.getTeamRankingTableHtml();
         querySelectorAndCheck(document, "div#team-ranking-wrapper").innerHTML = teamRankingTableHtml;
-        this.presentation?.setTeamRankingHtml(teamRankingTableHtml);
+        this.presentation?.setGameEndTeamRankingHtml(teamRankingTableHtml);
 
         if (this.teamArray) {
 
