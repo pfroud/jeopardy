@@ -7,7 +7,7 @@ import { Operator } from "./operator/Operator";
  */
 export class GameBoard {
 
-    private static readonly TABLE_COLUMN_COUNT = 6;
+    public static readonly TABLE_COLUMN_COUNT = 6;
 
     /** The entire table has six rows. The first row is categories, followed by five rows of clues. */
     private static readonly TABLE_ROW_COUNT = 6;

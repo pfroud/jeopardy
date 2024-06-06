@@ -1,0 +1,60 @@
+div#slide-category-carousel {
+    overflow: hidden;
+
+    table#category-carousel {
+        border-collapse: collapse;
+
+        --cell-width: calc(100vw - var(--border-size));
+        --border-size: 50px;
+
+        transition: margin-left 1s ease-in-out;
+
+        margin-left: 999px;
+
+        &[data-show-category-index="0"] {
+            margin-left: 0px;
+        }
+
+        &[data-show-category-index="1"] {
+            margin-left: calc(-1 * var(--cell-width));
+        }
+
+        &[data-show-category-index="2"] {
+            margin-left: calc(-2 * var(--cell-width));
+        }
+
+        &[data-show-category-index="3"] {
+            margin-left: calc(-3 * var(--cell-width));
+        }
+
+        &[data-show-category-index="4"] {
+            margin-left: calc(-4 * var(--cell-width));
+        }
+
+        &[data-show-category-index="5"] {
+            margin-left: calc(-5 * var(--cell-width));
+        }
+
+        td {
+            background-image: url("../img/background.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+
+            text-shadow: 3px 3px black, 5px 5px black, 7px 7px black;
+            font-family: swiss911;
+
+            box-sizing: border-box;
+            border: var(--border-size) solid black;
+            font-size: 100px;
+
+            /* setting width directly does not work! */
+            /* min-width: var(--cell-width); */
+            min-width: var(--cell-width);
+
+            height: calc(100vh - var(--border-size));
+            text-align: center;
+            vertical-align: middle;
+            padding: 10px;
+        }
+    }
+}

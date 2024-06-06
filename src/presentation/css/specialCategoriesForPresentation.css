@@ -7,6 +7,9 @@ div#special-category-backdrop {
     left: 0;
     z-index: 1;
 
+    /* prevent web browser inspector from selecting the backdrop */
+    pointer-events: none;
+
     &.blurred {
         backdrop-filter: blur(3px);
     }

@@ -108,6 +108,14 @@ export class StateMachine {
                 if (this.DEBUG) {
                     console.log(`Manual trigger "${TRIGGER_NAME}" from ${this.presentState.NAME} to ${transition.DESTINATION}`);
                 }
+
+                if (transition.ON_TRANSITION) {
+                    if (this.DEBUG) {
+                        console.log(`calling transition fn ${transition.ON_TRANSITION.name}`);
+                    }
+                    transition.ON_TRANSITION();
+                }
+
                 this.goToState(transition.DESTINATION);
                 return;
             }
@@ -350,6 +358,12 @@ export class StateMachine {
 
                 switch (transition.TYPE) {
                     case "keyboard": {
+
+                        if (transition.GUARD_CONDITION) {
+                            // do not check for multiple transitions using the same keyboard key leaving this state
+                            break;
+                        }
+
                         // Verify each keyboard key is not used in multiple transitions leaving this state.
                         const keyboardKeys: string = transition.KEYBOARD_KEYS;
                         for (let i = 0; i < keyboardKeys.length; i++) {

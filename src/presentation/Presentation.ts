@@ -2,6 +2,7 @@ import { Operator } from "../operator/Operator";
 import { JServiceClue } from "../Clue";
 import { SpecialCategory } from "../specialCategories";
 import { querySelectorAndCheck } from "../common";
+import { GameBoard } from "../GameBoard";
 
 export class Presentation {
     public readonly ALL_SLIDE_NAMES = new Set<string>();
@@ -27,6 +28,9 @@ export class Presentation {
     private readonly ALL_SLIDE_DIVS: { [slideName: string]: HTMLDivElement } = {};
     private visibleSlideDiv?: HTMLDivElement;
 
+    private readonly CATEGORY_CAROUSEL_TABLE: HTMLTableElement;
+    private readonly CATEGORY_CAROUSEL_CELLS: HTMLTableCellElement[];
+
     public constructor(operator: Operator) {
         this.HEADER = querySelectorAndCheck(document, "header");
         this.SPAN_CLUE_CATEGORY_IN_HEADER = querySelectorAndCheck(this.HEADER, "span#clue-category-in-header");
@@ -48,6 +52,14 @@ export class Presentation {
         this.DIV_PAUSED = querySelectorAndCheck(document, "div#paused");
 
         this.FOOTER = querySelectorAndCheck(document, "footer");
+
+        this.CATEGORY_CAROUSEL_TABLE = querySelectorAndCheck(document, "table#category-carousel");
+        const categoryCarouselCells = this.CATEGORY_CAROUSEL_TABLE.querySelectorAll("td");
+        if (categoryCarouselCells.length !== GameBoard.TABLE_COLUMN_COUNT) {
+            throw new Error(`found ${categoryCarouselCells.length} category carousel cells, expected exactly ${GameBoard.TABLE_COLUMN_COUNT}`);
+        }
+        this.CATEGORY_CAROUSEL_CELLS = Array.from(categoryCarouselCells);
+
 
         this.initSlides();
 
@@ -150,7 +162,11 @@ export class Presentation {
     }
 
     public hideHeaderAndFooter(): void {
-        document.body.className = "hide-header-and-footer";
+        document.body.classList.add("hide-header-and-footer");
+    }
+
+    public showHeaderAndFooter(): void {
+        document.body.classList.remove("hide-header-and-footer");
     }
 
     public minimizeHeader(): void {
@@ -197,8 +213,22 @@ export class Presentation {
         return querySelectorAndCheck(document, "div#slide-buzz-history-chart svg");
     }
 
-    public getGameBoard(): HTMLTableElement {
+    public getGameBoardTable(): HTMLTableElement {
         return querySelectorAndCheck(document, "table#game-board");
+    }
+
+    public setCategoryCarouselRound(gameRound: Round): void {
+        const categories = gameRound.categories;
+        if (categories.length !== GameBoard.TABLE_COLUMN_COUNT) {
+            throw new Error(`categories length is ${categories.length}, expected exactly ${GameBoard.TABLE_COLUMN_COUNT}`);
+        }
+        for (let i = 0; i < GameBoard.TABLE_COLUMN_COUNT; i++) {
+            this.CATEGORY_CAROUSEL_CELLS[i].innerHTML = categories[i].name;
+        }
+    }
+
+    public setCategoryCarouselIndex(n: number): void {
+        this.CATEGORY_CAROUSEL_TABLE.setAttribute("data-show-category-index", String(n));
     }
 
 }

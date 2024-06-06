@@ -53,6 +53,8 @@ export class Operator {
     private buzzHistoryRecordForActiveAnswer?: BuzzHistoryRecord<BuzzResultStartAnswer> | undefined;
     private questionCount = 0;
 
+    private categoryCarouselIndex = 0;
+
     private buzzHistoryDiagram: BuzzHistoryChart | undefined;
 
     private readonly GAME_BOARD;
@@ -113,8 +115,11 @@ export class Operator {
         this.presentation = presentationInstanceFromOtherWindow;
         this.initTeams();
 
-        this.GAME_BOARD.addTable(this.presentation.getGameBoard(), "presentation");
-        this.GAME_BOARD.setRound(SCRAPED_GAME.rounds[0]);
+        this.GAME_BOARD.addTable(this.presentation.getGameBoardTable(), "presentation");
+
+        const gameRound = SCRAPED_GAME.rounds[0];
+        this.GAME_BOARD.setRound(gameRound);
+        this.presentation?.setCategoryCarouselRound(gameRound);
 
         this.initKeyboardListenersForBuzzerFootswitchIcons();
 
@@ -828,6 +833,29 @@ export class Operator {
         } else {
             throw new Error("called shouldShowBuzzHistory() when teamArray is undefined");
         }
+    }
+
+    public startCategoryCarousel(): void {
+        this.presentation?.hideHeaderAndFooter();
+        this.presentation?.setCategoryCarouselIndex(0);
+        this.DIV_INSTRUCTIONS.innerText = "Press space to show the next category in the carousel";
+    }
+
+    public stopCategoryCarousel(): void {
+        this.presentation?.showHeaderAndFooter();
+    }
+
+    public hasMoreCategoryCarousel(): boolean {
+        return this.categoryCarouselIndex < GameBoard.TABLE_COLUMN_COUNT - 1;
+    }
+
+    public doneWithCategoryCarousel(): boolean {
+        return !this.hasMoreCategoryCarousel();
+    }
+
+    public showNextCategoryCarousel(): void {
+        this.categoryCarouselIndex++;
+        this.presentation?.setCategoryCarouselIndex(this.categoryCarouselIndex);
     }
 
 }

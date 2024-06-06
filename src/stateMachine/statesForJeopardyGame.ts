@@ -11,10 +11,26 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             TRANSITIONS: [{
                 TYPE: "manualTrigger",
                 TRIGGER_NAME: "startGame",
-                DESTINATION: "showGameBoard"
+                ON_TRANSITION: operator.startCategoryCarousel.bind(operator),
+                DESTINATION: "showCategoryCarousel"
             }],
-        },
-        {
+        }, {
+            NAME: "showCategoryCarousel",
+            PRESENTATION_SLIDE_TO_SHOW: "slide-category-carousel",
+            TRANSITIONS: [{
+                TYPE: "keyboard",
+                DESTINATION: "showCategoryCarousel",
+                GUARD_CONDITION: operator.hasMoreCategoryCarousel.bind(operator),
+                KEYBOARD_KEYS: " ", //space
+                ON_TRANSITION: operator.showNextCategoryCarousel.bind(operator)
+            }, {
+                TYPE: "keyboard",
+                DESTINATION: "showGameBoard",
+                GUARD_CONDITION: operator.doneWithCategoryCarousel.bind(operator),
+                KEYBOARD_KEYS: " ", //space
+                ON_TRANSITION: operator.stopCategoryCarousel.bind(operator)
+            }]
+        }, {
             NAME: "showGameBoard",
             INSTRUCTIONS: "Click on a clue in the game board.",
             PRESENTATION_SLIDE_TO_SHOW: "slide-game-board",
