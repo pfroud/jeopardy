@@ -1,5 +1,5 @@
 import { AudioManager } from "../AudioManager";
-import { querySelectorAndCheck } from "../common";
+import { querySelectorAndCheck } from "../commonFunctions";
 import { CountdownTimer } from "../CountdownTimer";
 import { Operator } from "../operator/Operator";
 import { Presentation } from "../presentation/Presentation";

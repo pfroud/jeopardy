@@ -1,8 +1,8 @@
 import Viz from "@aduh95/viz.js";
-import { querySelectorSVGAndCheck } from "../common";
+import { querySelectorSVGAndCheck } from "../commonFunctions";
 import { Operator } from "../operator/Operator";
-import { stateMachineToGraphviz } from "./generateDotFileForGraphviz";
 import { StateMachineViewer } from "./StateMachineViewer";
+import { stateMachineToGraphviz } from "./generateDotFileForGraphviz";
 
 window.addEventListener('DOMContentLoaded', () => {
 

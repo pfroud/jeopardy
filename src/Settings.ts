@@ -1,4 +1,4 @@
-import { querySelectorAndCheck } from "./common";
+import { querySelectorAndCheck } from "./commonFunctions";
 
 export class Settings {
     // How long to show the category in big text in the presentation window

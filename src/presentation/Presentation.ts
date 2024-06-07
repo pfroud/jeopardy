@@ -1,8 +1,8 @@
-import { Operator } from "../operator/Operator";
-import { JServiceClue } from "../Clue";
-import { SpecialCategory } from "../specialCategories";
-import { querySelectorAndCheck } from "../common";
 import { GameBoard } from "../GameBoard";
+import { querySelectorAndCheck } from "../commonFunctions";
+import { ScrapedClue, ScrapedRound } from "../gameTypes";
+import { Operator } from "../operator/Operator";
+import { SpecialCategory } from "../specialCategories";
 
 export class Presentation {
     public readonly ALL_SLIDE_NAMES = new Set<string>();
@@ -105,12 +105,12 @@ export class Presentation {
         }
     }
 
-    public setClue(clue: JServiceClue): void {
-        this.SPAN_CLUE_CATEGORY_IN_HEADER.innerHTML = clue.CATEGORY.TITLE;
-        this.SPAN_CLUE_MONEY_IN_HEADER.innerHTML = `$${clue.VALUE}`;
+    public setClue(clue: ScrapedClue, category: string, value: number): void {
+        this.SPAN_CLUE_CATEGORY_IN_HEADER.innerHTML = category;
+        this.SPAN_CLUE_MONEY_IN_HEADER.innerHTML = `$${value}`;
 
-        this.DIV_CLUE_CATEGORY_BIG.innerHTML = clue.CATEGORY.TITLE;
-        this.DIV_CLUE_VALUE_BIG.innerHTML = `$${clue.VALUE}`;
+        this.DIV_CLUE_CATEGORY_BIG.innerHTML = category;
+        this.DIV_CLUE_VALUE_BIG.innerHTML = `$${value}`;
 
         this.DIV_SLIDE_CLUE_QUESTION.innerHTML = clue.QUESTION;
 
@@ -211,13 +211,13 @@ export class Presentation {
         return querySelectorAndCheck(document, "table#game-board");
     }
 
-    public setCategoryCarouselRound(gameRound: Round): void {
-        const categories = gameRound.categories;
+    public setCategoryCarouselRound(gameRound: ScrapedRound): void {
+        const categories = gameRound.CATEGORIES;
         if (categories.length !== GameBoard.TABLE_COLUMN_COUNT) {
             throw new Error(`categories length is ${categories.length}, expected exactly ${GameBoard.TABLE_COLUMN_COUNT}`);
         }
         for (let i = 0; i < GameBoard.TABLE_COLUMN_COUNT; i++) {
-            this.CATEGORY_CAROUSEL_CELLS[i].innerHTML = categories[i].name;
+            this.CATEGORY_CAROUSEL_CELLS[i].innerHTML = categories[i].NAME;
         }
     }
 

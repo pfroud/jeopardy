@@ -14,6 +14,16 @@ export interface SpecialCategory {
     }
 }
 
+export function checkSpecialCategory(categoryName: string): SpecialCategory | null {
+    // search for the first one which matches
+    for (const specialCategory of specialCategories) {
+        if (specialCategory.CATEGORY_TITLE_MATCHES.test(categoryName)) {
+            return specialCategory;
+        }
+    }
+    return null;
+}
+
 export const specialCategories: SpecialCategory[] = [
     {
         DISPLAY_NAME: "Crossword clue categories",

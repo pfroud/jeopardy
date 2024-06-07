@@ -1,4 +1,4 @@
-import { Category, Round, RoundType } from "./games";
+import { RoundType, ScrapedCategory, ScrapedRound } from "./gameTypes";
 import { Operator } from "./operator/Operator";
 
 /**
@@ -46,7 +46,7 @@ export class GameBoard {
 
     private readonly OPERATOR;
 
-    private round: Round | null = null;
+    private round: ScrapedRound | null = null;
 
     public constructor(operator: Operator) {
         this.OPERATOR = operator;
@@ -104,11 +104,11 @@ export class GameBoard {
                     if (window === "operator") {
                         td.addEventListener("click", () => {
                             if (this.round) {
-                                const clue = this.round.clues[clueRowIndex][columnIndex];
+                                const clue = this.round.CLUES[clueRowIndex][columnIndex];
                                 this.OPERATOR.gameBoardClueClicked(
                                     clue,
-                                    this.round.categories[columnIndex].name,
-                                    GameBoard.CLUE_VALUES[clueRowIndex] * GameBoard.MULTIPLIER[this.round.type]
+                                    this.round.CATEGORIES[columnIndex].NAME,
+                                    GameBoard.CLUE_VALUES[clueRowIndex] * GameBoard.MULTIPLIER[this.round.TYPE]
                                 );
 
                                 this.TABLES.forEach(t => this.CLUE_CELLS.get(t)![clueRowIndex][columnIndex].setAttribute(
@@ -154,19 +154,19 @@ export class GameBoard {
         this.CLUE_CELLS.set(table, clueCells);
     }
 
-    public setRound(round: Round): void {
+    public setRound(round: ScrapedRound): void {
         this.round = round;
-        this.setCategoryNames(round.categories);
-        this.setClueValues(round.type);
+        this.setCategoryNames(round.CATEGORIES);
+        this.setClueValues(round.TYPE);
     }
 
-    private setCategoryNames(categories: Category[]): void {
+    private setCategoryNames(categories: ScrapedCategory[]): void {
         if (categories.length !== GameBoard.TABLE_COLUMN_COUNT) {
             throw new Error(`The array of categories has length ${categories.length}, expected exactly ${GameBoard.TABLE_COLUMN_COUNT}`);
         }
         this.CATEGORY_CELLS.forEach(arrayOfTds => {
             for (let i = 0; i < GameBoard.TABLE_COLUMN_COUNT; i++) {
-                arrayOfTds[i].innerText = categories[i].name;
+                arrayOfTds[i].innerText = categories[i].NAME;
             }
         });
     }

@@ -1,14 +1,14 @@
 import { AudioManager } from "../AudioManager";
-import { BuzzHistoryChart, BuzzHistoryRecord, BuzzResultStartAnswer } from "../BuzzHistoryChart";
-import { JServiceClue } from "../Clue";
+import { BuzzHistoryChart, BuzzHistoryForClue, BuzzHistoryRecord, BuzzResult, BuzzResultStartAnswer } from "../BuzzHistoryChart";
 import { CountdownTimer } from "../CountdownTimer";
 import { GameBoard } from "../GameBoard";
 import { Settings } from "../Settings";
 import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
-import { querySelectorAndCheck } from "../common";
-import { SCRAPED_GAME, ScrapedClue } from "../games";
+import { querySelectorAndCheck } from "../commonFunctions";
+import { FullClue, ScrapedClue } from "../gameTypes";
 import { Presentation } from "../presentation/Presentation";
-import { SpecialCategory } from "../specialCategories";
+import { SCRAPED_GAME } from "../scrapedGame";
+import { SpecialCategory, checkSpecialCategory } from "../specialCategories";
 import { StateMachine } from "../stateMachine/StateMachine";
 import { createLineChartOfMoneyOverTime, createPieCharts } from "../statisticsCharts";
 
@@ -44,7 +44,9 @@ export class Operator {
     private readonly KEYBOARD_KEYS_FOR_TEAM_NUMBERS = new Set<string>();
     private teamArray?: Team[];
     private teamNameInputElements?: HTMLInputElement[];
-    private presentClue?: JServiceClue;
+    private presentClue?: FullClue;
+
+    private buzzHistoryForClue?: BuzzHistoryForClue;
     private presentation?: Presentation;
     private isPaused = false;
     private stateMachine?: StateMachine;
@@ -115,7 +117,7 @@ export class Operator {
 
         this.GAME_BOARD.addTable(this.presentation.getGameBoardTable(), "presentation");
 
-        const gameRound = SCRAPED_GAME.rounds[0];
+        const gameRound = SCRAPED_GAME.ROUNDS[0];
         this.GAME_BOARD.setRound(gameRound);
         this.presentation?.setCategoryCarouselRound(gameRound);
 
@@ -164,7 +166,7 @@ export class Operator {
                     } else if (teamState === "idle") {
                         // Ignore, we don't need it to appear in the history chart.
                     } else {
-                        this.presentClue.BUZZ_HISTORY.RECORDS[teamIndex].push({
+                        this.buzzHistoryForClue?.RECORDS[teamIndex].push({
                             startTimestamp: Date.now(),
                             RESULT: {
                                 TYPE: "ignored",
@@ -241,7 +243,7 @@ export class Operator {
             this.buzzHistoryRecordForActiveAnswer.RESULT.endTimestamp = Date.now();
             this.buzzHistoryRecordForActiveAnswer.RESULT.answeredCorrectly = answeredCorrectly;
 
-            this.presentClue.BUZZ_HISTORY.RECORDS[this.teamPresentlyAnswering.getTeamIndex()]
+            this.buzzHistoryForClue?.RECORDS[this.teamPresentlyAnswering.getTeamIndex()]
                 .push(this.buzzHistoryRecordForActiveAnswer);
 
             this.buzzHistoryRecordForActiveAnswer = undefined;
@@ -417,7 +419,7 @@ export class Operator {
         const team = this.teamArray[teamIndex];
         team.canBeLockedOut() && team.startLockout();
 
-        this.presentClue?.BUZZ_HISTORY.RECORDS[teamIndex].push({
+        this.buzzHistoryForClue?.RECORDS[teamIndex].push({
             startTimestamp: Date.now(),
             RESULT: { TYPE: "too-early-start-lockout" }
         });
@@ -425,29 +427,46 @@ export class Operator {
     }
 
 
-    private showClueToOperator(clue: JServiceClue): void {
+    private showClueToOperator(clue: FullClue, category: string, value: number): void {
         /*
         This function only shows the category, and dollar value to the operator.
         The state machine will show the clue question after a timeout.
         */
         this.DIV_CLUE_WRAPPER.style.display = ""; //show it by removing "display=none"
-        this.DIV_CLUE_CATEGORY.innerHTML = clue.CATEGORY.TITLE;
-        this.DIV_CLUE_VALUE.innerHTML = `$${clue.VALUE}`;
+        this.DIV_CLUE_CATEGORY.innerHTML = category;
+        this.DIV_CLUE_VALUE.innerHTML = `$${value}`;
         this.TR_ANSWER.style.display = "none";
     }
 
-    private setPresentClue(clue: JServiceClue): void {
+    private setPresentClue(clue: FullClue, category: string, value: number): void {
         this.presentClue = clue;
-        this.showClueToOperator(clue);
-        this.presentation?.setClue(clue);
 
-        if (clue.CATEGORY.specialCategory) {
-            this.showSpecialCategoryPrompt(clue.CATEGORY.specialCategory);
+        this.buzzHistoryForClue = {
+            RECORDS: getEmpty2DArray(this.teamCount),
+            timestampWhenClueQuestionFinishedReading: NaN
+        };
+        function getEmpty2DArray(size: number): BuzzHistoryRecord<BuzzResult>[][] {
+            /*
+             Do not use array.fill([]) because it creates one new empty array and sets
+             all the elements to that empty array.
+             */
+            const rv = new Array<BuzzHistoryRecord<BuzzResult>[]>(size);
+            for (let teamIdx = 0; teamIdx < size; teamIdx++) {
+                rv[teamIdx] = [];
+            }
+            return rv;
+        }
+
+        this.showClueToOperator(clue, category, value);
+        this.presentation?.setClue(clue, category, value);
+
+        if (clue.SPECIAL_CATEGORY) {
+            this.showSpecialCategoryPrompt(clue.SPECIAL_CATEGORY);
         }
     }
 
     public isCurrentClueSpecialCategory(): boolean {
-        return this.presentClue?.CATEGORY.specialCategory !== null;
+        return this.presentClue?.SPECIAL_CATEGORY !== null;
     }
 
     public gameBoardShow(): void {
@@ -460,15 +479,21 @@ export class Operator {
         this.presentation?.maximizeHeader();
     }
 
-    public gameBoardClueClicked(clue: ScrapedClue, category: string, value: number): void {
-        console.log(`clicked on row ${clue.rowIndex}, category ${clue.categoryIndex}`);
-
+    public gameBoardClueClicked(scrapedClue: ScrapedClue, categoryName: string, value: number): void {
         this.stateMachine?.getCountdownTimerForState("showClueCategoryAndValue").reset();
 
         this.BUTTON_START_GAME.blur();
         this.TR_QUESTION.style.display = "none";
 
-        this.setPresentClue(new JServiceClue(this, clue, category, value));
+
+        const fullClue: FullClue = {
+            QUESTION: scrapedClue.QUESTION,
+            ANSWER: scrapedClue.ANSWER,
+            CATEGORY_NAME: categoryName,
+            VALUE: value,
+            SPECIAL_CATEGORY: checkSpecialCategory(categoryName)
+        };
+        this.setPresentClue(fullClue, categoryName, value);
 
         this.stateMachine?.manualTrigger("userChoseClue");
     }
@@ -490,7 +515,7 @@ export class Operator {
     public showSpecialCategoryOverlay(): void {
         this.GAME_TIMER.pause();
 
-        const specialCategory = this.presentClue?.CATEGORY.specialCategory;
+        const specialCategory = this.presentClue?.SPECIAL_CATEGORY;
         if (!specialCategory) {
             throw new Error("called showSpecialCategoryOverlay() when the present clue does not have a special category");
         }
@@ -532,13 +557,26 @@ export class Operator {
         */
         this.setAllTeamsState("operator-is-reading-question");
 
-        this.DIV_CLUE_QUESTION.innerHTML = this.presentClue.getQuestionHtmlWithSubjectInBold();
+        this.DIV_CLUE_QUESTION.innerHTML = this.getQuestionHtmlWithSubjectInBold(this.presentClue.QUESTION);
         this.TR_QUESTION.style.display = ""; //show it by removing "display=none"
         this.TR_ANSWER.style.display = "none";
 
         this.BUTTON_SKIP_CLUE.removeAttribute("disabled");
 
         this.hideSpecialCategoryPrompt();
+    }
+
+    private getQuestionHtmlWithSubjectInBold(question: string): string {
+        /*
+        The person reading the question out loud should emphasize the subject
+        of the question. Look for words that are probably the subject and make them bold.
+        \b means word boundary.
+        */
+        const regex = /\b((this)|(these)|(her)|(his)|(she)|(he)|(here))\b/ig;
+
+        // "$&" is the matched substring
+        return question.replace(regex, '<span class="clue-keyword">$&</span>');
+
     }
 
     public handleDoneReadingClueQuestion(): void {
@@ -556,8 +594,8 @@ export class Operator {
 
         this.teamArray?.forEach(team => team.hasBuzzedForCurrentQuestion = false);
 
-        if (this.presentClue) {
-            this.presentClue.BUZZ_HISTORY.timestampWhenClueQuestionFinishedReading = Date.now();
+        if (this.buzzHistoryForClue) {
+            this.buzzHistoryForClue.timestampWhenClueQuestionFinishedReading = Date.now();
         }
     }
 
@@ -784,13 +822,13 @@ export class Operator {
     }
 
     public showBuzzHistory(): void {
-        if (this.presentClue && this.buzzHistoryDiagram) {
+        if (this.buzzHistoryForClue && this.buzzHistoryDiagram) {
             this.GAME_TIMER.pause();
 
             this.showBackdropForPopups();
             this.DIV_BUZZ_HISTORY_PROMPT.style.display = "block";
 
-            this.buzzHistoryDiagram.showNewHistory(this.presentClue.BUZZ_HISTORY);
+            this.buzzHistoryDiagram.showNewHistory(this.buzzHistoryForClue);
         }
     }
 

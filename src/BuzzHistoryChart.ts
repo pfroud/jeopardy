@@ -1,9 +1,9 @@
-import { select, Selection } from "d3-selection";
-import { ScaleLinear, scaleLinear } from "d3-scale";
 import { Axis, axisBottom } from "d3-axis";
-import { zoom, D3ZoomEvent, zoomIdentity } from "d3-zoom";
+import { ScaleLinear, scaleLinear } from "d3-scale";
+import { select, Selection } from "d3-selection";
+import { D3ZoomEvent, zoom, zoomIdentity } from "d3-zoom";
+import { createSvgElement } from "./commonFunctions";
 import { Team, TeamState } from "./Team";
-import { createSvgElement } from "./common";
 
 
 /**

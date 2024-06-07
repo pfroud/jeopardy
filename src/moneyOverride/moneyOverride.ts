@@ -1,4 +1,4 @@
-import { querySelectorAndCheck } from "../common";
+import { querySelectorAndCheck } from "../commonFunctions";
 import { Operator } from "../operator/Operator";
 import { Team } from "../Team";
 

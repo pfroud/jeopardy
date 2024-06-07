@@ -1,10 +1,10 @@
-import { JServiceClue } from "./Clue";
-import { querySelectorAndCheck } from "./common";
-import { CountdownTimer } from "./CountdownTimer";
 import { AudioManager } from "./AudioManager";
+import { CountdownTimer } from "./CountdownTimer";
+import { Settings } from "./Settings";
+import { querySelectorAndCheck } from "./commonFunctions";
+import { FullClue } from "./gameTypes";
 import { Operator } from "./operator/Operator";
 import { Presentation } from "./presentation/Presentation";
-import { Settings } from "./Settings";
 
 interface Statistics {
     questionsNotBuzzed: number;
@@ -99,7 +99,7 @@ export class Team {
         this.setState("idle");
     }
 
-    public handleAnswerCorrect(clue: JServiceClue): void {
+    public handleAnswerCorrect(clue: FullClue): void {
         this.stopAnswer();
         this.AUDIO_MANAGER.ANSWER_CORRECT.play();
         this.moneyAdd(clue.VALUE);
@@ -107,7 +107,7 @@ export class Team {
         this.hasBuzzedForCurrentQuestion = true;
     }
 
-    public handleAnswerIncorrectOrAnswerTimeout(clue: JServiceClue): void {
+    public handleAnswerIncorrectOrAnswerTimeout(clue: FullClue): void {
         this.stopAnswer();
         this.AUDIO_MANAGER.ANSWER_WRONG_OR_ANSWER_TIMEOUT.play();
         this.moneySubtract(clue.VALUE * this.SETTINGS.wrongAnswerPenaltyMultiplier);
