@@ -5,7 +5,6 @@
     --height-footer: 180px;
 
     --color-money: #e3a147;
-    --color-airdate: #8e99d8;
 
     --text-shadow-big: 3px 3px black, 5px 5px black, 7px 7px black, 9px 9px black, 11px 11px #000;
 }
@@ -50,11 +49,6 @@ header {
     text-shadow: var(--text-shadow-big);
     padding-top: 5px;
     text-transform: uppercase;
-
-    span#clue-airdate-in-header {
-        color: var(--color-airdate);
-        font-size: 75%;
-    }
 
     span#clue-value-in-header {
         color: var(--color-money);
@@ -121,10 +115,6 @@ main {
                 color: var(--color-money);
             }
 
-            div#clue-airdate-big {
-                color: var(--color-airdate);
-                font-size: 75%;
-            }
         }
 
         &#slide-clue-question {

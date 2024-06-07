@@ -29,7 +29,6 @@ export class Operator {
     private readonly DIV_CLUE_VALUE: HTMLDivElement;
     private readonly DIV_CLUE_CATEGORY: HTMLDivElement;
     private readonly DIV_CLUE_ANSWER: HTMLDivElement;
-    private readonly DIV_CLUE_AIRDATE: HTMLDivElement;
     private readonly TR_QUESTION: HTMLTableRowElement;
     private readonly TR_ANSWER: HTMLTableRowElement;
     private readonly DIV_PAUSED: HTMLDivElement;
@@ -68,7 +67,6 @@ export class Operator {
         this.DIV_CLUE_VALUE = querySelectorAndCheck(document, "div#div-clue-value");
         this.DIV_CLUE_CATEGORY = querySelectorAndCheck(document, "div#div-clue-category");
         this.DIV_CLUE_ANSWER = querySelectorAndCheck(document, "div#div-clue-answer");
-        this.DIV_CLUE_AIRDATE = querySelectorAndCheck(document, "div#div-clue-airdate");
 
         this.TR_QUESTION = querySelectorAndCheck(document, "tr#tr-clue-question");
         this.TR_ANSWER = querySelectorAndCheck(document, "tr#tr-clue-answer");
@@ -429,13 +427,12 @@ export class Operator {
 
     private showClueToOperator(clue: JServiceClue): void {
         /*
-        This function only shows the airdate, category, and dollar value to the operator.
+        This function only shows the category, and dollar value to the operator.
         The state machine will show the clue question after a timeout.
         */
         this.DIV_CLUE_WRAPPER.style.display = ""; //show it by removing "display=none"
         this.DIV_CLUE_CATEGORY.innerHTML = clue.CATEGORY.TITLE;
         this.DIV_CLUE_VALUE.innerHTML = `$${clue.VALUE}`;
-        // this.DIV_CLUE_AIRDATE.innerHTML = clue.AIRDATE.getFullYear().toString();
         this.TR_ANSWER.style.display = "none";
     }
 

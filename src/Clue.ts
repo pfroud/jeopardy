@@ -12,7 +12,6 @@ export class JServiceClue {
     public readonly ANSWER: string;
 
     public readonly VALUE: number;
-    // public readonly AIRDATE: Date;
     public readonly CATEGORY: {
         readonly TITLE: string;
         specialCategory: SpecialCategory | null
@@ -25,9 +24,6 @@ export class JServiceClue {
         this.ANSWER = input.answer;
         this.QUESTION = input.question;
         this.VALUE = value;
-
-        // example of what format the airdate is in: "2013-01-25T12:00:00.000Z"
-        // this.AIRDATE = new Date(parsedJson.airdate);
 
         this.CATEGORY = {
             TITLE: category,

@@ -10,12 +10,10 @@ export class Presentation {
     private readonly HEADER: HTMLElement; // there's no HTMLHeaderElement
     private readonly SPAN_CLUE_CATEGORY_IN_HEADER: HTMLSpanElement;
     private readonly SPAN_CLUE_MONEY_IN_HEADER: HTMLSpanElement;
-    private readonly SPAN_CLUE_AIRDATE_IN_HEADER: HTMLSpanElement;
 
     private readonly DIV_SLIDE_CLUE_QUESTION: HTMLDivElement;
     private readonly DIV_CLUE_CATEGORY_BIG: HTMLDivElement;
     private readonly DIV_CLUE_VALUE_BIG: HTMLDivElement;
-    private readonly DIV_CLUE_AIRDATE_BIG: HTMLDivElement;
     private readonly DIV_SLIDE_CLUE_ANSWER_TEXT: HTMLDivElement;
 
     private readonly DIV_BACKDROP_FOR_POPUPS: HTMLDivElement;
@@ -35,7 +33,6 @@ export class Presentation {
         this.HEADER = querySelectorAndCheck(document, "header");
         this.SPAN_CLUE_CATEGORY_IN_HEADER = querySelectorAndCheck(this.HEADER, "span#clue-category-in-header");
         this.SPAN_CLUE_MONEY_IN_HEADER = querySelectorAndCheck(this.HEADER, "span#clue-value-in-header");
-        this.SPAN_CLUE_AIRDATE_IN_HEADER = querySelectorAndCheck(this.HEADER, "span#clue-airdate-in-header");
         this.PROGRESS_ELEMENT_FOR_GAME_TIMER = querySelectorAndCheck(this.HEADER, "progress#game-timer");
         this.PROGRESS_ELEMENT_FOR_STATE_MACHINE = querySelectorAndCheck(this.HEADER, "progress#state-machine");
 
@@ -44,7 +41,6 @@ export class Presentation {
 
         this.DIV_CLUE_CATEGORY_BIG = querySelectorAndCheck(document, "div#clue-category-big");
         this.DIV_CLUE_VALUE_BIG = querySelectorAndCheck(document, "div#clue-value-big");
-        this.DIV_CLUE_AIRDATE_BIG = querySelectorAndCheck(document, "div#clue-airdate-big");
 
         this.DIV_BACKDROP_FOR_POPUPS = querySelectorAndCheck(document, "div#special-category-backdrop");
         this.DIV_SPECIAL_CATEGORY_POPUP = querySelectorAndCheck(document, "div#special-category-popup");
@@ -112,11 +108,9 @@ export class Presentation {
     public setClue(clue: JServiceClue): void {
         this.SPAN_CLUE_CATEGORY_IN_HEADER.innerHTML = clue.CATEGORY.TITLE;
         this.SPAN_CLUE_MONEY_IN_HEADER.innerHTML = `$${clue.VALUE}`;
-        // this.SPAN_CLUE_AIRDATE_IN_HEADER.innerHTML = `(${clue.AIRDATE.getFullYear()})`;
 
         this.DIV_CLUE_CATEGORY_BIG.innerHTML = clue.CATEGORY.TITLE;
         this.DIV_CLUE_VALUE_BIG.innerHTML = `$${clue.VALUE}`;
-        // this.DIV_CLUE_AIRDATE_BIG.innerHTML = `Airdate: ${clue.AIRDATE.getFullYear()}`;
 
         this.DIV_SLIDE_CLUE_QUESTION.innerHTML = clue.QUESTION;
 
