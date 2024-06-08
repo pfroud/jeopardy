@@ -10,7 +10,6 @@ import { CountdownBehavior, StateMachineState, TimeoutTransition } from "./types
 
 
 export class StateMachine {
-    private readonly DEBUG = false;
     private readonly OPERATOR: Operator;
     private readonly AUDIO_MANAGER: AudioManager;
     private readonly PRESENTATION: Presentation;
@@ -74,14 +73,7 @@ export class StateMachine {
                         continue;
                     }
 
-                    if (this.DEBUG) {
-                        console.log(`keyboard transition from keyboard key ${keyboardEvent.key}`);
-                    }
-
                     if (transition.ON_TRANSITION) {
-                        if (this.DEBUG) {
-                            console.log(`calling transition fn ${transition.ON_TRANSITION.name}`);
-                        }
                         transition.ON_TRANSITION(keyboardEvent);
                     }
 
@@ -105,16 +97,8 @@ export class StateMachine {
                 if (transition.GUARD_CONDITION && !transition.GUARD_CONDITION()) {
                     continue;
                 }
-                if (this.DEBUG) {
-                    console.log(`Manual trigger "${TRIGGER_NAME}" from ${this.presentState.NAME} to ${transition.DESTINATION}`);
-                }
 
-                if (transition.ON_TRANSITION) {
-                    if (this.DEBUG) {
-                        console.log(`calling transition fn ${transition.ON_TRANSITION.name}`);
-                    }
-                    transition.ON_TRANSITION();
-                }
+                transition.ON_TRANSITION?.();
 
                 this.goToState(transition.DESTINATION);
                 return;
@@ -131,19 +115,7 @@ export class StateMachine {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         this.COUNTDOWN_TIMER_LEAVING_STATE[this.presentState.NAME]?.pause();
 
-        if (this.DEBUG) {
-            console.group(`changing states: ${this.presentState.NAME} --> ${destinationStateName}`);
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////////////
-        /////////////////// Call onExit function of the state we're leaving ////////////////////
-        ////////////////////////////////////////////////////////////////////////////////////////
-        if (this.presentState.ON_EXIT) {
-            if (this.DEBUG) {
-                console.log(`Running the onExit function of ${this.presentState.NAME}: ${this.presentState.ON_EXIT.name}`);
-            }
-            this.presentState.ON_EXIT();
-        }
+        this.presentState.ON_EXIT?.();
 
         ////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////// Change the state ///////////////////////////////////////
@@ -161,9 +133,6 @@ export class StateMachine {
         ///////////////////////////////////////////////////////////////////////////////////
         if (this.presentState.PRESENTATION_SLIDE_TO_SHOW) {
             if (this.PRESENTATION.ALL_SLIDE_NAMES.has(this.presentState.PRESENTATION_SLIDE_TO_SHOW)) {
-                if (this.DEBUG) {
-                    console.log(`Showing presentation slide "${this.presentState.PRESENTATION_SLIDE_TO_SHOW}"`);
-                }
                 this.PRESENTATION.showSlide(this.presentState.PRESENTATION_SLIDE_TO_SHOW);
             } else {
                 console.warn(`entering state "${this.presentState.NAME}": can't show slide "${this.presentState.PRESENTATION_SLIDE_TO_SHOW}", slide not found`);
@@ -174,15 +143,7 @@ export class StateMachine {
             this.OPERATOR.setInstructions(this.presentState.INSTRUCTIONS);
         }
 
-        ///////////////////////////////////////////////////////////////////////////////
-        /////////////////////////// Call onEnter function /////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////
-        if (this.presentState.ON_ENTER) {
-            if (this.DEBUG) {
-                console.log(`Running the onEnter function on ${this.presentState.NAME}: ${this.presentState.ON_ENTER.name}`);
-            }
-            this.presentState.ON_ENTER(keyboardEvent);
-        }
+        this.presentState.ON_ENTER?.(keyboardEvent);
 
 
         //////////////////////////////////////////////////////////////////////
@@ -257,36 +218,17 @@ export class StateMachine {
             this.PRESENTATION.getProgressElementForStateMachine().setAttribute("value", "0");
         }
 
-        if (this.DEBUG) {
-            console.groupEnd();
-        }
-
         ////////////////////////////////////////////////////////////////
         /////////////////////// Handle if transition ///////////////////
         ////////////////////////////////////////////////////////////////
         // Search for the first if transition.
         for (const transition of transitionArray) {
             if (transition.TYPE === "if") {
-                if (this.DEBUG) {
-                    console.log(`Transition type if: the condition function is ${transition.CONDITION.name}`);
-                }
                 if (transition.CONDITION()) {
-                    if (transition.THEN.ON_TRANSITION) {
-                        if (this.DEBUG) {
-                            console.log(`Running the then.ON_TRANSITION function of ${this.presentState.NAME}: ${transition.THEN.ON_TRANSITION.name}`);
-                        }
-                        transition.THEN.ON_TRANSITION();
-
-                    }
+                    transition.THEN.ON_TRANSITION?.();
                     this.goToState(transition.THEN.DESTINATION, keyboardEvent);
                 } else {
-                    if (transition.ELSE.ON_TRANSITION) {
-                        if (this.DEBUG) {
-                            console.log(`Running the else.ON_TRANSITIONThen function of ${this.presentState.NAME}: ${transition.ELSE.ON_TRANSITION.name}`);
-                        }
-                        transition.ELSE.ON_TRANSITION();
-
-                    }
+                    transition.ELSE.ON_TRANSITION?.();
                     this.goToState(transition.ELSE.DESTINATION, keyboardEvent);
                 }
             }
