@@ -7,7 +7,7 @@ export interface StateMachineState {
     readonly TRANSITIONS: StateMachineTransition[];
 }
 
-export type StateMachineTransition = ManualTransition | IfTransition | TimeoutTransition | KeyboardTransition;
+export type StateMachineTransition = ManualTransition | IfTransition | TimeoutTransition | KeyboardTransition | KeyboardIfTransition;
 
 export interface ManualTransition {
     readonly TYPE: "manualTrigger";
@@ -17,8 +17,7 @@ export interface ManualTransition {
     readonly GUARD_CONDITION?: () => boolean;
 }
 
-export interface IfTransition {
-    readonly TYPE: "if";
+interface IfTransitionBase {
     readonly CONDITION: () => boolean;
     readonly THEN: {
         readonly DESTINATION: string;
@@ -28,6 +27,10 @@ export interface IfTransition {
         readonly DESTINATION: string;
         readonly ON_TRANSITION?: () => void;
     };
+}
+
+export interface IfTransition extends IfTransitionBase {
+    readonly TYPE: "if";
 }
 
 export interface TimeoutTransition {
@@ -53,4 +56,9 @@ export interface KeyboardTransition {
     readonly DESTINATION: string;
     readonly ON_TRANSITION?: (keyboardEvent: KeyboardEvent) => void;
     readonly GUARD_CONDITION?: (keyboardEvent: KeyboardEvent) => boolean;
+}
+
+export interface KeyboardIfTransition extends IfTransitionBase {
+    readonly TYPE: "keyboardWithIf";
+    readonly KEYBOARD_KEYS: string;
 }

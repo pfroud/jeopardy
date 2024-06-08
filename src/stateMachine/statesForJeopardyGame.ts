@@ -18,17 +18,17 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             NAME: "showCategoryCarousel",
             PRESENTATION_SLIDE_TO_SHOW: "slide-category-carousel",
             TRANSITIONS: [{
-                TYPE: "keyboard",
-                DESTINATION: "showCategoryCarousel",
-                GUARD_CONDITION: operator.hasMoreCategoryCarousel.bind(operator),
+                TYPE: "keyboardWithIf",
                 KEYBOARD_KEYS: " ", //space
-                ON_TRANSITION: operator.showNextCategoryCarousel.bind(operator)
-            }, {
-                TYPE: "keyboard",
-                DESTINATION: "showGameBoard",
-                GUARD_CONDITION: operator.doneWithCategoryCarousel.bind(operator),
-                KEYBOARD_KEYS: " ", //space
-                ON_TRANSITION: operator.stopCategoryCarousel.bind(operator)
+                CONDITION: operator.hasMoreCategoryCarousel.bind(operator),
+                THEN: {
+                    DESTINATION: "showCategoryCarousel",
+                    ON_TRANSITION: operator.showNextCategoryCarousel.bind(operator)
+                },
+                ELSE: {
+                    DESTINATION: "showGameBoard",
+                    ON_TRANSITION: operator.stopCategoryCarousel.bind(operator)
+                }
             }]
         }, {
             NAME: "showGameBoard",

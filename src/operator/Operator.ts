@@ -884,10 +884,6 @@ export class Operator {
         return this.categoryCarouselIndex < GameBoard.TABLE_COLUMN_COUNT - 1;
     }
 
-    public doneWithCategoryCarousel(): boolean {
-        return !this.hasMoreCategoryCarousel();
-    }
-
     public showNextCategoryCarousel(): void {
         this.categoryCarouselIndex++;
         this.presentation?.setCategoryCarouselIndex(this.categoryCarouselIndex);

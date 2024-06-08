@@ -43,6 +43,7 @@ export class StateMachine {
         this.ALL_STATES = getStatesForJeopardyGame(operator, settings);
         this.validateStates();
 
+        // eslint-disable-next-line dot-notation
         this.presentState = this.STATE_MAP["idle"];
     }
 
@@ -66,19 +67,30 @@ export class StateMachine {
 
             // Search for the first transition with a keyboard transition for the key pressed.
             for (const transition of this.presentState.TRANSITIONS) {
-                if (transition.TYPE === "keyboard" &&
-                    transition.KEYBOARD_KEYS.toLowerCase().includes(keyboardEvent.key.toLowerCase())) {
+                if (
+                    (transition.TYPE === "keyboard" || transition.TYPE === "keyboardWithIf") &&
+                    transition.KEYBOARD_KEYS.toLowerCase().includes(keyboardEvent.key.toLowerCase())
+                ) {
 
-                    if (transition.GUARD_CONDITION && !transition.GUARD_CONDITION(keyboardEvent)) {
-                        continue;
+                    if (transition.TYPE === "keyboard") {
+                        if (transition.GUARD_CONDITION && !transition.GUARD_CONDITION(keyboardEvent)) {
+                            continue;
+                        }
+                        if (transition.ON_TRANSITION) {
+                            transition.ON_TRANSITION(keyboardEvent);
+                        }
+                        this.goToState(transition.DESTINATION, keyboardEvent);
+                        break;
+
+                    } else if (transition.TYPE === "keyboardWithIf") {
+                        if (transition.CONDITION()) {
+                            transition.THEN.ON_TRANSITION?.();
+                            this.goToState(transition.THEN.DESTINATION, keyboardEvent);
+                        } else {
+                            transition.ELSE.ON_TRANSITION?.();
+                            this.goToState(transition.ELSE.DESTINATION, keyboardEvent);
+                        }
                     }
-
-                    if (transition.ON_TRANSITION) {
-                        transition.ON_TRANSITION(keyboardEvent);
-                    }
-
-                    this.goToState(transition.DESTINATION, keyboardEvent);
-                    break;
                 }
             }
         }
@@ -291,7 +303,7 @@ export class StateMachine {
             state.TRANSITIONS.forEach((transition, transitionIndex) => {
 
                 // Verify all the destination states exist.
-                if (transition.TYPE !== "if") {
+                if (transition.TYPE !== "if" && transition.TYPE !== "keyboardWithIf") {
                     if (!(transition.DESTINATION in this.STATE_MAP)) {
                         printWarning(state.NAME, transitionIndex,
                             `unknown DESTINATION state "${transition.DESTINATION}"`);
@@ -299,6 +311,7 @@ export class StateMachine {
                 }
 
                 switch (transition.TYPE) {
+
                     case "keyboard": {
 
                         if (transition.GUARD_CONDITION) {
@@ -321,18 +334,20 @@ export class StateMachine {
                         break;
                     }
 
-                    case "if": {
-                        // Verify DESTINATION states exist.
-                        if (!(transition.THEN.DESTINATION in this.STATE_MAP)) {
-                            printWarning(state.NAME, transitionIndex,
-                                `unknown 'then' state "${transition.THEN.DESTINATION}"`);
+                    case "if":
+                    case "keyboardWithIf":
+                        {
+                            // Verify DESTINATION states exist.
+                            if (!(transition.THEN.DESTINATION in this.STATE_MAP)) {
+                                printWarning(state.NAME, transitionIndex,
+                                    `unknown 'then' state "${transition.THEN.DESTINATION}"`);
+                            }
+                            if (!(transition.ELSE.DESTINATION in this.STATE_MAP)) {
+                                printWarning(state.NAME, transitionIndex,
+                                    `unknown 'else' state "${transition.ELSE.DESTINATION}"`);
+                            }
+                            break;
                         }
-                        if (!(transition.ELSE.DESTINATION in this.STATE_MAP)) {
-                            printWarning(state.NAME, transitionIndex,
-                                `unknown 'else' state "${transition.ELSE.DESTINATION}"`);
-                        }
-                        break;
-                    }
 
                     // Initialize countdown timers for all timeout transitions.
                     case "timeout": {
