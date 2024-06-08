@@ -807,14 +807,14 @@ export class Operator {
         const html: string[] = [];
         html.push("<table><tbody>");
 
-        shallowCopy.forEach(team => {
-            html.push(
-                "<tr>" +
-                "<td>" + team.getTeamName() + "</td>" +
-                "<td>$" + team.getMoney().toLocaleString() + "</td>" +
-                "</tr>"
-            );
-        });
+        shallowCopy.forEach(team => html.push(
+            `
+            <tr>
+            <td>${team.getTeamName()}</td>
+            <td>${team.getMoney().toLocaleString()}</td>
+            </tr>
+            `
+        ));
 
         html.push("</tbody></table>");
 
