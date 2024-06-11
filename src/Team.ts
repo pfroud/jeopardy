@@ -45,6 +45,7 @@ export class Team {
     private stateBeforeLockout?: TeamState | null;
     private progressElementInPresentationWindow?: HTMLProgressElement;
     private progressElementInOperatorWindow?: HTMLProgressElement;
+    private allCountdownDots?: NodeListOf<HTMLTableCellElement>;
     private readonly DIV: {
         readonly OPERATOR: {
             wrapper: HTMLDivElement | null;
@@ -250,6 +251,8 @@ export class Team {
 
         divTeam.append(tableCountdownDots);
 
+        this.allCountdownDots = this.countdownDotsInPresentationWindow?.querySelectorAll("td");
+
         const divMoney = this.DIV.PRESENTATION.money = document.createElement("div");
         divMoney.classList.add("team-money");
         divMoney.innerHTML = `$${this.money}`;
@@ -355,7 +358,7 @@ export class Team {
     }
 
     public stopAnswer(): void {
-        this.countdownDotsInPresentationWindow?.querySelectorAll("td").forEach(td => td.classList.remove("active"));
+        this.allCountdownDots?.forEach(td => td.classList.remove("active"));
         if (this.progressElementInOperatorWindow) {
             this.progressElementInOperatorWindow.style.display = "none";
         }

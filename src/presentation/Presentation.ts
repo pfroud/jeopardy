@@ -7,6 +7,7 @@ import { SpecialCategory } from "../specialCategories";
 export class Presentation {
     public readonly ALL_SLIDE_NAMES = new Set<string>();
 
+    private readonly MAIN: HTMLElement; // there's no HTMLMainElement
     private readonly HEADER: HTMLElement; // there's no HTMLHeaderElement
     private readonly SPAN_CLUE_CATEGORY_IN_HEADER: HTMLSpanElement;
     private readonly SPAN_CLUE_MONEY_IN_HEADER: HTMLSpanElement;
@@ -20,6 +21,11 @@ export class Presentation {
 
     private readonly DIV_BACKDROP_FOR_POPUPS: HTMLDivElement;
     private readonly DIV_SPECIAL_CATEGORY_POPUP: HTMLDivElement;
+    private readonly SPECIAL_CATEGORY_TITLE: HTMLElement;
+    private readonly SPECIAL_CATEGORY_DESCRIPTION: HTMLElement;
+    private readonly SPECIAL_CATEGORY_EXAMPLE_CATEGORY: HTMLElement;
+    private readonly SPECIAL_CATEGORY_EXAMPLE_QUESTION: HTMLElement;
+    private readonly SPECIAL_CATEGORY_EXAMPLE_ANSWER: HTMLElement;
 
     private readonly DIV_PAUSED: HTMLDivElement;
     private readonly FOOTER: HTMLElement;
@@ -28,10 +34,18 @@ export class Presentation {
     private readonly ALL_SLIDE_DIVS: { [slideName: string]: HTMLDivElement } = {};
     private visibleSlideDiv?: HTMLDivElement;
 
+    private readonly DIV_GAME_END_TEAM_RANKING_TABLE: HTMLDivElement;
+    private readonly DIV_GAME_END_PIE_CHART_CONTAINER: HTMLDivElement;
+    private readonly DIV_GAME_END_LINE_CHART_CONTAINER: HTMLDivElement;
+    private readonly DIV_GAME_END_LINE_CHART_LEGEND: HTMLDivElement;
+    private readonly TABLE_GAME_BOARD: HTMLTableElement;
+    private readonly SVG_BUZZ_HISTORY: SVGSVGElement;
+
     private readonly CATEGORY_CAROUSEL_TABLE: HTMLTableElement;
     private readonly CATEGORY_CAROUSEL_CELLS: HTMLTableCellElement[];
 
     public constructor(operator: Operator) {
+        this.MAIN = querySelectorAndCheck(document, "main");
         this.HEADER = querySelectorAndCheck(document, "header");
         this.SPAN_CLUE_CATEGORY_IN_HEADER = querySelectorAndCheck(this.HEADER, "span#clue-category-in-header");
         this.SPAN_CLUE_MONEY_IN_HEADER = querySelectorAndCheck(this.HEADER, "span#clue-value-in-header");
@@ -48,6 +62,20 @@ export class Presentation {
 
         this.DIV_BACKDROP_FOR_POPUPS = querySelectorAndCheck(document, "div#special-category-backdrop");
         this.DIV_SPECIAL_CATEGORY_POPUP = querySelectorAndCheck(document, "div#special-category-popup");
+        this.SPECIAL_CATEGORY_TITLE = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-title");
+        this.SPECIAL_CATEGORY_DESCRIPTION = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-description");
+        this.SPECIAL_CATEGORY_EXAMPLE_CATEGORY = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-category");
+        this.SPECIAL_CATEGORY_EXAMPLE_QUESTION = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-question");
+        this.SPECIAL_CATEGORY_EXAMPLE_ANSWER = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-answer");
+
+        this.DIV_GAME_END_TEAM_RANKING_TABLE = querySelectorAndCheck(document, "div#slide-gameEnd-team-ranking-table div#team-ranking");
+        this.DIV_GAME_END_PIE_CHART_CONTAINER = querySelectorAndCheck(document, "div#slide-gameEnd-pie-charts div#pie-charts");
+        this.DIV_GAME_END_LINE_CHART_CONTAINER = querySelectorAndCheck(document, "div#slide-gameEnd-line-chart div#line-chart");
+        this.DIV_GAME_END_LINE_CHART_LEGEND = querySelectorAndCheck(document, "div#slide-gameEnd-line-chart div#line-chart-legend");
+
+        this.SVG_BUZZ_HISTORY = querySelectorAndCheck(document, "div#slide-buzz-history-chart svg");
+
+        this.TABLE_GAME_BOARD = querySelectorAndCheck(document, "table#game-board");
 
         this.DIV_PAUSED = querySelectorAndCheck(document, "div#paused");
 
@@ -128,7 +156,7 @@ export class Presentation {
          */
         this.DIV_SLIDE_CLUE_QUESTION.style.fontSize = "";
 
-        const heightOfMain = querySelectorAndCheck(document, "main").clientHeight;
+        const heightOfMain = this.MAIN.clientHeight;
         while (this.DIV_SLIDE_CLUE_QUESTION.clientHeight > heightOfMain) {
             const oldFontSizeString = window.getComputedStyle(this.DIV_SLIDE_CLUE_QUESTION).getPropertyValue("font-size");
             const oldFontSize = Number(oldFontSizeString.replace("px", ""));
@@ -144,19 +172,19 @@ export class Presentation {
     }
 
     public setGameEndTeamRankingHtml(htmlString: string): void {
-        querySelectorAndCheck(document, "div#slide-gameEnd-team-ranking-table div#team-ranking").innerHTML = htmlString;
+        this.DIV_GAME_END_TEAM_RANKING_TABLE.innerHTML = htmlString;
     }
 
     public getDivForPieCharts(): HTMLDivElement {
-        return querySelectorAndCheck(document, "div#slide-gameEnd-pie-charts div#pie-charts");
+        return this.DIV_GAME_END_PIE_CHART_CONTAINER;
     }
 
     public getDivForLineChart(): HTMLDivElement {
-        return querySelectorAndCheck(document, "div#slide-gameEnd-line-chart div#line-chart");
+        return this.DIV_GAME_END_LINE_CHART_CONTAINER;
     }
 
     public getDivForLineChartLegend(): HTMLDivElement {
-        return querySelectorAndCheck(document, "div#slide-gameEnd-line-chart div#line-chart-legend");
+        return this.DIV_GAME_END_LINE_CHART_LEGEND;
     }
 
     public hideHeaderAndFooter(): void {
@@ -185,13 +213,13 @@ export class Presentation {
 
     public showSpecialCategoryPopup(specialCategory: SpecialCategory): void {
 
-        querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-title").innerHTML = specialCategory.DISPLAY_NAME;
-        querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-description").innerHTML = specialCategory.DESCRIPTION;
+        this.SPECIAL_CATEGORY_TITLE.innerHTML = specialCategory.DISPLAY_NAME;
+        this.SPECIAL_CATEGORY_DESCRIPTION.innerHTML = specialCategory.DESCRIPTION;
         if (specialCategory.EXAMPLE) {
             this.DIV_SPECIAL_CATEGORY_POPUP.classList.remove("no-example");
-            querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-category").innerHTML = specialCategory.EXAMPLE.CATEGORY;
-            querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-question").innerHTML = specialCategory.EXAMPLE.QUESTION;
-            querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-answer").innerHTML = specialCategory.EXAMPLE.ANSWER;
+            this.SPECIAL_CATEGORY_EXAMPLE_CATEGORY.innerHTML = specialCategory.EXAMPLE.CATEGORY;
+            this.SPECIAL_CATEGORY_EXAMPLE_QUESTION.innerHTML = specialCategory.EXAMPLE.QUESTION;
+            this.SPECIAL_CATEGORY_EXAMPLE_ANSWER.innerHTML = specialCategory.EXAMPLE.ANSWER;
         } else {
             this.DIV_SPECIAL_CATEGORY_POPUP.classList.add("no-example");
         }
@@ -208,11 +236,11 @@ export class Presentation {
     }
 
     public getBuzzHistorySvg(): SVGSVGElement {
-        return querySelectorAndCheck(document, "div#slide-buzz-history-chart svg");
+        return this.SVG_BUZZ_HISTORY;
     }
 
     public getGameBoardTable(): HTMLTableElement {
-        return querySelectorAndCheck(document, "table#game-board");
+        return this.TABLE_GAME_BOARD;
     }
 
     public setCategoryCarouselRound(gameRound: ScrapedRound): void {

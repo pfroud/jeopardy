@@ -156,7 +156,7 @@ export class GameBoard {
         this.setCategoryNames(round.CATEGORIES);
         this.setClueValues(round.TYPE);
         this.setAllCluesAvailable();
-        this.cluesRevealedInThisRound = 29;
+        this.cluesRevealedInThisRound = 0;
     }
 
     private setCategoryNames(categories: ScrapedCategory[]): void {

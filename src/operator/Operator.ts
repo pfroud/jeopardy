@@ -5,7 +5,7 @@ import { GameBoard } from "../GameBoard";
 import { Settings } from "../Settings";
 import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
 import { querySelectorAndCheck } from "../commonFunctions";
-import { FullClue, ScrapedClue, ScrapedRound } from "../gameTypes";
+import { FullClue, ScrapedClue } from "../gameTypes";
 import { Presentation } from "../presentation/Presentation";
 import { SCRAPED_GAME } from "../scrapedGame";
 import { SpecialCategory, checkSpecialCategory } from "../specialCategories";
@@ -40,6 +40,18 @@ export class Operator {
     private readonly DIV_SPECIAL_CATEGORY_POPUP: HTMLDivElement;
     private readonly DIV_BUZZ_HISTORY_PROMPT: HTMLDivElement;
     private readonly DIV_BACKDROP_FOR_POPUPS: HTMLDivElement;
+    private readonly SPECIAL_CATEGORY_TITLE: HTMLElement;
+    private readonly SPECIAL_CATEGORY_DESCRIPTION: HTMLElement;
+    private readonly SPECIAL_CATEGORY_EXAMPLE_CATEGORY: HTMLElement;
+    private readonly SPECIAL_CATEGORY_EXAMPLE_QUESTION: HTMLElement;
+    private readonly SPECIAL_CATEGORY_EXAMPLE_ANSWER: HTMLElement;
+    private readonly DIV_GAME_END_CONTROLS: HTMLDivElement;
+    private readonly DIV_STATISTICS_CHART_POPUP: HTMLDivElement;
+    private readonly DIV_TEAM_RANKING_WRAPPER: HTMLDivElement;
+    private readonly DIV_PIE_CHARTS: HTMLDivElement;
+    private readonly DIV_LINE_CHART: HTMLDivElement;
+    private readonly DIV_LINE_CHART_LEGEND: HTMLDivElement;
+
     private readonly GAME_TIMER: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
     private readonly KEYBOARD_KEYS_FOR_TEAM_NUMBERS = new Set<string>();
     private teamArray?: Team[];
@@ -83,9 +95,21 @@ export class Operator {
         this.DIV_BACKDROP_FOR_POPUPS = querySelectorAndCheck(document, "div#backdrop-for-popups");
         this.DIV_SPECIAL_CATEGORY_PROMPT = querySelectorAndCheck(document, "div#special-category-prompt");
         this.SPAN_SPECIAL_CATEGORY_TITLE = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_PROMPT, "span#special-category-title");
-
         this.DIV_BUZZ_HISTORY_PROMPT = querySelectorAndCheck(document, "div#buzz-history-chart-popup");
         this.DIV_SPECIAL_CATEGORY_POPUP = querySelectorAndCheck(document, "div#special-category-popup");
+        this.SPECIAL_CATEGORY_TITLE = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, ".popup-title");
+        this.SPECIAL_CATEGORY_DESCRIPTION = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-description");
+        this.SPECIAL_CATEGORY_EXAMPLE_CATEGORY = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-category");
+        this.SPECIAL_CATEGORY_EXAMPLE_QUESTION = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-question");
+        this.SPECIAL_CATEGORY_EXAMPLE_ANSWER = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-answer");
+
+        this.DIV_GAME_END_CONTROLS = querySelectorAndCheck<HTMLDivElement>(document, "div#game-end-controls");
+        this.DIV_STATISTICS_CHART_POPUP = querySelectorAndCheck<HTMLDivElement>(document, "div#statistics-chart-popup");
+        this.DIV_TEAM_RANKING_WRAPPER = querySelectorAndCheck(document, "div#team-ranking-wrapper");
+        this.DIV_PIE_CHARTS = querySelectorAndCheck(document, "div#pie-charts");
+        this.DIV_LINE_CHART = querySelectorAndCheck(document, "div#line-chart");
+        this.DIV_LINE_CHART_LEGEND = querySelectorAndCheck(document, "div#line-chart-legend");
+
 
         this.initPauseKeyboardListener();
         this.initMouseListeners();
@@ -420,7 +444,6 @@ export class Operator {
 
     }
 
-
     private showClueToOperator(clue: FullClue, category: string, value: number): void {
         /*
         This function only shows the category, and dollar value to the operator.
@@ -516,13 +539,13 @@ export class Operator {
 
         this.presentation?.showSpecialCategoryPopup(specialCategory);
 
-        querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, ".popup-title").innerHTML = specialCategory.DISPLAY_NAME;
-        querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-description").innerHTML = specialCategory.DESCRIPTION;
+        this.SPECIAL_CATEGORY_TITLE.innerHTML = specialCategory.DISPLAY_NAME;
+        this.SPECIAL_CATEGORY_DESCRIPTION.innerHTML = specialCategory.DESCRIPTION;
         if (specialCategory.EXAMPLE) {
             this.DIV_SPECIAL_CATEGORY_POPUP.classList.remove("no-example");
-            querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-category").innerHTML = specialCategory.EXAMPLE.CATEGORY;
-            querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-question").innerHTML = specialCategory.EXAMPLE.QUESTION;
-            querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-answer").innerHTML = specialCategory.EXAMPLE.ANSWER;
+            this.SPECIAL_CATEGORY_EXAMPLE_CATEGORY.innerHTML = specialCategory.EXAMPLE.CATEGORY;
+            this.SPECIAL_CATEGORY_EXAMPLE_QUESTION.innerHTML = specialCategory.EXAMPLE.QUESTION;
+            this.SPECIAL_CATEGORY_EXAMPLE_ANSWER.innerHTML = specialCategory.EXAMPLE.ANSWER;
         } else {
             this.DIV_SPECIAL_CATEGORY_POPUP.classList.add("no-example");
         }
@@ -675,8 +698,6 @@ export class Operator {
 
         const divMessage = querySelectorAndCheck<HTMLDivElement>(document, "div#saved-game-message");
 
-        const divSavedGame = querySelectorAndCheck<HTMLDivElement>(document, "div#tab-content-load-game");
-
         const rawLocalStorageResult = window.localStorage.getItem(Operator.LOCAL_STORAGE_KEY);
         if (rawLocalStorageResult === null) {
             divMessage.innerHTML = "No saved game found in localStorage.";
@@ -705,6 +726,8 @@ export class Operator {
             cellTeamMoney.innerHTML = `$${team.MONEY}`;
             tableRowTeamMoney.appendChild(cellTeamMoney);
         });
+
+        const divSavedGame = querySelectorAndCheck<HTMLDivElement>(document, "div#tab-content-load-game");
 
         querySelectorAndCheck(document, "button#saved-game-load").addEventListener("click", () => {
             this.loadGame(parsedJson);
@@ -762,22 +785,18 @@ export class Operator {
         this.presentation?.hideHeaderAndFooter();
 
         this.showBackdropForPopups();
-        querySelectorAndCheck<HTMLDivElement>(document, "div#game-end-controls").style.display = "block";
-        querySelectorAndCheck<HTMLDivElement>(document, "div#statistics-chart-popup").style.display = "block";
+        this.DIV_GAME_END_CONTROLS.style.display = "block";
+        this.DIV_STATISTICS_CHART_POPUP.style.display = "block";
 
         const teamRankingTableHtml = this.getTeamRankingTableHtml();
-        querySelectorAndCheck(document, "div#team-ranking-wrapper").innerHTML = teamRankingTableHtml;
+        this.DIV_TEAM_RANKING_WRAPPER.innerHTML = teamRankingTableHtml;
         this.presentation?.setGameEndTeamRankingHtml(teamRankingTableHtml);
 
         if (this.teamArray) {
 
-            createPieCharts(this, querySelectorAndCheck(document, "div#pie-charts"), this.teamArray);
+            createPieCharts(this, this.DIV_PIE_CHARTS, this.teamArray);
 
-            createLineChartOfMoneyOverTime(
-                querySelectorAndCheck(document, "div#line-chart"),
-                querySelectorAndCheck(document, "div#line-chart-legend"),
-                this.teamArray
-            );
+            createLineChartOfMoneyOverTime(this.DIV_LINE_CHART, this.DIV_LINE_CHART_LEGEND, this.teamArray);
 
             if (this.presentation) {
                 createPieCharts(this, this.presentation.getDivForPieCharts(), this.teamArray);
