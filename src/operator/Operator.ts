@@ -872,8 +872,12 @@ export class Operator {
 
     public startCategoryCarousel(): void {
         this.presentation?.hideHeaderAndFooter();
+        this.categoryCarouselIndex = 0;
         this.presentation?.setCategoryCarouselIndex(0);
-        this.DIV_INSTRUCTIONS.innerText = "Press space to show the next category in the carousel";
+
+        const categories = SCRAPED_GAME.ROUNDS[0].CATEGORIES;
+        this.DIV_INSTRUCTIONS.innerText =
+            `Category 1 of ${GameBoard.TABLE_COLUMN_COUNT}: "${categories[0].NAME}". Press space to show the next category in the carousel`;
     }
 
     public stopCategoryCarousel(): void {
@@ -887,6 +891,14 @@ export class Operator {
     public showNextCategoryCarousel(): void {
         this.categoryCarouselIndex++;
         this.presentation?.setCategoryCarouselIndex(this.categoryCarouselIndex);
+
+        const categories = SCRAPED_GAME.ROUNDS[0].CATEGORIES;
+        const str = `Category ${this.categoryCarouselIndex + 1} of ${GameBoard.TABLE_COLUMN_COUNT}: "${categories[this.categoryCarouselIndex].NAME}".`;
+        if (this.hasMoreCategoryCarousel()) {
+            this.DIV_INSTRUCTIONS.innerText = `${str} Press space to start the game`;
+        } else {
+            this.DIV_INSTRUCTIONS.innerText = `${str} Press space to show the next category in the carousel`;
+        }
     }
 
 }
