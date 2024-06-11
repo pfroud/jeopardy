@@ -104,6 +104,11 @@ main {
             }
         }
 
+        &#slide-round-start {
+            font-size: 70px;
+            text-shadow: var(--text-shadow-big);
+        }
+
         &#slide-clue-category-and-value {
             font-family: swiss911;
             text-shadow: var(--text-shadow-big);

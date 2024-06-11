@@ -1,4 +1,4 @@
-import { StateMachineState } from "../stateMachine/typesForStateMachine";
+import { StateMachineState, StateMachineTransition } from "../stateMachine/typesForStateMachine";
 
 /**
  * Convert state machine states into a string of the Graphviz graph description language.
@@ -54,8 +54,8 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
 
                     dotFileLines.push(`\t${state.NAME} -> ${transition.DESTINATION} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
-
                 }
+
                 case "timeout": {
                     let transitionLabel = `${transition.TYPE.toString()}: `;
 
@@ -73,6 +73,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     dotFileLines.push(`\t${state.NAME} -> ${transition.DESTINATION} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
                 }
+
                 case "manualTrigger": {
                     let transitionLabel = `${transition.TYPE.toString()}: \\"${transition.TRIGGER_NAME.replace("manualTrigger_", "")}\\"`;
                     if (transition.GUARD_CONDITION) {
@@ -107,12 +108,40 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     break;
                 }
 
+                case "keyboardWithIf": {
+                    let keyboardLabel = "keyboard: ";
+                    if (transition.KEYBOARD_KEYS === " ") {
+                        keyboardLabel += "space";
+                    } else {
+                        keyboardLabel += `\\"${transition.KEYBOARD_KEYS}\\"`;
+                    }
+
+                    const condition = transition.CONDITION.name.replace("bound ", "");
+
+                    let labelThen = `${keyboardLabel} if(${condition})`;
+                    if (transition.THEN.ON_TRANSITION) {
+                        labelThen += ` / ${transition.THEN.ON_TRANSITION.name.replace("bound ", "")}()`;
+                    }
+                    const idThen = `${state.NAME}_to_${transition.THEN.DESTINATION}`;
+
+                    let labelElse = `${keyboardLabel} if(!${condition})`;
+                    if (transition.ELSE.ON_TRANSITION) {
+                        labelElse += ` / ${transition.ELSE.ON_TRANSITION.name.replace("bound ", "")}()`;
+                    }
+                    const idElse = `${state.NAME}_to_${transition.ELSE.DESTINATION}`;
+
+                    dotFileLines.push(`\t${state.NAME} -> ${transition.THEN.DESTINATION} [label="${labelThen}", id="${idThen}"];`);
+                    dotFileLines.push(`\t${state.NAME} -> ${transition.ELSE.DESTINATION} [label="${labelElse}", id="${idElse}"];`);
+                    break;
+                }
+
                 default:
-                    throw new TypeError("unknown transition type!");
+                    // Prevent TS2339 "Property 'TYPE' does not exist on type 'never'"
+                    throw new TypeError(`unknown transition type "${(transition as StateMachineTransition).TYPE}"`);
             }
 
         });
-        dotFileLines.push(""); // empty string becomes one newline because the whole array gets joined wih t\n
+        dotFileLines.push(""); // empty string becomes one newline because the whole array gets joined with \n
 
     });
     dotFileLines.push("}");

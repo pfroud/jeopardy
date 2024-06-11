@@ -16,6 +16,8 @@ export class Presentation {
     private readonly DIV_CLUE_VALUE_BIG: HTMLDivElement;
     private readonly DIV_SLIDE_CLUE_ANSWER_TEXT: HTMLDivElement;
 
+    private readonly DIV_SLIDE_ROUND_START: HTMLDivElement;
+
     private readonly DIV_BACKDROP_FOR_POPUPS: HTMLDivElement;
     private readonly DIV_SPECIAL_CATEGORY_POPUP: HTMLDivElement;
 
@@ -35,6 +37,8 @@ export class Presentation {
         this.SPAN_CLUE_MONEY_IN_HEADER = querySelectorAndCheck(this.HEADER, "span#clue-value-in-header");
         this.PROGRESS_ELEMENT_FOR_GAME_TIMER = querySelectorAndCheck(this.HEADER, "progress#game-timer");
         this.PROGRESS_ELEMENT_FOR_STATE_MACHINE = querySelectorAndCheck(this.HEADER, "progress#state-machine");
+
+        this.DIV_SLIDE_ROUND_START = querySelectorAndCheck(document, "div#slide-round-start");
 
         this.DIV_SLIDE_CLUE_QUESTION = querySelectorAndCheck(document, "div#slide-clue-question");
         this.DIV_SLIDE_CLUE_ANSWER_TEXT = querySelectorAndCheck(document, "div#slide-clue-answer div#clue-answer-text");
@@ -225,4 +229,7 @@ export class Presentation {
         this.CATEGORY_CAROUSEL_TABLE.setAttribute("data-show-category-index", String(n));
     }
 
+    public setRoundStartText(message: string): void {
+        this.DIV_SLIDE_ROUND_START.innerText = message;
+    }
 }

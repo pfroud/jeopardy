@@ -13,6 +13,8 @@ export class GameBoard {
     private static readonly TABLE_ROW_COUNT = 6;
     private static readonly TABLE_CLUE_ROW_COUNT = GameBoard.TABLE_ROW_COUNT - 1;
 
+    private static readonly TOTAL_CLUES_COUNT = GameBoard.TABLE_COLUMN_COUNT * GameBoard.TABLE_CLUE_ROW_COUNT;
+
     /** Attribute name for whether the question behind a table cell has been revealed. */
     private static readonly CELL_ATTRIBUTE_NAME_IS_CLUE_REVEALED = "data-clue-revealed";
     private static readonly CELL_ATTRIBUTE_VALUE_NOT_REVEALED_YET = "no";
@@ -45,6 +47,8 @@ export class GameBoard {
     private readonly CLUE_CELLS = new Map<HTMLTableElement, HTMLTableCellElement[][]>();
 
     private readonly OPERATOR;
+
+    private cluesRevealedInThisRound = NaN;
 
     private round: ScrapedRound | null = null;
 
@@ -82,8 +86,6 @@ export class GameBoard {
             if (trIndex === 0) {
                 // The first row is the categories.
                 this.CATEGORY_CELLS.set(table, Array.from(tds));
-                tds.forEach((td, idx) => td.innerText = `Category ${idx + 1}`);
-                // The actual category names are set separately, by calling setCategoryNames(). but why?
 
             } else {
                 /*
@@ -94,12 +96,6 @@ export class GameBoard {
 
                 clueCells[clueRowIndex] = Array.from(tds);
                 tds.forEach((td, columnIndex) => {
-
-                    td.innerText = `Row ${trIndex}`;
-                    td.setAttribute(
-                        GameBoard.CELL_ATTRIBUTE_NAME_IS_CLUE_REVEALED,
-                        GameBoard.CELL_ATTRIBUTE_VALUE_NOT_REVEALED_YET
-                    );
 
                     if (window === "operator") {
                         td.addEventListener("click", () => {
@@ -115,6 +111,7 @@ export class GameBoard {
                                     GameBoard.CELL_ATTRIBUTE_NAME_IS_CLUE_REVEALED,
                                     GameBoard.CELL_ATTRIBUTE_VALUE_ALREADY_REVEALED));
 
+                                this.cluesRevealedInThisRound++;
                             } else {
                                 console.warn("clicked on a cell but the game round has not been set");
                             }
@@ -158,6 +155,8 @@ export class GameBoard {
         this.round = round;
         this.setCategoryNames(round.CATEGORIES);
         this.setClueValues(round.TYPE);
+        this.setAllCluesAvailable();
+        this.cluesRevealedInThisRound = 29;
     }
 
     private setCategoryNames(categories: ScrapedCategory[]): void {
@@ -180,15 +179,21 @@ export class GameBoard {
         });
     }
 
-    public resetCluesAvailability(): void {
+    private setAllCluesAvailable(): void {
         this.CLUE_CELLS.forEach(cellsForTable =>
             cellsForTable.forEach(cellsInRow =>
                 cellsInRow.forEach(cell =>
-                    cell.setAttribute(GameBoard.CELL_ATTRIBUTE_NAME_IS_CLUE_REVEALED,
-                        GameBoard.CELL_ATTRIBUTE_VALUE_NOT_REVEALED_YET)
+                    cell.setAttribute(
+                        GameBoard.CELL_ATTRIBUTE_NAME_IS_CLUE_REVEALED,
+                        GameBoard.CELL_ATTRIBUTE_VALUE_NOT_REVEALED_YET
+                    )
                 )
             )
         );
+    }
+
+    public isAllCluesRevealedThisRound(): boolean {
+        return this.cluesRevealedInThisRound === GameBoard.TOTAL_CLUES_COUNT;
     }
 
 }

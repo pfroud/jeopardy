@@ -5,7 +5,7 @@ import { GameBoard } from "../GameBoard";
 import { Settings } from "../Settings";
 import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
 import { querySelectorAndCheck } from "../commonFunctions";
-import { FullClue, ScrapedClue } from "../gameTypes";
+import { FullClue, ScrapedClue, ScrapedRound } from "../gameTypes";
 import { Presentation } from "../presentation/Presentation";
 import { SCRAPED_GAME } from "../scrapedGame";
 import { SpecialCategory, checkSpecialCategory } from "../specialCategories";
@@ -53,6 +53,8 @@ export class Operator {
     private teamPresentlyAnswering?: Team | undefined;
     private buzzHistoryRecordForActiveAnswer?: BuzzHistoryRecord<BuzzResultStartAnswer> | undefined;
     private questionCount = 0;
+
+    private gameRoundIndex = -1;
 
     private categoryCarouselIndex = 0;
 
@@ -116,10 +118,6 @@ export class Operator {
         this.initTeams();
 
         this.GAME_BOARD.addTable(this.presentation.getGameBoardTable(), "presentation");
-
-        const gameRound = SCRAPED_GAME.ROUNDS[0];
-        this.GAME_BOARD.setRound(gameRound);
-        this.presentation?.setCategoryCarouselRound(gameRound);
 
         this.initKeyboardListenersForBuzzerFootswitchIcons();
 
@@ -402,12 +400,8 @@ export class Operator {
         };
     }
 
-    public shouldGameEnd(): boolean {
-        if (!this.teamArray) {
-            throw new Error("called shouldGameEnd() when teamArray is undefined");
-        }
-        return this.GAME_TIMER.getIsFinished() ||
-            this.teamArray.some(team => team.getMoney() >= this.SETTINGS.teamMoneyWhenGameShouldEnd);
+    public isGameTimerOver(): boolean {
+        return this.GAME_TIMER.getIsFinished();
     }
 
     public handleLockout(keyboardEvent: KeyboardEvent): void {
@@ -751,7 +745,7 @@ export class Operator {
             this.buzzHistoryDiagram?.setTeamName(teamIdx, team.TEAM_NAME);
         }
 
-        if (this.shouldGameEnd()) {
+        if (this.isGameTimerOver()) {
             this.stateMachine?.goToState("gameEnd");
         }
     }
@@ -871,13 +865,13 @@ export class Operator {
     }
 
     public startCategoryCarousel(): void {
-        this.presentation?.hideHeaderAndFooter();
         this.categoryCarouselIndex = 0;
-        this.presentation?.setCategoryCarouselIndex(0);
+        this.presentation?.hideHeaderAndFooter();
+        this.presentation?.setCategoryCarouselIndex(this.categoryCarouselIndex);
 
-        const categories = SCRAPED_GAME.ROUNDS[0].CATEGORIES;
+        const categoryName = SCRAPED_GAME.ROUNDS[this.gameRoundIndex].CATEGORIES[this.categoryCarouselIndex].NAME;
         this.DIV_INSTRUCTIONS.innerText =
-            `Category 1 of ${GameBoard.TABLE_COLUMN_COUNT}: "${categories[0].NAME}". Press space to show the next category in the carousel`;
+            `Category 1 of ${GameBoard.TABLE_COLUMN_COUNT}: "${categoryName}". Press space to show the next category in the carousel`;
     }
 
     public stopCategoryCarousel(): void {
@@ -892,13 +886,34 @@ export class Operator {
         this.categoryCarouselIndex++;
         this.presentation?.setCategoryCarouselIndex(this.categoryCarouselIndex);
 
-        const categories = SCRAPED_GAME.ROUNDS[0].CATEGORIES;
-        const str = `Category ${this.categoryCarouselIndex + 1} of ${GameBoard.TABLE_COLUMN_COUNT}: "${categories[this.categoryCarouselIndex].NAME}".`;
+        const categoryName = SCRAPED_GAME.ROUNDS[this.gameRoundIndex].CATEGORIES[this.categoryCarouselIndex].NAME;
+        const str = `Category ${this.categoryCarouselIndex + 1} of ${GameBoard.TABLE_COLUMN_COUNT}: "${categoryName}".`;
+
         if (this.hasMoreCategoryCarousel()) {
-            this.DIV_INSTRUCTIONS.innerText = `${str} Press space to start the game`;
-        } else {
             this.DIV_INSTRUCTIONS.innerText = `${str} Press space to show the next category in the carousel`;
+        } else {
+            this.DIV_INSTRUCTIONS.innerText = `${str} Press space to start the game`;
         }
+    }
+
+    public startNextGameRound(): void {
+        this.gameRoundIndex++;
+        const gameRound = SCRAPED_GAME.ROUNDS[this.gameRoundIndex];
+        this.GAME_BOARD.setRound(gameRound);
+
+        this.DIV_CLUE_WRAPPER.style.display = "none";
+
+        this.DIV_INSTRUCTIONS.innerText = `Get ready for round ${this.gameRoundIndex + 1}, press space to start the category carousel`;
+        this.presentation?.setRoundStartText(`Get ready for round ${this.gameRoundIndex + 1}`);
+        this.presentation?.setCategoryCarouselRound(gameRound);
+    }
+
+    public hasMoreRounds(): boolean {
+        return this.gameRoundIndex < SCRAPED_GAME.ROUNDS.length - 1;
+    }
+
+    public isAllCluesRevealedThisRound(): boolean {
+        return this.GAME_BOARD.isAllCluesRevealedThisRound();
     }
 
 }

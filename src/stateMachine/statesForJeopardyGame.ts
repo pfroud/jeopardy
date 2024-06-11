@@ -11,9 +11,18 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             TRANSITIONS: [{
                 TYPE: "manualTrigger",
                 TRIGGER_NAME: "startGame",
+                DESTINATION: "startNextRound"
+            }]
+        }, {
+            NAME: "startNextRound",
+            PRESENTATION_SLIDE_TO_SHOW: "slide-round-start",
+            ON_ENTER: operator.startNextGameRound.bind(operator),
+            TRANSITIONS: [{
+                TYPE: "keyboard",
+                KEYBOARD_KEYS: " ",// space
                 ON_TRANSITION: operator.startCategoryCarousel.bind(operator),
                 DESTINATION: "showCategoryCarousel"
-            }],
+            }]
         }, {
             NAME: "showCategoryCarousel",
             PRESENTATION_SLIDE_TO_SHOW: "slide-category-carousel",
@@ -64,7 +73,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 KEYBOARD_KEYS: " ", //space
                 DESTINATION: "showMessageForSpecialCategory",
                 GUARD_CONDITION: operator.isCurrentClueSpecialCategory.bind(operator)
-            }],
+            }]
         }, {
             /*
             The game is paused to display an information message about a Jeopardy category
@@ -102,7 +111,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 KEYBOARD_KEYS: "123456789",
                 DESTINATION: "showClueQuestion",
                 ON_TRANSITION: operator.handleLockout.bind(operator)
-            }],
+            }]
         }, {
             /*
             The operator has finished reading the clue question, people can press the buzzer now.
@@ -120,7 +129,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 INITIAL_DURATION: settings.timeoutWaitForBuzzesMillisec,
                 BEHAVIOR: CountdownBehavior.ContinueTimerUntilManuallyReset,
                 ON_TRANSITION: operator.playSoundQuestionTimeout.bind(operator)
-            }],
+            }]
         }, {
             /*
             A team has pressed the buzzer, now we are waiting for them to say their answer.
@@ -143,7 +152,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 BEHAVIOR: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
                 IS_WAITING_FOR_TEAM_TO_ANSWER_AFTER_BUZZ: true,
                 DESTINATION: "answerWrongOrTimeout"
-            }],
+            }]
         },
         {
             NAME: "answerWrongOrTimeout",
@@ -153,7 +162,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 CONDITION: operator.haveAllTeamsAnswered.bind(operator),
                 THEN: { DESTINATION: "showAnswer" },
                 ELSE: { DESTINATION: "waitForBuzzes" }
-            }],
+            }]
         }, {
             NAME: "showAnswer",
             INSTRUCTIONS: "Let people read the answer. Press space to continue.",
@@ -180,7 +189,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 TYPE: "if",
                 CONDITION: operator.shouldShowBuzzHistory.bind(operator),
                 THEN: { DESTINATION: "showBuzzHistory" },
-                ELSE: { DESTINATION: "checkGameEnd" }
+                ELSE: { DESTINATION: "checkGameTimerOver" }
             }]
         }, {
             NAME: "showBuzzHistory",
@@ -191,16 +200,33 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             TRANSITIONS: [{
                 TYPE: "keyboard",
                 KEYBOARD_KEYS: " ", //space
-                DESTINATION: "checkGameEnd"
+                DESTINATION: "checkGameTimerOver"
             }]
         }, {
-            NAME: "checkGameEnd",
+            NAME: "checkGameTimerOver",
             TRANSITIONS: [{
                 TYPE: "if",
-                CONDITION: operator.shouldGameEnd.bind(operator),
+                CONDITION: operator.isGameTimerOver.bind(operator),
                 THEN: { DESTINATION: "gameEnd" },
+                ELSE: { DESTINATION: "checkAllCluesRevealed" }
+            }]
+        }, {
+            NAME: "checkAllCluesRevealed",
+            TRANSITIONS: [{
+                TYPE: "if",
+                CONDITION: operator.isAllCluesRevealedThisRound.bind(operator),
+                THEN: { DESTINATION: "nextRoundOrEndGame" },
                 ELSE: { DESTINATION: "showGameBoard" }
-            }],
+            }]
+
+        }, {
+            NAME: "nextRoundOrEndGame",
+            TRANSITIONS: [{
+                TYPE: "if",
+                CONDITION: operator.hasMoreRounds.bind(operator),
+                THEN: { DESTINATION: "startNextRound" },
+                ELSE: { DESTINATION: "gameEnd" }
+            }]
         }, {
             NAME: "gameEnd",
             INSTRUCTIONS: "Game over",
@@ -210,7 +236,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 TYPE: "manualTrigger",
                 TRIGGER_NAME: "reset",
                 DESTINATION: "idle"
-            }],
+            }]
         }
     ];
 
