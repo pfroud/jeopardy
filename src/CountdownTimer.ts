@@ -13,7 +13,7 @@ export class CountdownTimer {
     private readonly DEBUG = false;
     private static readonly DESIRED_FRAME_RATE_HZ = 30;
     private readonly UPDATE_INTERVAL_MILLISEC = 1000 / CountdownTimer.DESIRED_FRAME_RATE_HZ;
-    private readonly AUDIO_MANAGER: AudioManager | undefined;
+    private readonly AUDIO_MANAGER?: AudioManager | undefined;
     private readonly TEXT_ELEMENTS = new Set<HTMLElement>();
     private readonly PROGRESS_ELEMENTS = new Set<HTMLProgressElement>();
     private readonly DOTS_TABLES = new Set<HTMLTableElement>();

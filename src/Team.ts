@@ -40,37 +40,29 @@ export class Team {
     private readonly OPERATOR: Operator;
     private readonly TEAM_INDEX: number;
     /** One countdown timer used to keep track of all timing for this Team */
-    private countdownTimer?: CountdownTimer | null;
+    private countdownTimer: CountdownTimer | null = null;
     private state: TeamState;
-    private stateBeforeLockout?: TeamState | null;
+    private stateBeforeLockout: TeamState | null = null;
     private progressElementInPresentationWindow?: HTMLProgressElement;
     private progressElementInOperatorWindow?: HTMLProgressElement;
     private allCountdownDots?: NodeListOf<HTMLTableCellElement>;
     private readonly DIV: {
         readonly OPERATOR: {
-            wrapper: HTMLDivElement | null;
-            money: HTMLDivElement | null;
-            teamName: HTMLDivElement | null;
-            state: HTMLDivElement | null;
+            wrapper?: HTMLDivElement;
+            money?: HTMLDivElement;
+            teamName?: HTMLDivElement;
+            state?: HTMLDivElement;
         };
         readonly PRESENTATION: {
-            wrapper: HTMLDivElement | null;
-            money: HTMLDivElement | null;
-            teamName: HTMLDivElement | null;
-            buzzerShow: HTMLDivElement | null;
+            wrapper?: HTMLDivElement;
+            money?: HTMLDivElement;
+            teamName?: HTMLDivElement;
+            buzzerShow?: HTMLDivElement;
         };
     } = {
             OPERATOR: {
-                wrapper: null,
-                money: null,
-                teamName: null,
-                state: null
             },
             PRESENTATION: {
-                wrapper: null,
-                money: null,
-                teamName: null,
-                buzzerShow: null
             }
         };
     public hasBuzzedForCurrentQuestion = false;

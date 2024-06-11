@@ -62,8 +62,8 @@ export class Operator {
     private presentation?: Presentation;
     private isPaused = false;
     private stateMachine?: StateMachine;
-    private teamPresentlyAnswering?: Team | undefined;
-    private buzzHistoryRecordForActiveAnswer?: BuzzHistoryRecord<BuzzResultStartAnswer> | undefined;
+    private teamPresentlyAnswering: Team | undefined;
+    private buzzHistoryRecordForActiveAnswer: BuzzHistoryRecord<BuzzResultStartAnswer> | undefined;
     private questionCount = 0;
 
     private gameRoundIndex = -1;
@@ -686,12 +686,11 @@ export class Operator {
         return this.isPaused;
     }
 
-    public getTeam(teamIdx: number): Team | undefined {
-        if (this.teamArray) {
-            return this.teamArray[teamIdx];
-        } else {
-            return undefined;
+    public getTeam(teamIdx: number): Team {
+        if (!this.teamArray) {
+            throw new Error("getting team when teamArray is not defined");
         }
+        return this.teamArray[teamIdx];
     }
 
     private lookForSavedGame(): void {
