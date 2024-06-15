@@ -1,6 +1,5 @@
 import { querySelectorAndCheck } from "../commonFunctions";
 import { Operator } from "../operator/Operator";
-import { Team } from "../Team";
 
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -9,9 +8,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    window.opener.addEventListener("unload", () => close());
-
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-type-assertion, @typescript-eslint/no-explicit-any
     const operator = (window.opener as any).operator as Operator;
     if (!operator) {
@@ -19,9 +15,10 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    window.opener.addEventListener("unload", () => close());
 
-    const teamArray: Team[] | undefined = operator.getTeamArray();
-
+    const teamArray = operator.getTeamArray();
 
     const table = querySelectorAndCheck(document, "table tbody");
     for (let teamIndex = 0; teamIndex < operator.teamCount; teamIndex++) {

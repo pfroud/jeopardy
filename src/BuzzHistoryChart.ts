@@ -29,7 +29,7 @@ export interface BuzzHistoryRecord<R extends BuzzResult> {
 export type BuzzResult = BuzzResultTooEarlyStartLockout | BuzzResultStartAnswer | BuzzResultIgnore;
 
 /**
- * The team buzzed before the person operating the game finished reading the question out loud.
+ * The team pressed their buzzer before the person operating the game finished reading the question out loud.
  * 
  * This buzz result happens when the team is in state "operator-is-reading-question".
  */
@@ -38,7 +38,7 @@ interface BuzzResultTooEarlyStartLockout {
 }
 
 /**
- * The team buzzed and their time to answer started.
+ * The team pressed their buzzer and their time to answer started.
  * 
  * This buzz result happens when the team is in state "can-answer".
  */
@@ -49,7 +49,7 @@ export interface BuzzResultStartAnswer {
 }
 
 /**
- * The team pressed the buzzer but the buzzer didn't do anything.
+ * The team pressed their buzzer but the buzzer didn't do anything.
  * 
  * This buzz result happens when the team is in any of these states:
  *   - "idle"
@@ -62,6 +62,9 @@ interface BuzzResultIgnore {
     readonly TEAM_STATE_WHY_IT_WAS_IGNORED: TeamState;
 }
 
+/**
+ * An annotation is an arrow with text.
+ */
 interface Annotation {
     startTimestamp: number;
     endTimestamp: number;
@@ -74,6 +77,10 @@ interface Annotation {
     teamIndexWhereStartTimestampHappened?: number;
 }
 
+/**
+ * The buzz history chart shows the buzzes each team made relative to when the human
+ * operator finished reading the clue question.
+ */
 export class BuzzHistoryChart {
 
     private readonly SVG_MARGIN = {
@@ -86,6 +93,7 @@ export class BuzzHistoryChart {
     private readonly LEGEND_HEIGHT = 30;
     private readonly LEGEND_PADDING = 40;
 
+    // content means the SVG size minus the margins.
     private readonly CONTENT_WIDTH: number;
     private readonly CONTENT_HEIGHT: number;
 
@@ -106,7 +114,12 @@ export class BuzzHistoryChart {
     private static readonly CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_RIGHT = "annotation-arrowhead-top-right";
     private static readonly CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_RIGHT = "annotation-arrowhead-bottom-right";
 
+    /**
+     * Only show annotations within this time range of when the human operator finished
+     * reading the clue question.
+     */
     private static readonly ANNOTATION_RANGE_MILLISEC = 100;
+
     private static readonly ANNOTATION_ARROWHEAD_SIZE = 5;
 
     /**
@@ -114,20 +127,24 @@ export class BuzzHistoryChart {
      */
     private readonly ANNOTATIONS: Annotation[][] = [];
 
+    /** We will show two SVGs, one in the operator window and one in the presentation window. */
     private readonly ALL_SVGS: SVGSVGElement[] = [];
 
     /**
      * A "scale" does linear interpolation to convert a domain to a range.
      * For us, the domain is time (in milliseconds) and the range is screen-space pixels.
     */
-    // shared between both SVGs
-    private readonly SCALE_WITHOUT_ZOOM_TRANSFORM: ScaleLinear<number, number>;
+    private readonly SCALE_WITHOUT_ZOOM_TRANSFORM: ScaleLinear<number, number>; //only one, shared between all SVGs
     private scaleWithZoomTransform: ScaleLinear<number, number>;
+
     private readonly AXIS_GENERATOR: Axis<number>;
-    private history: BuzzHistoryForClue | null = null;
     private readonly LOCKOUT_DURATION_MILLISEC: number;
     private readonly ZOOM_CONTROLLER = zoom<SVGSVGElement, unknown>();
+
+    /** The SVG in the operator window needs mouse listeners */
     private readonly SVG_IN_OPERATOR_WINDOW: Selection<SVGSVGElement, unknown, null, undefined>;
+
+    private history: BuzzHistoryForClue | null = null;
 
     // one for each SVG
     private readonly X_AXIS_GROUPS = new Map<
@@ -138,7 +155,7 @@ export class BuzzHistoryChart {
         SVGSVGElement,
         Selection<SVGGElement, unknown, null, undefined>
     >;
-    private readonly VERTICAL_LINES = new Map<SVGSVGElement, SVGLineElement>;
+    private readonly VERTICAL_LINES_WHEN_OPERATOR_FINISHED_READING_QUESTION = new Map<SVGSVGElement, SVGLineElement>;
     private readonly ROWS_ARRAY = new Map<
         SVGSVGElement,
         Selection<SVGGElement, unknown, null, undefined>[]
@@ -156,11 +173,11 @@ export class BuzzHistoryChart {
         this.CONTENT_WIDTH = svgWidth - this.SVG_MARGIN.LEFT - this.SVG_MARGIN.RIGHT;
         this.CONTENT_HEIGHT = svgHeight - this.SVG_MARGIN.TOP - this.SVG_MARGIN.BOTTOM - this.LEGEND_HEIGHT - this.LEGEND_PADDING;
 
-        // the domain is set in the setHistory() function
+        // The domain is set in the showNewHistory() function
         this.SCALE_WITHOUT_ZOOM_TRANSFORM = scaleLinear()
             .range([0, this.CONTENT_WIDTH]);
 
-        // the zoomed scale is changed in the handleZoom() function
+        // The scale with zoom transform is changed in the handleZoom() function
         this.scaleWithZoomTransform = this.SCALE_WITHOUT_ZOOM_TRANSFORM;
 
         this.AXIS_GENERATOR = axisBottom<number>(this.scaleWithZoomTransform)
@@ -257,7 +274,7 @@ export class BuzzHistoryChart {
 
             const xPositionAtTimeZero = this.scaleWithZoomTransform(0);
             const verticalLine = createSvgElement("line");
-            this.VERTICAL_LINES.set(theSvg, verticalLine);
+            this.VERTICAL_LINES_WHEN_OPERATOR_FINISHED_READING_QUESTION.set(theSvg, verticalLine);
             verticalLine.classList.add("vertical-line");
             verticalLine.setAttribute("id", "operator-finished-reading-question");
             verticalLine.setAttribute("y1", "0");
@@ -360,20 +377,20 @@ export class BuzzHistoryChart {
 
     /** The input is the present zoom scale factor. The output is the tick count for the axis. */
     private readonly ZOOM_TO_AXIS_TICK_COUNT_FUNCTION = BuzzHistoryChart.getClampedLineFunction(
-        4, 4,  // at 4x zoom and below, set the tick count to 4
-        6, 8   // at 6x zoom and above, set the tick count to 8
+        4, 4,  // At 4x zoom and below, set the tick count to 4.
+        6, 8   // At 6x zoom and above, set the tick count to 8.
     );
 
     /** The input is the present zoom scale factor. The output is opacity for the gridlines. */
     private readonly ZOOM_TO_GRIDLINE_OPACITY_FUNCTION = BuzzHistoryChart.getClampedLineFunction(
-        20, 0.0, // at 20x zoom and below, set the grid opacity to 0.0
-        30, 1.0  // at 30x zoom and above, set the grid opacity to 1.0
+        20, 0.0, // At 20x zoom and below, set the grid opacity to 0.0.
+        30, 1.0  // At 30x zoom and above, set the grid opacity to 1.0.
     );
 
     /** The input is the present zoom scale factor. The output is opacity for the annotations. */
     private readonly ZOOM_TO_ANNOTATION_OPACITY_FUNCTION = BuzzHistoryChart.getClampedLineFunction(
-        2, 0.0, // at 2x zoom and below, set the annotation opacity to 0.0
-        4, 1.0  // at 4x zoom and above, set the annotation opacity to 1.0
+        2, 0.0, // At 2x zoom and below, set the annotation opacity to 0.0.
+        4, 1.0  // At 4x zoom and above, set the annotation opacity to 1.0.
     );
 
     private initPanZoomController(): void {
@@ -390,7 +407,7 @@ export class BuzzHistoryChart {
             Normally you would just call 
                 myAxisGenerator.ticks(n)
             to set how many ticks you want to be generated.
-            (It actually is a hint to the tick algorithm, so it might not return
+            (It actually is only a hint to the tick algorithm, so it might not return
             exactly n ticks.)
 
             But if you zoom in enough, eventually it will produce ticks with non-
@@ -401,8 +418,8 @@ export class BuzzHistoryChart {
             Solution from here although due to a new D3 version it doesn't work exactly:
             https://stackoverflow.com/a/56821215/7376577
             */
-            const allTicks = this.scaleWithZoomTransform.ticks(this.ZOOM_TO_AXIS_TICK_COUNT_FUNCTION(zoomEvent));
-            const onlyIntegerTicks = allTicks.filter(n => Number.isInteger(n));
+            const ticksBeforeFilter = this.scaleWithZoomTransform.ticks(this.ZOOM_TO_AXIS_TICK_COUNT_FUNCTION(zoomEvent));
+            const onlyIntegerTicks = ticksBeforeFilter.filter(n => Number.isInteger(n));
             this.AXIS_GENERATOR.tickValues(onlyIntegerTicks);
 
             // Set the scale which will be used by the axis generator
@@ -510,11 +527,12 @@ export class BuzzHistoryChart {
         }
 
         /*
-        Now I want to:
-        - find the first record which starts the answer
-        - then search for records which are within the range of that timestamp
-        - then I need to add some stuff to the Annotation interface so that
-            we can indicate that the start or end time comes from a different team
+        Next I want to add more annotations:
+
+        - Find the first record which starts the answer.
+        - Then search for records which are within the range of that timestamp.
+        - Then I need to add some stuff to the Annotation interface so that
+            we can indicate that the start or end time comes from a different team:
 
             Team A    o=========       answer
             Team B    |  o===          lockout
@@ -574,7 +592,7 @@ export class BuzzHistoryChart {
 
         /*
         Add padding so the leftmost record doesn't overlap the label 
-        and the rightmost record isn't exactly on the edge
+        and the rightmost record isn't exactly on the edge.
         */
         this.SCALE_WITHOUT_ZOOM_TRANSFORM.domain([domainMinToUse * 1.3, lastTimestamp * 1.1]);
 
@@ -586,12 +604,15 @@ export class BuzzHistoryChart {
 
     }
 
+    /**
+     * Called from the handleZoom() function.
+     */
     private redraw(): void {
 
         const xPositionAtTimeZero = this.scaleWithZoomTransform(0);
         const lockoutBarWidth = this.scaleWithZoomTransform(this.LOCKOUT_DURATION_MILLISEC) - xPositionAtTimeZero;
 
-        this.VERTICAL_LINES.forEach(verticalLine => {
+        this.VERTICAL_LINES_WHEN_OPERATOR_FINISHED_READING_QUESTION.forEach(verticalLine => {
             verticalLine.setAttribute("x1", String(xPositionAtTimeZero));
             verticalLine.setAttribute("x2", String(xPositionAtTimeZero));
         });

@@ -2,10 +2,11 @@ import { AudioManager } from "./AudioManager";
 import { CountdownTimer } from "./CountdownTimer";
 import { Settings } from "./Settings";
 import { querySelectorAndCheck } from "./commonFunctions";
-import { FullClue } from "./gameTypes";
 import { Operator } from "./operator/Operator";
 import { Presentation } from "./presentation/Presentation";
+import { FullClue } from "./typesForGame";
 
+/** Used to create charts at the end of the game. */
 interface Statistics {
     questionsNotBuzzed: number;
     questionsBuzzedThenAnsweredRight: number;
@@ -92,30 +93,21 @@ export class Team {
         this.setState("idle");
     }
 
-    public handleAnswerCorrect(clue: FullClue): void {
-        this.stopAnswer();
+    public onAnswerCorrect(clue: FullClue): void {
+        this.answerStop();
         this.AUDIO_MANAGER.ANSWER_CORRECT.play();
         this.moneyAdd(clue.VALUE);
         this.statistics.questionsBuzzedThenAnsweredRight++;
         this.hasBuzzedForCurrentQuestion = true;
     }
 
-    public handleAnswerIncorrectOrAnswerTimeout(clue: FullClue): void {
-        this.stopAnswer();
+    public onAnswerIncorrectOrAnswerTimeout(clue: FullClue): void {
+        this.answerStop();
         this.AUDIO_MANAGER.ANSWER_WRONG_OR_ANSWER_TIMEOUT.play();
         this.moneySubtract(clue.VALUE * this.SETTINGS.wrongAnswerPenaltyMultiplier);
         this.setState(this.SETTINGS.allowMultipleAnswersToSameQuestion ? "can-answer" : "already-answered-this-clue");
         this.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut++;
         this.hasBuzzedForCurrentQuestion = true;
-    }
-
-    public moneyAdd(amountAdd: number, animate = true): void {
-        if (animate) {
-            this.animateMoneyChange(this.money + amountAdd);
-        } else {
-            this.money += amountAdd;
-            this.setMoneyDisplay(this.money);
-        }
     }
 
     public getTeamName(): string {
@@ -128,29 +120,47 @@ export class Team {
         this.DIV.PRESENTATION.teamName!.innerText = newName;
     }
 
+    /** 
+     * Animate it when a team interacts with a clue.
+     * Do not animate it when using the money override tool.
+     */
+    public moneyAdd(amountAdd: number, animate = true): void {
+        if (animate) {
+            this.moneyAnimateChange(this.money + amountAdd);
+        } else {
+            this.money += amountAdd;
+            this.moneySetDisplay(this.money);
+        }
+    }
+
+    /** 
+     * Animate it when a team interacts with a clue.
+     * Do not animate it when using the money override tool.
+     */
     public moneySubtract(amountSubtract: number, animate = true): void {
         if (animate) {
-            this.animateMoneyChange(this.money - amountSubtract);
+            this.moneyAnimateChange(this.money - amountSubtract);
         } else {
             this.money -= amountSubtract;
-            this.setMoneyDisplay(this.money);
+            this.moneySetDisplay(this.money);
         }
     }
 
     public moneySet(newMoney: number, animate = true): void {
         if (animate) {
-            this.animateMoneyChange(newMoney);
+            this.moneyAnimateChange(newMoney);
         } else {
             this.money = newMoney;
-            this.setMoneyDisplay(this.money);
+            this.moneySetDisplay(this.money);
         }
     }
 
-    private animateMoneyChange(targetMoney: number): void {
+    private moneyAnimateChange(targetMoney: number): void {
         if (this.money === targetMoney) {
             return;
         }
 
+        // Immediately update the money property, but remember what it was before
         let moneyDisplayedOnScreen = this.money;
         this.money = targetMoney;
 
@@ -158,7 +168,7 @@ export class Team {
         const DELAY_BETWEEN_STEPS_MILLISEC = 50;
         const DIRECTION_MULTIPLIER = (targetMoney > moneyDisplayedOnScreen) ? 1 : -1;
 
-        const handleTimeout = (): void => {
+        const onTimeout = (): void => {
             const difference = Math.abs(targetMoney - moneyDisplayedOnScreen);
 
             // teams could loose $50 if the guessing penalty is 0.5, for example
@@ -168,15 +178,24 @@ export class Team {
                 moneyDisplayedOnScreen += DIRECTION_MULTIPLIER * difference;
             }
 
-            this.setMoneyDisplay(moneyDisplayedOnScreen);
+            this.moneySetDisplay(moneyDisplayedOnScreen);
             if (moneyDisplayedOnScreen !== targetMoney) {
-                setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MILLISEC, this);
+                setTimeout(onTimeout, DELAY_BETWEEN_STEPS_MILLISEC, this);
             }
 
         };
 
-        setTimeout(handleTimeout, DELAY_BETWEEN_STEPS_MILLISEC);
+        setTimeout(onTimeout, DELAY_BETWEEN_STEPS_MILLISEC);
 
+    }
+
+    private moneySetDisplay(value: number): void {
+        if (this.DIV.PRESENTATION.money) {
+            this.DIV.PRESENTATION.money.innerHTML = `$${value.toLocaleString()}`;
+        }
+        if (this.DIV.OPERATOR.money) {
+            this.DIV.OPERATOR.money.innerHTML = `$${value.toLocaleString()}`;
+        }
     }
 
     public canBuzz(): boolean {
@@ -185,15 +204,6 @@ export class Team {
 
     public setPaused(isPaused: boolean): void {
         this.countdownTimer?.setPaused(isPaused);
-    }
-
-    private setMoneyDisplay(value: number): void {
-        if (this.DIV.PRESENTATION.money) {
-            this.DIV.PRESENTATION.money.innerHTML = `$${value.toLocaleString()}`;
-        }
-        if (this.DIV.OPERATOR.money) {
-            this.DIV.OPERATOR.money.innerHTML = `$${value.toLocaleString()}`;
-        }
     }
 
     private createElementsInPresentationWindow(): void {
@@ -221,6 +231,15 @@ export class Team {
         divBuzzerDisplay.append(imgSwitchClosed);
         divBuzzerDisplay.append(imgSwitchOpened);
         divTeam.append(divBuzzerDisplay);
+
+        /*
+        In the TV show, there are nine light-up rectangles below each contestant which shows
+        how much time is left to answer a question.
+        Here's a video from the official Jeopardy Youtube channel where you can see how it works:
+        https://www.youtube.com/watch?v=cGSDLZ5wqy8&t=10s
+        
+        For some reason I call the rectangles "dots."
+        */
 
         const tableCountdownDots = this.countdownDotsInPresentationWindow = document.createElement("table");
         tableCountdownDots.classList.add("countdown-dots");
@@ -259,7 +278,7 @@ export class Team {
         progress.style.display = "none";
         divTeam.append(progress);
 
-        this.PRESENTATION.appendTeamDivToFooter(divTeam);
+        this.PRESENTATION.footerAppendTeamDiv(divTeam);
 
     }
 
@@ -293,7 +312,7 @@ export class Team {
 
 
     public setState(targetState: TeamState, endLockout = false): void {
-        // TODO talk about why the endLockout boolean is needed
+        // TODO write documentation about why the endLockout boolean is needed
         if (this.state === "lockout" && !endLockout) {
             this.stateBeforeLockout = targetState;
         } else {
@@ -316,7 +335,7 @@ export class Team {
         return this.state === "operator-is-reading-question";
     }
 
-    public startLockout(): void {
+    public lockoutStart(): void {
         this.stateBeforeLockout = this.state;
         this.setState("lockout");
 
@@ -325,12 +344,12 @@ export class Team {
             countdownShowCategory.addProgressElement(this.progressElementInPresentationWindow);
             this.progressElementInPresentationWindow.style.display = ""; //show it by removing "display=none"
         }
-        countdownShowCategory.onFinished = (): void => this.endLockout();
+        countdownShowCategory.onFinished = (): void => this.lockoutStop();
         countdownShowCategory.start();
 
     }
 
-    public endLockout(): void {
+    public lockoutStop(): void {
         if (this.progressElementInPresentationWindow) {
             this.progressElementInPresentationWindow.style.display = "none";
         }
@@ -341,7 +360,7 @@ export class Team {
         this.countdownTimer = null;
     }
 
-    public startAnswer(): void {
+    public answerStart(): void {
         this.setState("answering");
 
         if (this.progressElementInOperatorWindow) {
@@ -349,7 +368,7 @@ export class Team {
         }
     }
 
-    public stopAnswer(): void {
+    public answerStop(): void {
         this.allCountdownDots?.forEach(td => td.classList.remove("active"));
         if (this.progressElementInOperatorWindow) {
             this.progressElementInOperatorWindow.style.display = "none";
@@ -365,12 +384,12 @@ export class Team {
         }
     }
 
-    public showKeyDown(): void {
+    public showKeyboardKeyDown(): void {
         this.DIV.PRESENTATION.buzzerShow?.classList.add("pressed");
         this.DIV.PRESENTATION.buzzerShow?.classList.remove("not-pressed");
     }
 
-    public showKeyUp(): void {
+    public showKeyboardKeyUp(): void {
         this.DIV.PRESENTATION.buzzerShow?.classList.add("not-pressed");
         this.DIV.PRESENTATION.buzzerShow?.classList.remove("pressed");
     }
@@ -391,7 +410,7 @@ export class Team {
         return this.state;
     }
 
-    public updateMoneyAtEndOfRound(): void {
+    public statisticsUpdateMoneyAtEndOfRound(): void {
         this.statistics.moneyAtEndOfEachRound.push(this.money);
     }
 

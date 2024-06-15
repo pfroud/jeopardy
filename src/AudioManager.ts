@@ -16,7 +16,7 @@ export class AudioManager {
     (I am using this sound correctly.)
 
     If you're having trouble getting sounds to work:
-        - If you've installed the Chrome extension called "Disable HTML5 Autoplay",
+        - If you've installed the browser extension called "Disable HTML5 Autoplay",
           disable it for this domain.
         - You might also want to go to Site Settings (chrome://settings/content)
           and set 'Sound' to 'Allow' for this domain.

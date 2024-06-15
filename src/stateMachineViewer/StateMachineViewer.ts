@@ -1,9 +1,9 @@
+import { createSvgElement, querySelectorAndCheck } from "../commonFunctions";
+
 export class StateMachineViewer {
 
-    private readonly DEBUG = true;
-
     /*
-    Some states are entered then exited very quickly. I want to see a trail showing
+    Some states are entered then immediately exited. I want to see a trail showing
     which states & transitions lead up to the present state.
     The state at index zero is the present state.
     The transition at index zero is the transition which lead to the present state.
@@ -17,6 +17,10 @@ export class StateMachineViewer {
     private readonly STATE_TRAIL: SVGGElement[] = [];
     private readonly TRANSITION_TRAIL: SVGGElement[] = [];
 
+    /**
+     * The StateMachineViewer constructor is called after the states have been converted 
+     * to an SVG and added to the page.
+     */
     public constructor(svgElement: SVGSVGElement) {
         this.SVG = svgElement;
 
@@ -25,8 +29,7 @@ export class StateMachineViewer {
 
     private createStyleElementInSVG(): void {
 
-        // https://stackoverflow.com/a/4906603
-        const styleElement = window.document.createElementNS("http://www.w3.org/2000/svg", "style");
+        const styleTag = createSvgElement("style");
 
         const lines: string[] = [];
 
@@ -46,18 +49,13 @@ export class StateMachineViewer {
             lines.push(`g[${StateMachineViewer.ATTRIBUTE_TRANSITION_TRAIL_INDEX}="${trailIdx}"] text {fill: ${color}; font-weight: bold}`);
         }
 
-
-        styleElement.textContent = lines.join("\n");
-        this.SVG.appendChild(styleElement);
+        styleTag.textContent = lines.join("\n");
+        this.SVG.appendChild(styleTag);
     }
 
     public updateTrail(previousStateName: string | null, newStateName: string): void {
 
-        if (this.DEBUG && previousStateName) {
-            console.log(`stateMachineViewer: ${previousStateName} --> ${newStateName}`);
-        }
-
-        const svgGroupForState = this.SVG.querySelector<SVGGElement>(`g#${newStateName}`);
+        const svgGroupForState = querySelectorAndCheck<SVGGElement>(this.SVG, `g#${newStateName}`);
         if (svgGroupForState) {
 
             // add element to the beginning of the array

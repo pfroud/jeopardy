@@ -1,8 +1,9 @@
 import { Operator } from "../operator/Operator";
+import { Presentation } from "../presentation/Presentation";
 import { Settings } from "../Settings";
 import { CountdownBehavior, StateMachineState } from "./typesForStateMachine";
 
-export function getStatesForJeopardyGame(operator: Operator, settings: Settings): StateMachineState[] {
+export function getStatesForJeopardyGame(operator: Operator, presentation: Presentation, settings: Settings): StateMachineState[] {
 
     return [
         {
@@ -14,13 +15,14 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 DESTINATION: "startNextRound"
             }]
         }, {
+            // This state 
             NAME: "startNextRound",
             PRESENTATION_SLIDE_TO_SHOW: "slide-round-start",
-            ON_ENTER: operator.startNextGameRound.bind(operator),
+            ON_ENTER: operator.gameRoundStartNext.bind(operator),
             TRANSITIONS: [{
                 TYPE: "keyboard",
                 KEYBOARD_KEYS: " ",// space
-                ON_TRANSITION: operator.startCategoryCarousel.bind(operator),
+                ON_TRANSITION: operator.categoryCarouselStart.bind(operator),
                 DESTINATION: "showCategoryCarousel"
             }]
         }, {
@@ -29,14 +31,14 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             TRANSITIONS: [{
                 TYPE: "keyboardWithIf",
                 KEYBOARD_KEYS: " ", //space
-                CONDITION: operator.hasMoreCategoryCarousel.bind(operator),
+                CONDITION: operator.categoryCarouselHasMore.bind(operator),
                 THEN: {
                     DESTINATION: "showCategoryCarousel",
-                    ON_TRANSITION: operator.showNextCategoryCarousel.bind(operator)
+                    ON_TRANSITION: operator.categoryCarouselShowNext.bind(operator)
                 },
                 ELSE: {
                     DESTINATION: "showGameBoard",
-                    ON_TRANSITION: operator.stopCategoryCarousel.bind(operator)
+                    ON_TRANSITION: operator.categoryCarouselStop.bind(operator)
                 }
             }]
         }, {
@@ -67,7 +69,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 Don't put this as onEnter of the showClueQuestion state because it does
                 a bunch of stuff and would get called every time lockout happens
                 */
-                ON_TRANSITION: operator.handleShowClueQuestion.bind(operator)
+                ON_TRANSITION: operator.onShowClueQuestion.bind(operator)
             }, {
                 TYPE: "keyboard",
                 KEYBOARD_KEYS: " ", //space
@@ -80,8 +82,8 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             with special meaning (quotation marks, before & after, etc).
             */
             NAME: "showMessageForSpecialCategory",
-            ON_ENTER: operator.showSpecialCategoryOverlay.bind(operator),
-            ON_EXIT: operator.hideSpecialCategoryOverlay.bind(operator),
+            ON_ENTER: operator.specialCategoryPopupShow.bind(operator),
+            ON_EXIT: operator.specialCategoryPopupHide.bind(operator),
             TRANSITIONS: [{
                 TYPE: "keyboard",
                 KEYBOARD_KEYS: " ", //space
@@ -96,7 +98,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             NAME: "showClueQuestion",
             INSTRUCTIONS: "Read the question out loud. Buzzers open when you press space.",
             PRESENTATION_SLIDE_TO_SHOW: "slide-clue-question",
-            ON_ENTER: operator.fitClueQuestionToScreenInOperatorWindow.bind(operator),
+            ON_ENTER: presentation.fitClueQuestionToWindow.bind(presentation),
             TRANSITIONS: [{
                 TYPE: "keyboard",
                 KEYBOARD_KEYS: " ", //space
@@ -105,12 +107,12 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 Don't put this function as the onEnter for the waitForBuzzes state
                 because there are two other ways to enter the waitForBuzzes state.
                 */
-                ON_TRANSITION: operator.handleDoneReadingClueQuestion.bind(operator)
+                ON_TRANSITION: operator.onDoneReadingClueQuestion.bind(operator)
             }, {
                 TYPE: "keyboard",
                 KEYBOARD_KEYS: "123456789",
                 DESTINATION: "showClueQuestion",
-                ON_TRANSITION: operator.handleLockout.bind(operator)
+                ON_TRANSITION: operator.onTeamLockout.bind(operator)
             }]
         }, {
             /*
@@ -122,7 +124,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
                 TYPE: "keyboard",
                 KEYBOARD_KEYS: "123456789",
                 DESTINATION: "waitForTeamAnswer",
-                GUARD_CONDITION: operator.canTeamBuzz.bind(operator)
+                GUARD_CONDITION: operator.teamCanBuzz.bind(operator)
             }, {
                 TYPE: "timeout",
                 DESTINATION: "showAnswer",
@@ -136,12 +138,12 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             */
             NAME: "waitForTeamAnswer",
             INSTRUCTIONS: "Did they answer correctly? y / n",
-            ON_ENTER: operator.startAnswer.bind(operator),
+            ON_ENTER: operator.teamAnswerStart.bind(operator),
             TRANSITIONS: [{
                 TYPE: "keyboard",
                 KEYBOARD_KEYS: "y",
                 DESTINATION: "showAnswer",
-                ON_TRANSITION: operator.handleAnswerCorrect.bind(operator)
+                ON_TRANSITION: operator.onAnswerCorrect.bind(operator)
             }, {
                 TYPE: "keyboard",
                 KEYBOARD_KEYS: "n",
@@ -156,17 +158,17 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
         },
         {
             NAME: "answerWrongOrTimeout",
-            ON_ENTER: operator.handleAnswerWrongOrTimeout.bind(operator),
+            ON_ENTER: operator.onAnswerWrongOrTimeout.bind(operator),
             TRANSITIONS: [{
                 TYPE: "if",
-                CONDITION: operator.haveAllTeamsAnswered.bind(operator),
+                CONDITION: operator.isAllTeamsAnswered.bind(operator),
                 THEN: { DESTINATION: "showAnswer" },
                 ELSE: { DESTINATION: "waitForBuzzes" }
             }]
         }, {
             NAME: "showAnswer",
             INSTRUCTIONS: "Let people read the answer. Press space to continue.",
-            ON_ENTER: operator.handleShowAnswer.bind(operator),
+            ON_ENTER: operator.onShowAnswer.bind(operator),
             PRESENTATION_SLIDE_TO_SHOW: "slide-clue-answer",
             TRANSITIONS: [
                 /*
@@ -187,15 +189,15 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             NAME: "maybeShowBuzzHistory",
             TRANSITIONS: [{
                 TYPE: "if",
-                CONDITION: operator.shouldShowBuzzHistory.bind(operator),
+                CONDITION: operator.buzzHistoryShouldShow.bind(operator),
                 THEN: { DESTINATION: "showBuzzHistory" },
                 ELSE: { DESTINATION: "checkGameTimerOver" }
             }]
         }, {
             NAME: "showBuzzHistory",
             INSTRUCTIONS: "The buzz history is showing. Press space to continue.",
-            ON_ENTER: operator.showBuzzHistory.bind(operator),
-            ON_EXIT: operator.hideBuzzHistory.bind(operator),
+            ON_ENTER: operator.onBuzzHistoryShow.bind(operator),
+            ON_EXIT: operator.onBuzzHistoryHide.bind(operator),
             PRESENTATION_SLIDE_TO_SHOW: "slide-buzz-history-chart",
             TRANSITIONS: [{
                 TYPE: "keyboard",
@@ -223,7 +225,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             NAME: "nextRoundOrEndGame",
             TRANSITIONS: [{
                 TYPE: "if",
-                CONDITION: operator.hasMoreRounds.bind(operator),
+                CONDITION: operator.gameRoundHasMore.bind(operator),
                 THEN: { DESTINATION: "startNextRound" },
                 ELSE: { DESTINATION: "gameEnd" }
             }]
@@ -231,7 +233,7 @@ export function getStatesForJeopardyGame(operator: Operator, settings: Settings)
             NAME: "gameEnd",
             INSTRUCTIONS: "Game over",
             PRESENTATION_SLIDE_TO_SHOW: "slide-gameEnd-team-ranking-table",
-            ON_ENTER: operator.handleGameEnd.bind(operator),
+            ON_ENTER: operator.onGameEnd.bind(operator),
             TRANSITIONS: [{
                 TYPE: "manualTrigger",
                 TRIGGER_NAME: "reset",

@@ -17,11 +17,15 @@ export class StateMachine {
     private readonly OPERATOR_WINDOW_COUNTDOWN_TEXT: HTMLDivElement;
     private readonly OPERATOR_WINDOW_DIV_STATE_NAME: HTMLDivElement;
     private readonly STATE_MAP: { [stateName: string]: StateMachineState } = {};
+
+    private readonly ADD_COUNTDOWN_TIMERS_DISPLAY_TO_OPERATOR_WINDOW = true;
+
     /**
      * Keep track of countdown timer going out of the state. In other words
      * it is the countdown timer that starts when you enter the state.
      */
     private readonly COUNTDOWN_TIMER_LEAVING_STATE: { [stateName: string]: CountdownTimer } = {};
+
     private readonly ALL_STATES: StateMachineState[];
     private readonly TABLE_OF_ALL_COUNTDOWN_TIMERS: HTMLTableElement;
     private stateMachineViewer?: StateMachineViewer;
@@ -38,21 +42,21 @@ export class StateMachine {
 
         this.TABLE_OF_ALL_COUNTDOWN_TIMERS = querySelectorAndCheck(document, "table#state-machine-all-countdown-timers");
 
-        window.addEventListener("keydown", keyboardEvent => this.handleKeyboardEvent(keyboardEvent));
+        window.addEventListener("keydown", keyboardEvent => this.onKeyboardEvent(keyboardEvent));
 
-        this.ALL_STATES = getStatesForJeopardyGame(operator, settings);
+        this.ALL_STATES = getStatesForJeopardyGame(operator, presentation, settings);
         this.validateStates();
 
         // eslint-disable-next-line dot-notation
         this.presentState = this.STATE_MAP["idle"];
     }
 
-    public handleStateMachineViewerReady(stateMachineViewer: StateMachineViewer): void {
+    public addStateMachineViewer(stateMachineViewer: StateMachineViewer): void {
         stateMachineViewer.updateTrail(null, this.presentState.NAME);
         this.stateMachineViewer = stateMachineViewer;
     }
 
-    private handleKeyboardEvent(keyboardEvent: KeyboardEvent): void {
+    private onKeyboardEvent(keyboardEvent: KeyboardEvent): void {
         if (document.activeElement?.tagName === "INPUT") {
             // Don't do anything if the cursor is in a <input> field.
             return;
@@ -63,7 +67,7 @@ export class StateMachine {
             return;
         }
 
-        if (!this.OPERATOR.getIsPaused()) {
+        if (!this.OPERATOR.isPaused()) {
 
             // Search for the first transition with a keyboard transition for the key pressed.
             for (const transition of this.presentState.TRANSITIONS) {
@@ -356,31 +360,33 @@ export class StateMachine {
                             printWarning(state.NAME, transitionIndex,
                                 "multiple timeout transitions leaving a state is not supported (because the countdownTimerForState map uses the state name as the key)");
                         }
+                        stateHasTimeoutTransition = true;
 
                         const countdownTimer = this.createCountdownTimerForTransition(transition);
-
-                        // create a progress element in the operator page - probably only needed for debugging
                         this.COUNTDOWN_TIMER_LEAVING_STATE[state.NAME] = countdownTimer;
-                        const tr = document.createElement("tr");
 
-                        const tdStateLabel = document.createElement("td");
-                        tdStateLabel.innerHTML = `(${transition.BEHAVIOR}) ${state.NAME} &rarr; ${transition.DESTINATION} `;
-                        tr.appendChild(tdStateLabel);
+                        if (this.ADD_COUNTDOWN_TIMERS_DISPLAY_TO_OPERATOR_WINDOW) {
+                            // create a progress element in the operator page - probably only needed for debugging
+                            const tr = document.createElement("tr");
 
-                        const tdProgressElement = document.createElement("td");
-                        const progressElement = document.createElement("progress");
-                        progressElement.setAttribute("value", "0");
-                        countdownTimer.addProgressElement(progressElement);
-                        tdProgressElement.appendChild(progressElement);
-                        tr.appendChild(tdProgressElement);
+                            const tdStateLabel = document.createElement("td");
+                            tdStateLabel.innerHTML = `(${transition.BEHAVIOR}) ${state.NAME} &rarr; ${transition.DESTINATION} `;
+                            tr.appendChild(tdStateLabel);
 
-                        const tdRemainingTimeText = document.createElement("td");
-                        countdownTimer.addTextElement(tdRemainingTimeText);
-                        tr.appendChild(tdRemainingTimeText);
+                            const tdProgressElement = document.createElement("td");
+                            const progressElement = document.createElement("progress");
+                            progressElement.setAttribute("value", "0");
+                            countdownTimer.addProgressElement(progressElement);
+                            tdProgressElement.appendChild(progressElement);
+                            tr.appendChild(tdProgressElement);
+
+                            const tdRemainingTimeText = document.createElement("td");
+                            countdownTimer.addTextElement(tdRemainingTimeText);
+                            tr.appendChild(tdRemainingTimeText);
 
 
-                        this.TABLE_OF_ALL_COUNTDOWN_TIMERS.appendChild(tr);
-                        stateHasTimeoutTransition = true;
+                            this.TABLE_OF_ALL_COUNTDOWN_TIMERS.appendChild(tr);
+                        }
                         break;
                     }
                 }

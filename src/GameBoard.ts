@@ -1,5 +1,5 @@
-import { RoundType, ScrapedCategory, ScrapedRound } from "./gameTypes";
 import { Operator } from "./operator/Operator";
+import { RoundType, ScrapedRound } from "./typesForGame";
 
 /**
  * The <table>s in the operator window and presentation windows should have the exact same
@@ -20,37 +20,37 @@ export class GameBoard {
     private static readonly CELL_ATTRIBUTE_VALUE_NOT_REVEALED_YET = "no";
     private static readonly CELL_ATTRIBUTE_VALUE_ALREADY_REVEALED = "yes";
 
-    /** For Double Jeopardy, each number is doubled. */
     private static readonly CLUE_VALUES = [200, 400, 600, 800, 1000];
+    /** For Double Jeopardy, each dollar value is doubled. */
     private static readonly MULTIPLIER: { [roundType in RoundType]: number } = {
         "single": 1,
         "double": 2
     };
 
-    /** One for the operator window and one for the presentation window. */
+    /** There will be two tables, one for the operator window and one for the presentation window. */
     private readonly TABLES = new Set<HTMLTableElement>();
 
     private presentationTable: HTMLTableElement | null = null;
 
     /** 
      * The Map key is the table in either the operator window or the presentation window.
-     * The Map value is an array of table columns.
+     * The Map value is an array of table cells.
      * */
     private readonly CATEGORY_CELLS = new Map<HTMLTableElement, HTMLTableCellElement[]>();
 
     /**
      * The Map key is the table in either the operator window and presentation window.
      * The Map value is a 2D array:
-     *     The first array index is the <tr> index.
-     *     The second array index is the <td> index.
+     *     The first array index is the <tr> (row) index.
+     *     The second array index is the <td> (column) index.
      */
     private readonly CLUE_CELLS = new Map<HTMLTableElement, HTMLTableCellElement[][]>();
 
     private readonly OPERATOR;
 
-    private cluesRevealedInThisRound = NaN;
+    private cluesCountRevealedThisRound = NaN;
 
-    private round: ScrapedRound | null = null;
+    private gameRound: ScrapedRound | null = null;
 
     public constructor(operator: Operator) {
         this.OPERATOR = operator;
@@ -99,19 +99,19 @@ export class GameBoard {
 
                     if (window === "operator") {
                         td.addEventListener("click", () => {
-                            if (this.round) {
-                                const clue = this.round.CLUES[clueRowIndex][columnIndex];
-                                this.OPERATOR.gameBoardClueClicked(
+                            if (this.gameRound) {
+                                const clue = this.gameRound.CLUES[clueRowIndex][columnIndex];
+                                this.OPERATOR.onGameBoardClueClicked(
                                     clue,
-                                    this.round.CATEGORIES[columnIndex].NAME,
-                                    GameBoard.CLUE_VALUES[clueRowIndex] * GameBoard.MULTIPLIER[this.round.TYPE]
+                                    this.gameRound.CATEGORIES[columnIndex].NAME,
+                                    GameBoard.CLUE_VALUES[clueRowIndex] * GameBoard.MULTIPLIER[this.gameRound.TYPE]
                                 );
 
                                 this.TABLES.forEach(t => this.CLUE_CELLS.get(t)![clueRowIndex][columnIndex].setAttribute(
                                     GameBoard.CELL_ATTRIBUTE_NAME_IS_CLUE_REVEALED,
                                     GameBoard.CELL_ATTRIBUTE_VALUE_ALREADY_REVEALED));
 
-                                this.cluesRevealedInThisRound++;
+                                this.cluesCountRevealedThisRound++;
                             } else {
                                 console.warn("clicked on a cell but the game round has not been set");
                             }
@@ -151,15 +151,11 @@ export class GameBoard {
         this.CLUE_CELLS.set(table, clueCells);
     }
 
-    public setRound(round: ScrapedRound): void {
-        this.round = round;
-        this.setCategoryNames(round.CATEGORIES);
-        this.setClueValues(round.TYPE);
-        this.setAllCluesAvailable();
-        this.cluesRevealedInThisRound = 0;
-    }
+    public setGameRound(gameRound: ScrapedRound): void {
+        this.gameRound = gameRound;
 
-    private setCategoryNames(categories: ScrapedCategory[]): void {
+        // Set categories
+        const categories = gameRound.CATEGORIES;
         if (categories.length !== GameBoard.TABLE_COLUMN_COUNT) {
             throw new Error(`The array of categories has length ${categories.length}, expected exactly ${GameBoard.TABLE_COLUMN_COUNT}`);
         }
@@ -168,18 +164,16 @@ export class GameBoard {
                 arrayOfTds[i].innerText = categories[i].NAME;
             }
         });
-    }
 
-    private setClueValues(roundType: RoundType): void {
+        // Set values
         this.CLUE_CELLS.forEach(cellsForTable => {
             for (let rowIndex = 0; rowIndex < GameBoard.TABLE_CLUE_ROW_COUNT; rowIndex++) {
                 cellsForTable[rowIndex].forEach(td => td.innerText =
-                    `$${GameBoard.CLUE_VALUES[rowIndex] * GameBoard.MULTIPLIER[roundType]}`);
+                    `$${GameBoard.CLUE_VALUES[rowIndex] * GameBoard.MULTIPLIER[gameRound.TYPE]}`);
             }
         });
-    }
 
-    private setAllCluesAvailable(): void {
+        // Set all clues to available
         this.CLUE_CELLS.forEach(cellsForTable =>
             cellsForTable.forEach(cellsInRow =>
                 cellsInRow.forEach(cell =>
@@ -190,10 +184,12 @@ export class GameBoard {
                 )
             )
         );
+
+        this.cluesCountRevealedThisRound = 0;
     }
 
     public isAllCluesRevealedThisRound(): boolean {
-        return this.cluesRevealedInThisRound === GameBoard.TOTAL_CLUES_COUNT;
+        return this.cluesCountRevealedThisRound === GameBoard.TOTAL_CLUES_COUNT;
     }
 
 }

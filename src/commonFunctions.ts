@@ -12,18 +12,6 @@ export function querySelectorAndCheck<E extends Element = Element>(parent: Paren
     }
 }
 
-
-
-export function querySelectorSVGAndCheck<K extends keyof SVGElementTagNameMap>
-    (parent: ParentNode, query: K): SVGElementTagNameMap[K] {
-    const result = parent.querySelector<K>(query);
-    if (result) {
-        return result;
-    } else {
-        throw new Error(`${parent.nodeName}.querySelector("${query}") returned null`);
-    }
-}
-
 export function createSvgElement<K extends keyof SVGElementTagNameMap>(qualifiedName: K): SVGElementTagNameMap[K] {
     return document.createElementNS<K>("http://www.w3.org/2000/svg", qualifiedName);
 }

@@ -1,11 +1,17 @@
 import * as Chartist from "chartist";
 import { Team } from "./Team";
-import { createSvgElement, querySelectorSVGAndCheck } from "./commonFunctions";
+import { createSvgElement, querySelectorAndCheck } from "./commonFunctions";
 import { Operator } from "./operator/Operator";
 
-export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElement, teams: Team[]): void {
+/**
+ * Create a pie chart for each team which shows:
+ *  - how many questions they got right
+ *  - how many questions they got wrong or timed out after buzzing
+ *  - how many questions the did not buzz for
+ */
+export function createGameEndPieCharts(operator: Operator, divForPieCharts: HTMLDivElement, teams: Team[]): void {
 
-    const questionCount = operator.getQuestionCount();
+    const questionCount = operator.getQuestionCountForPieCharts();
 
     teams.forEach(team => {
         const containerForTeamPieChart = document.createElement("div");
@@ -87,21 +93,22 @@ export function createPieCharts(operator: Operator, divForPieCharts: HTMLDivElem
         const pieChart = new Chartist.PieChart(containerForTeamPieChart, chartData, chartOptions);
 
         /*
-        If any of the series is 100%, Chartist puts the label in the center
+        If any of the series is 100% of the pie chart, Chartist puts the label in the center
         of the chart, but we already put our own label for "Team #" in the center. In that 
         case we will manually move the Chartist label.
         */
         const needToManuallyMoveLabel = seriesToPotentiallyAdd.map(obj => obj.value).some(n => n === questionCount);
         if (needToManuallyMoveLabel) {
             pieChart.on("created", () => {
-                const svgCreatedByChartist = querySelectorSVGAndCheck(containerForTeamPieChart, "svg");
-                querySelectorSVGAndCheck(svgCreatedByChartist, "text").setAttribute("dy", "20");
+                const svgCreatedByChartist = querySelectorAndCheck<SVGSVGElement>(containerForTeamPieChart, "svg");
+                querySelectorAndCheck<SVGTextElement>(svgCreatedByChartist, "text").setAttribute("dy", "20");
             });
         }
     });
 }
 
-export function createLineChartOfMoneyOverTime(divForLineChart: HTMLDivElement, legendContainer: HTMLDivElement, teams: Team[]): void {
+/** Create a single line chart with a series for each team. */
+export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivElement, legendContainer: HTMLDivElement, teams: Team[]): void {
 
     interface XYPoint {
         x: number;
@@ -118,7 +125,7 @@ export function createLineChartOfMoneyOverTime(divForLineChart: HTMLDivElement, 
             (team, teamIndex) => ({
                 className: `team-${teamIndex + 1}`,
                 data: team.statistics.moneyAtEndOfEachRound.map(
-                    (money, moneyIndex) => ({ x: moneyIndex, y: money })
+                    (dollars, index) => ({ x: index, y: dollars })
                 )
             })
         );

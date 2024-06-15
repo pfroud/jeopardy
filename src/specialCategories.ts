@@ -4,8 +4,9 @@ This list is from:
 https://list.fandom.com/wiki/Jeopardy!_recurring_categories
 */
 export interface SpecialCategory {
+    /** Name to show to human operator and players */
     readonly DISPLAY_NAME: string;
-    readonly CATEGORY_TITLE_MATCHES: RegExp;
+    readonly CATEGORY_NAME_MATCHES: RegExp;
     readonly DESCRIPTION: string;
     readonly EXAMPLE?: {
         readonly CATEGORY: string;
@@ -17,7 +18,7 @@ export interface SpecialCategory {
 export function checkSpecialCategory(categoryName: string): SpecialCategory | null {
     // search for the first one which matches
     for (const specialCategory of specialCategories) {
-        if (specialCategory.CATEGORY_TITLE_MATCHES.test(categoryName)) {
+        if (specialCategory.CATEGORY_NAME_MATCHES.test(categoryName)) {
             return specialCategory;
         }
     }
@@ -27,7 +28,7 @@ export function checkSpecialCategory(categoryName: string): SpecialCategory | nu
 export const specialCategories: SpecialCategory[] = [
     {
         DISPLAY_NAME: "Crossword clue categories",
-        CATEGORY_TITLE_MATCHES: /CROSSWORD CLUE/i,
+        CATEGORY_NAME_MATCHES: /CROSSWORD CLUE/i,
         DESCRIPTION: "The category gives the first letter of the correct answer. The clue gives the number of letters in the correct answer.",
         EXAMPLE: {
             CATEGORY: "CROSSWORD CLUES \"H\"",
@@ -36,7 +37,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "\"File under\" categories",
-        CATEGORY_TITLE_MATCHES: /FILE UNDER/i,
+        CATEGORY_NAME_MATCHES: /FILE UNDER/i,
         DESCRIPTION: "The correct answer starts with the given letter.",
         EXAMPLE: {
             CATEGORY: "FILE UNDER \"Q\"",
@@ -45,7 +46,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "\"Words in\" categories",
-        CATEGORY_TITLE_MATCHES: /WORDS (THAT ARE)? IN/i,
+        CATEGORY_NAME_MATCHES: /WORDS (THAT ARE)? IN/i,
         DESCRIPTION: "The correct answer can be formed from the word in the category title. Not in order, do not need to use all of them.",
         EXAMPLE: {
             CATEGORY: "WORDS IN SEPTEMBER",
@@ -54,7 +55,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "Before-and-after categories",
-        CATEGORY_TITLE_MATCHES: /BEFORE (AND)|& AFTER/i,
+        CATEGORY_NAME_MATCHES: /BEFORE (AND)|& AFTER/i,
         DESCRIPTION: "The first and second parts of the correct answer share a word in common.",
         EXAMPLE: {
             CATEGORY: "BEFORE AND AFTER",
@@ -63,7 +64,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "J-portmanteau categories",
-        CATEGORY_TITLE_MATCHES: /JEOPORTMANTEAU/i,
+        CATEGORY_NAME_MATCHES: /JEOPORTMANTEAU/i,
         DESCRIPTION: "The correct answer is an artificial portmanteau.",
         EXAMPLE: {
             CATEGORY: "JEOPORTMANTEAU",
@@ -72,7 +73,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "\"Stupid answer\" categories",
-        CATEGORY_TITLE_MATCHES: /STUPID ANSWER/i,
+        CATEGORY_NAME_MATCHES: /STUPID ANSWER/i,
         DESCRIPTION: "The correct answer appears in the question.",
         EXAMPLE: {
             CATEGORY: "STUPID ANSWERS",
@@ -81,7 +82,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "Spelling categories",
-        CATEGORY_TITLE_MATCHES: /SPELLING/i,
+        CATEGORY_NAME_MATCHES: /SPELLING/i,
         DESCRIPTION: "You have to spell out the answer.",
         EXAMPLE: {
             CATEGORY: "GEOGRAPHIC SPELLING BEE",
@@ -90,7 +91,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "\"Common bonds\" categories",
-        CATEGORY_TITLE_MATCHES: /COMMON BOND/i,
+        CATEGORY_NAME_MATCHES: /COMMON BOND/i,
         DESCRIPTION: "The correct answer is the connection between the given items.",
         EXAMPLE: {
             CATEGORY: "COMMON BONDS",
@@ -99,7 +100,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "\"Name's the same\" categories",
-        CATEGORY_TITLE_MATCHES: /NAME.S THE SAME/i, //allow curly apostrophe
+        CATEGORY_NAME_MATCHES: /NAME.S THE SAME/i, //allow curly apostrophe
         DESCRIPTION: "The names share the first or last word.",
         EXAMPLE: {
             CATEGORY: "FIRST NAME'S THE SAME",
@@ -108,7 +109,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "\"Get your facts straight\" categories",
-        CATEGORY_TITLE_MATCHES: /GET YOUR FACTS STRAIGHT/i,
+        CATEGORY_NAME_MATCHES: /GET YOUR FACTS STRAIGHT/i,
         DESCRIPTION: "Clues in this category present information about two similar-sounding names, one of which is stated in the clue and the other of which is the correct response.",
         EXAMPLE: {
             CATEGORY: "GET YOUR FACTS STRAIGHT",
@@ -117,7 +118,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "\"Also a ...\" categories",
-        CATEGORY_TITLE_MATCHES: /ALSO A/i,
+        CATEGORY_NAME_MATCHES: /ALSO A/i,
         DESCRIPTION: "The correct response is also an unrelated thing.",
         EXAMPLE: {
             CATEGORY: "ALSO A SCHOOL WORD",
@@ -126,7 +127,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "\"Sounds like...\" categories",
-        CATEGORY_TITLE_MATCHES: /SOUNDS LIKE/i,
+        CATEGORY_NAME_MATCHES: /SOUNDS LIKE/i,
         DESCRIPTION: "The correct response sounds like an unrelated thing or person.",
         EXAMPLE: {
             CATEGORY: "SOUNDS LIKE A BOAT PART",
@@ -135,7 +136,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "Rhyme time",
-        CATEGORY_TITLE_MATCHES: /RHYME TIME/i,
+        CATEGORY_NAME_MATCHES: /RHYME TIME/i,
         DESCRIPTION: "The correct response contains two rhyming words.",
         EXAMPLE: {
             CATEGORY: "RHYME TIME",
@@ -144,7 +145,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "Quasi-related pairs",
-        CATEGORY_TITLE_MATCHES: /QUASI.RELATED PAIRS/i, //allow hyphen or any type of dash
+        CATEGORY_NAME_MATCHES: /QUASI.RELATED PAIRS/i, //allow hyphen or any type of dash
         DESCRIPTION: "The clue describes two unrelated people or things whose names are shared by a well-known pair.",
         EXAMPLE: {
             CATEGORY: "QUASI-RELATED PAIRS",
@@ -153,7 +154,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "Non-potent potables",
-        CATEGORY_TITLE_MATCHES: /NON-?POTENT POTABLES/i,
+        CATEGORY_NAME_MATCHES: /NON-?POTENT POTABLES/i,
         DESCRIPTION: "The correct answer is a non-alcoholic beverage.",
         EXAMPLE: {
             CATEGORY: "NONPOTENT POTABLES",
@@ -162,7 +163,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "Potent potables",
-        CATEGORY_TITLE_MATCHES: /POTENT POTABLE/i,
+        CATEGORY_NAME_MATCHES: /POTENT POTABLE/i,
         DESCRIPTION: "The correct answer is an alcoholic drink.",
         EXAMPLE: {
             CATEGORY: "POTENT POTABLES",
@@ -171,7 +172,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "Homophone categories",
-        CATEGORY_TITLE_MATCHES: /HOMOPHON/i, //match "homophone" or "homophonic"
+        CATEGORY_NAME_MATCHES: /HOMOPHON/i, //match "homophone" or "homophonic"
         DESCRIPTION: "Words that are pronounced the same but have different meaning. (May also have different spelling.)",
         EXAMPLE: {
             CATEGORY: "HOMOPHONES",
@@ -180,11 +181,11 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "Potpourri, hodgepodge, goulash, leftovers, mixed bag",
-        CATEGORY_TITLE_MATCHES: /(POTPOURRI)|(HODGEPODGE)|(GOULASH)|(LEFTOVERS)|(MIXED BAG)/i,
+        CATEGORY_NAME_MATCHES: /(POTPOURRI)|(HODGEPODGE)|(GOULASH)|(LEFTOVERS)|(MIXED BAG)/i,
         DESCRIPTION: "It can be anything."
     }, {
         DISPLAY_NAME: "Quotation-mark categories",
-        CATEGORY_TITLE_MATCHES: /"|“|”/,  // match quotation mark and curly quotes
+        CATEGORY_NAME_MATCHES: /"|“|”/,  // match quotation mark and curly quotes
         DESCRIPTION: "The correct answer contains the letter(s) in quotes.",
         EXAMPLE: {
             CATEGORY: "\"AFTER\" CLASS",

@@ -1,5 +1,5 @@
-import { Settings } from "../Settings";
 import { AudioManager } from "../AudioManager";
+import { Settings } from "../Settings";
 import { Operator } from "./Operator";
 
 document.addEventListener("DOMContentLoaded", function () {

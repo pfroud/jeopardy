@@ -1,8 +1,8 @@
 import { GameBoard } from "../GameBoard";
 import { querySelectorAndCheck } from "../commonFunctions";
-import { ScrapedClue, ScrapedRound } from "../gameTypes";
 import { Operator } from "../operator/Operator";
 import { SpecialCategory } from "../specialCategories";
+import { ScrapedClue, ScrapedRound } from "../typesForGame";
 
 export class Presentation {
     public readonly ALL_SLIDE_NAMES = new Set<string>();
@@ -92,7 +92,7 @@ export class Presentation {
         this.initSlides();
 
         this.showSlide("slide-jeopardy-logo");
-        operator.handlePresentationReady(this);
+        operator.onPresentationReady(this);
 
     }
 
@@ -149,7 +149,7 @@ export class Presentation {
         this.DIV_SLIDE_CLUE_ANSWER_TEXT.innerHTML = clue.ANSWER;
     }
 
-    public fitClueQuestionToScreen(): void {
+    public fitClueQuestionToWindow(): void {
         /*
          Remove font-size in the inline style property on the div,
          which may have been set by a previous call to this method.
@@ -175,43 +175,43 @@ export class Presentation {
         this.DIV_GAME_END_TEAM_RANKING_TABLE.innerHTML = htmlString;
     }
 
-    public getDivForPieCharts(): HTMLDivElement {
+    public getGameEndPieChartContainer(): HTMLDivElement {
         return this.DIV_GAME_END_PIE_CHART_CONTAINER;
     }
 
-    public getDivForLineChart(): HTMLDivElement {
+    public getGameEndLineChartContainer(): HTMLDivElement {
         return this.DIV_GAME_END_LINE_CHART_CONTAINER;
     }
 
-    public getDivForLineChartLegend(): HTMLDivElement {
+    public getGameEndLineChartLegendContainer(): HTMLDivElement {
         return this.DIV_GAME_END_LINE_CHART_LEGEND;
     }
 
-    public hideHeaderAndFooter(): void {
+    public headerAndFooterHide(): void {
         document.body.classList.add("hide-header-and-footer");
     }
 
-    public showHeaderAndFooter(): void {
+    public headerAndFooterShow(): void {
         document.body.classList.remove("hide-header-and-footer");
     }
 
-    public minimizeHeader(): void {
+    public headerMinimize(): void {
         document.body.classList.add("showing-game-board");
     }
 
-    public maximizeHeader(): void {
+    public headerMaximize(): void {
         document.body.classList.remove("showing-game-board");
     }
 
-    public clearFooter(): void {
+    public footerClear(): void {
         this.FOOTER.innerHTML = "";
     }
 
-    public appendTeamDivToFooter(divForTeam: HTMLDivElement): void {
+    public footerAppendTeamDiv(divForTeam: HTMLDivElement): void {
         this.FOOTER.append(divForTeam);
     }
 
-    public showSpecialCategoryPopup(specialCategory: SpecialCategory): void {
+    public specialCategoryPopupShow(specialCategory: SpecialCategory): void {
 
         this.SPECIAL_CATEGORY_TITLE.innerHTML = specialCategory.DISPLAY_NAME;
         this.SPECIAL_CATEGORY_DESCRIPTION.innerHTML = specialCategory.DESCRIPTION;
@@ -229,7 +229,7 @@ export class Presentation {
         this.DIV_SPECIAL_CATEGORY_POPUP.classList.add("visible-centered");
     }
 
-    public hideSpecialCategoryPopup(): void {
+    public specialCategoryPopupHide(): void {
         this.DIV_BACKDROP_FOR_POPUPS.className = "not-blurred";
         this.DIV_SPECIAL_CATEGORY_POPUP.classList.remove("visible-centered");
         this.DIV_SPECIAL_CATEGORY_POPUP.classList.add("offscreen-left");
@@ -243,7 +243,7 @@ export class Presentation {
         return this.TABLE_GAME_BOARD;
     }
 
-    public setCategoryCarouselRound(gameRound: ScrapedRound): void {
+    public setCategoryCarouselGameRound(gameRound: ScrapedRound): void {
         const categories = gameRound.CATEGORIES;
         if (categories.length !== GameBoard.TABLE_COLUMN_COUNT) {
             throw new Error(`categories length is ${categories.length}, expected exactly ${GameBoard.TABLE_COLUMN_COUNT}`);

@@ -5,12 +5,12 @@ export class CountdownTimer {
     public readonly MAX_DURATION_MILLISEC: number; //the value passed into the constructor
     public onStart?: () => void;
     public onPause?: () => void;
+    /** Called when the timer is un-paused */
     public onResume?: () => void;
     public onReset?: () => void;
     public onFinished?: () => void;
     public onTick?: () => void;
 
-    private readonly DEBUG = false;
     private static readonly DESIRED_FRAME_RATE_HZ = 30;
     private readonly UPDATE_INTERVAL_MILLISEC = 1000 / CountdownTimer.DESIRED_FRAME_RATE_HZ;
     private readonly AUDIO_MANAGER?: AudioManager | undefined;
@@ -18,11 +18,12 @@ export class CountdownTimer {
     private readonly PROGRESS_ELEMENTS = new Set<HTMLProgressElement>();
     private readonly DOTS_TABLES = new Set<HTMLTableElement>();
     private remainingMillisec: number;
-    private previousDotsDeactivated = NaN; //only used for dots elements
     private timestampOfLastInterval = NaN;
-    private intervalID = NaN; //value returned by window.setInterval(), used to cancel it later
-    private isStarted = false;
-    private isFinished = false;
+    private previousDotsDeactivated = NaN; //only used for dots elements
+    /** Value returned by window.setInterval(), used to cancel interval later */
+    private intervalID = NaN;
+    private isStarted_ = false; // add underscore to property name so the method can be called isStarted
+    private isFinished_ = false; // add underscore to property name so the method can be called isFinished
     private isPaused = false;
 
     public constructor(durationMillisec: number, audioManager?: AudioManager) {
@@ -43,13 +44,9 @@ export class CountdownTimer {
         this.MAX_DURATION_MILLISEC = durationMillisec;
 
         this.remainingMillisec = durationMillisec;
-        if (this.DEBUG) {
-            console.log(`CountdownTimer constructed with duration ${durationMillisec.toLocaleString()} millisec.`);
-        }
     }
 
     public reset(): void {
-
         this.remainingMillisec = this.MAX_DURATION_MILLISEC;
 
         this.setPaused(false);
@@ -63,8 +60,8 @@ export class CountdownTimer {
         this.intervalID = NaN;
         this.previousDotsDeactivated = NaN;
 
-        this.isStarted = false;
-        this.isFinished = false;
+        this.isStarted_ = false;
+        this.isFinished_ = false;
 
         this.PROGRESS_ELEMENTS.forEach(progressElement => {
             progressElement.setAttribute("max", String(this.MAX_DURATION_MILLISEC));
@@ -93,7 +90,7 @@ export class CountdownTimer {
     }
 
     public startOrResume(): void {
-        if (this.isStarted) {
+        if (this.isStarted_) {
             this.resume();
         } else {
             this.start();
@@ -101,7 +98,7 @@ export class CountdownTimer {
     }
 
     public pause(): void {
-        if (this.isStarted && !this.isFinished && !this.isPaused) {
+        if (this.isStarted_ && !this.isFinished_ && !this.isPaused) {
             clearInterval(this.intervalID);
             this.isPaused = true;
             this.guiUpdatePaused();
@@ -115,34 +112,21 @@ export class CountdownTimer {
 
             this.onPause?.();
 
-            if (this.DEBUG) {
-                console.log(`CountdownTimer: paused. elapsed = ${String(elapsedMillisecSinceLastInterval).padStart(4)}; remaining = ${String(this.remainingMillisec).padStart(4)}. `);
-            }
-        } else {
-            if (this.DEBUG) {
-                console.log("CountdownTimer: called pause but (not started) or (already finished) or (already paused).");
-            }
         }
     }
 
+    /** Un-pause */
     public resume(): void {
-        if (this.isStarted && !this.isFinished && this.isPaused) {
-            if (this.DEBUG) {
-                console.log("CountdownTimer: resumed.");
-            }
+        if (this.isStarted_ && !this.isFinished_ && this.isPaused) {
 
             this.isPaused = false;
             this.guiUpdatePaused();
             this.timestampOfLastInterval = Date.now();
 
-            this.intervalID = window.setInterval(this.handleInterval.bind(this), this.UPDATE_INTERVAL_MILLISEC);
+            this.intervalID = window.setInterval(this.onInterval.bind(this), this.UPDATE_INTERVAL_MILLISEC);
 
 
             this.onResume?.();
-        } else {
-            if (this.DEBUG) {
-                console.log("CountdownTimer: called resume but (not started) or (already finished) or (not paused).");
-            }
         }
     }
 
@@ -153,13 +137,10 @@ export class CountdownTimer {
     }
 
     public start(): void {
-        if (!this.isStarted && !this.isFinished) {
-            if (this.DEBUG) {
-                console.log("CountdownTimer: started.");
-            }
-            this.isStarted = true;
+        if (!this.isStarted_ && !this.isFinished_) {
+            this.isStarted_ = true;
             this.timestampOfLastInterval = Date.now();
-            this.intervalID = window.setInterval(this.handleInterval.bind(this), this.UPDATE_INTERVAL_MILLISEC);
+            this.intervalID = window.setInterval(this.onInterval.bind(this), this.UPDATE_INTERVAL_MILLISEC);
             this.onStart?.();
 
             ////////////////////// Update GUI //////////////////////////////////////////////////////////////
@@ -176,46 +157,22 @@ export class CountdownTimer {
                 tds.forEach(td => td.classList.add("active"));
             });
             this.TEXT_ELEMENTS.forEach(divElement => divElement.innerHTML = (this.MAX_DURATION_MILLISEC / 1000).toFixed(1));
-            /////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-        } else {
-            if (this.DEBUG) {
-                console.log("CountdownTimer: called start() but already started or already finished.");
-            }
         }
     }
 
-    private handleInterval(): void {
+    private onInterval(): void {
         const presentTimestamp = Date.now(); //unix epoch
         const elapsedMillisecSinceLastInterval = presentTimestamp - this.timestampOfLastInterval;
         this.remainingMillisec -= elapsedMillisecSinceLastInterval;
         this.timestampOfLastInterval = presentTimestamp;
 
-        let logLine = "";
-        if (this.DEBUG) {
-            logLine = `CountdownTimer: handleInterval. elapsed = ${String(elapsedMillisecSinceLastInterval).padStart(4)}; remaining = ${String(this.remainingMillisec).padStart(4)}. `;
-        }
-
         this.guiUpdateForInterval();
 
         if (this.remainingMillisec <= 0) {
-            if (this.DEBUG) {
-                logLine += "Finishing.";
-            }
             this.finish();
-        } else {
-            if (this.DEBUG) {
-                logLine += "Letting the interval happen again.";
-            }
-        }
-
-        if (this.DEBUG) {
-            console.log(logLine);
         }
 
         this.onTick?.();
-
     }
 
     private guiUpdateForInterval(): void {
@@ -237,7 +194,7 @@ export class CountdownTimer {
             /*
             In the TV show, there are nine light-up rectangles below each contestant which shows
             how much time is left to answer a question.
-            Here's a video from the official Jeopardy Youtube channel which shows how it works:
+            Here's a video from the official Jeopardy Youtube channel where you can see how it works:
             https://www.youtube.com/watch?v=cGSDLZ5wqy8&t=10s
             
             For some reason I call the rectangles "dots."
@@ -300,10 +257,7 @@ export class CountdownTimer {
     }
 
     private finish(): void {
-        if (this.DEBUG) {
-            console.log("CountdownTimer: finished.");
-        }
-        this.isFinished = true;
+        this.isFinished_ = true;
         this.TEXT_ELEMENTS.forEach(elem => elem.innerHTML = "done");
         this.DOTS_TABLES.forEach(table => table.querySelectorAll("td").forEach(td => td.classList.remove("active")));
         clearInterval(this.intervalID);
@@ -335,12 +289,12 @@ export class CountdownTimer {
         return this.remainingMillisec;
     }
 
-    public getIsStarted(): boolean {
-        return this.isStarted;
+    public isStarted(): boolean {
+        return this.isStarted_;
     }
 
-    public getIsFinished(): boolean {
-        return this.isFinished;
+    public isFinished(): boolean {
+        return this.isFinished_;
     }
 
     public setRemainingMillisec(remainingMillisec: number): void {
@@ -358,7 +312,7 @@ export class CountdownTimer {
      * reset, I want the green bar to go away.
      */
     public showProgressBarFinished(): void {
-        if (!this.isFinished) {
+        if (!this.isFinished_) {
             this.PROGRESS_ELEMENTS.forEach(progress => progress.setAttribute("value", "0"));
             this.TEXT_ELEMENTS.forEach(textElem => textElem.innerHTML = "");
         }

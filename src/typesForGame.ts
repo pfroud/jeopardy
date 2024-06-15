@@ -27,11 +27,18 @@ export type ScrapedCategory = {
     readonly COMMENTS?: string;
 }
 
+/**
+ * A scraped clue does not have the value or category because those both come from array indexes.
+ */
 export type ScrapedClue = {
     readonly QUESTION: string;
     readonly ANSWER: string;
 }
 
+/**
+ * A full clue is created only when the human operator clicks on a cell in
+ * the game board table.
+ */
 export interface FullClue extends ScrapedClue {
     readonly VALUE: number;
     readonly CATEGORY_NAME: string;
