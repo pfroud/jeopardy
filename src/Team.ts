@@ -278,7 +278,7 @@ export class Team {
         progress.style.display = "none";
         divTeam.append(progress);
 
-        this.PRESENTATION.footerAppendTeamDiv(divTeam);
+        this.PRESENTATION.footerAppendTeamDiv(this.TEAM_INDEX, divTeam);
 
     }
 

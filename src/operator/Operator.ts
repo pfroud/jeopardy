@@ -76,6 +76,7 @@ export class Operator {
     private questionCountForPieCharts = 0;
     private gameRoundIndex = -1;
     private categoryCarouselIndex = -1;
+    private teamIndexToPickClue = -1;
 
     public constructor(audioManager: AudioManager, settings: Settings) {
         this.AUDIO_MANAGER = audioManager;
@@ -514,12 +515,24 @@ export class Operator {
         this.GAME_BOARD.show();
         this.presentation?.headerMinimize();
         this.GAME_ROUND_TIMER.pause();
+
+        this.DIV_CLUE_WRAPPER.style.display = "none";
+
+        if (this.teamIndexToPickClue === this.teamCount - 1) {
+            this.teamIndexToPickClue = 0;
+        } else {
+            this.teamIndexToPickClue++;
+        }
+
+        this.presentation?.teamChoosingClueSet(this.teamIndexToPickClue);
     }
 
     public gameBoardHide(): void {
         this.GAME_BOARD.hide();
         this.presentation?.headerMaximize();
         this.GAME_ROUND_TIMER.resume();
+
+        this.presentation?.teamChoosingClueClear(this.teamIndexToPickClue);
     }
 
     /**
@@ -991,8 +1004,6 @@ export class Operator {
         this.GAME_BOARD.setGameRound(gameRound);
 
         this.GAME_ROUND_TIMER.reset();
-
-        this.DIV_CLUE_WRAPPER.style.display = "none";
 
         this.DIV_INSTRUCTIONS.innerText = `Get ready for round ${this.gameRoundIndex + 1}, press space to start the category carousel`;
         this.presentation?.setRoundStartText(`Get ready for round ${this.gameRoundIndex + 1}`);

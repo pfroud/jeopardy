@@ -44,6 +44,8 @@ export class Presentation {
     private readonly CATEGORY_CAROUSEL_TABLE: HTMLTableElement;
     private readonly CATEGORY_CAROUSEL_CELLS: HTMLTableCellElement[];
 
+    private readonly TEAM_DIVS_IN_FOOTER: HTMLDivElement[] = [];
+
     public constructor(operator: Operator) {
         this.MAIN = querySelectorAndCheck(document, "main");
         this.HEADER = querySelectorAndCheck(document, "header");
@@ -207,8 +209,9 @@ export class Presentation {
         this.FOOTER.innerHTML = "";
     }
 
-    public footerAppendTeamDiv(divForTeam: HTMLDivElement): void {
+    public footerAppendTeamDiv(teamIndex: number, divForTeam: HTMLDivElement): void {
         this.FOOTER.append(divForTeam);
+        this.TEAM_DIVS_IN_FOOTER[teamIndex] = divForTeam;
     }
 
     public specialCategoryPopupShow(specialCategory: SpecialCategory): void {
@@ -259,5 +262,13 @@ export class Presentation {
 
     public setRoundStartText(message: string): void {
         this.DIV_SLIDE_ROUND_START.innerText = message;
+    }
+
+    public teamChoosingClueSet(teamIndex: number): void {
+        this.TEAM_DIVS_IN_FOOTER[teamIndex].classList.add("choose-clue");
+    }
+
+    public teamChoosingClueClear(teamIndex: number): void {
+        this.TEAM_DIVS_IN_FOOTER[teamIndex].classList.remove("choose-clue");
     }
 }

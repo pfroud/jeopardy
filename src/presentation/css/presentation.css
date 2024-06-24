@@ -200,6 +200,11 @@ footer {
             }
         }
 
+        &.choose-clue {
+            border: 2px solid white;
+            background-color: purple;
+        }
+
         div.team-money {
             font-family: swiss911;
             font-size: 40px;
