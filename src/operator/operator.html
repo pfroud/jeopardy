@@ -101,9 +101,10 @@
 
     <main>
 
-        <p>
+        <div id="game-board-wrapper" style="display:none">
+            <!-- HTML comment to disable VS Code formatter is set by "html.format.unformattedContentDelimiter" in .vscode/settings.json -->
             <!-- formatter-toggle -->
-            <table id="game-board" style="display:none">
+            <table id="game-board">
                 <tr id="categories"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
                 <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
                 <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
@@ -112,7 +113,7 @@
                 <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
             </table>
             <!-- formatter-toggle -->
-        </p>
+        </div>
 
         <input id="tab-play" type="radio" name="tabs" checked>
         <label for="tab-play">Play</label>

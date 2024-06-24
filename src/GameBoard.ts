@@ -27,19 +27,14 @@ export class GameBoard {
         "double": 2
     };
 
-    /** There will be two tables, one for the operator window and one for the presentation window. */
-    private readonly TABLES = new Set<HTMLTableElement>();
-
-    private presentationTable: HTMLTableElement | null = null;
-
     /** 
-     * The Map key is the table in either the operator window or the presentation window.
      * The Map value is an array of table cells.
      * */
-    private readonly CATEGORY_CELLS = new Map<HTMLTableElement, HTMLTableCellElement[]>();
+    private readonly CATEGORY_CELLS = new Set<HTMLTableCellElement[]>();
 
     /**
      * The Map key is the table in either the operator window and presentation window.
+     * The 2D array is structured like an HTML table.
      * The Map value is a 2D array:
      *     The first array index is the <tr> (row) index.
      *     The second array index is the <td> (column) index.
@@ -52,103 +47,87 @@ export class GameBoard {
 
     private gameRound: ScrapedRound | null = null;
 
-    public constructor(operator: Operator) {
+    public constructor(operator: Operator, tableInOperatorWindow: HTMLTableElement, tableInPresentationWindow: HTMLTableElement) {
         this.OPERATOR = operator;
-    }
 
-    public show(): void {
-        this.TABLES.forEach(table => table.style.display = "table");
-    }
+        [tableInOperatorWindow, tableInPresentationWindow].forEach(table => {
 
-    public hide(): void {
-        this.TABLES.forEach(table => table.style.display = "none");
-    }
-
-    public addTable(table: HTMLTableElement, window: "operator" | "presentation"): void {
-        this.TABLES.add(table);
-
-        if (window === "presentation") {
-            this.presentationTable = table;
-        }
-
-        const allRows = table.querySelectorAll("tr");
-        if (allRows.length !== GameBoard.TABLE_ROW_COUNT) {
-            throw new Error(`The table has ${allRows.length} <tr> element(s), expected exactly ${GameBoard.TABLE_ROW_COUNT}`);
-        }
-
-        const clueCells: HTMLTableCellElement[][] = [];
-
-        allRows.forEach((tr, trIndex) => {
-            const tds = tr.querySelectorAll("td");
-            if (tds.length !== GameBoard.TABLE_COLUMN_COUNT) {
-                throw new Error(`The table row at index ${trIndex} has ${tds.length} <td> element(s), expected exactly ${GameBoard.TABLE_COLUMN_COUNT}`);
+            const allRows = table.querySelectorAll("tr");
+            if (allRows.length !== GameBoard.TABLE_ROW_COUNT) {
+                throw new Error(`The table has ${allRows.length} <tr> element(s), expected exactly ${GameBoard.TABLE_ROW_COUNT}`);
             }
-            if (trIndex === 0) {
-                // The first row is the categories.
-                this.CATEGORY_CELLS.set(table, Array.from(tds));
 
-            } else {
-                /*
-                The first row in the table is categories, so the second row
-                in the table is the first row of clues.
-                */
-                const clueRowIndex = trIndex - 1;
+            /*
+            This 2D array is structured like an HTML table.
+            The first array index is the <tr> (row) index.
+            The second array index is the <td> (column) index.
+            */
+            const clueCells: HTMLTableCellElement[][] = [];
 
-                clueCells[clueRowIndex] = Array.from(tds);
-                tds.forEach((td, columnIndex) => {
+            allRows.forEach((tr, trIndex) => {
+                const tds = tr.querySelectorAll("td");
+                if (tds.length !== GameBoard.TABLE_COLUMN_COUNT) {
+                    throw new Error(`The table row at index ${trIndex} has ${tds.length} <td> element(s), expected exactly ${GameBoard.TABLE_COLUMN_COUNT}`);
+                }
 
-                    if (window === "operator") {
-                        td.addEventListener("click", () => {
-                            if (this.gameRound) {
-                                const clue = this.gameRound.CLUES[clueRowIndex][columnIndex];
-                                this.OPERATOR.onGameBoardClueClicked(
-                                    clue,
-                                    this.gameRound.CATEGORIES[columnIndex].NAME,
-                                    GameBoard.CLUE_VALUES[clueRowIndex] * GameBoard.MULTIPLIER[this.gameRound.TYPE]
-                                );
+                if (trIndex === 0) {
+                    // The first row is the categories.
+                    this.CATEGORY_CELLS.add(Array.from(tds));
+                } else {
+                    /*
+                    The first row in the table is categories, so the second row
+                    in the table is the first row of clues.
+                    */
+                    const clueRowIndex = trIndex - 1;
+                    clueCells[clueRowIndex] = Array.from(tds);
+                }
+            });
+            this.CLUE_CELLS.set(table, clueCells);
 
-                                this.TABLES.forEach(t => this.CLUE_CELLS.get(t)![clueRowIndex][columnIndex].setAttribute(
-                                    GameBoard.CELL_ATTRIBUTE_NAME_IS_CLUE_REVEALED,
-                                    GameBoard.CELL_ATTRIBUTE_VALUE_ALREADY_REVEALED));
+        });
 
-                                this.cluesCountRevealedThisRound++;
-                            } else {
-                                console.warn("clicked on a cell but the game round has not been set");
-                            }
-                        });
+        // Add mouse listeners to the table in the operator window.
+        this.CLUE_CELLS.get(tableInOperatorWindow)!.forEach((cellsInRow, clueRowIndex) =>
+            cellsInRow.forEach((td, columnIndex) => {
 
-                        td.addEventListener("mouseenter", () => {
-                            if (this.presentationTable) {
-                                this.CLUE_CELLS.get(this.presentationTable)![clueRowIndex][columnIndex].classList.add("hover-in-operator-window");
-                            }
-                        });
+                td.addEventListener("click", () => {
+                    if (this.gameRound) {
+                        const clue = this.gameRound.CLUES[clueRowIndex][columnIndex];
+                        const categoryName = this.gameRound.CATEGORIES[columnIndex].NAME;
+                        const value = GameBoard.CLUE_VALUES[clueRowIndex] * GameBoard.MULTIPLIER[this.gameRound.TYPE];
+                        this.OPERATOR.onGameBoardClueClicked(clue, categoryName, value);
 
-                        td.addEventListener("mouseleave", () => {
-                            if (this.presentationTable) {
-                                this.CLUE_CELLS.get(this.presentationTable)![clueRowIndex][columnIndex].classList.remove("hover-in-operator-window");
-                                this.CLUE_CELLS.get(this.presentationTable)![clueRowIndex][columnIndex].classList.remove("active-in-operator-window");
-                            }
-                        });
+                        // Hide the cell so it cannot be clicked on again.
+                        this.CLUE_CELLS.forEach(twoDArray => twoDArray[clueRowIndex][columnIndex].setAttribute(
+                            GameBoard.CELL_ATTRIBUTE_NAME_IS_CLUE_REVEALED,
+                            GameBoard.CELL_ATTRIBUTE_VALUE_ALREADY_REVEALED));
 
-                        td.addEventListener("mousedown", () => {
-                            if (this.presentationTable) {
-                                this.CLUE_CELLS.get(this.presentationTable)![clueRowIndex][columnIndex].classList.add("active-in-operator-window");
-                            }
-                        });
-
-                        td.addEventListener("mouseup", () => {
-                            if (this.presentationTable) {
-                                this.CLUE_CELLS.get(this.presentationTable)![clueRowIndex][columnIndex].classList.remove("active-in-operator-window");
-                            }
-                        });
-
+                        this.cluesCountRevealedThisRound++;
+                    } else {
+                        console.warn("clicked on a cell but the game round has not been set");
                     }
-
                 });
 
-            }
-        });
-        this.CLUE_CELLS.set(table, clueCells);
+                td.addEventListener("mouseenter", () => {
+                    this.CLUE_CELLS.get(tableInPresentationWindow)![clueRowIndex][columnIndex].classList.add("hover-in-operator-window");
+                });
+
+                td.addEventListener("mousedown", () => {
+                    this.CLUE_CELLS.get(tableInPresentationWindow)![clueRowIndex][columnIndex].classList.add("active-in-operator-window");
+                });
+
+                td.addEventListener("mouseleave", () => {
+                    this.CLUE_CELLS.get(tableInPresentationWindow)![clueRowIndex][columnIndex].classList.remove("hover-in-operator-window");
+                    this.CLUE_CELLS.get(tableInPresentationWindow)![clueRowIndex][columnIndex].classList.remove("active-in-operator-window");
+                });
+
+                td.addEventListener("mouseup", () => {
+                    this.CLUE_CELLS.get(tableInPresentationWindow)![clueRowIndex][columnIndex].classList.remove("active-in-operator-window");
+                });
+
+            }));
+
+
     }
 
     public setGameRound(gameRound: ScrapedRound): void {

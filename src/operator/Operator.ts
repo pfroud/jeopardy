@@ -5,11 +5,11 @@ import { GameBoard } from "../GameBoard";
 import { Settings } from "../Settings";
 import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
 import { querySelectorAndCheck } from "../commonFunctions";
+import { createGameEndLineChartOfMoneyOverTime, createGameEndPieCharts } from "../gameEndStatisticsCharts";
 import { Presentation } from "../presentation/Presentation";
 import { SCRAPED_GAME } from "../scrapedGame";
 import { SpecialCategory, checkSpecialCategory } from "../specialCategories";
 import { StateMachine } from "../stateMachine/StateMachine";
-import { createGameEndLineChartOfMoneyOverTime, createGameEndPieCharts } from "../gameEndStatisticsCharts";
 import { FullClue, ScrapedClue } from "../typesForGame";
 
 interface SavedGameInLocalStorage {
@@ -56,12 +56,13 @@ export class Operator {
     private readonly DIV_PIE_CHARTS: HTMLDivElement;
     private readonly DIV_LINE_CHART: HTMLDivElement;
     private readonly DIV_LINE_CHART_LEGEND: HTMLDivElement;
+    private readonly DIV_GAME_BOARD_WRAPPER: HTMLDivElement;
 
-    private readonly GAME_BOARD: GameBoard;
     private readonly GAME_ROUND_TIMER: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
     private readonly KEYBOARD_KEYS_FOR_TEAM_NUMBERS = new Set<string>();
     private presentation?: Presentation;
     private stateMachine?: StateMachine;
+    private gameBoard?: GameBoard;
 
     private teamArray?: Team[];
     private teamNameInputElements?: HTMLInputElement[];
@@ -109,6 +110,7 @@ export class Operator {
         this.DIV_PIE_CHARTS = querySelectorAndCheck(document, "div#pie-charts");
         this.DIV_LINE_CHART = querySelectorAndCheck(document, "div#line-chart");
         this.DIV_LINE_CHART_LEGEND = querySelectorAndCheck(document, "div#line-chart-legend");
+        this.DIV_GAME_BOARD_WRAPPER = querySelectorAndCheck(document, "div#game-board-wrapper");
 
         this.initKeyboardListenerToPause();
         this.initMouseListeners();
@@ -118,8 +120,7 @@ export class Operator {
         this.GAME_ROUND_TIMER.addProgressElement(querySelectorAndCheck(document, "div#game-round-timer progress"));
         this.GAME_ROUND_TIMER.addTextElement(querySelectorAndCheck(document, "div#game-round-timer div.remaining-time-text"));
 
-        this.GAME_BOARD = new GameBoard(this);
-        this.GAME_BOARD.addTable(querySelectorAndCheck<HTMLTableElement>(document, "table#game-board"), "operator");
+
 
         window.open("../presentation/presentation.html", "windowPresentation");
 
@@ -139,7 +140,10 @@ export class Operator {
         this.presentation = presentationInstanceFromOtherWindow;
         this.initTeams();
 
-        this.GAME_BOARD.addTable(this.presentation.getGameBoardTable(), "presentation");
+        this.gameBoard = new GameBoard(this,
+            querySelectorAndCheck<HTMLTableElement>(document, "table#game-board"),
+            this.presentation.getGameBoardTable()
+        );
 
         this.initKeyboardListenersForBuzzerFootswitchIcons();
 
@@ -439,7 +443,11 @@ export class Operator {
     }
 
     public isGameRoundOver(): boolean {
-        return this.GAME_ROUND_TIMER.isFinished() || this.GAME_BOARD.isAllCluesRevealedThisRound();
+        if (this.gameBoard) {
+            return this.GAME_ROUND_TIMER.isFinished() || this.gameBoard?.isAllCluesRevealedThisRound();
+        } else {
+            throw new Error("called isGameRoundOver() when the gameBoard has not been set");
+        }
     }
 
     /**
@@ -512,9 +520,8 @@ export class Operator {
      * The game board is the table of categories and dollar values.
      */
     public gameBoardShow(): void {
-        this.GAME_BOARD.show();
+        this.DIV_GAME_BOARD_WRAPPER.style.display = ""; //show it by removing display=none
         this.presentation?.headerMinimize();
-        this.GAME_ROUND_TIMER.pause();
 
         this.DIV_CLUE_WRAPPER.style.display = "none";
 
@@ -528,9 +535,8 @@ export class Operator {
     }
 
     public gameBoardHide(): void {
-        this.GAME_BOARD.hide();
+        this.DIV_GAME_BOARD_WRAPPER.style.display = "none";
         this.presentation?.headerMaximize();
-        this.GAME_ROUND_TIMER.resume();
 
         this.presentation?.teamChoosingClueClear(this.teamIndexToPickClue);
     }
@@ -1001,7 +1007,7 @@ export class Operator {
     public gameRoundStartNext(): void {
         this.gameRoundIndex++;
         const gameRound = SCRAPED_GAME.ROUNDS[this.gameRoundIndex];
-        this.GAME_BOARD.setGameRound(gameRound);
+        this.gameBoard?.setGameRound(gameRound);
 
         this.GAME_ROUND_TIMER.reset();
 

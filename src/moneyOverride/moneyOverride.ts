@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
+    // Automatically close the money-override window when the operator window closes.
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     window.opener.addEventListener("unload", () => close());
 
