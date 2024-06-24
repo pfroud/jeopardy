@@ -28,7 +28,7 @@ export class Settings {
     // Stop the game when a team reaches this much money
     public teamMoneyWhenGameShouldEnd = 10_000;
 
-    public gameTimeLimitMillisec = 10 * 60 * 1000;
+    public gameRoundTimeLimitMillisec = 10 * 60 * 1000;
 
     private readonly GUI_INPUT: {
         readonly DISPLAY_DURATION_CATEGORY: HTMLInputElement;

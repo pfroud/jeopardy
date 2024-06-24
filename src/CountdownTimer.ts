@@ -72,7 +72,7 @@ export class CountdownTimer {
             tableElement.querySelectorAll("td").forEach(td => td.classList.remove("active"))
         );
 
-        this.TEXT_ELEMENTS.forEach(divElement => divElement.innerHTML = "Reset");
+        this.guiUpdateForInterval();
 
         this.onReset?.();
     }
@@ -149,6 +149,7 @@ export class CountdownTimer {
                 progressElement.setAttribute("max", String(this.MAX_DURATION_MILLISEC));
                 progressElement.setAttribute("value", String(this.MAX_DURATION_MILLISEC));
             });
+
             this.DOTS_TABLES.forEach(tableElement => {
                 const tds = tableElement.querySelectorAll("td");
                 if (tds.length !== 9) {
@@ -156,7 +157,8 @@ export class CountdownTimer {
                 }
                 tds.forEach(td => td.classList.add("active"));
             });
-            this.TEXT_ELEMENTS.forEach(divElement => divElement.innerHTML = (this.MAX_DURATION_MILLISEC / 1000).toFixed(1));
+
+            this.guiUpdateForInterval();
         }
     }
 
@@ -258,7 +260,7 @@ export class CountdownTimer {
 
     private finish(): void {
         this.isFinished_ = true;
-        this.TEXT_ELEMENTS.forEach(elem => elem.innerHTML = "done");
+        this.TEXT_ELEMENTS.forEach(elem => elem.innerHTML = "Done");
         this.DOTS_TABLES.forEach(table => table.querySelectorAll("td").forEach(td => td.classList.remove("active")));
         clearInterval(this.intervalID);
 

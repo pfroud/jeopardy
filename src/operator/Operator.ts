@@ -13,7 +13,7 @@ import { createGameEndLineChartOfMoneyOverTime, createGameEndPieCharts } from ".
 import { FullClue, ScrapedClue } from "../typesForGame";
 
 interface SavedGameInLocalStorage {
-    readonly GAME_TIMER_REMAINING_MILLISEC: number,
+    readonly GAME_ROUND_TIMER_REMAINING_MILLISEC: number,
     readonly TEAMS: readonly TeamSavedInLocalStorage[]
     // todo save the settings
 }
@@ -58,7 +58,7 @@ export class Operator {
     private readonly DIV_LINE_CHART_LEGEND: HTMLDivElement;
 
     private readonly GAME_BOARD: GameBoard;
-    private readonly GAME_TIMER: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
+    private readonly GAME_ROUND_TIMER: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
     private readonly KEYBOARD_KEYS_FOR_TEAM_NUMBERS = new Set<string>();
     private presentation?: Presentation;
     private stateMachine?: StateMachine;
@@ -113,9 +113,9 @@ export class Operator {
         this.initMouseListeners();
         this.lookForSavedGame();
 
-        this.GAME_TIMER = new CountdownTimer(this.SETTINGS.gameTimeLimitMillisec);
-        this.GAME_TIMER.addProgressElement(querySelectorAndCheck(document, "div#game-timer progress"));
-        this.GAME_TIMER.addTextElement(querySelectorAndCheck(document, "div#game-timer div.remaining-time-text"));
+        this.GAME_ROUND_TIMER = new CountdownTimer(this.SETTINGS.gameRoundTimeLimitMillisec);
+        this.GAME_ROUND_TIMER.addProgressElement(querySelectorAndCheck(document, "div#game-round-timer progress"));
+        this.GAME_ROUND_TIMER.addTextElement(querySelectorAndCheck(document, "div#game-round-timer div.remaining-time-text"));
 
         this.GAME_BOARD = new GameBoard(this);
         this.GAME_BOARD.addTable(querySelectorAndCheck<HTMLTableElement>(document, "table#game-board"), "operator");
@@ -142,7 +142,7 @@ export class Operator {
 
         this.initKeyboardListenersForBuzzerFootswitchIcons();
 
-        this.GAME_TIMER.addProgressElement(this.presentation.getProgressElementForGameTimer());
+        this.GAME_ROUND_TIMER.addProgressElement(this.presentation.getProgressElementForGameTimer());
 
         this.stateMachine = new StateMachine(this.SETTINGS, this, this.presentation, this.AUDIO_MANAGER);
 
@@ -336,7 +336,6 @@ export class Operator {
     private gameStart(): void {
         this.stateMachine?.manualTrigger("startGame");
         this.BUTTON_START_GAME.setAttribute("disabled", "disabled");
-        this.GAME_TIMER.start();
     }
 
 
@@ -438,8 +437,8 @@ export class Operator {
         };
     }
 
-    public isGameTimerOver(): boolean {
-        return this.GAME_TIMER.isFinished();
+    public isGameRoundOver(): boolean {
+        return this.GAME_ROUND_TIMER.isFinished() || this.GAME_BOARD.isAllCluesRevealedThisRound();
     }
 
     /**
@@ -514,11 +513,13 @@ export class Operator {
     public gameBoardShow(): void {
         this.GAME_BOARD.show();
         this.presentation?.headerMinimize();
+        this.GAME_ROUND_TIMER.pause();
     }
 
     public gameBoardHide(): void {
         this.GAME_BOARD.hide();
         this.presentation?.headerMaximize();
+        this.GAME_ROUND_TIMER.resume();
     }
 
     /**
@@ -559,7 +560,7 @@ export class Operator {
      * A category is special if it has special rules or need extra explanation.
      */
     public specialCategoryPopupShow(): void {
-        this.GAME_TIMER.pause();
+        this.GAME_ROUND_TIMER.pause();
 
         const specialCategory = this.presentClue?.SPECIAL_CATEGORY;
         if (!specialCategory) {
@@ -587,7 +588,7 @@ export class Operator {
         this.backdropForPopupsHide();
         this.DIV_SPECIAL_CATEGORY_POPUP.style.display = "none";
         this.presentation?.specialCategoryPopupHide();
-        this.GAME_TIMER.resume();
+        this.GAME_ROUND_TIMER.resume();
     }
 
     /**
@@ -715,7 +716,7 @@ export class Operator {
         this.isPaused_ = isPaused;
         this.DIV_PAUSED.style.display = isPaused ? "" : "none";
         this.stateMachine?.setPaused(isPaused);
-        this.GAME_TIMER.setPaused(isPaused);
+        this.GAME_ROUND_TIMER.setPaused(isPaused);
         this.teamArray?.forEach(team => team.setPaused(isPaused));
         this.presentation?.setPaused(isPaused);
     }
@@ -783,7 +784,7 @@ export class Operator {
             throw new Error("called saveGame() when teamArray is undefined");
         }
         const objectToSave: SavedGameInLocalStorage = {
-            GAME_TIMER_REMAINING_MILLISEC: this.GAME_TIMER.getRemainingMillisec(),
+            GAME_ROUND_TIMER_REMAINING_MILLISEC: this.GAME_ROUND_TIMER.getRemainingMillisec(),
             TEAMS: this.teamArray.map(t => t.getObjectToSaveInLocalStorage())
         };
 
@@ -795,7 +796,7 @@ export class Operator {
 
     private gameLoad(parsedJson: SavedGameInLocalStorage): void {
 
-        this.GAME_TIMER.setRemainingMillisec(parsedJson.GAME_TIMER_REMAINING_MILLISEC);
+        this.GAME_ROUND_TIMER.setRemainingMillisec(parsedJson.GAME_ROUND_TIMER_REMAINING_MILLISEC);
 
         this.teamCount = parsedJson.TEAMS.length;
         this.initTeams();
@@ -805,7 +806,7 @@ export class Operator {
             this.buzzHistoryChart?.setTeamName(teamIdx, team.TEAM_NAME);
         }
 
-        if (this.isGameTimerOver()) {
+        if (this.isGameRoundOver()) {
             this.stateMachine?.goToState("gameEnd");
         }
     }
@@ -814,7 +815,7 @@ export class Operator {
      * Called from the state machine.
      */
     public onGameEnd(): void {
-        this.GAME_TIMER.pause();
+        this.GAME_ROUND_TIMER.pause();
 
         // First play the eight high-pitched beeps sound, then play the closing music
         this.AUDIO_MANAGER.playInOrder(
@@ -864,7 +865,7 @@ export class Operator {
             `
             <tr>
             <td>${team.getTeamName()}</td>
-            <td>${team.getMoney().toLocaleString()}</td>
+            <td>$${team.getMoney().toLocaleString()}</td>
             </tr>
             `
         ));
@@ -881,7 +882,7 @@ export class Operator {
      */
     public onBuzzHistoryShow(): void {
         if (this.buzzHistoryForClue && this.buzzHistoryChart) {
-            this.GAME_TIMER.pause();
+            this.GAME_ROUND_TIMER.pause();
 
             this.backdropForPopupsShow();
             this.DIV_BUZZ_HISTORY_PROMPT.style.display = "block";
@@ -907,7 +908,7 @@ export class Operator {
      * Buzz history is for each clue. It shows a timeline of when teams buzzed in.
      */
     public onBuzzHistoryHide(): void {
-        this.GAME_TIMER.resume();
+        this.GAME_ROUND_TIMER.resume();
         this.backdropForPopupsHide();
         this.DIV_BUZZ_HISTORY_PROMPT.style.display = "none";
     }
@@ -957,6 +958,7 @@ export class Operator {
      */
     public categoryCarouselStop(): void {
         this.presentation?.headerAndFooterShow();
+        this.GAME_ROUND_TIMER.start();
     }
 
     public categoryCarouselHasMore(): boolean {
@@ -988,6 +990,8 @@ export class Operator {
         const gameRound = SCRAPED_GAME.ROUNDS[this.gameRoundIndex];
         this.GAME_BOARD.setGameRound(gameRound);
 
+        this.GAME_ROUND_TIMER.reset();
+
         this.DIV_CLUE_WRAPPER.style.display = "none";
 
         this.DIV_INSTRUCTIONS.innerText = `Get ready for round ${this.gameRoundIndex + 1}, press space to start the category carousel`;
@@ -997,10 +1001,6 @@ export class Operator {
 
     public gameRoundHasMore(): boolean {
         return this.gameRoundIndex < SCRAPED_GAME.ROUNDS.length - 1;
-    }
-
-    public isAllCluesRevealedThisRound(): boolean {
-        return this.GAME_BOARD.isAllCluesRevealedThisRound();
     }
 
 }

@@ -12,11 +12,11 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             TRANSITIONS: [{
                 TYPE: "manualTrigger",
                 TRIGGER_NAME: "startGame",
-                DESTINATION: "startNextRound"
+                DESTINATION: "startNextGameRound"
             }]
         }, {
             // This state 
-            NAME: "startNextRound",
+            NAME: "startNextGameRound",
             PRESENTATION_SLIDE_TO_SHOW: "slide-round-start",
             ON_ENTER: operator.gameRoundStartNext.bind(operator),
             TRANSITIONS: [{
@@ -191,7 +191,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
                 TYPE: "if",
                 CONDITION: operator.buzzHistoryShouldShow.bind(operator),
                 THEN: { DESTINATION: "showBuzzHistory" },
-                ELSE: { DESTINATION: "checkGameTimerOver" }
+                ELSE: { DESTINATION: "checkGameRoundOver" }
             }]
         }, {
             NAME: "showBuzzHistory",
@@ -202,21 +202,13 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             TRANSITIONS: [{
                 TYPE: "keyboard",
                 KEYBOARD_KEYS: " ", //space
-                DESTINATION: "checkGameTimerOver"
+                DESTINATION: "checkGameRoundOver"
             }]
         }, {
-            NAME: "checkGameTimerOver",
+            NAME: "checkGameRoundOver",
             TRANSITIONS: [{
                 TYPE: "if",
-                CONDITION: operator.isGameTimerOver.bind(operator),
-                THEN: { DESTINATION: "gameEnd" },
-                ELSE: { DESTINATION: "checkAllCluesRevealed" }
-            }]
-        }, {
-            NAME: "checkAllCluesRevealed",
-            TRANSITIONS: [{
-                TYPE: "if",
-                CONDITION: operator.isAllCluesRevealedThisRound.bind(operator),
+                CONDITION: operator.isGameRoundOver.bind(operator),
                 THEN: { DESTINATION: "nextRoundOrEndGame" },
                 ELSE: { DESTINATION: "showGameBoard" }
             }]
@@ -226,7 +218,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             TRANSITIONS: [{
                 TYPE: "if",
                 CONDITION: operator.gameRoundHasMore.bind(operator),
-                THEN: { DESTINATION: "startNextRound" },
+                THEN: { DESTINATION: "startNextGameRound" },
                 ELSE: { DESTINATION: "gameEnd" }
             }]
         }, {

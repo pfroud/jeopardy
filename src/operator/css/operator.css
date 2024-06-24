@@ -61,7 +61,7 @@ main {
             }
 
             div#state-machine-viz,
-            div#game-timer {
+            div#game-round-timer {
                 position: relative;
 
                 progress {

@@ -30,7 +30,7 @@ export class Presentation {
     private readonly DIV_PAUSED: HTMLDivElement;
     private readonly FOOTER: HTMLElement;
     private readonly PROGRESS_ELEMENT_FOR_STATE_MACHINE: HTMLProgressElement;
-    private readonly PROGRESS_ELEMENT_FOR_GAME_TIMER: HTMLProgressElement;
+    private readonly PROGRESS_ELEMENT_FOR_GAME_ROUND_TIMER: HTMLProgressElement;
     private readonly ALL_SLIDE_DIVS: { [slideName: string]: HTMLDivElement } = {};
     private visibleSlideDiv?: HTMLDivElement;
 
@@ -49,7 +49,7 @@ export class Presentation {
         this.HEADER = querySelectorAndCheck(document, "header");
         this.SPAN_CLUE_CATEGORY_IN_HEADER = querySelectorAndCheck(this.HEADER, "span#clue-category-in-header");
         this.SPAN_CLUE_MONEY_IN_HEADER = querySelectorAndCheck(this.HEADER, "span#clue-value-in-header");
-        this.PROGRESS_ELEMENT_FOR_GAME_TIMER = querySelectorAndCheck(this.HEADER, "progress#game-timer");
+        this.PROGRESS_ELEMENT_FOR_GAME_ROUND_TIMER = querySelectorAndCheck(this.HEADER, "progress#game-round-timer");
         this.PROGRESS_ELEMENT_FOR_STATE_MACHINE = querySelectorAndCheck(this.HEADER, "progress#state-machine");
 
         this.DIV_SLIDE_ROUND_START = querySelectorAndCheck(document, "div#slide-round-start");
@@ -114,7 +114,7 @@ export class Presentation {
     }
 
     public getProgressElementForGameTimer(): HTMLProgressElement {
-        return this.PROGRESS_ELEMENT_FOR_GAME_TIMER;
+        return this.PROGRESS_ELEMENT_FOR_GAME_ROUND_TIMER;
     }
 
     public showSlide(slideName: string): void {
