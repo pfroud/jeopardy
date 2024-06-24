@@ -18,7 +18,7 @@ export class StateMachine {
     private readonly OPERATOR_WINDOW_DIV_STATE_NAME: HTMLDivElement;
     private readonly STATE_MAP: { [stateName: string]: StateMachineState } = {};
 
-    private readonly ADD_COUNTDOWN_TIMERS_DISPLAY_TO_OPERATOR_WINDOW = true;
+    private readonly ADD_COUNTDOWN_TIMERS_DISPLAY_TO_OPERATOR_WINDOW = false;
 
     /**
      * Keep track of countdown timer going out of the state. In other words

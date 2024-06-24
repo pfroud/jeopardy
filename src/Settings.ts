@@ -2,7 +2,7 @@ import { querySelectorAndCheck } from "./commonFunctions";
 
 export class Settings {
     // How long to show the category in big text in the presentation window
-    public displayDurationCategoryMillisec = 2 * 1000;
+    public displayDurationCategoryMillisec = 1000;
 
     // How long to show the answer in the presentation window
     public displayDurationAnswerMillisec = 5 * 1000;

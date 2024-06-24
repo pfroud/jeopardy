@@ -13,19 +13,19 @@ table#game-board {
         text-align: center;
         vertical-align: middle;
         width: calc((100vw - 100px) / 6);
-        padding: 20px 0px;
+        padding: 5px 0px;
     }
 
 
     tr#categories {
-        font-size: 35px;
+        font-size: 30px;
     }
 
     tr.clues {
 
         color: var(--color-money);
         letter-spacing: 2px;
-        font-size: 60px;
+        font-size: 50px;
 
         td {
 
