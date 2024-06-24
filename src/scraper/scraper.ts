@@ -1,49 +1,44 @@
 type Game = {
     /** From game_id in URL */
-    jArchiveGameID: number;
+    readonly J_ARCHIVE_GAME_ID: number;
     /** From the header in the webpage */
-    showNumber: number;
-    airdate: string;
-    rounds: Round[];
+    readonly SHOW_NUMBER: number;
+    readonly AIRDATE: string;
+    readonly ROUNDS: Round[];
 }
 
 type RoundType = "single" | "double";
 type Round = {
-    type: RoundType;
-    categories: Category[];
+    readonly TYPE: RoundType;
+    readonly CATEGORIES: Category[];
     /**
      * This 2D array follows the structure of an HTML table.
      * The first array index is the row index.
      * The second array index is the column index.
      * */
-    clues: ScrapedClue[][];
+    readonly CLUES: ScrapedClue[][];
 }
 
 type Category = {
-    name: string;
+    readonly NAME: string;
     /** A few categories have a comment from the host explaining the meaning of the category name. */
-    comments?: string;
+    COMMENTS?: string;
 }
 
 type ScrapedClue = {
-    categoryIndex: number;
-    // The category string or object is not included in this object
-    rowIndex: number;
-    question: string;
-    answer: string;
-    // The value is NOT included here, it comes from from the round type (singel vs double) and the row index.
+    readonly QUESTION: string;
+    readonly ANSWER: string;
 }
-
 
 function main(): void {
 
     const h1Text = document.querySelector("h1")!.innerText;
 
     const result: Game = {
-        jArchiveGameID: Number(window.location.search.replace("?game_id=", "")),
-        showNumber: Number(h1Text?.match(/Show #(\d+)/)![1]),
-        airdate: h1Text.split(" - ")[1],
-        rounds: [
+        J_ARCHIVE_GAME_ID: Number(window.location.search.replace("?game_id=", "")),
+        SHOW_NUMBER: Number(h1Text?.match(/Show #(\d+)/)![1]),
+        AIRDATE: h1Text.split(" - ")[1],
+        ROUNDS: [
             parseTableForRound("single", document.querySelector<HTMLTableElement>("div#jeopardy_round table.round")!),
             parseTableForRound("double", document.querySelector<HTMLTableElement>("div#double_jeopardy_round table.round")!),
         ]
@@ -88,11 +83,11 @@ function parseTableForRound(roundType: RoundType, table: HTMLTableElement): Roun
         Array.from(categoryRow.querySelectorAll<HTMLTableCellElement>("td.category")).
             map(td => {
                 const rv: Category = {
-                    name: td.querySelector<HTMLTableCellElement>("td.category_name")!.innerText
+                    NAME: td.querySelector<HTMLTableCellElement>("td.category_name")!.innerText
                 };
                 const commentsString = td.querySelector<HTMLTableCellElement>("td.category_comments")!.innerText.trim();
                 if (commentsString.length > 0) {
-                    rv.comments = commentsString;
+                    rv.COMMENTS = commentsString;
                 }
                 return rv;
             });
@@ -112,19 +107,17 @@ function parseTableForRound(roundType: RoundType, table: HTMLTableElement): Roun
             const answer = childRow.querySelector<HTMLTableCellElement>("td.clue_text em.correct_response")!.innerText;
 
             return {
-                categoryIndex: categoryIndex,
-                rowIndex: rowIndex,
-                question: question,
-                answer: answer
+                QUESTION: question,
+                ANSWER: answer
             };
         })
 
     );
 
     return {
-        type: roundType,
-        categories: categories,
-        clues: clues
+        TYPE: roundType,
+        CATEGORIES: categories,
+        CLUES: clues
     };
 
 }
