@@ -284,6 +284,8 @@ export class BuzzHistoryChart {
 
         this.initPanZoomController();
 
+        // The chart is drawn when showNewHistory() is called.
+
     }
 
     public setTeamName(idx: number, name: string): void {
@@ -397,6 +399,8 @@ export class BuzzHistoryChart {
         */
         const handleZoom = (zoomEvent: D3ZoomEvent<SVGSVGElement, unknown>): void => {
 
+            this.redraw();
+
             this.scaleWithZoomTransform = zoomEvent.transform.rescaleX(this.SCALE_WITHOUT_ZOOM_TRANSFORM);
 
             /*
@@ -452,12 +456,11 @@ export class BuzzHistoryChart {
                     annotationGroup => annotationGroup.setAttribute("opacity", String(annotationOpacity)))
             );
 
-            // Re-draw the buzz history diagram
-            this.redraw();
         };
 
         this.ZOOM_CONTROLLER.on("zoom", handleZoom);
 
+        // Apply the zoom controller to the SVG.
         this.ZOOM_CONTROLLER(this.SVG_IN_OPERATOR_WINDOW);
     }
 
@@ -593,8 +596,8 @@ export class BuzzHistoryChart {
         this.SCALE_WITHOUT_ZOOM_TRANSFORM.domain([domainMinToUse * 1.3, lastTimestamp * 1.1]);
 
         /*
-        Reset the pan & zoom. Calling transform() fires a zoom event,
-        which calls the redraw() method.
+        Reset the pan & zoom.
+        Calling transform() fires a zoom event, which calls the redraw() method.
         */
         this.ZOOM_CONTROLLER.transform(this.SVG_IN_OPERATOR_WINDOW, zoomIdentity);
 
@@ -602,6 +605,8 @@ export class BuzzHistoryChart {
 
     /**
      * Called from the handleZoom() function.
+     * 
+     * This function can also draw the chart for the first time.
      */
     private redraw(): void {
 
