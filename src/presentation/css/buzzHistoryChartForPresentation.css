@@ -47,9 +47,10 @@ svg#buzz-history {
         stroke-width: 1;
     }
 
-    g.annotation line {
+    g.annotation path {
         stroke-linecap: round;
         stroke: white;
+        fill: none;
     }
 
     rect.buzz-record {

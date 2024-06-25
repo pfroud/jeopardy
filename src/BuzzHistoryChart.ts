@@ -108,11 +108,7 @@ export class BuzzHistoryChart {
     private static readonly CLASS_NAME_FOR_ANSWERED_RIGHT = "answered-right";
     private static readonly CLASS_NAME_FOR_ANSWERED_WRONG = "answered-wrong";
     private static readonly CLASS_NAME_FOR_ANNOTATION_GROUP = "annotation";
-    private static readonly CLASS_NAME_FOR_ANNOTATION_ARROW_BODY = "annotation-arrow-body";
-    private static readonly CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_LEFT = "annotation-arrowhead-top-left";
-    private static readonly CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_LEFT = "annotation-arrowhead-bottom-left";
-    private static readonly CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_RIGHT = "annotation-arrowhead-top-right";
-    private static readonly CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_RIGHT = "annotation-arrowhead-bottom-right";
+    private static readonly CLASS_NAME_FOR_ANNOTATION_ARROW_PATH = "annotation-arrow-path";
 
     /**
      * Only show annotations within this time range of when the human operator finished
@@ -690,55 +686,83 @@ export class BuzzHistoryChart {
 
                 const arrowY = (BuzzHistoryChart.ROW_HEIGHT / 2) + 9;
 
-                // draw the body of the arrow
-                annotationGroups
-                    .selectAll(`line.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROW_BODY}`)
-                    .data(annotationForThisTeam)
-                    .join("line")
-                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROW_BODY, true)
-                    .attr("x1", d => this.scaleWithZoomTransform(d.startTimestamp))
-                    .attr("x2", d => this.scaleWithZoomTransform(d.endTimestamp))
-                    .attr("y1", arrowY)
-                    .attr("y2", arrowY);
+                const getSvgPathDataForAnnotationArrow = (d: Annotation): string => {
+                    /*
+                     The arrow we want to draw:
 
-                // draw the arrowhead
-                // TODO use two SVG paths instead of four SVG lines
+                        o               o
+                       /                 \
+                      /                   \
+                     o---------------------o
+                      \                   /
+                       \                 /
+                        o               o
+
+                    In the SVG path language:
+                        M is mode to
+                        L is draw line to
+
+                    It is case sensitive. The lowercase versions of those commands are relative.
+
+                    See https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d#path_commands
+                     */
+
+
+                    /*
+                    Body of the arrow:
+
+                    (x1, y1)               (x2, y2)
+                        o---------------------o
+                    */
+                    const body =
+                        `M ${this.scaleWithZoomTransform(d.startTimestamp)}, ${arrowY}\n` +
+                        `L ${this.scaleWithZoomTransform(d.endTimestamp)}, ${arrowY}`;
+
+                    /*
+                    Left arrow head:
+
+                        o  (x1, y1)
+                       /
+                      /
+                     o     (x2, y2)
+                      \
+                       \
+                        o  (x3, y3)
+                    */
+                    const leftArrowHead =
+                        `M ${this.scaleWithZoomTransform(d.startTimestamp) + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}\n` +
+                        `L ${this.scaleWithZoomTransform(d.startTimestamp)}, ${arrowY}\n` +
+                        `L ${this.scaleWithZoomTransform(d.startTimestamp) + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}`;
+
+
+                    /*
+                    Right arrow head:
+
+                    o     (x1, y1)
+                     \
+                      \
+                       o  (x2, y2)
+                      /
+                     /
+                    o     (x3, y3)
+                    */
+
+                    const rightArrowHead =
+                        `M ${this.scaleWithZoomTransform(d.endTimestamp) - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}\n` +
+                        `L ${this.scaleWithZoomTransform(d.endTimestamp)}, ${arrowY}\n` +
+                        `L ${this.scaleWithZoomTransform(d.endTimestamp) - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}`;
+
+                    return `${leftArrowHead}\n\n${body}\n\n${rightArrowHead}`;
+
+                };
+
                 annotationGroups
-                    .selectAll(`line.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_LEFT}`)
+                    .selectAll(`path.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROW_PATH}`)
                     .data(annotationForThisTeam)
-                    .join("line")
-                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_LEFT, true)
-                    .attr("x1", d => this.scaleWithZoomTransform(d.startTimestamp))
-                    .attr("x2", d => this.scaleWithZoomTransform(d.startTimestamp) + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE)
-                    .attr("y1", arrowY)
-                    .attr("y2", arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE);
-                annotationGroups
-                    .selectAll(`line.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_LEFT}`)
-                    .data(annotationForThisTeam)
-                    .join("line")
-                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_LEFT, true)
-                    .attr("x1", d => this.scaleWithZoomTransform(d.startTimestamp))
-                    .attr("x2", d => this.scaleWithZoomTransform(d.startTimestamp) + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE)
-                    .attr("y1", arrowY)
-                    .attr("y2", arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE);
-                annotationGroups
-                    .selectAll(`line.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_RIGHT}`)
-                    .data(annotationForThisTeam)
-                    .join("line")
-                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_TOP_RIGHT, true)
-                    .attr("x1", d => this.scaleWithZoomTransform(d.endTimestamp))
-                    .attr("x2", d => this.scaleWithZoomTransform(d.endTimestamp) - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE)
-                    .attr("y1", arrowY)
-                    .attr("y2", arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE);
-                annotationGroups
-                    .selectAll(`line.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_RIGHT}`)
-                    .data(annotationForThisTeam)
-                    .join("line")
-                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROWHEAD_BOTTOM_RIGHT, true)
-                    .attr("x1", d => this.scaleWithZoomTransform(d.endTimestamp))
-                    .attr("x2", d => this.scaleWithZoomTransform(d.endTimestamp) - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE)
-                    .attr("y1", arrowY)
-                    .attr("y2", arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE);
+                    .join("path")
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROW_PATH, true)
+                    .attr("d", annotation => getSvgPathDataForAnnotationArrow(annotation));
+
 
                 // draw annotation text
                 annotationGroups
