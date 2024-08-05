@@ -432,5 +432,15 @@ export class Team {
         return this.TEAM_INDEX;
     }
 
+    public choosingClueSet(): void {
+        this.DIV.OPERATOR.wrapper?.classList.add("choose-clue");
+        this.DIV.PRESENTATION.wrapper?.classList.add("choose-clue");
+    }
+
+    public choosingClueClear(): void {
+        this.DIV.OPERATOR.wrapper?.classList.add("choose-clue");
+        this.DIV.PRESENTATION.wrapper?.classList.remove("choose-clue");
+    }
+
 
 }

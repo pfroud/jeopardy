@@ -531,14 +531,14 @@ export class Operator {
             this.teamIndexToPickClue++;
         }
 
-        this.presentation?.teamChoosingClueSet(this.teamIndexToPickClue);
+        this.teamArray?.[this.teamIndexToPickClue].choosingClueSet();
     }
 
     public gameBoardHide(): void {
         this.DIV_GAME_BOARD_WRAPPER.style.display = "none";
         this.presentation?.headerMaximize();
 
-        this.presentation?.teamChoosingClueClear(this.teamIndexToPickClue);
+        this.teamArray?.[this.teamIndexToPickClue].choosingClueClear();
     }
 
     /**
