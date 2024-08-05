@@ -53,7 +53,7 @@ div#paused {
 
 header {
     height: var(--height-header);
-    font-family: swiss911;
+    font-family: swiss911, sans-serif;
     font-size: 60px;
     letter-spacing: 2px;
     text-shadow: var(--text-shadow-big);
@@ -120,7 +120,7 @@ main {
         }
 
         &#slide-clue-category-and-value {
-            font-family: swiss911;
+            font-family: swiss911, sans-serif;
             text-shadow: var(--text-shadow-big);
             font-size: 80px;
             text-align: center;
@@ -134,7 +134,7 @@ main {
 
         &#slide-clue-question {
             text-align: center;
-            font-family: korinna;
+            font-family: korinna, serif;
             font-size: 80px;
             text-transform: uppercase;
             text-shadow: var(--text-shadow-big);
@@ -216,7 +216,7 @@ footer {
         }
 
         div.team-money {
-            font-family: swiss911;
+            font-family: swiss911, sans-serif;
             font-size: 40px;
             text-shadow: 3px 3px 0px black;
         }

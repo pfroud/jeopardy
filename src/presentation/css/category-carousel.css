@@ -41,7 +41,7 @@ div#slide-category-carousel {
             background-size: cover;
 
             text-shadow: 3px 3px black, 5px 5px black, 7px 7px black;
-            font-family: swiss911;
+            font-family: swiss911, sans-serif;
 
             box-sizing: border-box;
             border: var(--border-size) solid black;
