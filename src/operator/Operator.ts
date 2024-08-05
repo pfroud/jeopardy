@@ -1009,6 +1009,8 @@ export class Operator {
         const gameRound = SCRAPED_GAME.ROUNDS[this.gameRoundIndex];
         this.gameBoard?.setGameRound(gameRound);
 
+        this.DIV_CLUE_WRAPPER.style.display = "none";
+
         this.GAME_ROUND_TIMER.reset();
 
         this.DIV_INSTRUCTIONS.innerText = `Get ready for round ${this.gameRoundIndex + 1}, press space to start the category carousel`;
