@@ -9,6 +9,16 @@
     --text-shadow-big: 3px 3px black, 5px 5px black, 7px 7px black, 9px 9px black, 11px 11px #000;
 }
 
+@keyframes choose-clue-flash-keyframes {
+    from {
+        background-color: purple;
+    }
+
+    to {
+        background-color: transparent;
+    }
+}
+
 body {
     height: 100vh;
     width: 100vw;
@@ -202,7 +212,7 @@ footer {
 
         &.choose-clue {
             border: 2px solid white;
-            background-color: purple;
+            animation: 0.5s steps(2, jump-none) infinite alternate choose-clue-flash-keyframes;
         }
 
         div.team-money {
