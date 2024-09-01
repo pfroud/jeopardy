@@ -37,7 +37,7 @@ export interface TimeoutTransition {
     readonly TYPE: "timeout";
     readonly DESTINATION: string;
     readonly BEHAVIOR: CountdownBehavior;
-    readonly INITIAL_DURATION: number;
+    readonly INITIAL_DURATION_MILLISEC: number;
     readonly IS_WAITING_FOR_TEAM_TO_ANSWER_AFTER_BUZZ?: boolean;
     readonly ON_TRANSITION?: () => void; //called when time runs out
     readonly GUARD_CONDITION?: () => boolean;

@@ -258,7 +258,7 @@ export class StateMachine {
 
     private createCountdownTimerForTransition(timeoutTransition: TimeoutTransition): CountdownTimer {
 
-        const countdownTimer = new CountdownTimer(timeoutTransition.INITIAL_DURATION, this.AUDIO_MANAGER);
+        const countdownTimer = new CountdownTimer(timeoutTransition.INITIAL_DURATION_MILLISEC, this.AUDIO_MANAGER);
 
         countdownTimer.onFinished = (): void => {
             timeoutTransition.ON_TRANSITION?.();

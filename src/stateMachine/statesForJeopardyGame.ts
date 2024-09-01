@@ -62,7 +62,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             PRESENTATION_SLIDE_TO_SHOW: "slide-clue-category-and-value",
             TRANSITIONS: [{
                 TYPE: "timeout",
-                INITIAL_DURATION: settings.displayDurationCategoryMillisec,
+                INITIAL_DURATION_MILLISEC: settings.displayDurationCategoryMillisec,
                 BEHAVIOR: CountdownBehavior.ContinueTimerUntilManuallyReset,
                 DESTINATION: "showClueQuestion",
                 /*
@@ -128,7 +128,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             }, {
                 TYPE: "timeout",
                 DESTINATION: "showAnswer",
-                INITIAL_DURATION: settings.timeoutWaitForBuzzesMillisec,
+                INITIAL_DURATION_MILLISEC: settings.timeoutWaitForBuzzesMillisec,
                 BEHAVIOR: CountdownBehavior.ContinueTimerUntilManuallyReset,
                 ON_TRANSITION: operator.playSoundQuestionTimeout.bind(operator)
             }]
@@ -150,7 +150,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
                 DESTINATION: "answerWrongOrTimeout"
             }, {
                 TYPE: "timeout",
-                INITIAL_DURATION: settings.timeoutWaitForAnswerMillisec,
+                INITIAL_DURATION_MILLISEC: settings.timeoutWaitForAnswerMillisec,
                 BEHAVIOR: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
                 IS_WAITING_FOR_TEAM_TO_ANSWER_AFTER_BUZZ: true,
                 DESTINATION: "answerWrongOrTimeout"
