@@ -11,6 +11,8 @@ table#game-board {
 
     tr.clues td {
 
+        padding: 15px;
+
         &[data-clue-revealed="no"] {
 
             /* background-color: #333; */
