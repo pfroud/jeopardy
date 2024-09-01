@@ -8,7 +8,6 @@ import { querySelectorAndCheck } from "../commonFunctions";
 import { createGameEndLineChartOfMoneyOverTime, createGameEndPieCharts } from "../gameEndStatisticsCharts";
 import { Presentation } from "../presentation/Presentation";
 import { SCRAPED_GAME } from "../scrapedGame";
-import { SpecialCategory, checkSpecialCategory } from "../specialCategories";
 import { StateMachine } from "../stateMachine/StateMachine";
 import { Clue } from "../typesForGame";
 
@@ -554,13 +553,14 @@ export class Operator {
         this.BUTTON_START_GAME.blur();
         this.TR_QUESTION.style.display = "none";
 
-
         this.setPresentClue(clue);
-
         this.stateMachine?.manualTrigger("userChoseClue");
     }
 
-
+    public teamTimedOutChoosingClue(): void {
+        const randomUnrevealedClue = this.gameBoard!.getRandomUnrevealedClue();
+        this.onGameBoardClueClicked(randomUnrevealedClue);
+    }
 
     /*
     A prompt is shown to the operator which says "press space to show info about
@@ -742,6 +742,13 @@ export class Operator {
         this.GAME_ROUND_TIMER.setPaused(isPaused);
         this.teamArray?.forEach(team => team.setPaused(isPaused));
         this.presentation?.setPaused(isPaused);
+
+        if (isPaused) {
+            document.body.classList.add("paused");
+        } else {
+            document.body.classList.remove("paused");
+        }
+
     }
 
     public isPaused(): boolean {

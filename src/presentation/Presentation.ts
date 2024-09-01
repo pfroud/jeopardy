@@ -169,6 +169,13 @@ export class Presentation {
 
     public setPaused(isPaused: boolean): void {
         this.DIV_PAUSED.style.display = isPaused ? "" : "none";
+
+        if (isPaused) {
+            document.body.classList.add("paused");
+        } else {
+            document.body.classList.remove("paused");
+        }
+
     }
 
     public setGameEndTeamRankingHtml(htmlString: string): void {

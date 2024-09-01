@@ -286,11 +286,11 @@ body.hide-header-and-footer {
 }
 
 body.showing-game-board header {
-    /*
-    Hide everything except the game timer
-    */
+    progress#state-machine {
+        margin-top: 20px;
+    }
 
-    progress#state-machine,
+    /* Hide category name and clue value spans */
     span {
         display: none;
     }
@@ -299,4 +299,8 @@ body.showing-game-board header {
 h1,
 h2 {
     text-align: center;
+}
+
+body.paused div.team.choose-clue {
+    animation-play-state: paused;
 }

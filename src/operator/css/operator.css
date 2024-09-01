@@ -196,3 +196,7 @@ footer {
         }
     }
 }
+
+body.paused div.team.choose-clue {
+    animation-play-state: paused;
+}

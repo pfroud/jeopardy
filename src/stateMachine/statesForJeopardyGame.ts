@@ -48,21 +48,17 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             ON_ENTER: operator.gameBoardShow.bind(operator),
             ON_EXIT: operator.gameBoardHide.bind(operator),
             TRANSITIONS: [{
-                // the operator calls this manual trigger from the mouse listener.
+                // This manual trigger is called from Operator.onGameBoardClueClicked().
                 TYPE: "manualTrigger",
                 TRIGGER_NAME: "userChoseClue",
                 DESTINATION: "showClueCategoryAndValue"
-            }
-                /*
-                , {
-                    TYPE: "timeout",
-                    BEHAVIOR: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
-                    INITIAL_DURATION_MILLISEC: 10_000,
-                    ON_TRANSITION: operator.teamTimedOutChoosingClue.bind(operator),
-                    DESTINATION: "showClueCategoryAndValue"
-                }
-                    */
-            ]
+            }, {
+                TYPE: "timeout",
+                BEHAVIOR: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
+                INITIAL_DURATION_MILLISEC: 10_000,
+                ON_TRANSITION: operator.teamTimedOutChoosingClue.bind(operator),
+                DESTINATION: "showClueCategoryAndValue"
+            }]
         }, {
             /*
             The category and dollar value are shown on in big text the center of the

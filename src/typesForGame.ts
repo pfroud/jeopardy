@@ -32,4 +32,6 @@ export type Clue = {
     readonly ANSWER: string;
     readonly VALUE: number;
     readonly CATEGORY_NAME: string;
+    readonly ROW_INDEX: number;
+    readonly COLUMN_INDEX: number;
 }

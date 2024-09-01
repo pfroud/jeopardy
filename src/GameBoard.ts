@@ -1,5 +1,5 @@
 import { Operator } from "./operator/Operator";
-import { RoundType, GameRound } from "./typesForGame";
+import { RoundType, GameRound, Clue } from "./typesForGame";
 
 /**
  * The <table>s in the operator window and presentation windows should have the exact same
@@ -43,11 +43,9 @@ export class GameBoard {
 
     private readonly OPERATOR;
 
-    private cluesCountRevealedThisRound = NaN;
-
     private gameRound: GameRound | null = null;
 
-    // TODO add a list of clues which have not been revealed yet, so we can get a random one if the team takes too long
+    private cluesNotYetRevealedThisRound: Set<Clue> | null = null;
 
     public constructor(operator: Operator, tableInOperatorWindow: HTMLTableElement, tableInPresentationWindow: HTMLTableElement) {
         this.OPERATOR = operator;
@@ -97,14 +95,20 @@ export class GameBoard {
                         const clue = this.gameRound.CLUES[clueRowIndex][columnIndex];
                         this.OPERATOR.onGameBoardClueClicked(clue);
 
+                        if (this.cluesNotYetRevealedThisRound) {
+                            this.cluesNotYetRevealedThisRound.delete(clue);
+                        }
+                        else {
+                            throw new Error("clicked on a clue but the Set of clues not yet revealed hasn't been set up");
+                        }
+
                         // Hide the cell so it cannot be clicked on again.
                         this.CLUE_CELLS.forEach(twoDArray => twoDArray[clueRowIndex][columnIndex].setAttribute(
                             GameBoard.CELL_ATTRIBUTE_NAME_IS_CLUE_REVEALED,
                             GameBoard.CELL_ATTRIBUTE_VALUE_ALREADY_REVEALED));
 
-                        this.cluesCountRevealedThisRound++;
                     } else {
-                        console.warn("clicked on a cell but the game round has not been set");
+                        throw new Error("clicked on a cell but the game round has not been set");
                     }
                 });
 
@@ -164,11 +168,43 @@ export class GameBoard {
             )
         );
 
-        this.cluesCountRevealedThisRound = 0;
+        this.cluesNotYetRevealedThisRound = new Set(gameRound.CLUES.flat());
+    }
+
+    public getRandomUnrevealedClue(): Clue {
+        if (this.cluesNotYetRevealedThisRound) {
+
+            /*
+            There isn't a way to get a random element from a Set, and apparently
+            the only way to remove an element from an array is to use splice()
+            which is crazy. So I'm using keeping a Set<Clue> for easy element
+            removal and converting it to an array to get a random element.
+            */
+            const setToArray = Array.from(this.cluesNotYetRevealedThisRound);
+
+            // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random#getting_a_random_integer_between_two_values
+            const randomIndex = Math.floor(Math.random() * setToArray.length); //https://stackoverflow.com/a/42739372/7376577
+
+            const rv = setToArray[randomIndex];
+
+            this.cluesNotYetRevealedThisRound.delete(rv);
+
+            this.CLUE_CELLS.forEach(twoDArray => twoDArray[rv.ROW_INDEX][rv.COLUMN_INDEX].setAttribute(
+                GameBoard.CELL_ATTRIBUTE_NAME_IS_CLUE_REVEALED,
+                GameBoard.CELL_ATTRIBUTE_VALUE_ALREADY_REVEALED));
+
+            return rv;
+        } else {
+            throw new Error("trying to get a random unrevealed clue when the game round has not been set");
+        }
     }
 
     public isAllCluesRevealedThisRound(): boolean {
-        return this.cluesCountRevealedThisRound === GameBoard.TOTAL_CLUES_COUNT;
+        if (this.cluesNotYetRevealedThisRound) {
+            return this.cluesNotYetRevealedThisRound?.size === 0;
+        } else {
+            throw new Error("checking if all clues revealed in this round but the Set<Clue> is null");
+        }
     }
 
 }
