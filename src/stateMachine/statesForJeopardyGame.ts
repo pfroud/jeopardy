@@ -48,10 +48,21 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             ON_ENTER: operator.gameBoardShow.bind(operator),
             ON_EXIT: operator.gameBoardHide.bind(operator),
             TRANSITIONS: [{
+                // the operator calls this manual trigger from the mouse listener.
                 TYPE: "manualTrigger",
                 TRIGGER_NAME: "userChoseClue",
                 DESTINATION: "showClueCategoryAndValue"
-            }]
+            }
+                /*
+                , {
+                    TYPE: "timeout",
+                    BEHAVIOR: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
+                    INITIAL_DURATION_MILLISEC: 10_000,
+                    ON_TRANSITION: operator.teamTimedOutChoosingClue.bind(operator),
+                    DESTINATION: "showClueCategoryAndValue"
+                }
+                    */
+            ]
         }, {
             /*
             The category and dollar value are shown on in big text the center of the
@@ -70,26 +81,34 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
                 a bunch of stuff and would get called every time lockout happens
                 */
                 ON_TRANSITION: operator.onShowClueQuestion.bind(operator)
-            }, {
-                TYPE: "keyboard",
-                KEYBOARD_KEYS: " ", //space
-                DESTINATION: "showMessageForSpecialCategory",
-                GUARD_CONDITION: operator.isCurrentClueSpecialCategory.bind(operator)
-            }]
-        }, {
-            /*
-            The game is paused to display an information message about a Jeopardy category
-            with special meaning (quotation marks, before & after, etc).
-            */
-            NAME: "showMessageForSpecialCategory",
-            ON_ENTER: operator.specialCategoryPopupShow.bind(operator),
-            ON_EXIT: operator.specialCategoryPopupHide.bind(operator),
-            TRANSITIONS: [{
-                TYPE: "keyboard",
-                KEYBOARD_KEYS: " ", //space
-                DESTINATION: "showClueCategoryAndValue"
-            }]
-        }, {
+            }
+                /*
+                , {
+                    TYPE: "keyboard",
+                    KEYBOARD_KEYS: " ", //space
+                    DESTINATION: "showMessageForSpecialCategory",
+                    GUARD_CONDITION: operator.isCurrentClueSpecialCategory.bind(operator)
+                }
+                    */
+            ]
+        },
+
+        //{
+        /*
+        The game is paused to display an information message about a Jeopardy category
+        with special meaning (quotation marks, before & after, etc).
+        */
+        /*
+         NAME: "showMessageForSpecialCategory",
+         ON_ENTER: operator.specialCategoryPopupShow.bind(operator),
+         ON_EXIT: operator.specialCategoryPopupHide.bind(operator),
+         TRANSITIONS: [{
+             TYPE: "keyboard",
+             KEYBOARD_KEYS: " ", //space
+             DESTINATION: "showClueCategoryAndValue"
+         }]
+     },*/
+        {
             /*
             The clue question is shown on center of the presentation window. The person operating the
             game is supposed to read the question out loud and press space when done reading it.

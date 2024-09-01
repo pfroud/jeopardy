@@ -2,7 +2,7 @@ import { GameBoard } from "../GameBoard";
 import { querySelectorAndCheck } from "../commonFunctions";
 import { Operator } from "../operator/Operator";
 import { SpecialCategory } from "../specialCategories";
-import { ScrapedClue, ScrapedRound } from "../typesForGame";
+import { Clue, GameRound } from "../typesForGame";
 
 export class Presentation {
     public readonly ALL_SLIDE_NAMES = new Set<string>();
@@ -137,12 +137,12 @@ export class Presentation {
         }
     }
 
-    public setClue(clue: ScrapedClue, category: string, value: number): void {
-        this.SPAN_CLUE_CATEGORY_IN_HEADER.innerHTML = category;
-        this.SPAN_CLUE_MONEY_IN_HEADER.innerHTML = `$${value}`;
+    public setClue(clue: Clue): void {
+        this.SPAN_CLUE_CATEGORY_IN_HEADER.innerHTML = clue.CATEGORY_NAME;
+        this.SPAN_CLUE_MONEY_IN_HEADER.innerHTML = `$${clue.VALUE}`;
 
-        this.DIV_CLUE_CATEGORY_BIG.innerHTML = category;
-        this.DIV_CLUE_VALUE_BIG.innerHTML = `$${value}`;
+        this.DIV_CLUE_CATEGORY_BIG.innerHTML = clue.CATEGORY_NAME;
+        this.DIV_CLUE_VALUE_BIG.innerHTML = `$${clue.VALUE}`;
 
         this.DIV_SLIDE_CLUE_QUESTION.innerHTML = clue.QUESTION;
 
@@ -243,7 +243,7 @@ export class Presentation {
         return this.TABLE_GAME_BOARD;
     }
 
-    public setCategoryCarouselGameRound(gameRound: ScrapedRound): void {
+    public setCategoryCarouselGameRound(gameRound: GameRound): void {
         const categories = gameRound.CATEGORIES;
         if (categories.length !== GameBoard.TABLE_COLUMN_COUNT) {
             throw new Error(`categories length is ${categories.length}, expected exactly ${GameBoard.TABLE_COLUMN_COUNT}`);

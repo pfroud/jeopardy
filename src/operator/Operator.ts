@@ -10,7 +10,7 @@ import { Presentation } from "../presentation/Presentation";
 import { SCRAPED_GAME } from "../scrapedGame";
 import { SpecialCategory, checkSpecialCategory } from "../specialCategories";
 import { StateMachine } from "../stateMachine/StateMachine";
-import { FullClue, ScrapedClue } from "../typesForGame";
+import { Clue } from "../typesForGame";
 
 interface SavedGameInLocalStorage {
     readonly GAME_ROUND_TIMER_REMAINING_MILLISEC: number,
@@ -68,7 +68,7 @@ export class Operator {
     private teamNameInputElements?: HTMLInputElement[];
     private teamPresentlyAnswering: Team | undefined;
 
-    private presentClue?: FullClue;
+    private presentClue?: Clue;
     private buzzHistoryForClue?: BuzzHistoryForClue;
     private buzzHistoryChart: BuzzHistoryChart | undefined;
     private buzzHistoryRecordForActiveAnswer: BuzzHistoryRecord<BuzzResultStartAnswer> | undefined;
@@ -470,18 +470,18 @@ export class Operator {
 
     }
 
-    private clueShowToOperator(clue: FullClue, category: string, value: number): void {
+    private clueShowToOperator(clue: Clue): void {
         /*
         This function only shows the category, and dollar value to the operator.
         The state machine will show the clue question after a timeout.
         */
         this.DIV_CLUE_WRAPPER.style.display = ""; //show it by removing "display=none"
-        this.DIV_CLUE_CATEGORY.innerHTML = category;
-        this.DIV_CLUE_VALUE.innerHTML = `$${value}`;
+        this.DIV_CLUE_CATEGORY.innerHTML = clue.CATEGORY_NAME;
+        this.DIV_CLUE_VALUE.innerHTML = `$${clue.VALUE}`;
         this.TR_ANSWER.style.display = "none";
     }
 
-    private setPresentClue(clue: FullClue, category: string, value: number): void {
+    private setPresentClue(clue: Clue): void {
         this.presentClue = clue;
 
         this.buzzHistoryForClue = {
@@ -501,20 +501,24 @@ export class Operator {
             return rv;
         }
 
-        this.clueShowToOperator(clue, category, value);
-        this.presentation?.setClue(clue, category, value);
+        this.clueShowToOperator(clue);
+        this.presentation?.setClue(clue);
 
+        /*
         if (clue.SPECIAL_CATEGORY) {
             this.specialCategoryPromptShow(clue.SPECIAL_CATEGORY);
         }
+            */
     }
 
     /**
      * A category is special if it has special rules or need extra explanation.
      */
+    /*
     public isCurrentClueSpecialCategory(): boolean {
         return this.presentClue?.SPECIAL_CATEGORY !== null;
     }
+        */
 
     /**
      * The game board is the table of categories and dollar values.
@@ -544,40 +548,39 @@ export class Operator {
     /**
      * Called when the human operator clicks on a cell in the game board table.
      */
-    public onGameBoardClueClicked(scrapedClue: ScrapedClue, categoryName: string, value: number): void {
+    public onGameBoardClueClicked(clue: Clue): void {
         this.stateMachine?.getCountdownTimerForState("showClueCategoryAndValue").reset();
 
         this.BUTTON_START_GAME.blur();
         this.TR_QUESTION.style.display = "none";
 
-        const fullClue: FullClue = {
-            QUESTION: scrapedClue.QUESTION,
-            ANSWER: scrapedClue.ANSWER,
-            CATEGORY_NAME: categoryName,
-            VALUE: value,
-            SPECIAL_CATEGORY: checkSpecialCategory(categoryName)
-        };
-        this.setPresentClue(fullClue, categoryName, value);
+
+        this.setPresentClue(clue);
 
         this.stateMachine?.manualTrigger("userChoseClue");
     }
+
+
 
     /*
     A prompt is shown to the operator which says "press space to show info about
     this special category.
     */
-    private specialCategoryPromptShow(specialCategory: SpecialCategory): void {
-        this.SPAN_SPECIAL_CATEGORY_TITLE.innerHTML = specialCategory.DISPLAY_NAME;
-        this.DIV_SPECIAL_CATEGORY_PROMPT.style.display = "block";
-    }
-
-    private specialCategoryPromptHide(): void {
-        this.DIV_SPECIAL_CATEGORY_PROMPT.style.display = "none";
-    }
+    /*
+     private specialCategoryPromptShow(specialCategory: SpecialCategory): void {
+         this.SPAN_SPECIAL_CATEGORY_TITLE.innerHTML = specialCategory.DISPLAY_NAME;
+         this.DIV_SPECIAL_CATEGORY_PROMPT.style.display = "block";
+     }
+ 
+     private specialCategoryPromptHide(): void {
+         this.DIV_SPECIAL_CATEGORY_PROMPT.style.display = "none";
+     }
+         */
 
     /**
      * A category is special if it has special rules or need extra explanation.
      */
+    /*
     public specialCategoryPopupShow(): void {
         this.GAME_ROUND_TIMER.pause();
 
@@ -609,6 +612,7 @@ export class Operator {
         this.presentation?.specialCategoryPopupHide();
         this.GAME_ROUND_TIMER.resume();
     }
+        */
 
     /**
      * Called from the state machine.
@@ -631,7 +635,7 @@ export class Operator {
 
         this.BUTTON_SKIP_CLUE.removeAttribute("disabled");
 
-        this.specialCategoryPromptHide();
+        // this.specialCategoryPromptHide();
     }
 
     private getQuestionHtmlWithSubjectInBold(question: string): string {

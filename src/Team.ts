@@ -4,7 +4,7 @@ import { Settings } from "./Settings";
 import { querySelectorAndCheck } from "./commonFunctions";
 import { Operator } from "./operator/Operator";
 import { Presentation } from "./presentation/Presentation";
-import { FullClue } from "./typesForGame";
+import { Clue } from "./typesForGame";
 
 /** Used to create charts at the end of the game. */
 interface Statistics {
@@ -93,7 +93,7 @@ export class Team {
         this.setState("idle");
     }
 
-    public onAnswerCorrect(clue: FullClue): void {
+    public onAnswerCorrect(clue: Clue): void {
         this.answerStop();
         this.AUDIO_MANAGER.ANSWER_CORRECT.play();
         this.moneyAdd(clue.VALUE);
@@ -101,7 +101,7 @@ export class Team {
         this.hasBuzzedForCurrentQuestion = true;
     }
 
-    public onAnswerIncorrectOrAnswerTimeout(clue: FullClue): void {
+    public onAnswerIncorrectOrAnswerTimeout(clue: Clue): void {
         this.answerStop();
         this.AUDIO_MANAGER.ANSWER_WRONG_OR_ANSWER_TIMEOUT.play();
         this.moneySubtract(clue.VALUE * this.SETTINGS.wrongAnswerPenaltyMultiplier);
@@ -438,7 +438,7 @@ export class Team {
     }
 
     public choosingClueClear(): void {
-        this.DIV.OPERATOR.wrapper?.classList.add("choose-clue");
+        this.DIV.OPERATOR.wrapper?.classList.remove("choose-clue");
         this.DIV.PRESENTATION.wrapper?.classList.remove("choose-clue");
     }
 

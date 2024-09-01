@@ -1,5 +1,5 @@
 import { Operator } from "./operator/Operator";
-import { RoundType, ScrapedRound } from "./typesForGame";
+import { RoundType, GameRound } from "./typesForGame";
 
 /**
  * The <table>s in the operator window and presentation windows should have the exact same
@@ -45,7 +45,9 @@ export class GameBoard {
 
     private cluesCountRevealedThisRound = NaN;
 
-    private gameRound: ScrapedRound | null = null;
+    private gameRound: GameRound | null = null;
+
+    // TODO add a list of clues which have not been revealed yet, so we can get a random one if the team takes too long
 
     public constructor(operator: Operator, tableInOperatorWindow: HTMLTableElement, tableInPresentationWindow: HTMLTableElement) {
         this.OPERATOR = operator;
@@ -93,9 +95,7 @@ export class GameBoard {
                 td.addEventListener("click", () => {
                     if (this.gameRound) {
                         const clue = this.gameRound.CLUES[clueRowIndex][columnIndex];
-                        const categoryName = this.gameRound.CATEGORIES[columnIndex].NAME;
-                        const value = GameBoard.CLUE_VALUES[clueRowIndex] * GameBoard.MULTIPLIER[this.gameRound.TYPE];
-                        this.OPERATOR.onGameBoardClueClicked(clue, categoryName, value);
+                        this.OPERATOR.onGameBoardClueClicked(clue);
 
                         // Hide the cell so it cannot be clicked on again.
                         this.CLUE_CELLS.forEach(twoDArray => twoDArray[clueRowIndex][columnIndex].setAttribute(
@@ -130,7 +130,7 @@ export class GameBoard {
 
     }
 
-    public setGameRound(gameRound: ScrapedRound): void {
+    public setGameRound(gameRound: GameRound): void {
         this.gameRound = gameRound;
 
         // Set categories

@@ -1,46 +1,35 @@
-import { SpecialCategory } from "./specialCategories";
-
-export type ScrapedGame = {
+export type Game = {
     /** From game_id in URL */
     readonly J_ARCHIVE_GAME_ID: number;
     /** From the header in the webpage */
     readonly SHOW_NUMBER: number;
     readonly AIRDATE: string;
-    readonly ROUNDS: ScrapedRound[];
+    readonly ROUNDS: GameRound[];
 }
 
 export type RoundType = "single" | "double";
-export type ScrapedRound = {
+export type GameRound = {
     readonly TYPE: RoundType;
-    readonly CATEGORIES: ScrapedCategory[];
+    readonly CATEGORIES: Category[];
     /**
      * This 2D array follows the structure of an HTML table.
      * The first array index is the row index.
      * The second array index is the column index.
      * */
-    readonly CLUES: ScrapedClue[][];
+    readonly CLUES: Clue[][];
 }
 
-export type ScrapedCategory = {
+export type Category = {
     readonly NAME: string;
     /** A few categories have a comment from the host explaining the meaning of the category name. */
-    readonly COMMENTS?: string;
+    readonly COMMENT?: string;
 }
 
-/**
- * A scraped clue does not have the value or category because those both come from array indexes.
- */
-export type ScrapedClue = {
+export type Clue = {
+    /** Text to show on screen to the players. */
     readonly QUESTION: string;
+    /** If a player says this, they get the money. */
     readonly ANSWER: string;
-}
-
-/**
- * A full clue is created only when the human operator clicks on a cell in
- * the game board table.
- */
-export interface FullClue extends ScrapedClue {
     readonly VALUE: number;
     readonly CATEGORY_NAME: string;
-    readonly SPECIAL_CATEGORY: SpecialCategory | null;
 }
