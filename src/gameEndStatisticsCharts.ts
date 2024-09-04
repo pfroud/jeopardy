@@ -27,14 +27,16 @@ export function createGameEndPieCharts(operator: Operator, divForPieCharts: HTML
             series: []
         };
 
+        const teamStats = team.getStatistics();
+
         const seriesToPotentiallyAdd = [{
-            value: team.statistics.questionsNotBuzzed,
+            value: teamStats.questionsNotBuzzed,
             className: "not-buzzed"
         }, {
-            value: team.statistics.questionsBuzzedThenAnsweredRight,
+            value: teamStats.questionsBuzzedThenAnsweredRight,
             className: "buzzed-then-answered-right"
         }, {
-            value: team.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut,
+            value: teamStats.questionsBuzzedThenAnsweredWrongOrTimedOut,
             className: "buzzed-then-answered-wrong-or-timed-out"
         }];
         // only add if non-zero
@@ -124,16 +126,16 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
         teams.map(
             (team, teamIndex) => ({
                 className: `team-${teamIndex + 1}`,
-                data: team.statistics.moneyAtEndOfEachRound.map(
+                data: team.getStatistics().moneyAtEndOfEachRound.map(
                     (dollars, index) => ({ x: index, y: dollars })
                 )
             })
         );
 
 
-    if (teams.some(team => team.statistics.moneyAtEndOfEachRound.some(money => money < 0))) {
+    if (teams.some(team => team.getStatistics().moneyAtEndOfEachRound.some(money => money < 0))) {
         // Add a horizontal line at $0.
-        const maxIndex = teams[0].statistics.moneyAtEndOfEachRound.length - 1;
+        const maxIndex = teams[0].getStatistics().moneyAtEndOfEachRound.length - 1;
         const seriesData: LineChartSeriesData = {
             className: "zero",
             data: [{

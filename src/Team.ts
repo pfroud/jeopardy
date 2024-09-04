@@ -66,9 +66,10 @@ export class Team {
             PRESENTATION: {
             }
         };
-    public hasBuzzedForCurrentQuestion = false;
 
-    public statistics: Statistics = {
+    private hasBuzzedForCurrentQuestion_ = false;
+
+    private statistics: Statistics = {
         questionsNotBuzzed: 0,
         questionsBuzzedThenAnsweredRight: 0,
         questionsBuzzedThenAnsweredWrongOrTimedOut: 0,
@@ -98,7 +99,7 @@ export class Team {
         this.AUDIO_MANAGER.ANSWER_CORRECT.play();
         this.moneyAdd(clue.VALUE);
         this.statistics.questionsBuzzedThenAnsweredRight++;
-        this.hasBuzzedForCurrentQuestion = true;
+        this.hasBuzzedForCurrentQuestion_ = true;
     }
 
     public onAnswerIncorrectOrAnswerTimeout(clue: Clue): void {
@@ -107,7 +108,7 @@ export class Team {
         this.moneySubtract(clue.VALUE * this.SETTINGS.wrongAnswerPenaltyMultiplier);
         this.setState(this.SETTINGS.allowMultipleAnswersToSameQuestion ? "can-answer" : "already-answered-this-clue");
         this.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut++;
-        this.hasBuzzedForCurrentQuestion = true;
+        this.hasBuzzedForCurrentQuestion_ = true;
     }
 
     public getTeamName(): string {
@@ -412,6 +413,11 @@ export class Team {
 
     public statisticsUpdateMoneyAtEndOfRound(): void {
         this.statistics.moneyAtEndOfEachRound.push(this.money);
+
+        if (this.hasBuzzedForCurrentQuestion_) {
+            this.statistics.questionsNotBuzzed++;
+        }
+
     }
 
     public getObjectToSaveInLocalStorage(): TeamSavedInLocalStorage {
@@ -440,6 +446,18 @@ export class Team {
     public choosingClueClear(): void {
         this.DIV.OPERATOR.wrapper?.classList.remove("choose-clue");
         this.DIV.PRESENTATION.wrapper?.classList.remove("choose-clue");
+    }
+
+    public hasBuzzedForCurrentQuestion(): boolean {
+        return this.hasBuzzedForCurrentQuestion_;
+    }
+
+    public resetHasBuzzedForCurrentQuestion(): void {
+        this.hasBuzzedForCurrentQuestion_ = false;
+    }
+
+    public getStatistics(): Statistics {
+        return this.statistics;
     }
 
 
