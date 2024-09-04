@@ -1,3 +1,26 @@
+/*
+This file is not an Ecmascript module because that would make
+it not work when you paste it into a web browser debugger console.
+
+To compile the scraper only to a Javascript file to run in the browser:
+1. Change the file extension of this file to .ts.
+2. On the terminal, run "tsc src/scraper/scraper.ts". It will generate scraper.js.
+
+But when this file has .ts file extension, all the types from this file
+will be visible to VS Code in the rest of the project. But since this file is NOT an 
+Ecmascript module it will not actually work when used in a web browser.
+
+If you typececk the entire project by running "tsc -noemit" when this file has .ts file extension,
+you'll get this error:
+    src/scraper/scraper.ts - error TS1208: 'scraper.ts' cannot be compiled under '--isolatedModules'
+    because it is considered a global script file. Add an import, export, or an empty 'export {}'
+    statement to make it a module.
+
+Info about isolatedModules: https://www.typescriptlang.org/tsconfig/#isolatedModules
+
+So when I am not editing this file I change the file extension to .ts.txt.
+
+*/
 type Game = {
     /** From game_id in URL */
     readonly J_ARCHIVE_GAME_ID: number;
@@ -19,15 +42,26 @@ type Round = {
     readonly CLUES: ScrapedClue[][];
 }
 
+const CLUE_VALUES = [200, 400, 600, 800, 1000];
+/** For Double Jeopardy, each dollar value is doubled. */
+const MULTIPLIER: { [roundType in RoundType]: number } = {
+    "single": 1,
+    "double": 2
+};
+
 type Category = {
     readonly NAME: string;
     /** A few categories have a comment from the host explaining the meaning of the category name. */
-    COMMENTS?: string;
+    COMMENT?: string;
 }
 
 type ScrapedClue = {
     readonly QUESTION: string;
     readonly ANSWER: string;
+    readonly VALUE: number;
+    readonly CATEGORY_NAME: string;
+    readonly ROW_INDEX: number;
+    readonly COLUMN_INDEX: number;
 }
 
 function main(): void {
@@ -87,7 +121,7 @@ function parseTableForRound(roundType: RoundType, table: HTMLTableElement): Roun
                 };
                 const commentsString = td.querySelector<HTMLTableCellElement>("td.category_comments")!.innerText.trim();
                 if (commentsString.length > 0) {
-                    rv.COMMENTS = commentsString;
+                    rv.COMMENT = commentsString;
                 }
                 return rv;
             });
@@ -108,7 +142,11 @@ function parseTableForRound(roundType: RoundType, table: HTMLTableElement): Roun
 
             return {
                 QUESTION: question,
-                ANSWER: answer
+                ANSWER: answer,
+                ROW_INDEX: rowIndex,
+                COLUMN_INDEX: categoryIndex,
+                VALUE: CLUE_VALUES[rowIndex] * MULTIPLIER[roundType],
+                CATEGORY_NAME: categories[categoryIndex].NAME
             };
         })
 
