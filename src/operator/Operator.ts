@@ -668,7 +668,7 @@ export class Operator {
 
         this.stateMachine?.getCountdownTimerForState("waitForBuzzes").reset();
 
-        this.teamArray?.forEach(team => team.hasBuzzedForCurrentQuestion = false);
+        this.teamArray?.forEach(team => team.resetHasBuzzedForCurrentQuestion());
 
         if (this.buzzHistoryForClue) {
             this.buzzHistoryForClue.timestampWhenClueQuestionFinishedReading = Date.now();
@@ -692,9 +692,6 @@ export class Operator {
 
         this.teamArray?.forEach(team => {
             team.statisticsUpdateMoneyAtEndOfRound();
-            if (!team.hasBuzzedForCurrentQuestion) {
-                team.statistics.questionsNotBuzzed++;
-            }
         });
 
         this.questionCountForPieCharts++;
@@ -961,7 +958,7 @@ export class Operator {
 
     public buzzHistoryShouldShow(): boolean {
         if (this.teamArray) {
-            return this.teamArray.some(t => t.hasBuzzedForCurrentQuestion);
+            return this.teamArray.some(t => t.hasBuzzedForCurrentQuestion());
         } else {
             throw new Error("called shouldShowBuzzHistory() when teamArray is undefined");
         }
