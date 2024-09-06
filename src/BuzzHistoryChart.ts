@@ -581,6 +581,7 @@ export class BuzzHistoryChart {
         and the rightmost record isn't exactly on the edge.
         */
         this.SCALE_WITHOUT_ZOOM_TRANSFORM.domain([domainMinToUse * 1.3, lastTimestamp * 1.1]);
+        this.scaleWithZoomTransform.domain(this.SCALE_WITHOUT_ZOOM_TRANSFORM.domain());
 
         /*
         Reset the pan & zoom.
