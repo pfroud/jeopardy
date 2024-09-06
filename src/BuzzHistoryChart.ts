@@ -466,13 +466,16 @@ export class BuzzHistoryChart {
 
     private calculateAnnotations(): void {
         if (!this.history) {
-            throw new Error("called doAnnotations with no history");
+            throw new Error("called calculateAnnotations with no history");
         }
 
-        // TODO do I need to add the team number into the record interface?
-        const answeringRecords = this.history.RECORDS.flat().filter(record => record.RESULT.TYPE === "start-answer")
+        // Find the first buzz from any team which started an answer.
+        const answeringRecords = this.history.RECORDS.flat()
+            .filter(record => record.RESULT.TYPE === "start-answer")
             .sort((a, b) => a.startTimestamp - b.startTimestamp);
-
+        if (answeringRecords.length < 1) {
+            return;
+        }
         const firstAnswer = answeringRecords[0];
 
         for (let teamIdx = 0; teamIdx < this.history.RECORDS.length; teamIdx++) {
@@ -483,6 +486,8 @@ export class BuzzHistoryChart {
             const records = this.history.RECORDS[teamIdx];
 
             /*
+            Find buzzes which were too late.
+
             Find the EARLIEST record which is AFTER the operator finishing 
             reading the clue question, and within annotation range.
             */
@@ -492,6 +497,7 @@ export class BuzzHistoryChart {
                 const difference = record.startTimestamp - firstAnswer.startTimestamp;
                 if (
                     record.RESULT.TYPE === "ignored" // buzzes that happened when someone else was answering
+                    && record.RESULT.TEAM_STATE_WHY_IT_WAS_IGNORED === "other-team-is-answering"
                     && difference <= BuzzHistoryChart.ANNOTATION_RANGE_MILLISEC
                 ) {
                     this.ANNOTATIONS[teamIdx].push({
@@ -504,6 +510,8 @@ export class BuzzHistoryChart {
             }
 
             /*
+            Find buzzes which were too early.
+
             Find the LATEST record which is BEFORE the operator finishing 
             reading the clue question, and within the annotation range.
             */
@@ -524,27 +532,6 @@ export class BuzzHistoryChart {
                 }
             }
         }
-
-        /*
-        Next I want to add more annotations:
-
-        - Find the first record which starts the answer.
-        - Then search for records which are within the range of that timestamp.
-        - Then I need to add some stuff to the Annotation interface so that
-            we can indicate that the start or end time comes from a different team:
-
-            Team A    o=========       answer
-            Team B    |  o===          lockout
-                      |  |
-                      <-->
-                     "n millisec too late"
-
-        The index in RECORDS should be the team where the message is drawn.
-        Then I can add another property in the Annotation interface to
-        specify the team index where one side of the arrow should go to.
-        Will it always be the left side which goes to a different team?
-        For now I think so, that's fine for testing it.
-        */
 
 
     }
