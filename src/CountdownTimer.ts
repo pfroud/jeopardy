@@ -320,5 +320,12 @@ export class CountdownTimer {
         }
     }
 
+    public addTime(millisecToAdd: number): void {
+        if (this.isStarted_ && !this.isFinished_) {
+            this.remainingMillisec += millisecToAdd;
+            this.guiUpdateForInterval();
+        }
+    }
+
 
 }

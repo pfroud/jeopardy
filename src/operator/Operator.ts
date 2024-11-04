@@ -286,6 +286,10 @@ export class Operator {
 
         this.BUTTON_SKIP_CLUE.addEventListener("click", () => this.clueSkip());
 
+        querySelectorAndCheck(document, "button#add-one-minute").addEventListener("click", () => {
+            this.GAME_ROUND_TIMER.addTime(60 * 1000);
+        });
+
         querySelectorAndCheck(document, "a#aMoneyOverride").addEventListener("click", () =>
             window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney"));
 
