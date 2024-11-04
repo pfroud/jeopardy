@@ -55,7 +55,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             }, {
                 TYPE: "timeout",
                 BEHAVIOR: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
-                INITIAL_DURATION_MILLISEC: 10_000,
+                INITIAL_DURATION_MILLISEC: settings.timeBeforeRandomClueIsChosen,
                 ON_TRANSITION: operator.teamTimedOutChoosingClue.bind(operator),
                 DESTINATION: "showClueCategoryAndValue"
             }]

@@ -30,6 +30,8 @@ export class Settings {
 
     public gameRoundTimeLimitMillisec = 10 * 60 * 1000;
 
+    public timeBeforeRandomClueIsChosen = 10_000;
+
     private readonly GUI_INPUT: {
         readonly DISPLAY_DURATION_CATEGORY: HTMLInputElement;
         readonly DISPLAY_DURATION_ANSWER: HTMLInputElement;
