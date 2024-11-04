@@ -37,6 +37,17 @@ main {
 
         /**************************************************/
         &#tab-content-play {
+
+            div#controls {
+                display: flex;
+
+                a#aMoneyOverride {
+                    flex-grow: 2;
+                    text-align: right;
+                }
+            }
+
+
             div#instructions {
                 font-weight: bold;
             }
