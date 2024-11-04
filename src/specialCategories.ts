@@ -15,14 +15,14 @@ export interface SpecialCategory {
     }
 }
 
-export function checkSpecialCategory(categoryName: string): SpecialCategory | null {
+export function checkSpecialCategory(categoryName: string): SpecialCategory | undefined {
     // search for the first one which matches
     for (const specialCategory of specialCategories) {
         if (specialCategory.CATEGORY_NAME_MATCHES.test(categoryName)) {
             return specialCategory;
         }
     }
-    return null;
+    return undefined;
 }
 
 export const specialCategories: SpecialCategory[] = [

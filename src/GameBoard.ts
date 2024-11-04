@@ -29,7 +29,7 @@ export class GameBoard {
 
     /** 
      * The Map value is an array of table cells.
-     * */
+     */
     private readonly CATEGORY_CELLS = new Set<HTMLTableCellElement[]>();
 
     /**
@@ -144,7 +144,25 @@ export class GameBoard {
         }
         this.CATEGORY_CELLS.forEach(arrayOfTds => {
             for (let i = 0; i < GameBoard.TABLE_COLUMN_COUNT; i++) {
-                arrayOfTds[i].innerText = categories[i].NAME;
+                const category = categories[i];
+                const td = arrayOfTds[i];
+                td.innerText = category.NAME;
+
+                if (category.specialCategory !== undefined) {
+
+                    const specialCategoryIconWrapper = document.createElement("div");
+                    specialCategoryIconWrapper.classList.add("special-category-icon-wrapper");
+                    specialCategoryIconWrapper.title = `This is a special category: ${category.specialCategory.DISPLAY_NAME}`;
+
+                    const specialCategoryIcon = document.createElement("div");
+                    specialCategoryIcon.classList.add("special-category-icon");
+                    specialCategoryIcon.innerText = "i";
+
+                    specialCategoryIconWrapper.append(specialCategoryIcon);
+                    td.append(" ");
+                    td.append(specialCategoryIconWrapper);
+                }
+
             }
         });
 

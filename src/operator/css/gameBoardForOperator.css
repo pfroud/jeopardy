@@ -7,6 +7,32 @@ table#game-board {
         border: 1px solid var(--light-foreground-color);
         text-align: center;
         vertical-align: middle;
+
+        div.special-category-icon-wrapper {
+            background: #aaaa00;
+            border: 1px solid #cccc00;
+            border-radius: 5px;
+            padding: 2px;
+            display: inline-block;
+
+            div.special-category-icon {
+
+                --blue: #1111cc;
+                --size: 16px;
+                border: 2px solid var(--blue);
+                border-radius: 50%;
+                width: var(--size);
+                height: var(--size);
+                line-height: var(--size);
+                font-size: var(--size);
+                text-align: center;
+                font-weight: bold;
+                color: var(--blue);
+                font-family: monospace;
+
+            }
+        }
+
     }
 
     tr.clues td {

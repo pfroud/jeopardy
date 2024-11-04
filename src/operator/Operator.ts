@@ -8,6 +8,7 @@ import { querySelectorAndCheck } from "../commonFunctions";
 import { createGameEndLineChartOfMoneyOverTime, createGameEndPieCharts } from "../gameEndStatisticsCharts";
 import { Presentation } from "../presentation/Presentation";
 import { SCRAPED_GAME } from "../scrapedGame";
+import { checkSpecialCategory, SpecialCategory } from "../specialCategories";
 import { StateMachine } from "../stateMachine/StateMachine";
 import { Clue } from "../typesForGame";
 
@@ -38,16 +39,16 @@ export class Operator {
     private readonly BUTTON_START_GAME: HTMLButtonElement;
     private readonly BUTTON_SKIP_CLUE: HTMLButtonElement;
     private readonly DIV_SPECIAL_CATEGORY_PROMPT: HTMLDivElement;
-    private readonly SPAN_SPECIAL_CATEGORY_TITLE: HTMLSpanElement;
+    private readonly SPAN_SPECIAL_CATEGORY_PROMPT_TITLE: HTMLSpanElement;
     private readonly DIV_SPECIAL_CATEGORY_POPUP: HTMLDivElement;
-    private readonly DIV_BUZZ_HISTORY_PROMPT: HTMLDivElement;
+    private readonly DIV_BUZZ_HISTORY_POPUP: HTMLDivElement;
     private readonly DIV_BACKDROP_FOR_POPUPS: HTMLDivElement;
 
-    private readonly SPECIAL_CATEGORY_TITLE: HTMLElement;
-    private readonly SPECIAL_CATEGORY_DESCRIPTION: HTMLElement;
-    private readonly SPECIAL_CATEGORY_EXAMPLE_CATEGORY: HTMLElement;
-    private readonly SPECIAL_CATEGORY_EXAMPLE_QUESTION: HTMLElement;
-    private readonly SPECIAL_CATEGORY_EXAMPLE_ANSWER: HTMLElement;
+    private readonly SPECIAL_CATEGORY_POPUP_TITLE: HTMLElement;
+    private readonly SPECIAL_CATEGORY_POPUP_DESCRIPTION: HTMLElement;
+    private readonly SPECIAL_CATEGORY_POPUP_EXAMPLE_CATEGORY: HTMLElement;
+    private readonly SPECIAL_CATEGORY_POPUP_EXAMPLE_QUESTION: HTMLElement;
+    private readonly SPECIAL_CATEGORY_POPUP_EXAMPLE_ANSWER: HTMLElement;
 
     private readonly DIV_GAME_END_CONTROLS: HTMLDivElement;
     private readonly DIV_STATISTICS_CHART_POPUP: HTMLDivElement;
@@ -93,16 +94,21 @@ export class Operator {
         this.DIV_INSTRUCTIONS = querySelectorAndCheck(document, "div#instructions");
         this.BUTTON_START_GAME = querySelectorAndCheck(document, "button#start-game");
         this.BUTTON_SKIP_CLUE = querySelectorAndCheck(document, "button#skip-clue");
+
         this.DIV_BACKDROP_FOR_POPUPS = querySelectorAndCheck(document, "div#backdrop-for-popups");
+
+        this.DIV_BUZZ_HISTORY_POPUP = querySelectorAndCheck(document, "div#buzz-history-chart-popup");
+
         this.DIV_SPECIAL_CATEGORY_PROMPT = querySelectorAndCheck(document, "div#special-category-prompt");
-        this.SPAN_SPECIAL_CATEGORY_TITLE = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_PROMPT, "span#special-category-title");
-        this.DIV_BUZZ_HISTORY_PROMPT = querySelectorAndCheck(document, "div#buzz-history-chart-popup");
+        this.SPAN_SPECIAL_CATEGORY_PROMPT_TITLE = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_PROMPT, "span#special-category-prompt-title");
+
         this.DIV_SPECIAL_CATEGORY_POPUP = querySelectorAndCheck(document, "div#special-category-popup");
-        this.SPECIAL_CATEGORY_TITLE = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, ".popup-title");
-        this.SPECIAL_CATEGORY_DESCRIPTION = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-description");
-        this.SPECIAL_CATEGORY_EXAMPLE_CATEGORY = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-category");
-        this.SPECIAL_CATEGORY_EXAMPLE_QUESTION = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-question");
-        this.SPECIAL_CATEGORY_EXAMPLE_ANSWER = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-example-answer");
+        this.SPECIAL_CATEGORY_POPUP_TITLE = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, ".popup-title");
+        this.SPECIAL_CATEGORY_POPUP_DESCRIPTION = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-popup-description");
+        this.SPECIAL_CATEGORY_POPUP_EXAMPLE_CATEGORY = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-popup-example-category");
+        this.SPECIAL_CATEGORY_POPUP_EXAMPLE_QUESTION = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-popup-example-question");
+        this.SPECIAL_CATEGORY_POPUP_EXAMPLE_ANSWER = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-popup-example-answer");
+
         this.DIV_GAME_END_CONTROLS = querySelectorAndCheck<HTMLDivElement>(document, "div#game-end-controls");
         this.DIV_STATISTICS_CHART_POPUP = querySelectorAndCheck<HTMLDivElement>(document, "div#statistics-chart-popup");
         this.DIV_TEAM_RANKING_WRAPPER = querySelectorAndCheck(document, "div#team-ranking-wrapper");
@@ -118,8 +124,6 @@ export class Operator {
         this.GAME_ROUND_TIMER = new CountdownTimer(this.SETTINGS.gameRoundTimeLimitMillisec);
         this.GAME_ROUND_TIMER.addProgressElement(querySelectorAndCheck(document, "div#game-round-timer progress"));
         this.GAME_ROUND_TIMER.addTextElement(querySelectorAndCheck(document, "div#game-round-timer div.remaining-time-text"));
-
-
 
         window.open("../presentation/presentation.html", "windowPresentation");
 
@@ -514,14 +518,6 @@ export class Operator {
             */
     }
 
-    /**
-     * A category is special if it has special rules or need extra explanation.
-     */
-    /*
-    public isCurrentClueSpecialCategory(): boolean {
-        return this.presentClue?.SPECIAL_CATEGORY !== null;
-    }
-        */
 
     /**
      * The game board is the table of categories and dollar values.
@@ -569,38 +565,36 @@ export class Operator {
     A prompt is shown to the operator which says "press space to show info about
     this special category.
     */
-    /*
-     private specialCategoryPromptShow(specialCategory: SpecialCategory): void {
-         this.SPAN_SPECIAL_CATEGORY_TITLE.innerHTML = specialCategory.DISPLAY_NAME;
-         this.DIV_SPECIAL_CATEGORY_PROMPT.style.display = "block";
-     }
- 
-     private specialCategoryPromptHide(): void {
-         this.DIV_SPECIAL_CATEGORY_PROMPT.style.display = "none";
-     }
-         */
+    private specialCategoryPromptShow(specialCategory: SpecialCategory): void {
+        this.SPAN_SPECIAL_CATEGORY_PROMPT_TITLE.innerHTML = specialCategory.DISPLAY_NAME;
+        this.DIV_SPECIAL_CATEGORY_PROMPT.style.display = "block";
+    }
+
+    private specialCategoryPromptHide(): void {
+        this.DIV_SPECIAL_CATEGORY_PROMPT.style.display = "none";
+    }
+
 
     /**
      * A category is special if it has special rules or need extra explanation.
      */
-    /*
     public specialCategoryPopupShow(): void {
         this.GAME_ROUND_TIMER.pause();
 
-        const specialCategory = this.presentClue?.SPECIAL_CATEGORY;
+        const specialCategory = this.categoryCarouselGetSpecialCategory();
         if (!specialCategory) {
             throw new Error("called showSpecialCategoryOverlay() when the present clue does not have a special category");
         }
 
         this.presentation?.specialCategoryPopupShow(specialCategory);
 
-        this.SPECIAL_CATEGORY_TITLE.innerHTML = specialCategory.DISPLAY_NAME;
-        this.SPECIAL_CATEGORY_DESCRIPTION.innerHTML = specialCategory.DESCRIPTION;
+        this.SPECIAL_CATEGORY_POPUP_TITLE.innerHTML = specialCategory.DISPLAY_NAME;
+        this.SPECIAL_CATEGORY_POPUP_DESCRIPTION.innerHTML = specialCategory.DESCRIPTION;
         if (specialCategory.EXAMPLE) {
             this.DIV_SPECIAL_CATEGORY_POPUP.classList.remove("no-example");
-            this.SPECIAL_CATEGORY_EXAMPLE_CATEGORY.innerHTML = specialCategory.EXAMPLE.CATEGORY;
-            this.SPECIAL_CATEGORY_EXAMPLE_QUESTION.innerHTML = specialCategory.EXAMPLE.QUESTION;
-            this.SPECIAL_CATEGORY_EXAMPLE_ANSWER.innerHTML = specialCategory.EXAMPLE.ANSWER;
+            this.SPECIAL_CATEGORY_POPUP_EXAMPLE_CATEGORY.innerHTML = specialCategory.EXAMPLE.CATEGORY;
+            this.SPECIAL_CATEGORY_POPUP_EXAMPLE_QUESTION.innerHTML = specialCategory.EXAMPLE.QUESTION;
+            this.SPECIAL_CATEGORY_POPUP_EXAMPLE_ANSWER.innerHTML = specialCategory.EXAMPLE.ANSWER;
         } else {
             this.DIV_SPECIAL_CATEGORY_POPUP.classList.add("no-example");
         }
@@ -615,7 +609,7 @@ export class Operator {
         this.presentation?.specialCategoryPopupHide();
         this.GAME_ROUND_TIMER.resume();
     }
-        */
+
 
     /**
      * Called from the state machine.
@@ -801,6 +795,7 @@ export class Operator {
             this.gameLoad(parsedJson);
             divSavedGame.style.display = "none";
         });
+
         querySelectorAndCheck(document, "button#saved-game-delete").addEventListener("click", function () {
             if (window.confirm("Delete the saved game?")) {
                 window.localStorage.removeItem(Operator.LOCAL_STORAGE_KEY);
@@ -915,7 +910,7 @@ export class Operator {
             this.GAME_ROUND_TIMER.pause();
 
             this.backdropForPopupsShow();
-            this.DIV_BUZZ_HISTORY_PROMPT.style.display = "block";
+            this.DIV_BUZZ_HISTORY_POPUP.style.display = "block";
 
             this.buzzHistoryChart.showNewHistory(this.buzzHistoryForClue);
         }
@@ -940,7 +935,7 @@ export class Operator {
     public onBuzzHistoryHide(): void {
         this.GAME_ROUND_TIMER.resume();
         this.backdropForPopupsHide();
-        this.DIV_BUZZ_HISTORY_PROMPT.style.display = "none";
+        this.DIV_BUZZ_HISTORY_POPUP.style.display = "none";
     }
 
     public getStateMachine(): StateMachine | undefined {
@@ -996,6 +991,17 @@ export class Operator {
     }
 
     /**
+     * A category is special if it has special rules or need extra explanation.
+     */
+    public categoryCarouselIsSpecialCategory(): boolean {
+        return this.categoryCarouselGetSpecialCategory() !== undefined;
+    }
+
+    public categoryCarouselGetSpecialCategory(): SpecialCategory | undefined {
+        return SCRAPED_GAME.ROUNDS[this.gameRoundIndex].CATEGORIES[this.categoryCarouselIndex].specialCategory;
+    }
+
+    /**
      * Called from the state machine
      */
     public categoryCarouselShowNext(): void {
@@ -1004,6 +1010,13 @@ export class Operator {
 
         const categoryName = SCRAPED_GAME.ROUNDS[this.gameRoundIndex].CATEGORIES[this.categoryCarouselIndex].NAME;
         const str = `Category ${this.categoryCarouselIndex + 1} of ${GameBoard.TABLE_COLUMN_COUNT}: "${categoryName}".`;
+
+        const specialCategory = this.categoryCarouselGetSpecialCategory();
+        if (specialCategory === undefined) {
+            this.specialCategoryPromptHide();
+        } else {
+            this.specialCategoryPromptShow(specialCategory);
+        }
 
         if (this.categoryCarouselHasMore()) {
             this.DIV_INSTRUCTIONS.innerText = `${str} Press space to show the next category in the carousel`;
@@ -1018,6 +1031,10 @@ export class Operator {
     public gameRoundStartNext(): void {
         this.gameRoundIndex++;
         const gameRound = SCRAPED_GAME.ROUNDS[this.gameRoundIndex];
+
+        gameRound.CATEGORIES.forEach(category => category.specialCategory = checkSpecialCategory(category.NAME));
+
+
         this.gameBoard?.setGameRound(gameRound);
 
         this.DIV_CLUE_WRAPPER.style.display = "none";

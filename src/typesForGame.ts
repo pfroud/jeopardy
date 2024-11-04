@@ -1,3 +1,5 @@
+import { SpecialCategory } from "./specialCategories";
+
 export type Game = {
     /** From game_id in URL */
     readonly J_ARCHIVE_GAME_ID: number;
@@ -23,6 +25,7 @@ export type Category = {
     readonly NAME: string;
     /** A few categories have a comment from the host explaining the meaning of the category name. */
     readonly COMMENT?: string;
+    specialCategory?: SpecialCategory | undefined;
 }
 
 export type Clue = {

@@ -101,18 +101,18 @@ div.operator-popup {
 
         &.no-example {
 
-            p#special-category-example-title,
-            div#special-category-example-wrapper {
+            p#special-category-popup-example-title,
+            div#special-category-popup-example-wrapper {
                 display: none;
             }
         }
 
-        div#special-category-example-wrapper {
+        div#special-category-popup-example-wrapper {
             border: 1px solid gray;
             padding: 20px;
             border-radius: 10px;
 
-            table#special-category-example-table {
+            table#special-category-popup-example-table {
                 border-collapse: collapse;
                 line-height: 200%;
 

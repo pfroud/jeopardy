@@ -28,20 +28,48 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
         }, {
             NAME: "showCategoryCarousel",
             PRESENTATION_SLIDE_TO_SHOW: "slide-category-carousel",
-            TRANSITIONS: [{
-                TYPE: "keyboardWithIf",
-                KEYBOARD_KEYS: " ", //space
-                CONDITION: operator.categoryCarouselHasMore.bind(operator),
-                THEN: {
-                    DESTINATION: "showCategoryCarousel",
-                    ON_TRANSITION: operator.categoryCarouselShowNext.bind(operator)
+            TRANSITIONS: [
+
+                {
+                    TYPE: "keyboard",
+                    KEYBOARD_KEYS: "y",
+                    DESTINATION: "showMessageForSpecialCategory",
+                    GUARD_CONDITION: operator.categoryCarouselIsSpecialCategory.bind(operator)
                 },
-                ELSE: {
-                    DESTINATION: "showGameBoard",
-                    ON_TRANSITION: operator.categoryCarouselStop.bind(operator)
-                }
+
+                {
+                    TYPE: "keyboardWithIf",
+                    KEYBOARD_KEYS: " ", //space
+                    CONDITION: operator.categoryCarouselHasMore.bind(operator),
+                    THEN: {
+                        DESTINATION: "showCategoryCarousel",
+                        ON_TRANSITION: operator.categoryCarouselShowNext.bind(operator)
+                    },
+                    ELSE: {
+                        DESTINATION: "showGameBoard",
+                        ON_TRANSITION: operator.categoryCarouselStop.bind(operator)
+                    }
+
+                }]
+        },
+
+        {
+            /*
+            The game is paused to display an information message about a Jeopardy category
+            with special meaning (quotation marks, before & after, etc).
+            */
+
+            NAME: "showMessageForSpecialCategory",
+            ON_ENTER: operator.specialCategoryPopupShow.bind(operator),
+            ON_EXIT: operator.specialCategoryPopupHide.bind(operator),
+            TRANSITIONS: [{
+                TYPE: "keyboard",
+                KEYBOARD_KEYS: " ", //space
+                DESTINATION: "showCategoryCarousel"
             }]
-        }, {
+        },
+
+        {
             NAME: "showGameBoard",
             INSTRUCTIONS: "Click on a clue in the game board.",
             PRESENTATION_SLIDE_TO_SHOW: "slide-game-board",
@@ -78,33 +106,8 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
                 */
                 ON_TRANSITION: operator.onShowClueQuestion.bind(operator)
             }
-                /*
-                , {
-                    TYPE: "keyboard",
-                    KEYBOARD_KEYS: " ", //space
-                    DESTINATION: "showMessageForSpecialCategory",
-                    GUARD_CONDITION: operator.isCurrentClueSpecialCategory.bind(operator)
-                }
-                    */
             ]
-        },
-
-        //{
-        /*
-        The game is paused to display an information message about a Jeopardy category
-        with special meaning (quotation marks, before & after, etc).
-        */
-        /*
-         NAME: "showMessageForSpecialCategory",
-         ON_ENTER: operator.specialCategoryPopupShow.bind(operator),
-         ON_EXIT: operator.specialCategoryPopupHide.bind(operator),
-         TRANSITIONS: [{
-             TYPE: "keyboard",
-             KEYBOARD_KEYS: " ", //space
-             DESTINATION: "showClueCategoryAndValue"
-         }]
-     },*/
-        {
+        }, {
             /*
             The clue question is shown on center of the presentation window. The person operating the
             game is supposed to read the question out loud and press space when done reading it.
@@ -186,14 +189,6 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             ON_ENTER: operator.onShowAnswer.bind(operator),
             PRESENTATION_SLIDE_TO_SHOW: "slide-clue-answer",
             TRANSITIONS: [
-                /*
-                {
-                type: "timeout",
-                initialDuration: settings.displayDurationAnswerMillisec,
-                behavior: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
-                destination: "showBuzzHistory"
-            }
-            */
                 {
                     TYPE: "keyboard",
                     KEYBOARD_KEYS: " ", //space

@@ -14,6 +14,12 @@ table#game-board {
         vertical-align: middle;
         width: calc((100vw - 100px) / 6);
         padding: 5px 0px;
+
+        div.special-category-icon-wrapper {
+            /* Not sure if I want to show a decorator icon in the presentation window */
+            display: none;
+        }
+
     }
 
 
