@@ -18,8 +18,6 @@ export class StateMachine {
     private readonly OPERATOR_WINDOW_DIV_STATE_NAME: HTMLDivElement;
     private readonly STATE_MAP: { [stateName: string]: StateMachineState } = {};
 
-    private readonly ADD_COUNTDOWN_TIMERS_DISPLAY_TO_OPERATOR_WINDOW = false;
-
     /**
      * Keep track of countdown timer going out of the state. In other words
      * it is the countdown timer that starts when you enter the state.
@@ -27,7 +25,6 @@ export class StateMachine {
     private readonly COUNTDOWN_TIMER_LEAVING_STATE: { [stateName: string]: CountdownTimer } = {};
 
     private readonly ALL_STATES: StateMachineState[];
-    private readonly TABLE_OF_ALL_COUNTDOWN_TIMERS: HTMLTableElement;
     private stateMachineViewer?: StateMachineViewer;
     private presentState: StateMachineState;
 
@@ -39,8 +36,6 @@ export class StateMachine {
         this.OPERATOR_WINDOW_COUNTDOWN_PROGRESS = querySelectorAndCheck(document, "div#state-machine-viz progress");
         this.OPERATOR_WINDOW_COUNTDOWN_TEXT = querySelectorAndCheck(document, "div#state-machine-viz div.remaining-time-text");
         this.OPERATOR_WINDOW_DIV_STATE_NAME = querySelectorAndCheck(document, "div#state-machine-viz div#state-name");
-
-        this.TABLE_OF_ALL_COUNTDOWN_TIMERS = querySelectorAndCheck(document, "table#state-machine-all-countdown-timers");
 
         window.addEventListener("keydown", keyboardEvent => this.onKeyboardEvent(keyboardEvent));
 
@@ -365,28 +360,6 @@ export class StateMachine {
                         const countdownTimer = this.createCountdownTimerForTransition(transition);
                         this.COUNTDOWN_TIMER_LEAVING_STATE[state.NAME] = countdownTimer;
 
-                        if (this.ADD_COUNTDOWN_TIMERS_DISPLAY_TO_OPERATOR_WINDOW) {
-                            // create a progress element in the operator page - probably only needed for debugging
-                            const tr = document.createElement("tr");
-
-                            const tdStateLabel = document.createElement("td");
-                            tdStateLabel.innerHTML = `(${transition.BEHAVIOR}) ${state.NAME} &rarr; ${transition.DESTINATION} `;
-                            tr.appendChild(tdStateLabel);
-
-                            const tdProgressElement = document.createElement("td");
-                            const progressElement = document.createElement("progress");
-                            progressElement.setAttribute("value", "0");
-                            countdownTimer.addProgressElement(progressElement);
-                            tdProgressElement.appendChild(progressElement);
-                            tr.appendChild(tdProgressElement);
-
-                            const tdRemainingTimeText = document.createElement("td");
-                            countdownTimer.addTextElement(tdRemainingTimeText);
-                            tr.appendChild(tdRemainingTimeText);
-
-
-                            this.TABLE_OF_ALL_COUNTDOWN_TIMERS.appendChild(tr);
-                        }
                         break;
                     }
                 }
