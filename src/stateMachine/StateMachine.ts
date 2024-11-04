@@ -33,9 +33,9 @@ export class StateMachine {
         this.PRESENTATION = presentation;
         this.AUDIO_MANAGER = audioManager;
 
-        this.OPERATOR_WINDOW_COUNTDOWN_PROGRESS = querySelectorAndCheck(document, "div#state-machine-viz progress");
-        this.OPERATOR_WINDOW_COUNTDOWN_TEXT = querySelectorAndCheck(document, "div#state-machine-viz div.remaining-time-text");
-        this.OPERATOR_WINDOW_DIV_STATE_NAME = querySelectorAndCheck(document, "div#state-machine-viz div#state-name");
+        this.OPERATOR_WINDOW_COUNTDOWN_PROGRESS = querySelectorAndCheck(document, "div#current-state progress");
+        this.OPERATOR_WINDOW_COUNTDOWN_TEXT = querySelectorAndCheck(document, "div#current-state div.remaining-time-text");
+        this.OPERATOR_WINDOW_DIV_STATE_NAME = querySelectorAndCheck(document, "div#current-state div#state-name");
 
         window.addEventListener("keydown", keyboardEvent => this.onKeyboardEvent(keyboardEvent));
 

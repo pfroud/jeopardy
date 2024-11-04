@@ -71,13 +71,21 @@ main {
                 border-radius: 5px;
             }
 
-            div#state-machine-viz,
+            div#game-round-timer-wrapper,
+            div#current-state-wrapper {
+                display: flex;
+
+            }
+
+            div#current-state,
             div#game-round-timer {
+                flex-grow: 2;
                 position: relative;
 
                 progress {
                     width: 100%;
                     height: 30px;
+
                 }
 
                 div {
