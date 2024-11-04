@@ -41,7 +41,7 @@ main {
             div#controls {
                 display: flex;
 
-                a#aMoneyOverride {
+                span#money-override-wrapper {
                     flex-grow: 2;
                     text-align: right;
                 }
