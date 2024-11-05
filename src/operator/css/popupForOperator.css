@@ -23,11 +23,11 @@ div.operator-popup {
         font-size: 60px;
     }
 
-    &#statistics-chart-popup {
+    &#game-end-popup {
         background: #dddddd;
         width: 85%;
 
-        div#game-end-controls {
+        div#game-end-popup-buttons {
             margin-bottom: 40px;
         }
 

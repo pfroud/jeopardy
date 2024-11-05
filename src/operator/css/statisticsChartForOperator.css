@@ -5,7 +5,7 @@ This stylesheet gets added with the Chartist stylesheet:
 "node_modules/chartist/dist/index.scss"
 */
 
-div#statistics-chart-popup div#pie-chart-wrapper {
+div#game-end-popup div#pie-chart-wrapper {
 
 
     --color-answered-right: green;
@@ -84,7 +84,7 @@ div#statistics-chart-popup div#pie-chart-wrapper {
     }
 }
 
-div#statistics-chart-popup div#line-chart-wrapper {
+div#game-end-popup div#line-chart-wrapper {
     g.ct-series {
 
         &.zero {

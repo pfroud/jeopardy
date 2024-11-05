@@ -51,12 +51,12 @@ export class Operator {
     private readonly SPECIAL_CATEGORY_POPUP_EXAMPLE_QUESTION: HTMLElement;
     private readonly SPECIAL_CATEGORY_POPUP_EXAMPLE_ANSWER: HTMLElement;
 
-    private readonly DIV_GAME_END_CONTROLS: HTMLDivElement;
-    private readonly DIV_STATISTICS_CHART_POPUP: HTMLDivElement;
-    private readonly DIV_TEAM_RANKING_WRAPPER: HTMLDivElement;
-    private readonly DIV_PIE_CHARTS: HTMLDivElement;
-    private readonly DIV_LINE_CHART: HTMLDivElement;
-    private readonly DIV_LINE_CHART_LEGEND: HTMLDivElement;
+    private readonly DIV_GAME_END_POPUP_BUTTONS: HTMLDivElement;
+    private readonly DIV_GAME_END_POPUP: HTMLDivElement;
+    private readonly DIV_GAME_END_TEAM_RANKING_WRAPPER: HTMLDivElement;
+    private readonly DIV_GAME_END_PIE_CHARTS: HTMLDivElement;
+    private readonly DIV_GAME_END_LINE_CHART: HTMLDivElement;
+    private readonly DIV_GAME_END_LINE_CHART_LEGEND: HTMLDivElement;
     private readonly DIV_GAME_BOARD_WRAPPER: HTMLDivElement;
 
     private readonly GAME_ROUND_TIMER: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
@@ -111,12 +111,13 @@ export class Operator {
         this.SPECIAL_CATEGORY_POPUP_EXAMPLE_QUESTION = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-popup-example-question");
         this.SPECIAL_CATEGORY_POPUP_EXAMPLE_ANSWER = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-popup-example-answer");
 
-        this.DIV_GAME_END_CONTROLS = querySelectorAndCheck<HTMLDivElement>(document, "div#game-end-controls");
-        this.DIV_STATISTICS_CHART_POPUP = querySelectorAndCheck<HTMLDivElement>(document, "div#statistics-chart-popup");
-        this.DIV_TEAM_RANKING_WRAPPER = querySelectorAndCheck(document, "div#team-ranking-wrapper");
-        this.DIV_PIE_CHARTS = querySelectorAndCheck(document, "div#pie-charts");
-        this.DIV_LINE_CHART = querySelectorAndCheck(document, "div#line-chart");
-        this.DIV_LINE_CHART_LEGEND = querySelectorAndCheck(document, "div#line-chart-legend");
+        this.DIV_GAME_END_POPUP = querySelectorAndCheck<HTMLDivElement>(document, "div#game-end-popup");
+        this.DIV_GAME_END_POPUP_BUTTONS = querySelectorAndCheck<HTMLDivElement>(this.DIV_GAME_END_POPUP, "div#game-end-popup-buttons");
+        this.DIV_GAME_END_TEAM_RANKING_WRAPPER = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#team-ranking-wrapper");
+        this.DIV_GAME_END_PIE_CHARTS = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#pie-charts");
+        this.DIV_GAME_END_LINE_CHART = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#line-chart");
+        this.DIV_GAME_END_LINE_CHART_LEGEND = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#line-chart-legend");
+
         this.DIV_GAME_BOARD_WRAPPER = querySelectorAndCheck(document, "div#game-board-wrapper");
 
         this.initKeyboardListenerToPause();
@@ -304,21 +305,19 @@ export class Operator {
             window.open("../stateMachineViewer", "windowStateMachineViewer", "popup")
         );
 
-        const statisticsPopup = querySelectorAndCheck(document, "div#statistics-chart-popup");
-        const gameEndControls = querySelectorAndCheck(document, "div#game-end-controls");
-        querySelectorAndCheck(gameEndControls, "button#show-team-ranking-table").addEventListener("click", () => {
+        querySelectorAndCheck(this.DIV_GAME_END_POPUP_BUTTONS, "button#show-team-ranking-table").addEventListener("click", () => {
             this.presentation?.showSlide("slide-gameEnd-team-ranking-table");
-            statisticsPopup.setAttribute("data-show-game-end-item", "team-ranking-table");
+            this.DIV_GAME_END_POPUP.setAttribute("data-show-game-end-item", "team-ranking-table");
         });
 
-        querySelectorAndCheck(gameEndControls, "button#show-money-over-time-line-chart").addEventListener("click", () => {
+        querySelectorAndCheck(this.DIV_GAME_END_POPUP_BUTTONS, "button#show-money-over-time-line-chart").addEventListener("click", () => {
             this.presentation?.showSlide("slide-gameEnd-line-chart");
-            statisticsPopup.setAttribute("data-show-game-end-item", "line-chart");
+            this.DIV_GAME_END_POPUP.setAttribute("data-show-game-end-item", "line-chart");
         });
 
-        querySelectorAndCheck(gameEndControls, "button#show-buzz-results-pie-charts").addEventListener("click", () => {
+        querySelectorAndCheck(this.DIV_GAME_END_POPUP_BUTTONS, "button#show-buzz-results-pie-charts").addEventListener("click", () => {
             this.presentation?.showSlide("slide-gameEnd-pie-charts");
-            statisticsPopup.setAttribute("data-show-game-end-item", "pie-charts");
+            this.DIV_GAME_END_POPUP.setAttribute("data-show-game-end-item", "pie-charts");
         });
 
         const teamCountNumberInput = querySelectorAndCheck<HTMLInputElement>(document, "input#team-count");
@@ -824,6 +823,8 @@ export class Operator {
 
     private gameLoad(parsedJson: SavedGameInLocalStorage): void {
 
+        // gameBoard.cluesNotYetRevealedThisRound does not get set which beaks this!!!
+
         this.GAME_ROUND_TIMER.setRemainingMillisec(parsedJson.GAME_ROUND_TIMER_REMAINING_MILLISEC);
 
         this.teamCount = parsedJson.TEAMS.length;
@@ -854,18 +855,18 @@ export class Operator {
         this.presentation?.headerAndFooterHide();
 
         this.backdropForPopupsShow();
-        this.DIV_GAME_END_CONTROLS.style.display = "block";
-        this.DIV_STATISTICS_CHART_POPUP.style.display = "block";
+        this.DIV_GAME_END_POPUP_BUTTONS.style.display = "block";
+        this.DIV_GAME_END_POPUP.style.display = "block";
 
         const teamRankingTableHtml = this.getGameEndTeamRankingTableHtml();
-        this.DIV_TEAM_RANKING_WRAPPER.innerHTML = teamRankingTableHtml;
+        this.DIV_GAME_END_TEAM_RANKING_WRAPPER.innerHTML = teamRankingTableHtml;
         this.presentation?.setGameEndTeamRankingHtml(teamRankingTableHtml);
 
         if (this.teamArray) {
 
-            createGameEndPieCharts(this, this.DIV_PIE_CHARTS, this.teamArray);
+            createGameEndPieCharts(this, this.DIV_GAME_END_PIE_CHARTS, this.teamArray);
 
-            createGameEndLineChartOfMoneyOverTime(this.DIV_LINE_CHART, this.DIV_LINE_CHART_LEGEND, this.teamArray);
+            createGameEndLineChartOfMoneyOverTime(this.DIV_GAME_END_LINE_CHART, this.DIV_GAME_END_LINE_CHART_LEGEND, this.teamArray);
 
             if (this.presentation) {
                 createGameEndPieCharts(this, this.presentation.getGameEndPieChartContainer(), this.teamArray);
