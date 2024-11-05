@@ -38,6 +38,7 @@ export class Operator {
     private readonly DIV_INSTRUCTIONS: HTMLDivElement;
     private readonly BUTTON_START_GAME: HTMLButtonElement;
     private readonly BUTTON_SKIP_CLUE: HTMLButtonElement;
+    private readonly BUTTON_ADD_TIME_TO_GAME_ROUND_TIMER: HTMLButtonElement;
     private readonly DIV_SPECIAL_CATEGORY_PROMPT: HTMLDivElement;
     private readonly SPAN_SPECIAL_CATEGORY_PROMPT_TITLE: HTMLSpanElement;
     private readonly DIV_SPECIAL_CATEGORY_POPUP: HTMLDivElement;
@@ -94,6 +95,7 @@ export class Operator {
         this.DIV_INSTRUCTIONS = querySelectorAndCheck(document, "div#instructions");
         this.BUTTON_START_GAME = querySelectorAndCheck(document, "button#start-game");
         this.BUTTON_SKIP_CLUE = querySelectorAndCheck(document, "button#skip-clue");
+        this.BUTTON_ADD_TIME_TO_GAME_ROUND_TIMER = querySelectorAndCheck(document, "button#add-one-minute");
 
         this.DIV_BACKDROP_FOR_POPUPS = querySelectorAndCheck(document, "div#backdrop-for-popups");
 
@@ -290,7 +292,7 @@ export class Operator {
 
         this.BUTTON_SKIP_CLUE.addEventListener("click", () => this.clueSkip());
 
-        querySelectorAndCheck(document, "button#add-one-minute").addEventListener("click", () => {
+        this.BUTTON_ADD_TIME_TO_GAME_ROUND_TIMER.addEventListener("click", () => {
             this.GAME_ROUND_TIMER.addTime(60 * 1000);
         });
 
@@ -348,6 +350,7 @@ export class Operator {
     private gameStart(): void {
         this.stateMachine?.manualTrigger("startGame");
         this.BUTTON_START_GAME.setAttribute("disabled", "disabled");
+        this.BUTTON_ADD_TIME_TO_GAME_ROUND_TIMER.removeAttribute("disabled");
     }
 
 
