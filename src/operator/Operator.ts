@@ -470,7 +470,9 @@ export class Operator {
         const teamNumber = Number(keyboardEvent.key);
         const teamIndex = teamNumber - 1;
         const team = this.teamArray[teamIndex];
-        team.canBeLockedOut() && team.lockoutStart();
+        if (team.canBeLockedOut()) {
+            team.lockoutStart();
+        }
 
         this.buzzHistoryForClue?.RECORDS[teamIndex].push({
             startTimestamp: Date.now(),

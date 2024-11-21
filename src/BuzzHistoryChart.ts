@@ -259,7 +259,7 @@ export class BuzzHistoryChart {
                 textNode.setAttribute("x", "10");
                 textNode.setAttribute("y", String(BuzzHistoryChart.ROW_HEIGHT / 2));
                 textNode.setAttribute("dominant-baseline", "middle");
-                textNode.innerHTML = `${teams[teamIndex].getTeamName()}`;
+                textNode.innerHTML = teams[teamIndex].getTeamName();
                 group.appendChild(textNode);
                 const teamNameTextElementsForThisSvg = this.TEAM_NAME_TEXT_ELEMENTS.get(theSvg);
                 if (!teamNameTextElementsForThisSvg) {
@@ -515,7 +515,6 @@ export class BuzzHistoryChart {
             Find the LATEST record which is BEFORE the operator finishing 
             reading the clue question, and within the annotation range.
             */
-            // eslint-disable-next-line @typescript-eslint/prefer-for-of
             for (let recordIdx = records.length - 1; recordIdx >= 0; recordIdx--) {
                 const record = records[recordIdx];
                 if (

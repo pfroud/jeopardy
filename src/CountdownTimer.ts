@@ -78,7 +78,11 @@ export class CountdownTimer {
     }
 
     public togglePaused(): void {
-        this.isPaused ? this.resume() : this.pause();
+        if (this.isPaused) {
+            this.resume();
+        } else {
+            this.pause();
+        }
     }
 
     public setPaused(newPaused: boolean): void {

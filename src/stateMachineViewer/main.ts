@@ -55,7 +55,7 @@ window.addEventListener('DOMContentLoaded', () => {
             stateMachine.addStateMachineViewer(stateMachineViewer);
 
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
             document.body.innerHTML = String(error);
             console.error(error);
         });

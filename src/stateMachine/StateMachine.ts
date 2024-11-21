@@ -96,7 +96,6 @@ export class StateMachine {
     }
 
     public setPaused(isPaused: boolean): void {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         this.COUNTDOWN_TIMER_LEAVING_STATE[this.presentState.NAME]?.setPaused(isPaused);
     }
 
@@ -123,7 +122,6 @@ export class StateMachine {
             throw new RangeError(`can't go to state named "${destinationStateName}", state not found`);
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         this.COUNTDOWN_TIMER_LEAVING_STATE[this.presentState.NAME]?.pause();
 
         this.presentState.ON_EXIT?.();
