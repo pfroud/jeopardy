@@ -1,0 +1,7 @@
+{
+    "no-inline-html": false,
+    "line-length": false,
+    "ul-indent": {
+        "indent": 4
+    }
+}
