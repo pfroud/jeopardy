@@ -360,7 +360,12 @@ export class Operator {
         this.setAllTeamsState("idle", true); // the second argument is endLockout
         this.BUTTON_SKIP_CLUE.setAttribute("disabled", "disabled");
         this.BUTTON_SKIP_CLUE.blur();
-        this.stateMachine?.goToState("showGameBoard");
+
+        if (this.gameBoard?.isAllCluesRevealedThisRound()) {
+            this.stateMachine?.goToState("nextRoundOrEndGame");
+        } else {
+            this.stateMachine?.goToState("showGameBoard");
+        }
     }
 
     private initTeams(): void {
