@@ -78,7 +78,7 @@ export class Operator {
     private questionCountForPieCharts = 0;
     private gameRoundIndex = -1;
     private categoryCarouselIndex = -1;
-    private teamIndexToPickClue = -1;
+    private teamIndexToPickClue = 0;
 
     public constructor(audioManager: AudioManager, settings: Settings) {
         this.AUDIO_MANAGER = audioManager;
@@ -532,12 +532,6 @@ export class Operator {
 
         this.DIV_CLUE_WRAPPER.style.display = "none";
 
-        if (this.teamIndexToPickClue === this.teamCount - 1) {
-            this.teamIndexToPickClue = 0;
-        } else {
-            this.teamIndexToPickClue++;
-        }
-
         this.teamArray?.[this.teamIndexToPickClue].choosingClueSet();
     }
 
@@ -698,6 +692,11 @@ export class Operator {
 
         this.questionCountForPieCharts++;
 
+        if (this.teamIndexToPickClue === this.teamCount - 1) {
+            this.teamIndexToPickClue = 0;
+        } else {
+            this.teamIndexToPickClue++;
+        }
     }
 
     public setAllTeamsState(targetState: TeamState, endLockout = false): void {
