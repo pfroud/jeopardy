@@ -528,6 +528,7 @@ export class Operator {
      */
     public gameBoardShow(): void {
         this.DIV_GAME_BOARD_WRAPPER.style.display = ""; //show it by removing display=none
+        this.presentation?.headerMinimize();
 
         this.DIV_CLUE_WRAPPER.style.display = "none";
 
