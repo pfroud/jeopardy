@@ -1,0 +1,326 @@
+<svg width="1398pt" height="1315pt" viewBox="0.00 0.00 1398.10 1315.20" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="jeopardy" class="graph" transform="scale(1 1) rotate(0) translate(4 1311.2)">
+<title>jeopardy</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-1311.2 1394.1,-1311.2 1394.1,4 -4,4"/>
+<!-- idle -->
+<g id="idle" class="node">
+<title>idle</title>
+<polygon fill="none" stroke="black" points="969.2,-1307.2 902.8,-1307.2 902.8,-1271.2 969.2,-1271.2 969.2,-1307.2"/>
+<text text-anchor="start" x="910.8" y="-1286" font-family="monospace,monospace" font-size="14.00"> </text>
+<text text-anchor="start" x="919.2" y="-1286" font-family="monospace,monospace" font-weight="bold" font-size="14.00">idle</text>
+<text text-anchor="start" x="952.8" y="-1286" font-family="monospace,monospace" font-size="14.00"> </text>
+</g>
+<!-- startNextGameRound -->
+<g id="startNextGameRound" class="node">
+<title>startNextGameRound</title>
+<polygon fill="none" stroke="black" points="755.02,-1218.4 486.98,-1218.4 486.98,-1182.4 755.02,-1182.4 755.02,-1218.4"/>
+<text text-anchor="start" x="541.19" y="-1202.8" font-family="monospace,monospace" font-size="14.00"> </text>
+<text text-anchor="start" x="549.59" y="-1202.8" font-family="monospace,monospace" font-weight="bold" font-size="14.00">startNextGameRound</text>
+<text text-anchor="start" x="494.98" y="-1188.8" font-family="monospace,monospace" font-size="14.00">onEnter: gameRoundStartNext() </text>
+</g>
+<!-- idle&#45;&gt;startNextGameRound -->
+<g id="idle_to_startNextGameRound" class="edge">
+<title>idle-&gt;startNextGameRound</title>
+<path fill="none" stroke="black" d="M902.59,-1278.99C853.54,-1265.48 760.78,-1239.92 695.14,-1221.83"/>
+<polygon fill="black" stroke="black" points="696.47,-1218.57 685.9,-1219.28 694.61,-1225.32 696.47,-1218.57"/>
+<text text-anchor="middle" x="893.38" y="-1240.6" font-family="Arial" font-size="14.00">manualTrigger: "startGame"</text>
+</g>
+<!-- showCategoryCarousel -->
+<g id="showCategoryCarousel" class="node">
+<title>showCategoryCarousel</title>
+<polygon fill="none" stroke="black" points="721.42,-1129.6 520.58,-1129.6 520.58,-1093.6 721.42,-1093.6 721.42,-1129.6"/>
+<text text-anchor="start" x="528.58" y="-1108.4" font-family="monospace,monospace" font-size="14.00"> </text>
+<text text-anchor="start" x="536.99" y="-1108.4" font-family="monospace,monospace" font-weight="bold" font-size="14.00">showCategoryCarousel</text>
+<text text-anchor="start" x="705.01" y="-1108.4" font-family="monospace,monospace" font-size="14.00"> </text>
+</g>
+<!-- startNextGameRound&#45;&gt;showCategoryCarousel -->
+<g id="startNextGameRound_to_showCategoryCarousel" class="edge">
+<title>startNextGameRound-&gt;showCategoryCarousel</title>
+<path fill="none" stroke="black" d="M621,-1182.25C621,-1170.56 621,-1154.79 621,-1141.22"/>
+<polygon fill="black" stroke="black" points="624.5,-1141.52 621,-1131.52 617.5,-1141.52 624.5,-1141.52"/>
+<text text-anchor="middle" x="752.51" y="-1151.8" font-family="Arial" font-size="14.00">keyboard: space / categoryCarouselStart()</text>
+</g>
+<!-- showCategoryCarousel&#45;&gt;showCategoryCarousel -->
+<g id="showCategoryCarousel_to_showCategoryCarousel" class="edge">
+<title>showCategoryCarousel-&gt;showCategoryCarousel</title>
+<path fill="none" stroke="black" d="M721.64,-1118.55C732.46,-1117.21 739.42,-1114.9 739.42,-1111.6 739.42,-1109.64 736.96,-1108.03 732.71,-1106.76"/>
+<polygon fill="black" stroke="black" points="733.61,-1103.37 723.13,-1104.93 732.29,-1110.25 733.61,-1103.37"/>
+<text text-anchor="middle" x="981.41" y="-1107.4" font-family="Arial" font-size="14.00">keyboard: space if(categoryCarouselHasMore) / categoryCarouselShowNext()</text>
+</g>
+<!-- showMessageForSpecialCategory -->
+<g id="showMessageForSpecialCategory" class="node">
+<title>showMessageForSpecialCategory</title>
+<polygon fill="none" stroke="black" points="950.02,-1040.8 639.98,-1040.8 639.98,-990.8 950.02,-990.8 950.02,-1040.8"/>
+<text text-anchor="start" x="668.98" y="-1025.2" font-family="monospace,monospace" font-size="14.00"> </text>
+<text text-anchor="start" x="677.38" y="-1025.2" font-family="monospace,monospace" font-weight="bold" font-size="14.00">showMessageForSpecialCategory</text>
+<text text-anchor="start" x="647.98" y="-1011.2" font-family="monospace,monospace" font-size="14.00">onEnter: specialCategoryPopupShow()</text>
+<text text-anchor="start" x="647.98" y="-997.2" font-family="monospace,monospace" font-size="14.00">onExit: specialCategoryPopupHide() </text>
+</g>
+<!-- showCategoryCarousel&#45;&gt;showMessageForSpecialCategory -->
+<g id="showCategoryCarousel_to_showMessageForSpecialCategory" class="edge">
+<title>showCategoryCarousel-&gt;showMessageForSpecialCategory</title>
+<path fill="none" stroke="black" d="M721.72,-1106.5C770.1,-1102.2 820.84,-1093.43 836,-1075.6 842.82,-1067.58 840.65,-1058.44 834.7,-1049.79"/>
+<polygon fill="black" stroke="black" points="837.42,-1047.59 828.31,-1042.19 832.06,-1052.09 837.42,-1047.59"/>
+<text text-anchor="middle" x="1000.83" y="-1063" font-family="Arial" font-size="14.00">keyboard: "y" [categoryCarouselIsSpecialCategory] </text>
+</g>
+<!-- showGameBoard -->
+<g id="showGameBoard" class="node">
+<title>showGameBoard</title>
+<polygon fill="none" stroke="black" points="524.82,-1040.8 307.18,-1040.8 307.18,-990.8 524.82,-990.8 524.82,-1040.8"/>
+<text text-anchor="start" x="357.19" y="-1025.2" font-family="monospace,monospace" font-size="14.00"> </text>
+<text text-anchor="start" x="365.59" y="-1025.2" font-family="monospace,monospace" font-weight="bold" font-size="14.00">showGameBoard</text>
+<text text-anchor="start" x="315.18" y="-1011.2" font-family="monospace,monospace" font-size="14.00">onEnter: gameBoardShow()</text>
+<text text-anchor="start" x="315.18" y="-997.2" font-family="monospace,monospace" font-size="14.00">onExit: gameBoardHide() </text>
+</g>
+<!-- showCategoryCarousel&#45;&gt;showGameBoard -->
+<g id="showCategoryCarousel_to_showGameBoard" class="edge">
+<title>showCategoryCarousel-&gt;showGameBoard</title>
+<path fill="none" stroke="black" d="M520.41,-1107.86C417.72,-1104.01 270.88,-1095.12 253.13,-1075.6 230.86,-1051.1 257.9,-1036.8 295.94,-1028.46"/>
+<polygon fill="black" stroke="black" points="296.33,-1031.95 305.45,-1026.55 294.96,-1025.08 296.33,-1031.95"/>
+<text text-anchor="middle" x="479.57" y="-1063" font-family="Arial" font-size="14.00">keyboard: space if(!categoryCarouselHasMore) / categoryCarouselStop()</text>
+</g>
+<!-- showMessageForSpecialCategory&#45;&gt;showCategoryCarousel -->
+<g id="showMessageForSpecialCategory_to_showCategoryCarousel" class="edge">
+<title>showMessageForSpecialCategory-&gt;showCategoryCarousel</title>
+<path fill="none" stroke="black" d="M754.73,-1041.19C746.17,-1046.75 737.29,-1052.79 729.27,-1058.8 720.18,-1065.61 719.71,-1069.7 710,-1075.6 702.04,-1080.43 693.31,-1084.83 684.51,-1088.74"/>
+<polygon fill="black" stroke="black" points="683.43,-1085.4 675.59,-1092.53 686.16,-1091.84 683.43,-1085.4"/>
+<text text-anchor="middle" x="780.63" y="-1063" font-family="Arial" font-size="14.00">keyboard: space</text>
+</g>
+<!-- showClueCategoryAndValue -->
+<g id="showClueCategoryAndValue" class="node">
+<title>showClueCategoryAndValue</title>
+<polygon fill="none" stroke="black" points="568.22,-938 333.78,-938 333.78,-902 568.22,-902 568.22,-938"/>
+<text text-anchor="start" x="341.78" y="-916.8" font-family="monospace,monospace" font-size="14.00"> </text>
+<text text-anchor="start" x="350.18" y="-916.8" font-family="monospace,monospace" font-weight="bold" font-size="14.00">showClueCategoryAndValue</text>
+<text text-anchor="start" x="551.82" y="-916.8" font-family="monospace,monospace" font-size="14.00"> </text>
+</g>
+<!-- showGameBoard&#45;&gt;showClueCategoryAndValue -->
+<g id="showGameBoard_to_showClueCategoryAndValue" class="edge">
+<title>showGameBoard-&gt;showClueCategoryAndValue</title>
+<path fill="none" stroke="black" d="M525.07,-1007.6C575.02,-1001.81 626.53,-991.41 642,-972.8 646.77,-967.06 646.78,-961.74 642,-956 632.74,-944.89 608.24,-937.3 579.75,-932.11"/>
+<polygon fill="black" stroke="black" points="580.59,-928.7 570.15,-930.49 579.43,-935.61 580.59,-928.7"/>
+<text text-anchor="middle" x="747.82" y="-960.2" font-family="Arial" font-size="14.00">manualTrigger: "userChoseClue"</text>
+</g>
+<!-- showGameBoard&#45;&gt;showClueCategoryAndValue -->
+<g id="showGameBoard_to_showClueCategoryAndValue" class="edge">
+<title>showGameBoard-&gt;showClueCategoryAndValue</title>
+<path fill="none" stroke="black" d="M306.72,-992.3C288.45,-983.6 279.02,-971.81 291.73,-956 296.98,-949.48 308.3,-944.1 322.61,-939.68"/>
+<polygon fill="black" stroke="black" points="323.37,-943.11 332.06,-937.05 321.49,-936.37 323.37,-943.11"/>
+<text text-anchor="middle" x="464.87" y="-960.2" font-family="Arial" font-size="14.00">timeout: new 10000 ms / teamTimedOutChoosingClue()</text>
+</g>
+<!-- showClueQuestion -->
+<g id="showClueQuestion" class="node">
+<title>showClueQuestion</title>
+<polygon fill="none" stroke="black" points="606.02,-849.2 295.98,-849.2 295.98,-813.2 606.02,-813.2 606.02,-849.2"/>
+<text text-anchor="start" x="379.59" y="-833.6" font-family="monospace,monospace" font-size="14.00"> </text>
+<text text-anchor="start" x="387.99" y="-833.6" font-family="monospace,monospace" font-weight="bold" font-size="14.00">showClueQuestion</text>
+<text text-anchor="start" x="303.98" y="-819.6" font-family="monospace,monospace" font-size="14.00">onEnter: fitClueQuestionToWindow() </text>
+</g>
+<!-- showClueCategoryAndValue&#45;&gt;showClueQuestion -->
+<g id="showClueCategoryAndValue_to_showClueQuestion" class="edge">
+<title>showClueCategoryAndValue-&gt;showClueQuestion</title>
+<path fill="none" stroke="black" d="M451,-901.85C451,-890.16 451,-874.39 451,-860.82"/>
+<polygon fill="black" stroke="black" points="454.5,-861.12 451,-851.12 447.5,-861.12 454.5,-861.12"/>
+<text text-anchor="middle" x="611.31" y="-871.4" font-family="Arial" font-size="14.00">timeout: continue 1000 ms / onShowClueQuestion()</text>
+</g>
+<!-- showClueQuestion&#45;&gt;showClueQuestion -->
+<g id="showClueQuestion_to_showClueQuestion" class="edge">
+<title>showClueQuestion-&gt;showClueQuestion</title>
+<path fill="none" stroke="black" d="M606.45,-837.28C617.37,-835.89 624.02,-833.87 624.02,-831.2 624.02,-829.62 621.68,-828.26 617.49,-827.13"/>
+<polygon fill="black" stroke="black" points="618.41,-823.74 607.94,-825.39 617.15,-830.62 618.41,-823.74"/>
+<text text-anchor="middle" x="757.41" y="-827" font-family="Arial" font-size="14.00">keyboard: "123456789" / onTeamLockout()</text>
+</g>
+<!-- waitForBuzzes -->
+<g id="waitForBuzzes" class="node">
+<title>waitForBuzzes</title>
+<polygon fill="none" stroke="black" points="522.01,-760.4 379.99,-760.4 379.99,-724.4 522.01,-724.4 522.01,-760.4"/>
+<text text-anchor="start" x="387.99" y="-739.2" font-family="monospace,monospace" font-size="14.00"> </text>
+<text text-anchor="start" x="396.39" y="-739.2" font-family="monospace,monospace" font-weight="bold" font-size="14.00">waitForBuzzes</text>
+<text text-anchor="start" x="505.61" y="-739.2" font-family="monospace,monospace" font-size="14.00"> </text>
+</g>
+<!-- showClueQuestion&#45;&gt;waitForBuzzes -->
+<g id="showClueQuestion_to_waitForBuzzes" class="edge">
+<title>showClueQuestion-&gt;waitForBuzzes</title>
+<path fill="none" stroke="black" d="M451,-813.05C451,-801.36 451,-785.59 451,-772.02"/>
+<polygon fill="black" stroke="black" points="454.5,-772.32 451,-762.32 447.5,-772.32 454.5,-772.32"/>
+<text text-anchor="middle" x="605.87" y="-782.6" font-family="Arial" font-size="14.00">keyboard: space / onDoneReadingClueQuestion()</text>
+</g>
+<!-- waitForTeamAnswer -->
+<g id="waitForTeamAnswer" class="node">
+<title>waitForTeamAnswer</title>
+<polygon fill="none" stroke="black" points="596.42,-671.6 353.58,-671.6 353.58,-635.6 596.42,-635.6 596.42,-671.6"/>
+<text text-anchor="start" x="399.39" y="-656" font-family="monospace,monospace" font-size="14.00"> </text>
+<text text-anchor="start" x="407.79" y="-656" font-family="monospace,monospace" font-weight="bold" font-size="14.00">waitForTeamAnswer</text>
+<text text-anchor="start" x="361.58" y="-642" font-family="monospace,monospace" font-size="14.00">onEnter: teamAnswerStart() </text>
+</g>
+<!-- waitForBuzzes&#45;&gt;waitForTeamAnswer -->
+<g id="waitForBuzzes_to_waitForTeamAnswer" class="edge">
+<title>waitForBuzzes-&gt;waitForTeamAnswer</title>
+<path fill="none" stroke="black" d="M449.03,-724.23C448.43,-713.95 448.66,-700.77 452.12,-689.6 452.97,-686.87 454.1,-684.15 455.4,-681.51"/>
+<polygon fill="black" stroke="black" points="458.28,-683.5 460.29,-673.1 452.24,-679.98 458.28,-683.5"/>
+<text text-anchor="middle" x="576.56" y="-693.8" font-family="Arial" font-size="14.00">keyboard: "123456789" [teamCanBuzz] </text>
+</g>
+<!-- showAnswer -->
+<g id="showAnswer" class="node">
+<title>showAnswer</title>
+<polygon fill="none" stroke="black" points="620.82,-494 403.18,-494 403.18,-458 620.82,-458 620.82,-494"/>
+<text text-anchor="start" x="465.79" y="-478.4" font-family="monospace,monospace" font-size="14.00"> </text>
+<text text-anchor="start" x="474.19" y="-478.4" font-family="monospace,monospace" font-weight="bold" font-size="14.00">showAnswer</text>
+<text text-anchor="start" x="411.18" y="-464.4" font-family="monospace,monospace" font-size="14.00">onEnter: onShowAnswer() </text>
+</g>
+<!-- waitForBuzzes&#45;&gt;showAnswer -->
+<g id="waitForBuzzes_to_showAnswer" class="edge">
+<title>waitForBuzzes-&gt;showAnswer</title>
+<path fill="none" stroke="black" d="M522.25,-741.44C587.8,-739.78 678.21,-732.61 701,-706.4 712.64,-693.02 711.14,-561.35 701,-546.8 684.5,-523.11 658.98,-507.44 631.99,-497.08"/>
+<polygon fill="black" stroke="black" points="633.2,-493.8 622.61,-493.74 630.85,-500.39 633.2,-493.8"/>
+<text text-anchor="middle" x="888.03" y="-605" font-family="Arial" font-size="14.00">timeout: continue 5000 ms / playSoundQuestionTimeout()</text>
+</g>
+<!-- waitForTeamAnswer&#45;&gt;showAnswer -->
+<g id="waitForTeamAnswer_to_showAnswer" class="edge">
+<title>waitForTeamAnswer-&gt;showAnswer</title>
+<path fill="none" stroke="black" d="M476.45,-635.21C478.43,-614.1 482.54,-577.53 489.54,-546.8 492.73,-532.83 497.45,-517.65 501.75,-505.03"/>
+<polygon fill="black" stroke="black" points="505.01,-506.29 505.01,-495.69 498.41,-503.97 505.01,-506.29"/>
+<text text-anchor="middle" x="595.27" y="-560.6" font-family="Arial" font-size="14.00">keyboard: "y" / onAnswerCorrect()</text>
+</g>
+<!-- answerWrongOrTimeout -->
+<g id="answerWrongOrTimeout" class="node">
+<title>answerWrongOrTimeout</title>
+<polygon fill="none" stroke="black" points="404.82,-582.8 103.18,-582.8 103.18,-546.8 404.82,-546.8 404.82,-582.8"/>
+<text text-anchor="start" x="165.79" y="-567.2" font-family="monospace,monospace" font-size="14.00"> </text>
+<text text-anchor="start" x="174.19" y="-567.2" font-family="monospace,monospace" font-weight="bold" font-size="14.00">answerWrongOrTimeout</text>
+<text text-anchor="start" x="111.18" y="-553.2" font-family="monospace,monospace" font-size="14.00">onEnter: onAnswerWrongOrTimeout() </text>
+</g>
+<!-- waitForTeamAnswer&#45;&gt;answerWrongOrTimeout -->
+<g id="waitForTeamAnswer_to_answerWrongOrTimeout" class="edge">
+<title>waitForTeamAnswer-&gt;answerWrongOrTimeout</title>
+<path fill="none" stroke="black" d="M418.7,-635.12C405.33,-630.15 391.35,-624.26 378.9,-617.6 367.77,-611.65 367.19,-606.65 356,-600.8 346.29,-595.73 335.7,-591.14 325.12,-587.09"/>
+<polygon fill="black" stroke="black" points="326.61,-583.91 316.01,-583.74 324.19,-590.48 326.61,-583.91"/>
+<text text-anchor="middle" x="420.45" y="-605" font-family="Arial" font-size="14.00">keyboard: "n"</text>
+</g>
+<!-- waitForTeamAnswer&#45;&gt;answerWrongOrTimeout -->
+<g id="waitForTeamAnswer_to_answerWrongOrTimeout" class="edge">
+<title>waitForTeamAnswer-&gt;answerWrongOrTimeout</title>
+<path fill="none" stroke="black" d="M353.12,-637.06C286.14,-628.38 216.29,-619.02 215.04,-617.6 207.67,-609.17 211.92,-599.46 219.87,-590.75"/>
+<polygon fill="black" stroke="black" points="222.01,-593.54 226.88,-584.13 217.21,-588.45 222.01,-593.54"/>
+<text text-anchor="middle" x="283.52" y="-605" font-family="Arial" font-size="14.00">timeout: new 5000 ms</text>
+</g>
+<!-- maybeShowBuzzHistory -->
+<g id="maybeShowBuzzHistory" class="node">
+<title>maybeShowBuzzHistory</title>
+<polygon fill="none" stroke="black" points="703.42,-405.2 502.58,-405.2 502.58,-369.2 703.42,-369.2 703.42,-405.2"/>
+<text text-anchor="start" x="510.58" y="-384" font-family="monospace,monospace" font-size="14.00"> </text>
+<text text-anchor="start" x="518.99" y="-384" font-family="monospace,monospace" font-weight="bold" font-size="14.00">maybeShowBuzzHistory</text>
+<text text-anchor="start" x="687.01" y="-384" font-family="monospace,monospace" font-size="14.00"> </text>
+</g>
+<!-- showAnswer&#45;&gt;maybeShowBuzzHistory -->
+<g id="showAnswer_to_maybeShowBuzzHistory" class="edge">
+<title>showAnswer-&gt;maybeShowBuzzHistory</title>
+<path fill="none" stroke="black" d="M529.98,-457.85C543.35,-445.09 561.81,-427.49 576.82,-413.17"/>
+<polygon fill="black" stroke="black" points="578.83,-416.09 583.65,-406.66 574,-411.02 578.83,-416.09"/>
+<text text-anchor="middle" x="617.02" y="-427.4" font-family="Arial" font-size="14.00">keyboard: space</text>
+</g>
+<!-- answerWrongOrTimeout&#45;&gt;waitForBuzzes -->
+<g id="answerWrongOrTimeout_to_waitForBuzzes" class="edge">
+<title>answerWrongOrTimeout-&gt;waitForBuzzes</title>
+<path fill="none" stroke="black" d="M225.31,-583.08C218.62,-588.13 212,-594.12 207,-600.8 187.82,-626.4 174.65,-646.19 194.08,-671.6 215.38,-699.47 301.76,-718.83 368.54,-729.97"/>
+<polygon fill="black" stroke="black" points="367.57,-733.36 378.01,-731.51 368.7,-726.45 367.57,-733.36"/>
+<text text-anchor="middle" x="269.54" y="-649.4" font-family="Arial" font-size="14.00">if(!isAllTeamsAnswered)</text>
+</g>
+<!-- answerWrongOrTimeout&#45;&gt;showAnswer -->
+<g id="answerWrongOrTimeout_to_showAnswer" class="edge">
+<title>answerWrongOrTimeout-&gt;showAnswer</title>
+<path fill="none" stroke="black" d="M269.62,-546.38C281.03,-534.79 297.5,-520.22 314.97,-512 338.69,-500.83 365.55,-493.21 391.63,-488"/>
+<polygon fill="black" stroke="black" points="392.08,-491.48 401.26,-486.2 390.79,-484.6 392.08,-491.48"/>
+<text text-anchor="middle" x="388.48" y="-516.2" font-family="Arial" font-size="14.00">if(isAllTeamsAnswered)</text>
+</g>
+<!-- showBuzzHistory -->
+<g id="showBuzzHistory" class="node">
+<title>showBuzzHistory</title>
+<polygon fill="none" stroke="black" points="1044.62,-316.4 793.38,-316.4 793.38,-266.4 1044.62,-266.4 1044.62,-316.4"/>
+<text text-anchor="start" x="851.79" y="-300.8" font-family="monospace,monospace" font-size="14.00"> </text>
+<text text-anchor="start" x="860.19" y="-300.8" font-family="monospace,monospace" font-weight="bold" font-size="14.00">showBuzzHistory</text>
+<text text-anchor="start" x="801.38" y="-286.8" font-family="monospace,monospace" font-size="14.00">onEnter: onBuzzHistoryShow()</text>
+<text text-anchor="start" x="801.38" y="-272.8" font-family="monospace,monospace" font-size="14.00">onExit: onBuzzHistoryHide() </text>
+</g>
+<!-- maybeShowBuzzHistory&#45;&gt;showBuzzHistory -->
+<g id="maybeShowBuzzHistory_to_showBuzzHistory" class="edge">
+<title>maybeShowBuzzHistory-&gt;showBuzzHistory</title>
+<path fill="none" stroke="black" d="M661.7,-368.78C707.7,-355.12 772.59,-335.86 825.7,-320.1"/>
+<polygon fill="black" stroke="black" points="826.45,-323.52 835.04,-317.32 824.46,-316.81 826.45,-323.52"/>
+<text text-anchor="middle" x="854.51" y="-338.6" font-family="Arial" font-size="14.00">if(buzzHistoryShouldShow)</text>
+</g>
+<!-- checkGameRoundOver -->
+<g id="checkGameRoundOver" class="node">
+<title>checkGameRoundOver</title>
+<polygon fill="none" stroke="black" points="1011.01,-213.6 826.99,-213.6 826.99,-177.6 1011.01,-177.6 1011.01,-213.6"/>
+<text text-anchor="start" x="834.99" y="-192.4" font-family="monospace,monospace" font-size="14.00"> </text>
+<text text-anchor="start" x="843.39" y="-192.4" font-family="monospace,monospace" font-weight="bold" font-size="14.00">checkGameRoundOver</text>
+<text text-anchor="start" x="994.61" y="-192.4" font-family="monospace,monospace" font-size="14.00"> </text>
+</g>
+<!-- maybeShowBuzzHistory&#45;&gt;checkGameRoundOver -->
+<g id="maybeShowBuzzHistory_to_checkGameRoundOver" class="edge">
+<title>maybeShowBuzzHistory-&gt;checkGameRoundOver</title>
+<path fill="none" stroke="black" d="M598.53,-368.74C593.08,-343.04 587.4,-295 612.04,-266.4 638.44,-235.77 736.88,-217.23 815.25,-207.03"/>
+<polygon fill="black" stroke="black" points="815.68,-210.51 825.16,-205.78 814.8,-203.56 815.68,-210.51"/>
+<text text-anchor="middle" x="698.02" y="-287.2" font-family="Arial" font-size="14.00">if(!buzzHistoryShouldShow)</text>
+</g>
+<!-- showBuzzHistory&#45;&gt;checkGameRoundOver -->
+<g id="showBuzzHistory_to_checkGameRoundOver" class="edge">
+<title>showBuzzHistory-&gt;checkGameRoundOver</title>
+<path fill="none" stroke="black" d="M919,-266.24C919,-253.69 919,-238.27 919,-225.14"/>
+<polygon fill="black" stroke="black" points="922.5,-225.38 919,-215.38 915.5,-225.38 922.5,-225.38"/>
+<text text-anchor="middle" x="970.37" y="-235.8" font-family="Arial" font-size="14.00">keyboard: space</text>
+</g>
+<!-- checkGameRoundOver&#45;&gt;showGameBoard -->
+<g id="checkGameRoundOver_to_showGameBoard" class="edge">
+<title>checkGameRoundOver-&gt;showGameBoard</title>
+<path fill="none" stroke="black" d="M1011.39,-211.23C1054.3,-223.83 1096,-247.19 1096,-290.4 1096,-921 1096,-921 1096,-921 1096,-973.25 683.01,-985.8 631,-990.8 600.37,-993.75 567.32,-997.26 536.54,-1000.69"/>
+<polygon fill="black" stroke="black" points="536.36,-997.18 526.81,-1001.77 537.14,-1004.14 536.36,-997.18"/>
+<text text-anchor="middle" x="1166.02" y="-605" font-family="Arial" font-size="14.00">if(!isGameRoundOver)</text>
+</g>
+<!-- nextRoundOrEndGame -->
+<g id="nextRoundOrEndGame" class="node">
+<title>nextRoundOrEndGame</title>
+<polygon fill="none" stroke="black" points="1011.01,-124.8 826.99,-124.8 826.99,-88.8 1011.01,-88.8 1011.01,-124.8"/>
+<text text-anchor="start" x="834.99" y="-103.6" font-family="monospace,monospace" font-size="14.00"> </text>
+<text text-anchor="start" x="843.39" y="-103.6" font-family="monospace,monospace" font-weight="bold" font-size="14.00">nextRoundOrEndGame</text>
+<text text-anchor="start" x="994.61" y="-103.6" font-family="monospace,monospace" font-size="14.00"> </text>
+</g>
+<!-- checkGameRoundOver&#45;&gt;nextRoundOrEndGame -->
+<g id="checkGameRoundOver_to_nextRoundOrEndGame" class="edge">
+<title>checkGameRoundOver-&gt;nextRoundOrEndGame</title>
+<path fill="none" stroke="black" d="M919,-177.45C919,-165.76 919,-149.99 919,-136.42"/>
+<polygon fill="black" stroke="black" points="922.5,-136.72 919,-126.72 915.5,-136.72 922.5,-136.72"/>
+<text text-anchor="middle" x="987.08" y="-147" font-family="Arial" font-size="14.00">if(isGameRoundOver)</text>
+</g>
+<!-- nextRoundOrEndGame&#45;&gt;startNextGameRound -->
+<g id="nextRoundOrEndGame_to_startNextGameRound" class="edge">
+<title>nextRoundOrEndGame-&gt;startNextGameRound</title>
+<path fill="none" stroke="black" d="M826.68,-106.99C593.63,-106.17 0,-112.17 0,-194.6 0,-1112.6 0,-1112.6 0,-1112.6 0,-1160.35 291.69,-1183.42 475.25,-1193.21"/>
+<polygon fill="black" stroke="black" points="474.95,-1196.7 485.12,-1193.73 475.32,-1189.71 474.95,-1196.7"/>
+<text text-anchor="middle" x="74.7" y="-649.4" font-family="Arial" font-size="14.00">if(gameRoundHasMore)</text>
+</g>
+<!-- gameEnd -->
+<g id="gameEnd" class="node">
+<title>gameEnd</title>
+<polygon fill="none" stroke="black" points="1118.21,-36 925.79,-36 925.79,0 1118.21,0 1118.21,-36"/>
+<text text-anchor="start" x="988.39" y="-20.4" font-family="monospace,monospace" font-size="14.00"> </text>
+<text text-anchor="start" x="996.8" y="-20.4" font-family="monospace,monospace" font-weight="bold" font-size="14.00">gameEnd</text>
+<text text-anchor="start" x="933.79" y="-6.4" font-family="monospace,monospace" font-size="14.00">onEnter: onGameEnd() </text>
+</g>
+<!-- nextRoundOrEndGame&#45;&gt;gameEnd -->
+<g id="nextRoundOrEndGame_to_gameEnd" class="edge">
+<title>nextRoundOrEndGame-&gt;gameEnd</title>
+<path fill="none" stroke="black" d="M939.35,-88.65C954.63,-75.78 975.76,-57.97 992.83,-43.58"/>
+<polygon fill="black" stroke="black" points="994.79,-46.51 1000.18,-37.39 990.28,-41.15 994.79,-46.51"/>
+<text text-anchor="middle" x="1056.37" y="-58.2" font-family="Arial" font-size="14.00">if(!gameRoundHasMore)</text>
+</g>
+<!-- gameEnd&#45;&gt;idle -->
+<g id="gameEnd_to_idle" class="edge">
+<title>gameEnd-&gt;idle</title>
+<path fill="none" stroke="black" d="M1114.15,-36.5C1177.79,-51.3 1251,-75.03 1251,-105.8 1251,-1201.4 1251,-1201.4 1251,-1201.4 1251,-1256.79 1067.72,-1278.18 980.76,-1285.21"/>
+<polygon fill="black" stroke="black" points="980.62,-1281.71 970.92,-1285.98 981.16,-1288.69 980.62,-1281.71"/>
+<text text-anchor="middle" x="1320.55" y="-649.4" font-family="Arial" font-size="14.00">manualTrigger: "reset"</text>
+</g>
+</g>
+</svg>
