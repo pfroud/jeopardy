@@ -75,7 +75,12 @@ How to read the transition labels: text is always to the right of the arrow (tro
 
 The project includes a live state machine visualizer for debugging. In the example video below, the current state is highlighted in bright green while the two previous states & transitions trail behind it in paler greens:
 
-![make this video work once pushed to github dot com](images-for-readme/state-machine-live-visualizer.mkv)
+<!--
+To get a video player to appear in a markdown file, you need to drag-and-drop the
+video file into the github.com code editor gui. I don't think you can make a video
+player using a video file committed to the repository.
+-->
+https://github.com/user-attachments/assets/1dd80c3e-f16f-47b7-9b65-f9ea2012b76c
 
 ## "Clue" vs "question" vs "answer"
 
