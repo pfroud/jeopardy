@@ -997,6 +997,7 @@ export class Operator {
      * Called from the state machine
      */
     public categoryCarouselStop(): void {
+        this.specialCategoryPromptHide();
         this.presentation?.headerAndFooterShow();
         this.GAME_ROUND_TIMER.start();
     }
