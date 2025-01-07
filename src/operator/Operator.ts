@@ -183,6 +183,10 @@ export class Operator {
         ]);
 
         window.addEventListener("keydown", keyboardEvent => {
+            if (keyboardEvent.repeat) {
+                // ignore events fired from the key being held down
+                return;
+            }
             const keyboardKey = keyboardEvent.key;
             if (this.teamArray && this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.has(keyboardKey)) {
                 const teamIndex = Number(keyboardKey) - 1;

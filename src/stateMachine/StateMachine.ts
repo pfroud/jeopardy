@@ -57,6 +57,11 @@ export class StateMachine {
             return;
         }
 
+        if (keyboardEvent.repeat) {
+            // ignore events fired from the key being held down
+            return;
+        }
+
         if (keyboardEvent.key.length !== 1) {
             // ignore non-printable characters https://stackoverflow.com/a/38802011/7376577
             return;
