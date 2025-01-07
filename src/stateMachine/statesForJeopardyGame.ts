@@ -29,15 +29,12 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             NAME: "showCategoryCarousel",
             PRESENTATION_SLIDE_TO_SHOW: "slide-category-carousel",
             TRANSITIONS: [
-
                 {
                     TYPE: "keyboard",
                     KEYBOARD_KEYS: "y",
                     DESTINATION: "showMessageForSpecialCategory",
                     GUARD_CONDITION: operator.categoryCarouselIsSpecialCategory.bind(operator)
-                },
-
-                {
+                }, {
                     TYPE: "keyboardWithIf",
                     KEYBOARD_KEYS: " ", //space
                     CONDITION: operator.categoryCarouselHasMore.bind(operator),
@@ -49,16 +46,12 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
                         DESTINATION: "showGameBoard",
                         ON_TRANSITION: operator.categoryCarouselStop.bind(operator)
                     }
-
                 }]
-        },
-
-        {
+        }, {
             /*
             The game is paused to display an information message about a Jeopardy category
             with special meaning (quotation marks, before & after, etc).
             */
-
             NAME: "showMessageForSpecialCategory",
             ON_ENTER: operator.specialCategoryPopupShow.bind(operator),
             ON_EXIT: operator.specialCategoryPopupHide.bind(operator),
@@ -67,9 +60,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
                 KEYBOARD_KEYS: " ", //space
                 DESTINATION: "showCategoryCarousel"
             }]
-        },
-
-        {
+        }, {
             NAME: "showGameBoard",
             INSTRUCTIONS: "Click on a clue in the game board.",
             PRESENTATION_SLIDE_TO_SHOW: "slide-game-board",
@@ -173,8 +164,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
                 IS_WAITING_FOR_TEAM_TO_ANSWER_AFTER_BUZZ: true,
                 DESTINATION: "answerWrongOrTimeout"
             }]
-        },
-        {
+        }, {
             NAME: "answerWrongOrTimeout",
             ON_ENTER: operator.onAnswerWrongOrTimeout.bind(operator),
             TRANSITIONS: [{
