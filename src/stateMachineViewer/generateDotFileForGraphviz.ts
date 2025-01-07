@@ -1,7 +1,8 @@
 import { StateMachineState, StateMachineTransition } from "../stateMachine/typesForStateMachine";
+import { StateMachineViewer } from "./StateMachineViewer";
 
 /**
- * Convert state machine states into a string of the Graphviz graph description language.
+ * Convert state machine states & transitions into a string of the Graphviz graph description language.
  * The language is called DOT which is difficult to include in function names.
  * See https://graphviz.org/doc/info/lang.html
  * 
@@ -13,13 +14,31 @@ import { StateMachineState, StateMachineTransition } from "../stateMachine/types
  */
 export function stateMachineToGraphviz(stateArray: StateMachineState[]): string {
 
+
     const dotFileLines: string[] = [];
-    dotFileLines.push('digraph jeopardy {');
-    dotFileLines.push('\tgraph [id="jeopardy"];');
-    dotFileLines.push('\tnode [shape="rect", fontname="Courier"];\n'); // https://graphviz.org/doc/info/attrs.html#d:fontname
+    dotFileLines.push('digraph jeopardy {\n');
+
+    // The ID attribute is copied to the SVG. Here it makes the top-level group be <g id="jeopardy">
+    dotFileLines.push('graph [id="jeopardy"];');
+
+    /*
+    Font handling is pretty wonky, setting fontnames="svg" results in 
+    the font-family being set to "monospace" instead of "Courier" which
+    seems good. See:
+    https://graphviz.org/faq/font/#what-about-svg-fonts
+    https://graphviz.org/docs/attrs/fontnames/
+    */
+    dotFileLines.push('fontnames = "svg"');
+
+    dotFileLines.push(`bgcolor = "transparent"`);
+
+    const color = StateMachineViewer.FOREGROUND_COLOR;
+
+    // The color attribute is the node outline only, not the fill.
+    dotFileLines.push(`node [color="${color}", fontcolor="${color}", fontname="Courier", shape="rect"];`);
+    dotFileLines.push(`edge [color="${color}", fontcolor="${color}", fontname="Arial"];\n`);
 
     stateArray.forEach((state: StateMachineState) => {
-
 
         let stateLabel = `<b>${state.NAME}</b>`;
         if (state.ON_ENTER) {
@@ -28,7 +47,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
         if (state.ON_EXIT) {
             stateLabel += `<br/>onExit: ${state.ON_EXIT.name.replace("bound ", "")}()`;
         }
-        dotFileLines.push(`\t${state.NAME} [label= < ${stateLabel} >, id="${state.NAME}"];`);
+        dotFileLines.push(`${state.NAME} [label= < ${stateLabel} >, id="${state.NAME}"];`);
 
         state.TRANSITIONS.forEach((transition) => {
 
@@ -52,7 +71,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
 
                     const transitionID = `${state.NAME}_to_${transition.DESTINATION}`;
 
-                    dotFileLines.push(`\t${state.NAME} -> ${transition.DESTINATION} [label="${transitionLabel}", id="${transitionID}"];`);
+                    dotFileLines.push(`${state.NAME} -> ${transition.DESTINATION} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
                 }
 
@@ -70,7 +89,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     }
 
                     const transitionID = `${state.NAME}_to_${transition.DESTINATION}`;
-                    dotFileLines.push(`\t${state.NAME} -> ${transition.DESTINATION} [label="${transitionLabel}", id="${transitionID}"];`);
+                    dotFileLines.push(`${state.NAME} -> ${transition.DESTINATION} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
                 }
 
@@ -84,7 +103,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     }
 
                     const transitionID = `${state.NAME}_to_${transition.DESTINATION}`;
-                    dotFileLines.push(`\t${state.NAME} -> ${transition.DESTINATION} [label="${transitionLabel}", id="${transitionID}"];`);
+                    dotFileLines.push(`${state.NAME} -> ${transition.DESTINATION} [label="${transitionLabel}", id="${transitionID}"];`);
                     break;
                 }
 
@@ -103,8 +122,8 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     }
                     const idElse = `${state.NAME}_to_${transition.ELSE.DESTINATION}`;
 
-                    dotFileLines.push(`\t${state.NAME} -> ${transition.THEN.DESTINATION} [label="${labelThen}", id="${idThen}"];`);
-                    dotFileLines.push(`\t${state.NAME} -> ${transition.ELSE.DESTINATION} [label="${labelElse}", id="${idElse}"];`);
+                    dotFileLines.push(`${state.NAME} -> ${transition.THEN.DESTINATION} [label="${labelThen}", id="${idThen}"];`);
+                    dotFileLines.push(`${state.NAME} -> ${transition.ELSE.DESTINATION} [label="${labelElse}", id="${idElse}"];`);
                     break;
                 }
 
@@ -130,13 +149,12 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     }
                     const idElse = `${state.NAME}_to_${transition.ELSE.DESTINATION}`;
 
-                    dotFileLines.push(`\t${state.NAME} -> ${transition.THEN.DESTINATION} [label="${labelThen}", id="${idThen}"];`);
-                    dotFileLines.push(`\t${state.NAME} -> ${transition.ELSE.DESTINATION} [label="${labelElse}", id="${idElse}"];`);
+                    dotFileLines.push(`${state.NAME} -> ${transition.THEN.DESTINATION} [label="${labelThen}", id="${idThen}"];`);
+                    dotFileLines.push(`${state.NAME} -> ${transition.ELSE.DESTINATION} [label="${labelElse}", id="${idElse}"];`);
                     break;
                 }
 
                 default:
-                    // Prevent TS2339 "Property 'TYPE' does not exist on type 'never'"
                     throw new TypeError(`unknown transition type "${(transition as StateMachineTransition).TYPE}"`);
             }
 

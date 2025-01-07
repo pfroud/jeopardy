@@ -28,9 +28,20 @@ window.addEventListener('DOMContentLoaded', () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     window.opener.addEventListener("unload", () => close());
 
+    /*
+    There are two steps to show a state diagram:
+    1. Convert Javascript array of states/transitions to Graphviz language string.
+    2. Render the Graphviz language string to SVG using viz.js.
+    */
+
     const graphvizLanguageString = stateMachineToGraphviz(stateMachine.getAllStates());
 
-    async function getSvgString(): Promise<string> {
+    const copyButton = document.createElement("button");
+    copyButton.innerText = "Copy graphviz language string to clipboard";
+    copyButton.addEventListener("click", () => { window.navigator.clipboard.writeText(graphvizLanguageString); });
+    document.body.append(copyButton);
+
+    async function renderGraphvizToSvg(graphvizInput: string): Promise<string> {
         // from https://github.com/aduh95/viz.js#using-a-bundler
         const viz = new Viz({
             worker: new Worker(
@@ -38,25 +49,24 @@ window.addEventListener('DOMContentLoaded', () => {
                 { type: "module" }
             )
         });
-        return viz.renderString(graphvizLanguageString);
+        // Newlines in the node labels don't work https://github.com/aduh95/viz.js/issues/29
+        return viz.renderString(graphvizInput, { format: "svg", engine: "dot" });
     }
 
-    getSvgString()
-        .then((svgString) => {
-            document.body.innerHTML = svgString;
+    renderGraphvizToSvg(graphvizLanguageString)
+        .then(svgString => {
+            document.body.insertAdjacentHTML("beforeend", svgString);
+
             // The body will now contain an <svg> tag.
             const svgElement = querySelectorAndCheck<SVGSVGElement>(document, "svg");
             svgElement.setAttribute("width", "100%");
             svgElement.removeAttribute("height");
 
-            const stateMachineViewer = new StateMachineViewer(svgElement);
-
-            // Tell the state machine that a viewer 
-            stateMachine.addStateMachineViewer(stateMachineViewer);
+            stateMachine.addStateMachineViewer(new StateMachineViewer(svgElement));
 
         })
         .catch((error: unknown) => {
-            document.body.innerHTML = String(error);
+            document.body.append(String(error));
             console.error(error);
         });
 
