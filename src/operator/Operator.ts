@@ -345,6 +345,12 @@ export class Operator {
                 }
             }
         });
+
+        querySelectorAndCheck(document, "button#nextRound").addEventListener("click", () =>
+            this.stateMachine?.goToState("nextRoundOrEndGame"));
+
+        querySelectorAndCheck(document, "button#endGame").addEventListener("click", () =>
+            this.stateMachine?.goToState("gameEnd"));
     }
 
     /**
