@@ -301,8 +301,8 @@ export class Operator {
             window.open("../moneyOverride/moneyOverride.html", "windowOverrideMoney"));
 
 
-        querySelectorAndCheck(document, "a#aOpenStateMachineViewer").addEventListener("click", () =>
-            window.open("../stateMachineViewer", "windowStateMachineViewer", "popup")
+        querySelectorAndCheck(document, "a#aOpenStateMachineHistoryVisualizer").addEventListener("click", () =>
+            window.open("../stateMachineHistoryVisualizer", "windowStateMachineHistoryVisualizer", "popup")
         );
 
         querySelectorAndCheck(this.DIV_GAME_END_POPUP_BUTTONS, "button#show-team-ranking-table").addEventListener("click", () => {
