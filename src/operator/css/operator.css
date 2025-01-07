@@ -14,6 +14,14 @@ body {
 
 }
 
+a:not(:active):visited {
+    color: darkviolet;
+}
+
+a:not(:active):not(:visited) {
+    color: dodgerblue;
+}
+
 main {
     line-height: 150%;
 
