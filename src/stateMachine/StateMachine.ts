@@ -4,7 +4,7 @@ import { CountdownTimer } from "../CountdownTimer";
 import { Operator } from "../operator/Operator";
 import { Presentation } from "../presentation/Presentation";
 import { Settings } from "../Settings";
-import { StateMachineViewer } from "../stateMachineViewer/StateMachineViewer";
+import { StateMachineHistoryVisualizer } from "../stateMachineHistoryVisualizer/StateMachineHistoryVisualizer";
 import { getStatesForJeopardyGame } from "./statesForJeopardyGame";
 import { CountdownBehavior, StateMachineState, TimeoutTransition } from "./typesForStateMachine";
 
@@ -25,7 +25,7 @@ export class StateMachine {
     private readonly COUNTDOWN_TIMER_LEAVING_STATE: { [stateName: string]: CountdownTimer } = {};
 
     private readonly ALL_STATES: StateMachineState[];
-    private stateMachineViewer?: StateMachineViewer;
+    private stateMachineHistoryVisualizer?: StateMachineHistoryVisualizer;
     private presentState: StateMachineState;
 
     public constructor(settings: Settings, operator: Operator, presentation: Presentation, audioManager: AudioManager) {
@@ -46,9 +46,9 @@ export class StateMachine {
         this.presentState = this.STATE_MAP["idle"];
     }
 
-    public addStateMachineViewer(stateMachineViewer: StateMachineViewer): void {
-        stateMachineViewer.updateTrail(null, this.presentState.NAME);
-        this.stateMachineViewer = stateMachineViewer;
+    public addStateMachineHistoryVisualizer(visualizer: StateMachineHistoryVisualizer): void {
+        visualizer.updateTrail(null, this.presentState.NAME);
+        this.stateMachineHistoryVisualizer = visualizer;
     }
 
     private onKeyboardEvent(keyboardEvent: KeyboardEvent): void {
@@ -132,8 +132,8 @@ export class StateMachine {
         const previousState = this.presentState;
         this.presentState = this.STATE_MAP[destinationStateName];
         this.OPERATOR_WINDOW_DIV_STATE_NAME.innerHTML = destinationStateName;
-        if (this.stateMachineViewer) {
-            this.stateMachineViewer.updateTrail(previousState.NAME, this.presentState.NAME);
+        if (this.stateMachineHistoryVisualizer) {
+            this.stateMachineHistoryVisualizer.updateTrail(previousState.NAME, this.presentState.NAME);
         }
 
 

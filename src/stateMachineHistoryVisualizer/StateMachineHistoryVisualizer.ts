@@ -8,7 +8,7 @@ type TrailStyle = { color: string, strokeWidth: number };
  * 
  * Some state are entered then immediately exited (possibly an impure state machine)
 */
-export class StateMachineViewer {
+export class StateMachineHistoryVisualizer {
 
     /**
      * Set this attribute on SVG elements to keep track of what index in the trail they are.
@@ -35,13 +35,13 @@ export class StateMachineViewer {
      * The length of the trail and what each index looks like are specified here.
      * Index zero is the current state and the transition which lead to the current state.
      * Index one is the previous state and the transition which led to that state.
-     * And so on.
+     * 
      */
     private static readonly TRAIL_STYLES: TrailStyle[] = [
         { color: "lime", strokeWidth: 10 },
         // see https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/color-mix
-        { color: `color-mix(in lab, lime 60%, ${StateMachineViewer.FOREGROUND_COLOR})`, strokeWidth: 5 },
-        { color: `color-mix(in lab, lime 20%, ${StateMachineViewer.FOREGROUND_COLOR})`, strokeWidth: 5 },
+        { color: `color-mix(in lab, lime 60%, ${StateMachineHistoryVisualizer.FOREGROUND_COLOR})`, strokeWidth: 5 },
+        { color: `color-mix(in lab, lime 20%, ${StateMachineHistoryVisualizer.FOREGROUND_COLOR})`, strokeWidth: 5 },
     ];
 
 
@@ -126,8 +126,8 @@ export class StateMachineViewer {
 
         // Declare the custom CSS variables
         styleTag.append(":root {");
-        for (let trailIndex = 0; trailIndex < StateMachineViewer.TRAIL_STYLES.length; trailIndex++) {
-            const styleObject = StateMachineViewer.TRAIL_STYLES[trailIndex];
+        for (let trailIndex = 0; trailIndex < StateMachineHistoryVisualizer.TRAIL_STYLES.length; trailIndex++) {
+            const styleObject = StateMachineHistoryVisualizer.TRAIL_STYLES[trailIndex];
             const styleKeys = Object.keys(styleObject) as (keyof TrailStyle)[];
             styleKeys.forEach(key => {
                 styleTag.append(`${propNameGetters[key](trailIndex)}: ${styleObject[key]};`);
@@ -136,7 +136,7 @@ export class StateMachineViewer {
         styleTag.append("}");
 
         // Add CSS rules for each index in the trail
-        for (let trailIndex = 0; trailIndex < StateMachineViewer.TRAIL_STYLES.length; trailIndex++) {
+        for (let trailIndex = 0; trailIndex < StateMachineHistoryVisualizer.TRAIL_STYLES.length; trailIndex++) {
 
             const propNameForColor = propNameGetters.color(trailIndex);
             const propNameForStrokeWidth = propNameGetters.strokeWidth(trailIndex);
@@ -145,7 +145,7 @@ export class StateMachineViewer {
 
             // Add rules for states (nodes)
             // see https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting/Using_CSS_nesting
-            styleTag.append(`g.node[${StateMachineViewer.ATTRIBUTE_STATE_TRAIL_INDEX} = "${trailIndex}"] {`);
+            styleTag.append(`g.node[${StateMachineHistoryVisualizer.ATTRIBUTE_STATE_TRAIL_INDEX} = "${trailIndex}"] {`);
 
             if (trailIndex === 0) {
                 // Scale the whole group for index zero only. Move this to the TrailStyle type?
@@ -168,7 +168,7 @@ export class StateMachineViewer {
             styleTag.append(`}`); // close selector for the state (node) group
 
             // Add rules for transitions (edges)
-            styleTag.append(`g.edge[${StateMachineViewer.ATTRIBUTE_TRANSITION_TRAIL_INDEX} = "${trailIndex}"] { `);
+            styleTag.append(`g.edge[${StateMachineHistoryVisualizer.ATTRIBUTE_TRANSITION_TRAIL_INDEX} = "${trailIndex}"] { `);
 
             // <path> is the line excluding arrowhead
             styleTag.append(`path {`);
@@ -202,14 +202,14 @@ export class StateMachineViewer {
         // Add element to the beginning of the array (it becomes index zero)
         this.STATE_TRAIL.unshift(svgGroupForNewState);
 
-        if (this.STATE_TRAIL.length > StateMachineViewer.TRAIL_STYLES.length) {
+        if (this.STATE_TRAIL.length > StateMachineHistoryVisualizer.TRAIL_STYLES.length) {
             // Remove the last element from the array (remove the element with greatest index)
-            this.STATE_TRAIL.pop()?.removeAttribute(StateMachineViewer.ATTRIBUTE_STATE_TRAIL_INDEX);
+            this.STATE_TRAIL.pop()?.removeAttribute(StateMachineHistoryVisualizer.ATTRIBUTE_STATE_TRAIL_INDEX);
         }
 
         // Set attributes on SVG elements to reflect new indexes
         for (let trailIdx = 0; trailIdx < this.STATE_TRAIL.length; trailIdx++) {
-            this.STATE_TRAIL[trailIdx].setAttribute(StateMachineViewer.ATTRIBUTE_STATE_TRAIL_INDEX, trailIdx.toString());
+            this.STATE_TRAIL[trailIdx].setAttribute(StateMachineHistoryVisualizer.ATTRIBUTE_STATE_TRAIL_INDEX, trailIdx.toString());
         }
 
 
@@ -222,14 +222,14 @@ export class StateMachineViewer {
                 // Add element to the beginning of the array (it becomes index zero)
                 this.TRANSITION_TRAIL.unshift(groupForTransition);
 
-                if (this.TRANSITION_TRAIL.length > StateMachineViewer.TRAIL_STYLES.length) {
+                if (this.TRANSITION_TRAIL.length > StateMachineHistoryVisualizer.TRAIL_STYLES.length) {
                     // Remove the last element from the array (remove the element with greatest index)
-                    this.TRANSITION_TRAIL.pop()?.removeAttribute(StateMachineViewer.ATTRIBUTE_TRANSITION_TRAIL_INDEX);
+                    this.TRANSITION_TRAIL.pop()?.removeAttribute(StateMachineHistoryVisualizer.ATTRIBUTE_TRANSITION_TRAIL_INDEX);
                 }
 
                 // Set attributes on SVG elements to reflect new indexes
                 for (let trailIdx = 0; trailIdx < this.TRANSITION_TRAIL.length; trailIdx++) {
-                    this.TRANSITION_TRAIL[trailIdx].setAttribute(StateMachineViewer.ATTRIBUTE_TRANSITION_TRAIL_INDEX, trailIdx.toString());
+                    this.TRANSITION_TRAIL[trailIdx].setAttribute(StateMachineHistoryVisualizer.ATTRIBUTE_TRANSITION_TRAIL_INDEX, trailIdx.toString());
                 }
             }
         }

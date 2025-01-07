@@ -1,7 +1,7 @@
 import Viz from "@aduh95/viz.js";
 import { querySelectorAndCheck } from "../commonFunctions";
 import { Operator } from "../operator/Operator";
-import { StateMachineViewer } from "./StateMachineViewer";
+import { StateMachineHistoryVisualizer } from "./StateMachineHistoryVisualizer";
 import { stateMachineToGraphviz } from "./generateDotFileForGraphviz";
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -62,7 +62,7 @@ window.addEventListener('DOMContentLoaded', () => {
             svgElement.setAttribute("width", "100%");
             svgElement.removeAttribute("height");
 
-            stateMachine.addStateMachineViewer(new StateMachineViewer(svgElement));
+            stateMachine.addStateMachineHistoryVisualizer(new StateMachineHistoryVisualizer(svgElement));
 
         })
         .catch((error: unknown) => {

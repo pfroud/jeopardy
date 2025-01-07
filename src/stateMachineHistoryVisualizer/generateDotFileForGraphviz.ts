@@ -1,5 +1,5 @@
 import { StateMachineState, StateMachineTransition } from "../stateMachine/typesForStateMachine";
-import { StateMachineViewer } from "./StateMachineViewer";
+import { StateMachineHistoryVisualizer } from "./StateMachineHistoryVisualizer";
 
 /**
  * Convert state machine states & transitions into a string of the Graphviz graph description language.
@@ -32,7 +32,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
 
     dotFileLines.push(`bgcolor = "transparent"`);
 
-    const color = StateMachineViewer.FOREGROUND_COLOR;
+    const color = StateMachineHistoryVisualizer.FOREGROUND_COLOR;
 
     // The color attribute is the node outline only, not the fill.
     dotFileLines.push(`node [color="${color}", fontcolor="${color}", fontname="Courier", shape="rect"];`);
