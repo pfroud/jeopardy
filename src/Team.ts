@@ -414,7 +414,7 @@ export class Team {
     public statisticsUpdateMoneyAtEndOfRound(): void {
         this.statistics.moneyAtEndOfEachRound.push(this.money);
 
-        if (this.hasBuzzedForCurrentQuestion_) {
+        if (!this.hasBuzzedForCurrentQuestion_) {
             this.statistics.questionsNotBuzzed++;
         }
 
