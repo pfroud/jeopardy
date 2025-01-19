@@ -286,6 +286,9 @@ body.hide-header-and-footer {
 }
 
 body.showing-game-board header {
+
+    height: 50px;
+
     progress#state-machine {
         margin-top: 20px;
     }
