@@ -2,7 +2,7 @@ import { Axis, axisBottom } from "d3-axis";
 import { ScaleLinear, scaleLinear } from "d3-scale";
 import { select, Selection } from "d3-selection";
 import { D3ZoomEvent, zoom, zoomIdentity } from "d3-zoom";
-import { createSvgElement } from "./commonFunctions";
+import { createSvgElement, querySelectorAndCheck } from "./commonFunctions";
 import { Team, TeamState } from "./Team";
 
 
@@ -93,6 +93,8 @@ export class BuzzHistoryChart {
     private readonly LEGEND_HEIGHT = 30;
     private readonly LEGEND_PADDING = 40;
 
+    private readonly SVG_WIDTH = 1000;
+
     // content means the SVG size minus the margins.
     private readonly CONTENT_WIDTH: number;
     private readonly CONTENT_HEIGHT: number;
@@ -163,10 +165,9 @@ export class BuzzHistoryChart {
         this.LOCKOUT_DURATION_MILLISEC = lockoutDurationMillisec;
         this.SVG_IN_OPERATOR_WINDOW = select(svgInOperatorWindow);
 
-        const svgWidth = 1000;
         const svgHeight = (teams.length * BuzzHistoryChart.ROW_HEIGHT) + this.SVG_MARGIN.TOP + this.SVG_MARGIN.BOTTOM + 30 + this.LEGEND_HEIGHT + this.LEGEND_PADDING;
 
-        this.CONTENT_WIDTH = svgWidth - this.SVG_MARGIN.LEFT - this.SVG_MARGIN.RIGHT;
+        this.CONTENT_WIDTH = this.SVG_WIDTH - this.SVG_MARGIN.LEFT - this.SVG_MARGIN.RIGHT;
         this.CONTENT_HEIGHT = svgHeight - this.SVG_MARGIN.TOP - this.SVG_MARGIN.BOTTOM - this.LEGEND_HEIGHT - this.LEGEND_PADDING;
 
         // The domain is set in the showNewHistory() function
@@ -184,7 +185,7 @@ export class BuzzHistoryChart {
         for (const theSvg of this.ALL_SVGS) {
             theSvg.innerHTML = "";
 
-            theSvg.setAttribute("width", String(svgWidth));
+            theSvg.setAttribute("width", String(this.SVG_WIDTH));
             theSvg.setAttribute("height", String(svgHeight));
 
             this.createLegend(theSvg);
@@ -285,6 +286,8 @@ export class BuzzHistoryChart {
         this.initPanZoomController();
 
         // The chart is drawn when showNewHistory() is called.
+
+        querySelectorAndCheck(document, "button#copy-css-to-xml").addEventListener("click", () => this.copyCssStylesToXmlAttributes());
 
     }
 
@@ -771,6 +774,68 @@ export class BuzzHistoryChart {
 
         });
 
+    }
+
+    /**
+     * All the styling is done in a separate CSS file. If you save the SVG to a file, it does
+     * not get the CSS styles.
+     * This function copies styles from CSS rules to XML attributes so the SVG looks right
+     * when added to a markdown file.
+     */
+    public copyCssStylesToXmlAttributes(): void {
+
+        const svg = this.SVG_IN_OPERATOR_WINDOW.node()!;
+
+        // make it recognized as SVG file when opened in web browser
+        svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+
+        // add white background so it is readable in dark theme
+        const backgroundRect = createSvgElement("rect");
+        backgroundRect.setAttribute("id", "background");
+        backgroundRect.setAttribute("fill", "white");
+        backgroundRect.setAttribute("stroke", "none");
+        backgroundRect.setAttribute("x", "0");
+        backgroundRect.setAttribute("y", "0");
+        backgroundRect.setAttribute("width", String(this.SVG_WIDTH));
+        backgroundRect.setAttribute("height", String(svg.getAttribute("height")));
+        svg.insertBefore(backgroundRect, svg.firstChild);
+
+        // The CSS styles we want to copy. For some of them, the XML attribute name is different.
+        const stylesToCopy: { cssPropName: keyof CSSStyleDeclaration, xmlAttribName?: string }[] = [
+            { cssPropName: "fill" },
+            { cssPropName: "stroke" },
+            { cssPropName: "strokeWidth", xmlAttribName: "stroke-width" },
+            { cssPropName: "fontSize", xmlAttribName: "font-size" },
+            { cssPropName: "fontFamily", xmlAttribName: "font-family" },
+            { cssPropName: "strokeDasharray", xmlAttribName: "stroke-dasharray" }
+        ];
+
+        recurse(svg.children);
+
+        function recurse(children: HTMLCollection): void {
+            Array.from(children).forEach(element => {
+
+                const computedCssStyle = window.getComputedStyle(element);
+
+                if (computedCssStyle.display === "none" || computedCssStyle.opacity === "0") {
+                    element.remove();
+                } else {
+                    stylesToCopy.forEach(styleObj => {
+
+                        const cssPropName = styleObj.cssPropName;
+                        const cssValue = String(computedCssStyle[cssPropName]);
+                        const xmlAttribName = styleObj.xmlAttribName ? styleObj.xmlAttribName : String(cssPropName);
+
+                        if (!element.hasAttribute(xmlAttribName)) {
+                            element.setAttribute(xmlAttribName, cssValue);
+                        }
+                    });
+                    recurse(element.children);
+                }
+            });
+        }
+
+        window.navigator.clipboard.writeText(svg.outerHTML);
     }
 
 }
