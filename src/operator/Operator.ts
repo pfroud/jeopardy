@@ -758,6 +758,7 @@ export class Operator {
 
         if (isPaused) {
             document.body.classList.add("paused");
+            this.gameBoard?.onGamePause();
         } else {
             document.body.classList.remove("paused");
         }

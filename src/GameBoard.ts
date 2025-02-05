@@ -29,6 +29,8 @@ export class GameBoard {
 
     /** 
      * The Map value is an array of table cells.
+     * There is one array of <tds> for the game board in the operator window, 
+     * and one array of <td>s for the game board in the presentation window.
      */
     private readonly CATEGORY_CELLS = new Set<HTMLTableCellElement[]>();
 
@@ -40,6 +42,18 @@ export class GameBoard {
      *     The second array index is the <td> (column) index.
      */
     private readonly CLUE_CELLS = new Map<HTMLTableElement, HTMLTableCellElement[][]>();
+
+    /** Only used to remove style from presentation window when the game pauses. */
+    private cellHovering: HTMLTableCellElement | null = null;
+
+    /** Only used to remove style from presentation window when the game pauses. */
+    private cellActive: HTMLTableCellElement | null = null;
+
+    /** Only used to check if the game paused while the mouse was down. */
+    private isMouseDown = false;
+
+    /** Only used to check if the game paused while the mouse was down. */
+    private cancelClickEventBecauseGamePausedWhenMouseWasDown = false;
 
     private readonly OPERATOR;
 
@@ -91,6 +105,16 @@ export class GameBoard {
             cellsInRow.forEach((td, columnIndex) => {
 
                 td.addEventListener("click", () => {
+
+                    if (this.OPERATOR.isPaused()) {
+                        return;
+                    }
+
+                    if (this.cancelClickEventBecauseGamePausedWhenMouseWasDown) {
+                        this.cancelClickEventBecauseGamePausedWhenMouseWasDown = false;
+                        return;
+                    }
+
                     if (this.gameRound) {
                         const clue = this.gameRound.CLUES[clueRowIndex][columnIndex];
                         this.OPERATOR.onGameBoardClueClicked(clue);
@@ -111,26 +135,56 @@ export class GameBoard {
                     }
                 });
 
+
+                const clueCellsForPresentation = this.CLUE_CELLS.get(tableInPresentationWindow);
+
                 td.addEventListener("mouseenter", () => {
-                    this.CLUE_CELLS.get(tableInPresentationWindow)![clueRowIndex][columnIndex].classList.add("hover-in-operator-window");
+                    if (!this.OPERATOR.isPaused()) {
+                        const cell = clueCellsForPresentation![clueRowIndex][columnIndex];
+                        cell.classList.add("hover-in-operator-window");
+                        this.cellHovering = cell;
+                    }
                 });
 
                 td.addEventListener("mousedown", () => {
-                    this.CLUE_CELLS.get(tableInPresentationWindow)![clueRowIndex][columnIndex].classList.add("active-in-operator-window");
+                    if (!this.OPERATOR.isPaused()) {
+                        const cell = clueCellsForPresentation![clueRowIndex][columnIndex];
+                        cell.classList.add("active-in-operator-window");
+                        this.cellActive = cell;
+                        this.isMouseDown = true;
+                    }
                 });
 
                 td.addEventListener("mouseleave", () => {
-                    this.CLUE_CELLS.get(tableInPresentationWindow)![clueRowIndex][columnIndex].classList.remove("hover-in-operator-window");
-                    this.CLUE_CELLS.get(tableInPresentationWindow)![clueRowIndex][columnIndex].classList.remove("active-in-operator-window");
+                    if (!this.OPERATOR.isPaused()) {
+                        const cell = clueCellsForPresentation![clueRowIndex][columnIndex];
+                        cell.classList.remove("hover-in-operator-window");
+                        cell.classList.remove("active-in-operator-window");
+                        this.cellActive = null;
+                        this.cellHovering = null;
+                    }
                 });
 
                 td.addEventListener("mouseup", () => {
-                    this.CLUE_CELLS.get(tableInPresentationWindow)![clueRowIndex][columnIndex].classList.remove("active-in-operator-window");
+                    if (!this.OPERATOR.isPaused()) {
+                        const cell = clueCellsForPresentation![clueRowIndex][columnIndex];
+                        cell.classList.remove("active-in-operator-window");
+                        this.cellActive = null;
+                        this.isMouseDown = false;
+                    }
                 });
 
             }));
 
 
+    }
+
+    public onGamePause(): void {
+        this.cellActive?.classList.remove("active-in-operator-window");
+        this.cellHovering?.classList.remove("hover-in-operator-window");
+        if (this.isMouseDown) {
+            this.cancelClickEventBecauseGamePausedWhenMouseWasDown = true;
+        }
     }
 
     public setGameRound(gameRound: GameRound): void {
