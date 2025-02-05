@@ -1,32 +1,33 @@
 svg#buzz-history {
-    background: none;
+    background: var(--chart-background);
 
     text {
-        fill: white;
+        fill: var(--foreground-color);
+        font-size: 20px;
+    }
 
-        &.team-name {
-            font-size: 20px;
-        }
+    g#legend text {
+        font-size: initial;
     }
 
     g#axis {
-        g.tick text {
-            font-size: 20px;
-        }
 
+        /* The domain is the long horizontal line */
         path.domain,
+        /* Ticks are short vertical lines where text labels are */
         g.tick line {
-            stroke: white;
+            stroke: var(--foreground-color);
         }
     }
 
     g#grid {
 
-        g.tick text,
-        path.domain {
+        path.domain,
+        g.tick text {
             display: none;
         }
 
+        /* The grid is actually ticks extended to be the height of the entire chart */
         g.tick line {
             stroke: gray;
             stroke-dasharray: 2, 2;
@@ -34,27 +35,27 @@ svg#buzz-history {
     }
 
     rect.row-shaded-background-even {
-        fill: #112266;
+        fill: var(--row-background-even-fill);
     }
 
     rect.row-shaded-background-odd {
-        fill: #223388;
+        fill: var(--row-background-odd-fill);
     }
 
     line.row-separator,
     line.vertical-line {
-        stroke: white;
+        stroke: var(--foreground-color);
         stroke-width: 1;
     }
 
     g.annotation path {
         stroke-linecap: round;
-        stroke: white;
+        stroke: var(--foreground-color);
         fill: none;
     }
 
     rect.buzz-record {
-        stroke: white;
+        stroke: var(--foreground-color);
         stroke-width: 1;
 
         &.too-early-start-lockout {
@@ -65,13 +66,13 @@ svg#buzz-history {
             fill: green;
         }
 
-        &.answered-wrong {
+        &.answered-wrong-or-timed-out {
             fill: red;
         }
     }
 
     circle.buzzer-press {
-        fill: white;
-        stroke-width: 0;
+        fill: var(--foreground-color);
+        stroke: none;
     }
 }

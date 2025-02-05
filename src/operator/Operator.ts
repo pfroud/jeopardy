@@ -1,5 +1,5 @@
 import { AudioManager } from "../AudioManager";
-import { BuzzHistoryChart, BuzzHistoryForClue, BuzzHistoryRecord, BuzzResult, BuzzResultStartAnswer } from "../BuzzHistoryChart";
+import { BuzzAnswerResult, BuzzHistoryChart, BuzzHistoryForClue, BuzzHistoryRecord, BuzzResult, BuzzResultStartAnswer } from "../BuzzHistoryChart";
 import { CountdownTimer } from "../CountdownTimer";
 import { GameBoard } from "../GameBoard";
 import { Settings } from "../Settings";
@@ -239,7 +239,7 @@ export class Operator {
             throw new Error("called handleAnswerCorrect() when presentClue is undefined");
         }
         this.teamPresentlyAnswering?.onAnswerCorrect(this.presentClue);
-        this.buzzHistoryPopulateRecordForActiveAnswerAndSave(true);
+        this.buzzHistoryPopulateRecordForActiveAnswerAndSave("answeredRight");
 
         this.setStatesOfTeamsNotAnswering("can-answer"); //only correct if teams can answer multiple questions for the same clue
         this.teamPresentlyAnswering = undefined;
@@ -256,7 +256,7 @@ export class Operator {
         this.teamPresentlyAnswering?.onAnswerIncorrectOrAnswerTimeout(this.presentClue);
 
         // finish adding info to object which was started when the buzzer was pressed (in method startAnswer())
-        this.buzzHistoryPopulateRecordForActiveAnswerAndSave(false);
+        this.buzzHistoryPopulateRecordForActiveAnswerAndSave("answeredWrongOrTimedOut");
 
         this.stateMachine?.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
 
@@ -280,10 +280,10 @@ export class Operator {
         }
     }
 
-    private buzzHistoryPopulateRecordForActiveAnswerAndSave(answeredCorrectly: boolean): void {
+    private buzzHistoryPopulateRecordForActiveAnswerAndSave(answerResult: BuzzAnswerResult): void {
         if (this.presentClue && this.buzzHistoryRecordForActiveAnswer && this.teamPresentlyAnswering) {
             this.buzzHistoryRecordForActiveAnswer.RESULT.endTimestamp = Date.now();
-            this.buzzHistoryRecordForActiveAnswer.RESULT.answeredCorrectly = answeredCorrectly;
+            this.buzzHistoryRecordForActiveAnswer.RESULT.answerResult = answerResult;
 
             this.buzzHistoryForClue?.RECORDS[this.teamPresentlyAnswering.getTeamIndex()]
                 .push(this.buzzHistoryRecordForActiveAnswer);
@@ -460,7 +460,7 @@ export class Operator {
             startTimestamp: Date.now(),
             RESULT: {
                 TYPE: "start-answer",
-                answeredCorrectly: false, //gets changed later
+                answerResult: "answeredWrongOrTimedOut", //changed later if they answer right
                 endTimestamp: NaN
             }
         };

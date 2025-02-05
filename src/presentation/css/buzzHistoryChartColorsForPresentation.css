@@ -1,0 +1,8 @@
+svg#buzz-history {
+    --chart-background: none;
+
+    --foreground-color: white;
+
+    --row-background-even-fill: #112266;
+    --row-background-odd-fill: #223388;
+}

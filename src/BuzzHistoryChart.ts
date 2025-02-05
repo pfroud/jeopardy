@@ -37,6 +37,8 @@ interface BuzzResultTooEarlyStartLockout {
     readonly TYPE: "too-early-start-lockout";
 }
 
+export type BuzzAnswerResult = "answeredRight" | "answeredWrongOrTimedOut";
+
 /**
  * The team pressed their buzzer and their time to answer started.
  * 
@@ -44,7 +46,7 @@ interface BuzzResultTooEarlyStartLockout {
  */
 export interface BuzzResultStartAnswer {
     readonly TYPE: "start-answer";
-    answeredCorrectly: boolean;
+    answerResult: BuzzAnswerResult;
     endTimestamp: number;
 }
 
@@ -108,7 +110,7 @@ export class BuzzHistoryChart {
     private static readonly CLASS_NAME_FOR_START_ANSWER = "start-answer";
     private static readonly CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT = "too-early-start-lockout";
     private static readonly CLASS_NAME_FOR_ANSWERED_RIGHT = "answered-right";
-    private static readonly CLASS_NAME_FOR_ANSWERED_WRONG = "answered-wrong";
+    private static readonly CLASS_NAME_FOR_ANSWERED_WRONG_OR_TIMED_OUT = "answered-wrong-or-timed-out";
     private static readonly CLASS_NAME_FOR_ANNOTATION_GROUP = "annotation";
     private static readonly CLASS_NAME_FOR_ANNOTATION_ARROW_PATH = "annotation-arrow-path";
 
@@ -348,7 +350,7 @@ export class BuzzHistoryChart {
         const rectanglesToAdd = [
             { label: "Too early (lockout)", xOffsetToLookLinedUp: 4, className: BuzzHistoryChart.CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT },
             { label: "Answered right", xOffsetToLookLinedUp: 1, className: BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_RIGHT },
-            { label: "Answered wrong", xOffsetToLookLinedUp: 1, className: BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_WRONG }
+            { label: "Answered wrong or timed out", xOffsetToLookLinedUp: 1, className: BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_WRONG_OR_TIMED_OUT }
         ];
 
         for (let i = 0; i < rectanglesToAdd.length; i++) {
@@ -654,8 +656,8 @@ export class BuzzHistoryChart {
                     .join("rect")
                     .classed("buzz-record", true)
                     .classed(BuzzHistoryChart.CLASS_NAME_FOR_START_ANSWER, true)
-                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_RIGHT, d => d.RESULT.answeredCorrectly)
-                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_WRONG, d => !d.RESULT.answeredCorrectly)
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_RIGHT, d => d.RESULT.answerResult === "answeredRight")
+                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_WRONG_OR_TIMED_OUT, d => d.RESULT.answerResult === "answeredWrongOrTimedOut")
                     .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp))
                     .attr("y", BuzzHistoryChart.Y_POSITION_FOR_BARS)
                     .attr("width", d => this.scaleWithZoomTransform(d.RESULT.endTimestamp) - this.scaleWithZoomTransform(d.startTimestamp))
