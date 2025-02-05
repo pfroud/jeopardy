@@ -250,7 +250,7 @@ export class CountdownTimer {
                         has passed so I am leaving it in here.
                         */
                         if (this.AUDIO_MANAGER) {
-                            this.AUDIO_MANAGER?.TICK.play();
+                            this.AUDIO_MANAGER.TICK.play();
                         } else {
                             console.warn("dotsTable is true but no audioManager");
                         }

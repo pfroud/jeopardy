@@ -554,7 +554,7 @@ export class BuzzHistoryChart {
         this.history.RECORDS.forEach(arrayOfRecordsForTeam => arrayOfRecordsForTeam.forEach(record => {
             record.startTimestamp -= this.history!.timestampWhenClueQuestionFinishedReading;
             allTimestamps.push(record.startTimestamp);
-            if (record.RESULT?.TYPE === "start-answer") {
+            if (record.RESULT.TYPE === "start-answer") {
                 record.RESULT.endTimestamp -= this.history!.timestampWhenClueQuestionFinishedReading;
                 allTimestamps.push(record.RESULT.endTimestamp);
             }
@@ -623,7 +623,7 @@ export class BuzzHistoryChart {
                 // Draw bars for buzzes that were too early
                 groupForTeam
                     .selectAll(`rect.${BuzzHistoryChart.CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT}`)
-                    .data(recordsForTeam.filter(record => record.RESULT?.TYPE === "too-early-start-lockout"))
+                    .data(recordsForTeam.filter(record => record.RESULT.TYPE === "too-early-start-lockout"))
                     .join("rect")
                     .classed("buzz-record", true)
                     .classed(BuzzHistoryChart.CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT, true)
@@ -644,7 +644,7 @@ export class BuzzHistoryChart {
                             https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates
                             */
                             function (record: BuzzHistoryRecord<BuzzResult>): record is BuzzHistoryRecord<BuzzResultStartAnswer> {
-                                return record.RESULT?.TYPE === "start-answer";
+                                return record.RESULT.TYPE === "start-answer";
                             }
                         )
                     )

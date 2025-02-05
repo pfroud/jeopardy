@@ -97,8 +97,7 @@ export class GameBoard {
 
                         if (this.cluesNotYetRevealedThisRound) {
                             this.cluesNotYetRevealedThisRound.delete(clue);
-                        }
-                        else {
+                        } else {
                             throw new Error("clicked on a clue but the Set of clues not yet revealed hasn't been set up");
                         }
 
@@ -219,7 +218,7 @@ export class GameBoard {
 
     public isAllCluesRevealedThisRound(): boolean {
         if (this.cluesNotYetRevealedThisRound) {
-            return this.cluesNotYetRevealedThisRound?.size === 0;
+            return this.cluesNotYetRevealedThisRound.size === 0;
         } else {
             throw new Error("checking if all clues revealed in this round but the Set<Clue> is null");
         }

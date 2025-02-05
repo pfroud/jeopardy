@@ -263,7 +263,7 @@ export class Team {
 
         divTeam.append(tableCountdownDots);
 
-        this.allCountdownDots = this.countdownDotsInPresentationWindow?.querySelectorAll("td");
+        this.allCountdownDots = this.countdownDotsInPresentationWindow.querySelectorAll("td");
 
         const divMoney = this.DIV.PRESENTATION.money = document.createElement("div");
         divMoney.classList.add("team-money");

@@ -487,12 +487,12 @@ export class Operator {
         const team = this.teamArray[teamIndex];
         if (team.canBeLockedOut()) {
             team.lockoutStart();
-        }
 
-        this.buzzHistoryForClue?.RECORDS[teamIndex].push({
-            startTimestamp: Date.now(),
-            RESULT: { TYPE: "too-early-start-lockout" }
-        });
+            this.buzzHistoryForClue?.RECORDS[teamIndex].push({
+                startTimestamp: Date.now(),
+                RESULT: { TYPE: "too-early-start-lockout" }
+            });
+        }
 
     }
 
@@ -832,7 +832,8 @@ export class Operator {
             TEAMS: this.teamArray.map(t => t.getObjectToSaveInLocalStorage())
         };
 
-        window.localStorage.setItem(Operator.LOCAL_STORAGE_KEY,
+        window.localStorage.setItem(
+            Operator.LOCAL_STORAGE_KEY,
             JSON.stringify(objectToSave)
         );
         //TODO save the settings
