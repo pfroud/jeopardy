@@ -128,6 +128,9 @@ export class Operator {
         this.GAME_ROUND_TIMER.addProgressElement(querySelectorAndCheck(document, "div#game-round-timer progress"));
         this.GAME_ROUND_TIMER.addTextElement(querySelectorAndCheck(document, "div#game-round-timer div.remaining-time-text"));
 
+        // web browser remembers the disabled state between reloads
+        this.BUTTON_SKIP_CLUE.setAttribute("disabled", "disabled");
+
         window.open("../presentation/presentation.html", "windowPresentation");
 
         /*
@@ -295,7 +298,7 @@ export class Operator {
     private initMouseListeners(): void {
         this.BUTTON_START_GAME.addEventListener("click", () => this.gameStart());
 
-        this.BUTTON_SKIP_CLUE.addEventListener("click", () => this.clueSkip());
+        this.BUTTON_SKIP_CLUE.addEventListener("click", () => { if (!this.isPaused()) this.clueSkip(); });
 
         this.BUTTON_ADD_TIME_TO_GAME_ROUND_TIMER.addEventListener("click", () => {
             this.GAME_ROUND_TIMER.addTime(60 * 1000);
@@ -575,6 +578,11 @@ export class Operator {
         this.onGameBoardClueClicked(randomUnrevealedClue);
     }
 
+    /** Called from the state machine */
+    public onShowClueCategoryAndValue(): void {
+        this.BUTTON_SKIP_CLUE.removeAttribute("disabled");
+    }
+
     /*
     A prompt is shown to the operator which says "press space to show info about
     this special category.
@@ -643,8 +651,6 @@ export class Operator {
         this.DIV_CLUE_QUESTION.innerHTML = this.getQuestionHtmlWithSubjectInBold(this.presentClue.QUESTION);
         this.TR_QUESTION.style.display = ""; //show it by removing "display=none"
         this.TR_ANSWER.style.display = "none";
-
-        this.BUTTON_SKIP_CLUE.removeAttribute("disabled");
 
         // this.specialCategoryPromptHide();
     }

@@ -85,6 +85,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             */
             NAME: "showClueCategoryAndValue",
             INSTRUCTIONS: "Read aloud the category and dollar value.",
+            ON_ENTER: operator.onShowClueCategoryAndValue.bind(operator),
             PRESENTATION_SLIDE_TO_SHOW: "slide-clue-category-and-value",
             TRANSITIONS: [{
                 TYPE: "timeout",
