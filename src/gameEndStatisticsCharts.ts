@@ -9,7 +9,7 @@ import { Operator } from "./operator/Operator";
  *  - how many questions they got wrong or timed out after buzzing
  *  - how many questions the did not buzz for
  */
-export function createGameEndPieCharts(operator: Operator, divForPieCharts: HTMLDivElement, teams: Team[]): void {
+export function createGameEndPieChartsOfBuzzResults(operator: Operator, divForPieCharts: HTMLDivElement, teams: Team[]): void {
 
     const questionCount = operator.getQuestionCountForPieCharts();
 

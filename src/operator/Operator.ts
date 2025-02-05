@@ -5,7 +5,7 @@ import { GameBoard } from "../GameBoard";
 import { Settings } from "../Settings";
 import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
 import { querySelectorAndCheck } from "../commonFunctions";
-import { createGameEndLineChartOfMoneyOverTime, createGameEndPieCharts } from "../gameEndStatisticsCharts";
+import { createGameEndLineChartOfMoneyOverTime, createGameEndPieChartsOfBuzzResults } from "../gameEndStatisticsCharts";
 import { Presentation } from "../presentation/Presentation";
 import { SCRAPED_GAME } from "../scrapedGame";
 import { checkSpecialCategory, SpecialCategory } from "../specialCategories";
@@ -882,12 +882,12 @@ export class Operator {
 
         if (this.teamArray) {
 
-            createGameEndPieCharts(this, this.DIV_GAME_END_PIE_CHARTS, this.teamArray);
+            createGameEndPieChartsOfBuzzResults(this, this.DIV_GAME_END_PIE_CHARTS, this.teamArray);
 
             createGameEndLineChartOfMoneyOverTime(this.DIV_GAME_END_LINE_CHART, this.DIV_GAME_END_LINE_CHART_LEGEND, this.teamArray);
 
             if (this.presentation) {
-                createGameEndPieCharts(this, this.presentation.getGameEndPieChartContainer(), this.teamArray);
+                createGameEndPieChartsOfBuzzResults(this, this.presentation.getGameEndPieChartContainer(), this.teamArray);
                 createGameEndLineChartOfMoneyOverTime(this.presentation.getGameEndLineChartContainer(), this.presentation.getGameEndLineChartLegendContainer(), this.teamArray);
             }
         }
