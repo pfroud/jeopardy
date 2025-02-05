@@ -1,0 +1,16 @@
+/*
+The statistics chart is shown at the end of the game.
+
+This stylesheet gets added with the Chartist stylesheet:
+"node_modules/chartist/dist/index.scss"
+*/
+
+div#game-end-popup div#line-chart-wrapper {
+    --zero-line-color: black;
+    --grid-line-color: #aaa;
+    --axis-label-color: black;
+}
+
+div#game-end-popup div#pie-chart-wrapper {
+    --text-color: black;
+}

@@ -1,0 +1,16 @@
+/*
+The statistics chart is shown at the end of the game.
+
+This stylesheet gets added with the Chartist stylesheet:
+"node_modules/chartist/dist/index.scss"
+*/
+
+div#slide-gameEnd-line-chart {
+    --zero-line-color: white;
+    --grid-line-color: #9999ff88;
+    --axis-label-color: white;
+}
+
+div.presentation-slide#slide-gameEnd-pie-charts {
+    --text-color: white;
+}

@@ -13,15 +13,13 @@ export function createGameEndPieChartsOfBuzzResults(operator: Operator, divForPi
 
     const questionCount = operator.getQuestionCountForPieCharts();
 
+    const chartWidth = 180;
+    const chartHeight = 180;
+
     teams.forEach(team => {
         const containerForTeamPieChart = document.createElement("div");
         containerForTeamPieChart.className = "team-pie-chart";
         divForPieCharts.appendChild(containerForTeamPieChart);
-
-        const titleDiv = document.createElement("div");
-        titleDiv.className = "chart-title";
-        titleDiv.innerText = team.getTeamName();
-        containerForTeamPieChart.appendChild(titleDiv);
 
         const chartData: Chartist.PieChartData = {
             series: []
@@ -51,8 +49,8 @@ export function createGameEndPieChartsOfBuzzResults(operator: Operator, divForPi
         You have to find the section called "declaration defaultOptions" and click the "show code" button!!
          */
         const chartOptions: Chartist.PieChartOptions = {
-            width: "180px",
-            height: "180px",
+            width: `${chartWidth}px`,
+            height: `${chartHeight}px`,
             donut: true,
             donutWidth: "40%",
             //
@@ -94,18 +92,31 @@ export function createGameEndPieChartsOfBuzzResults(operator: Operator, divForPi
 
         const pieChart = new Chartist.PieChart(containerForTeamPieChart, chartData, chartOptions);
 
-        /*
-        If any of the series is 100% of the pie chart, Chartist puts the label in the center
-        of the chart, but we already put our own label for "Team #" in the center. In that 
-        case we will manually move the Chartist label.
-        */
-        const needToManuallyMoveLabel = seriesToPotentiallyAdd.map(obj => obj.value).some(n => n === questionCount);
-        if (needToManuallyMoveLabel) {
-            pieChart.on("created", () => {
-                const svgCreatedByChartist = querySelectorAndCheck<SVGSVGElement>(containerForTeamPieChart, "svg");
+        pieChart.on("created", () => {
+
+            const svgCreatedByChartist = querySelectorAndCheck<SVGSVGElement>(containerForTeamPieChart, "svg");
+
+            const teamNameTextNode = createSvgElement("text");
+            teamNameTextNode.innerHTML = team.getTeamName();
+            teamNameTextNode.setAttribute("x", String(chartWidth / 2));
+            teamNameTextNode.setAttribute("y", String(chartHeight / 2));
+            teamNameTextNode.setAttribute("dominant-baseline", "middle");
+            teamNameTextNode.setAttribute("text-anchor", "middle");
+            teamNameTextNode.setAttribute("class", "team-name");
+            svgCreatedByChartist.append(teamNameTextNode);
+
+            /*
+            If any of the series is 100% of the pie chart, Chartist puts the label in the center
+            of the chart, but we already put our own label for "Team #" in the center. In that 
+            case we will manually move the Chartist label.
+            */
+            const needToManuallyMoveLabel = seriesToPotentiallyAdd.map(obj => obj.value).some(n => n === questionCount);
+            if (needToManuallyMoveLabel) {
                 querySelectorAndCheck<SVGTextElement>(svgCreatedByChartist, "text").setAttribute("dy", "20");
-            });
-        }
+            }
+        });
+
+
     });
 }
 
@@ -137,7 +148,7 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
         // Add a horizontal line at $0.
         const maxIndex = teams[0].getStatistics().moneyAtEndOfEachRound.length - 1;
         const seriesData: LineChartSeriesData = {
-            className: "zero",
+            className: "horizontal-line-at-zero-dollars",
             data: [{
                 x: 0,
                 y: 0
