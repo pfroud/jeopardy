@@ -1,0 +1,22 @@
+progress {
+
+    /* 
+    "Foreground" means the rectangle that grows as progress is made.
+    "Background" means the entire <progress> element.
+
+    https://developer.mozilla.org/en-US/docs/Web/CSS/::-moz-progress-bar
+    https://developer.mozilla.org/en-US/docs/Web/CSS/::-webkit-progress-value
+    https://developer.mozilla.org/en-US/docs/Web/CSS/::-webkit-progress-bar
+    */
+
+    --background: darkgray;
+    --foreground-default: #229922;
+    --foreground-paused: #116611;
+    --foreground-lockout: red;
+    --foreground-lockout-and-paused: darkred;
+
+    /* Try colors here: https: //codepen.io/chriscoyier/pen/MWWvBw */
+    --color1: #444;
+    --color2: #555;
+
+}

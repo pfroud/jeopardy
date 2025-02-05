@@ -16,13 +16,8 @@ progress {
     https://developer.mozilla.org/en-US/docs/Web/CSS/::-webkit-progress-bar
     */
 
-    --background: darkgray;
-    --foreground-default: #229922;
-    --foreground-paused: #116611;
-    --foreground-lockout: red;
-    --foreground-lockout-and-paused: darkred;
-
     &[value] {
+        /* Applies when the <progress> has the "value" attribute. */
 
         /* Background of bar in mozilla (the background-color property is applied to the entire <progress> element) */
         background-color: var(--background);
@@ -71,10 +66,7 @@ progress {
         Add diagonal stripes when the <progress> element does not have the "value" attribute.
 
         Originally from https://www.pexels.com/blog/css-only-loaders/
-        Try colors here: https://codepen.io/chriscoyier/pen/MWWvBw
         */
-        --color1: #444;
-        --color2: #555;
         --size: 10px;
 
         &::-webkit-progress-bar,
