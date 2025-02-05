@@ -1,68 +1,31 @@
 table#game-board {
-    border-collapse: collapse;
-    table-layout: fixed;
     width: 100%;
 
     td {
         border: 1px solid var(--light-foreground-color);
-        text-align: center;
-        vertical-align: middle;
-
-        div.special-category-icon-wrapper {
-            background: #aaaa00;
-            border: 1px solid #cccc00;
-            border-radius: 5px;
-            padding: 2px;
-            display: inline-block;
-
-            div.special-category-icon {
-
-                --blue: #1111cc;
-                --size: 16px;
-                border: 2px solid var(--blue);
-                border-radius: 50%;
-                width: var(--size);
-                height: var(--size);
-                line-height: var(--size);
-                font-size: var(--size);
-                text-align: center;
-                font-weight: bold;
-                color: var(--blue);
-                font-family: monospace;
-
-            }
-        }
-
-    }
-
-    tr.clues td {
-
-        padding: 15px;
-
-        &[data-clue-revealed="no"] {
-
-            /* background-color: #333; */
-
-            &:hover {
-                background-color: #444400;
-                cursor: pointer;
-                font-weight: bold;
-            }
-
-            &:active {
-                background-color: white;
-                color: black;
-            }
-
-        }
-
-        &[data-clue-revealed="yes"] {
-            visibility: hidden;
-        }
-
     }
 
     tr#categories {
         height: 70px;
     }
+
+    tr.clues td {
+        padding: 15px;
+    }
+
+
+}
+
+body:not(.paused) tr.clues td[data-clue-revealed="no"] {
+    &:hover {
+        background-color: #444400;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    &:active {
+        background-color: white;
+        color: black;
+    }
+
 }

@@ -1,0 +1,43 @@
+table#game-board {
+    border-collapse: collapse;
+    table-layout: fixed;
+
+    tr#categories {
+
+        div.special-category-icon-wrapper {
+            background: #aaaa00;
+            border: 1px solid #cccc00;
+            border-radius: 5px;
+            padding: 2px;
+            display: inline-block;
+
+            div.special-category-icon {
+                text-shadow: none;
+                --blue: #1111cc;
+                --icon-size: 16px;
+                border: 2px solid var(--blue);
+                border-radius: 50%;
+                width: var(--icon-size);
+                height: var(--icon-size);
+                line-height: var(--icon-size);
+                font-size: var(--icon-size);
+                text-align: center;
+                font-weight: bold;
+                color: var(--blue);
+                font-family: monospace;
+
+            }
+        }
+
+    }
+
+    td {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    tr.clues td[data-clue-revealed="yes"] {
+        visibility: hidden;
+    }
+
+}
