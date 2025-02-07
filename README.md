@@ -80,7 +80,9 @@ To get a video player to appear in a markdown file, you need to drag-and-drop th
 video file into the github.com code editor gui. I don't think you can make a video
 player using a video file committed to the repository.
 -->
-https://github.com/user-attachments/assets/1dd80c3e-f16f-47b7-9b65-f9ea2012b76c
+https://github.com/user-attachments/assets/5d5fbda3-2886-40ba-bed8-7e6227eca1c9
+
+
 
 ## "Clue" vs "question" vs "answer"
 
