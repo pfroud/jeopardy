@@ -7,8 +7,11 @@
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../../node_modules/chartist/dist/index.css">
     <link rel="stylesheet" href="css/tabs.css">
-    <link rel="stylesheet" href="css/popupForOperator.css">
     <link rel="stylesheet" href="css/operator.css">
+
+    <!-- Overlay popup -->
+    <link rel="stylesheet" href="../common-css/popupCommon.css">
+    <link rel="stylesheet" href="css/popupForOperator.css">
 
     <!-- Game end statistics charts -->
     <link rel="stylesheet" href="../common-css/gameEndStatisticsChartCommon.css">
@@ -38,9 +41,9 @@
 
     <div id="paused" style="display:none">&#9612;&#9612; PAUSED</div>
 
-    <div id="backdrop-for-popups" style="display:none"></div>
+    <div id="backdrop-for-popups" data-backdrop-state="disabled"></div>
 
-    <div class="operator-popup" id="special-category-popup" style="display:none">
+    <div class="overlay-popup" id="special-category-popup" data-popup-visibility="hidden">
         <div id="info-icon">i</div>
         <span class="popup-title"></span>
 
@@ -69,16 +72,18 @@
         <p>Press space to close this popup.</p>
     </div>
 
-    <div class="operator-popup" id="buzz-history-chart-popup" style="display:none">
+    <div class="overlay-popup" id="buzz-history-chart-popup" data-popup-visibility="hidden">
         <div class="popup-title">Buzz history</div>
         <p>Press space to continue the game.</p>
-        <svg id="buzz-history"></svg>
+        <svg id="buzz-history"></svg><br>
         <button id="copy-css-to-xml">Copy CSS styles to XML attributes</button>
     </div>
 
-    <div class="operator-popup" id="game-end-popup" data-show-game-end-item="team-ranking-table" style="display:none">
+    <div class="overlay-popup" id="game-end-popup" data-show-game-end-item="team-ranking-table"
+        data-popup-visibility="hidden">
 
-        <div id="game-end-popup-buttons" style="display:none">
+        <div class="popup-title">Game over!</div>
+        <div id="game-end-popup-buttons">
             Click these buttons to change what's showing in the presentation window:<br>
             <button id="show-team-ranking-table">Show team ranking table</button>&ensp;
             <button id="show-money-over-time-line-chart">Show line chart of money over time</button>&ensp;

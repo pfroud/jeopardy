@@ -10,7 +10,10 @@
     <link rel="stylesheet" href="font/swiss911/swiss911.css">
     <link rel="stylesheet" href="css/category-carousel.css">
     <link rel="stylesheet" href="css/presentation.css">
-    <link rel="stylesheet" href="css/specialCategoriesForPresentation.css">
+
+    <!-- Overlay popup -->
+    <link rel="stylesheet" href="../common-css/popupCommon.css">
+    <link rel="stylesheet" href="css/popupForPresentation.css">
 
     <!-- Game end statistics charts -->
     <link rel="stylesheet" href="../common-css/gameEndStatisticsChartCommon.css">
@@ -50,13 +53,12 @@
         &#9612;&#9612; PAUSED
     </div>
 
-    <!-- Blurs everything behind the special category popup
-        using CSS backdrop-filter -->
-    <div id="special-category-backdrop"></div>
+    <div id="backdrop-for-popups" data-backdrop-state="disabled"></div>
 
-    <div id="special-category-popup" class="offscreen-left">
+    <!-- Currently the only popup in the presentation window is the special category popup. -->
+    <div class="overlay-popup" id="special-category-popup" data-popup-visibility="hidden">
         <div id="info-icon">i</div>
-        <span id="special-category-prompt-title"></span>
+        <span class="popup-title"></span>
 
         <p id="special-category-popup-description"></p>
 

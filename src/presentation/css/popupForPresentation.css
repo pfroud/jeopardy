@@ -1,0 +1,22 @@
+/*
+Popups in the presentation window has transitions.
+Popups in the operator window do not have transitions.
+*/
+
+div#backdrop-for-popups {
+    transition: backdrop-filter 1s ease;
+}
+
+div.overlay-popup {
+    /* Currently the only popup in the presentation window is the special category popup. */
+
+    --popup-text-color: black;
+
+    /* Make text bigger because people are viewing it on a TV from a distance */
+    font-size: 30px;
+
+    &#special-category-popup {
+        --special-category-popup-background-color: #ffffcc;
+        transition: transform 1s ease;
+    }
+}

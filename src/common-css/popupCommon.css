@@ -1,0 +1,97 @@
+div#backdrop-for-popups {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    pointer-events: none;
+
+    &[data-backdrop-state="enabled"] {
+        backdrop-filter: brightness(0.8) blur(3px);
+    }
+
+    &[data-backdrop-state="disabled"] {
+        backdrop-filter: none;
+    }
+
+}
+
+/* ---------------------------------------------------------- */
+
+div.overlay-popup {
+    color: var(--popup-text-color);
+    border-radius: 20px;
+    width: 80%;
+    z-index: 2;
+    padding: 40px;
+    filter: drop-shadow(5px 5px 5px #111);
+
+    /* Transform and absolute position can make the div centered on screen */
+    transform: translate(-50%, -50%);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+
+    .popup-title {
+        font-size: 60px;
+    }
+
+    &#special-category-popup {
+
+        background-color: var(--special-category-popup-background-color);
+        border: 1px solid yellow;
+
+        &.no-example {
+
+            p#special-category-popup-example-title,
+            div#special-category-popup-example-wrapper {
+                display: none;
+            }
+        }
+
+        div#special-category-popup-example-wrapper {
+            border: 1px solid gray;
+            padding: 20px;
+            border-radius: 10px;
+
+            table#special-category-popup-example-table {
+                border-collapse: collapse;
+                line-height: 200%;
+
+                /* make first column bold */
+                td:nth-of-type(1) {
+                    font-weight: bold;
+                    padding-right: 10px;
+                }
+            }
+        }
+
+        div#info-icon {
+            --info-icon-color: #1111cc;
+            border: 10px solid var(--info-icon-color);
+            border-radius: 50%;
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--info-icon-color);
+            font-size: 80px;
+            font-family: monospace;
+            margin-bottom: 10px;
+            margin-right: 20px;
+        }
+    }
+
+    &[data-popup-visibility="visible"] {
+        /* The div is centered onscreen because this is combined with position:absolute, left:50%, top:50% */
+        transform: translate(-50%, -50%);
+    }
+
+    &[data-popup-visibility="hidden"] {
+        /* move it offscreen to the left */
+        transform: translate(-200%, -50%);
+    }
+
+}

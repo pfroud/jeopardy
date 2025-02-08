@@ -60,9 +60,9 @@ export class Presentation {
         this.DIV_CLUE_CATEGORY_BIG = querySelectorAndCheck(document, "div#clue-category-big");
         this.DIV_CLUE_VALUE_BIG = querySelectorAndCheck(document, "div#clue-value-big");
 
-        this.DIV_BACKDROP_FOR_POPUPS = querySelectorAndCheck(document, "div#special-category-backdrop");
+        this.DIV_BACKDROP_FOR_POPUPS = querySelectorAndCheck(document, "div#backdrop-for-popups");
         this.DIV_SPECIAL_CATEGORY_POPUP = querySelectorAndCheck(document, "div#special-category-popup");
-        this.SPECIAL_CATEGORY_TITLE = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-prompt-title");
+        this.SPECIAL_CATEGORY_TITLE = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "span.popup-title");
         this.SPECIAL_CATEGORY_DESCRIPTION = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-popup-description");
         this.SPECIAL_CATEGORY_EXAMPLE_CATEGORY = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-popup-example-category");
         this.SPECIAL_CATEGORY_EXAMPLE_QUESTION = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-popup-example-question");
@@ -231,15 +231,13 @@ export class Presentation {
             this.DIV_SPECIAL_CATEGORY_POPUP.classList.add("no-example");
         }
 
-        this.DIV_BACKDROP_FOR_POPUPS.className = "blurred";
-        this.DIV_SPECIAL_CATEGORY_POPUP.classList.remove("offscreen-left");
-        this.DIV_SPECIAL_CATEGORY_POPUP.classList.add("visible-centered");
+        this.DIV_BACKDROP_FOR_POPUPS.setAttribute("data-backdrop-state", "enabled");
+        this.DIV_SPECIAL_CATEGORY_POPUP.setAttribute("data-popup-visibility", "visible");
     }
 
     public specialCategoryPopupHide(): void {
-        this.DIV_BACKDROP_FOR_POPUPS.className = "not-blurred";
-        this.DIV_SPECIAL_CATEGORY_POPUP.classList.remove("visible-centered");
-        this.DIV_SPECIAL_CATEGORY_POPUP.classList.add("offscreen-left");
+        this.DIV_BACKDROP_FOR_POPUPS.setAttribute("data-backdrop-state", "disabled");
+        this.DIV_SPECIAL_CATEGORY_POPUP.setAttribute("data-popup-visibility", "hidden");
     }
 
     public getBuzzHistorySvg(): SVGSVGElement {

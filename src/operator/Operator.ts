@@ -621,13 +621,13 @@ export class Operator {
             this.DIV_SPECIAL_CATEGORY_POPUP.classList.add("no-example");
         }
 
-        this.DIV_SPECIAL_CATEGORY_POPUP.style.display = "block";
+        this.DIV_SPECIAL_CATEGORY_POPUP.setAttribute("data-popup-visibility", "visible");
         this.backdropForPopupsShow();
     }
 
     public specialCategoryPopupHide(): void {
         this.backdropForPopupsHide();
-        this.DIV_SPECIAL_CATEGORY_POPUP.style.display = "none";
+        this.DIV_SPECIAL_CATEGORY_POPUP.setAttribute("data-popup-visibility", "hidden");
         this.presentation?.specialCategoryPopupHide();
         this.GAME_ROUND_TIMER.resume();
     }
@@ -880,8 +880,7 @@ export class Operator {
         this.presentation?.headerAndFooterHide();
 
         this.backdropForPopupsShow();
-        this.DIV_GAME_END_POPUP_BUTTONS.style.display = "block";
-        this.DIV_GAME_END_POPUP.style.display = "block";
+        this.DIV_GAME_END_POPUP.setAttribute("data-popup-visibility", "visible");
 
         const teamRankingTableHtml = this.getGameEndTeamRankingTableHtml();
         this.DIV_GAME_END_TEAM_RANKING_WRAPPER.innerHTML = teamRankingTableHtml;
@@ -939,7 +938,7 @@ export class Operator {
             this.GAME_ROUND_TIMER.pause();
 
             this.backdropForPopupsShow();
-            this.DIV_BUZZ_HISTORY_POPUP.style.display = "block";
+            this.DIV_BUZZ_HISTORY_POPUP.setAttribute("data-popup-visibility", "visible");
 
             this.buzzHistoryChart.showNewHistory(this.buzzHistoryForClue);
         }
@@ -949,11 +948,11 @@ export class Operator {
     The backdrop slightly blurs everything behind the popup.
     */
     private backdropForPopupsShow(): void {
-        this.DIV_BACKDROP_FOR_POPUPS.style.display = "block";
+        this.DIV_BACKDROP_FOR_POPUPS.setAttribute("data-backdrop-state", "enabled");
     }
 
     private backdropForPopupsHide(): void {
-        this.DIV_BACKDROP_FOR_POPUPS.style.display = "none";
+        this.DIV_BACKDROP_FOR_POPUPS.setAttribute("data-backdrop-state", "disabled");
     }
 
     /**
@@ -964,7 +963,7 @@ export class Operator {
     public onBuzzHistoryHide(): void {
         this.GAME_ROUND_TIMER.resume();
         this.backdropForPopupsHide();
-        this.DIV_BUZZ_HISTORY_POPUP.style.display = "none";
+        this.DIV_BUZZ_HISTORY_POPUP.setAttribute("data-popup-visibility", "hidden");
     }
 
     public getStateMachine(): StateMachine | undefined {
