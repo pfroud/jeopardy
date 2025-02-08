@@ -9,14 +9,22 @@ progress {
     https://developer.mozilla.org/en-US/docs/Web/CSS/::-webkit-progress-bar
     */
 
-    --background: darkgray;
-    --foreground-default: #229922;
-    --foreground-paused: #116611;
-    --foreground-lockout: red;
-    --foreground-lockout-and-paused: darkred;
+    &[value] {
+        /* Applies when the <progress> has the "value" attribute. */
+        --background: darkgray;
+        --foreground-default: #229922;
+        --foreground-paused: #116611;
+        --foreground-lockout: red;
+        --foreground-lockout-and-paused: darkred;
+    }
 
-    /* Try colors here: https: //codepen.io/chriscoyier/pen/MWWvBw */
-    --color1: #444;
-    --color2: #555;
+    &:not([value]) {
+        /*
+        Diagonal stripes when the <progress> element does not have the "value" attribute.
+        Try colors here: https: //codepen.io/chriscoyier/pen/MWWvBw
+        */
+        --stripe-color-1: #444;
+        --stripe-color-2: #555;
+    }
 
 }

@@ -72,10 +72,10 @@ progress {
         &::-webkit-progress-bar,
         &::-moz-progress-bar {
             background-image: repeating-linear-gradient(-45deg,
-                    var(--color1),
-                    var(--color1) var(--size),
-                    var(--color2) var(--size),
-                    var(--color2) calc(2 * var(--size)));
+                    var(--stripe-color-1),
+                    var(--stripe-color-1) var(--size),
+                    var(--stripe-color-2) var(--size),
+                    var(--stripe-color-2) calc(2 * var(--size)));
         }
     }
 }
