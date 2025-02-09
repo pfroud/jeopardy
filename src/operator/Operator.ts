@@ -56,7 +56,6 @@ export class Operator {
     private readonly DIV_GAME_END_TEAM_RANKING_WRAPPER: HTMLDivElement;
     private readonly DIV_GAME_END_PIE_CHARTS: HTMLDivElement;
     private readonly DIV_GAME_END_LINE_CHART: HTMLDivElement;
-    private readonly DIV_GAME_END_LINE_CHART_LEGEND: HTMLDivElement;
     private readonly DIV_GAME_BOARD_WRAPPER: HTMLDivElement;
 
     private readonly GAME_ROUND_TIMER: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
@@ -116,7 +115,6 @@ export class Operator {
         this.DIV_GAME_END_TEAM_RANKING_WRAPPER = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#team-ranking-wrapper");
         this.DIV_GAME_END_PIE_CHARTS = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#pie-charts");
         this.DIV_GAME_END_LINE_CHART = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#line-chart");
-        this.DIV_GAME_END_LINE_CHART_LEGEND = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#line-chart-legend");
 
         this.DIV_GAME_BOARD_WRAPPER = querySelectorAndCheck(document, "div#game-board-wrapper");
 
@@ -890,11 +888,11 @@ export class Operator {
 
             createGameEndPieChartsOfBuzzResults(this, this.DIV_GAME_END_PIE_CHARTS, this.teamArray);
 
-            createGameEndLineChartOfMoneyOverTime(this.DIV_GAME_END_LINE_CHART, this.DIV_GAME_END_LINE_CHART_LEGEND, this.teamArray);
+            createGameEndLineChartOfMoneyOverTime(this.DIV_GAME_END_LINE_CHART, this.teamArray);
 
             if (this.presentation) {
                 createGameEndPieChartsOfBuzzResults(this, this.presentation.getGameEndPieChartContainer(), this.teamArray);
-                createGameEndLineChartOfMoneyOverTime(this.presentation.getGameEndLineChartContainer(), this.presentation.getGameEndLineChartLegendContainer(), this.teamArray);
+                createGameEndLineChartOfMoneyOverTime(this.presentation.getGameEndLineChartContainer(), this.teamArray);
             }
         }
     }

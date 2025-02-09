@@ -121,7 +121,7 @@ export function createGameEndPieChartsOfBuzzResults(operator: Operator, divForPi
 }
 
 /** Create a single line chart with a series for each team. */
-export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivElement, legendContainer: HTMLDivElement, teams: Team[]): void {
+export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivElement, teams: Team[]): void {
 
     interface XYPoint {
         x: number;
@@ -164,6 +164,9 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
         series: lineChartDataForAllTeams
     };
 
+    const chartWidth = 800;
+    const chartHeight = 500;
+
     /*
     https://gionkunz.github.io/chartist-js/api-documentation.html#chartistline-declaration-defaultoptions
     You have to find the section called "declaration defaultOptions" and click the "show code" button!!
@@ -182,57 +185,118 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
             labelInterpolationFnc: value => `$${value.toLocaleString()}`
         },
         lineSmooth: false,
-        width: "800px",
-        height: "500px"
+        width: `${chartWidth}px`,
+        height: `${chartHeight}px`
 
     };
 
-    new Chartist.LineChart(divForLineChart, chartData, chartOptions);
+    const lineChart = new Chartist.LineChart(divForLineChart, chartData, chartOptions);
 
-    /*
-     We need to create the legend by hand.
-     There is a package called chartist-plugin-legend but 
-     plugins are not yet supported in chartist v1 (only v0.x).
-     */
-    for (let teamIdx = 0; teamIdx < teams.length; teamIdx++) {
+    lineChart.on("created", () => {
+        /*
+        Chartist creates:
+         - grid lines
+         - data series with line and points
+         - axis labels
 
-        const legendRow = document.createElement("div");
-        legendRow.className = "line-chart-legend-row";
+        I am manually adding:
+         - axis titles
+         - legend
+        */
+        const svgCreatedByChartist = querySelectorAndCheck<SVGSVGElement>(divForLineChart, "svg");
 
-        const svgWidth = 50;
-        const svgHeight = 20;
+        const marginLeft = 20; // add space on the left for the Y axis title
+        const marginBottom = 20; // add space on the bottom for X axis title
+        const marginRight = 200; // add space on the right for the legend
 
-        const svg = createSvgElement("svg");
-        svg.classList.add("ct-chart-line");
-        svg.setAttribute("width", `${svgWidth}px`);
-        svg.setAttribute("height", `${svgHeight}px`);
-        legendRow.appendChild(svg);
+        /*
+        On the <svg>, chartist sets the width and height attributes AND sets the style attribute
+        with the width and height again in inline CSS.
+        I am going to remove the style attribute and only use the width and height attributes.
+        */
+        svgCreatedByChartist.setAttribute("style", "");
 
-        const svgGroup = createSvgElement("g");
-        svgGroup.classList.add("ct-series");
-        svgGroup.classList.add(`team-${teamIdx + 1}`);
-        svg.appendChild(svgGroup);
+        // Increase SVG size to make room for the stuff we are adding
+        svgCreatedByChartist.setAttribute("width", String(chartWidth + marginLeft + marginRight));
+        svgCreatedByChartist.setAttribute("height", String(chartHeight + marginBottom));
 
-        const xCenter = svgWidth / 2;
-        const yCenter = svgHeight / 2;
+        // Move everything created by Chartist into a new group
+        const groupChartistCreated = createSvgElement("g");
+        groupChartistCreated.setAttribute("id", "createdByChartist");
+        groupChartistCreated.setAttribute("transform", `translate(${marginLeft}, 0)`); //move it to the right to make room for Y axis title
+        groupChartistCreated.append(...svgCreatedByChartist.children); //the append() function moves nodes
+        svgCreatedByChartist.append(groupChartistCreated);
 
-        const svgPath = createSvgElement("path");
-        svgPath.classList.add("ct-line");
-        svgPath.setAttribute("d", `M0,${yCenter} L${svgWidth},${yCenter}`);
-        svgGroup.appendChild(svgPath);
+        // Add axis titles
+        const groupAxisTitles = createSvgElement("g");
+        groupAxisTitles.setAttribute("id", "axisTitles");
+        svgCreatedByChartist.append(groupAxisTitles);
 
-        const point = createSvgElement("line");
-        point.classList.add("ct-point");
-        point.setAttribute("x1", String(xCenter));
-        point.setAttribute("x2", String(xCenter));
-        point.setAttribute("y1", String(yCenter));
-        point.setAttribute("y2", String(yCenter));
-        svgGroup.appendChild(point);
+        // Add X axis title
+        const xAxisTitle = createSvgElement("text");
+        xAxisTitle.innerHTML = "Money";
+        xAxisTitle.setAttribute("transform", `translate(18, ${chartHeight / 2}) rotate(-90)`);
+        xAxisTitle.setAttribute("text-anchor", "middle");
+        xAxisTitle.setAttribute("fill", "black");
+        groupAxisTitles.append(xAxisTitle);
 
-        legendRow.append(teams[teamIdx].getTeamName());
+        // Add Y axis title
+        const yAxisTitle = createSvgElement("text");
+        yAxisTitle.innerHTML = "Question number";
+        yAxisTitle.setAttribute("x", String(marginLeft + (chartWidth / 2)));
+        yAxisTitle.setAttribute("y", String(chartHeight));
+        yAxisTitle.setAttribute("text-anchor", "middle");
+        yAxisTitle.setAttribute("dominant-baseline", "hanging"); // top-align
+        yAxisTitle.setAttribute("fill", "black");
+        groupAxisTitles.append(yAxisTitle);
 
-        legendContainer.appendChild(legendRow);
+        // Add legend
+        const groupLegend = createSvgElement("g");
+        groupLegend.setAttribute("id", "legend");
+        groupLegend.setAttribute("transform", `translate(${marginLeft + chartWidth + 40}, 20)`);
+        svgCreatedByChartist.append(groupLegend);
 
-    }
+        const legendLineWidth = 50;
+
+        for (let teamIdx = 0; teamIdx < teams.length; teamIdx++) {
+
+            // Container for the series and text
+            const groupLegendRow = createSvgElement("g");
+            groupLegendRow.setAttribute("class", `legend-row-${teamIdx + 1}`);
+            groupLegend.appendChild(groupLegendRow);
+
+            // Create an actual data series inside the legend
+            const groupLegendSeries = createSvgElement("g");
+            // Apply the same classes Chartist uses in the chart to get same colors set in CSS
+            groupLegendSeries.setAttribute("class", `ct-series team-${teamIdx + 1}`);
+            groupLegendRow.appendChild(groupLegendSeries);
+
+            const y = teamIdx * 50;
+
+            const legendLine = createSvgElement("path");
+            legendLine.classList.add("ct-line");
+            legendLine.setAttribute("d", `M0,${y} L${legendLineWidth},${y}`);
+            groupLegendSeries.append(legendLine);
+
+            // For some reason Chartist uses an SVG <line> for the points
+            const legendPoint = createSvgElement("line");
+            legendPoint.classList.add("ct-point");
+            legendPoint.setAttribute("x1", String(legendLineWidth / 2));
+            legendPoint.setAttribute("x2", String(legendLineWidth / 2));
+            legendPoint.setAttribute("y1", String(y));
+            legendPoint.setAttribute("y2", String(y));
+            groupLegendSeries.append(legendPoint);
+
+            const legendLabel = createSvgElement("text");
+            legendLabel.innerHTML = teams[teamIdx].getTeamName();
+            legendLabel.setAttribute("dominant-baseline", "middle");
+            legendLabel.setAttribute("x", String(legendLineWidth + 10));
+            legendLabel.setAttribute("y", String(y));
+            yAxisTitle.setAttribute("fill", "black");
+            groupLegendRow.append(legendLabel);
+
+        }
+
+    });
 
 }

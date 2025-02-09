@@ -94,7 +94,7 @@ div.presentation-slide#slide-gameEnd-pie-charts {
 /* ------------------------------------------------------------------------------- */
 
 /* This selector is for the operator window */
-div#game-end-popup div#line-chart-wrapper,
+div#game-end-popup div#line-chart,
 /* This selector is for the presentation window */
 div#slide-gameEnd-line-chart {
 
@@ -112,76 +112,47 @@ div#slide-gameEnd-line-chart {
             }
         }
 
-        /* These colors sort of suck but currently they are shown on top of white AND blue,
-        which make it hard to choose colors visible on both of those */
-        &.team-1,
-        &.team-5 {
-            stroke: red;
+        &.team-1 {
+            stroke: fireBrick;
         }
 
-        &.team-2,
-        &.team-6 {
-            stroke: orange;
+        &.team-2 {
+            stroke: darkOrange;
         }
 
-        &.team-3,
-        &.team-7 {
+        &.team-3 {
+            stroke: gold;
+        }
+
+        &.team-4 {
             stroke: green;
         }
 
-        &.team-4,
+        &.team-5 {
+            stroke: mediumturquoise;
+        }
+
+        &.team-6 {
+            stroke: blue;
+        }
+
+        &.team-7 {
+            stroke: magenta;
+        }
+
         &.team-8 {
             stroke: gray;
         }
 
-        &.team-5,
-        &.team-6,
-        &.team-7,
-        &.team-8 {
-            stroke-dasharray: 5;
-            stroke-linecap: butt;
-        }
     }
 
-
-    div#line-chart {
-        display: inline-block;
-        vertical-align: middle;
-
-        svg.ct-chart-line {
-            g.ct-grids line {
-                stroke: var(--grid-line-color);
-                stroke-dasharray: 3;
-            }
-
-            g.ct-labels span {
-                color: var(--text-color);
-            }
-        }
+    g.ct-grids line {
+        stroke: var(--grid-line-color);
+        stroke-dasharray: 3;
     }
 
-    div#y-axis-label {
-        transform: rotate(-90deg);
-        display: inline-block;
-    }
-
-    div#x-axis-label {
-        text-align: center;
-    }
-
-    div#line-chart-legend {
-        display: inline-block;
-        vertical-align: middle;
-        margin-left: 30px;
-
-        div.line-chart-legend-row {
-            margin-bottom: 20px;
-        }
-
-        svg {
-            vertical-align: middle;
-            margin-right: 10px;
-        }
+    g.ct-labels span {
+        color: var(--text-color);
     }
 
 }
