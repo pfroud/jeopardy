@@ -205,7 +205,7 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
         */
         const svgCreatedByChartist = querySelectorAndCheck<SVGSVGElement>(divForLineChart, "svg");
 
-        const marginLeft = 20; // add space on the left for the Y axis title
+        const marginLeft = 30; // add space on the left for the Y axis title
         const marginBottom = 20; // add space on the bottom for X axis title
         const marginRight = 200; // add space on the right for the legend
 
@@ -232,23 +232,23 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
         groupAxisTitles.setAttribute("id", "axisTitles");
         svgCreatedByChartist.append(groupAxisTitles);
 
-        // Add X axis title
-        const xAxisTitle = createSvgElement("text");
-        xAxisTitle.innerHTML = "Money";
-        xAxisTitle.setAttribute("transform", `translate(18, ${chartHeight / 2}) rotate(-90)`);
-        xAxisTitle.setAttribute("text-anchor", "middle");
-        xAxisTitle.setAttribute("fill", "black");
-        groupAxisTitles.append(xAxisTitle);
-
         // Add Y axis title
         const yAxisTitle = createSvgElement("text");
-        yAxisTitle.innerHTML = "Question number";
-        yAxisTitle.setAttribute("x", String(marginLeft + (chartWidth / 2)));
-        yAxisTitle.setAttribute("y", String(chartHeight));
+        yAxisTitle.innerHTML = "Money";
+        yAxisTitle.setAttribute("transform", `translate(15, ${chartHeight / 2}) rotate(-90)`);
         yAxisTitle.setAttribute("text-anchor", "middle");
-        yAxisTitle.setAttribute("dominant-baseline", "hanging"); // top-align
         yAxisTitle.setAttribute("fill", "black");
         groupAxisTitles.append(yAxisTitle);
+
+        // Add X axis title
+        const xAxisTitle = createSvgElement("text");
+        xAxisTitle.innerHTML = "Question number";
+        xAxisTitle.setAttribute("x", String(marginLeft + (chartWidth / 2)));
+        xAxisTitle.setAttribute("y", String(chartHeight));
+        xAxisTitle.setAttribute("text-anchor", "middle");
+        xAxisTitle.setAttribute("dominant-baseline", "hanging"); // top-align
+        xAxisTitle.setAttribute("fill", "black");
+        groupAxisTitles.append(xAxisTitle);
 
         // Add legend
         const groupLegend = createSvgElement("g");
@@ -292,7 +292,7 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
             legendLabel.setAttribute("dominant-baseline", "middle");
             legendLabel.setAttribute("x", String(legendLineWidth + 10));
             legendLabel.setAttribute("y", String(y));
-            yAxisTitle.setAttribute("fill", "black");
+            xAxisTitle.setAttribute("fill", "black");
             groupLegendRow.append(legendLabel);
 
         }
