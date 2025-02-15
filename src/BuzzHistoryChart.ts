@@ -2,7 +2,7 @@ import { Axis, axisBottom } from "d3-axis";
 import { ScaleLinear, scaleLinear } from "d3-scale";
 import { select, Selection } from "d3-selection";
 import { D3ZoomEvent, zoom, zoomIdentity } from "d3-zoom";
-import { createSvgElement, querySelectorAndCheck } from "./commonFunctions";
+import { downloadSVG, createSvgElement, querySelectorAndCheck } from "./commonFunctions";
 import { Team, TeamState } from "./Team";
 
 
@@ -289,7 +289,8 @@ export class BuzzHistoryChart {
 
         // The chart is drawn when showNewHistory() is called.
 
-        querySelectorAndCheck(document, "button#copy-css-to-xml").addEventListener("click", () => this.copyCssStylesToXmlAttributes());
+        querySelectorAndCheck(document, "button#download-svg-buzz-history-chart")
+            .addEventListener("click", () => downloadSVG(this.SVG_IN_OPERATOR_WINDOW.node()!, "buzz history"));
 
     }
 
@@ -776,68 +777,6 @@ export class BuzzHistoryChart {
 
         });
 
-    }
-
-    /**
-     * All the styling is done in a separate CSS file. If you save the SVG to a file, it does
-     * not get the CSS styles.
-     * This function copies styles from CSS rules to XML attributes so the SVG looks right
-     * when added to a markdown file.
-     */
-    public copyCssStylesToXmlAttributes(): void {
-
-        const svg = this.SVG_IN_OPERATOR_WINDOW.node()!;
-
-        // make it recognized as SVG file when opened in web browser
-        svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-
-        // add white background so it is readable in dark theme
-        const backgroundRect = createSvgElement("rect");
-        backgroundRect.setAttribute("id", "background");
-        backgroundRect.setAttribute("fill", "white");
-        backgroundRect.setAttribute("stroke", "none");
-        backgroundRect.setAttribute("x", "0");
-        backgroundRect.setAttribute("y", "0");
-        backgroundRect.setAttribute("width", String(this.SVG_WIDTH));
-        backgroundRect.setAttribute("height", String(svg.getAttribute("height")));
-        svg.insertBefore(backgroundRect, svg.firstChild);
-
-        // The CSS styles we want to copy. For some of them, the XML attribute name is different.
-        const stylesToCopy: { cssPropName: keyof CSSStyleDeclaration, xmlAttribName?: string }[] = [
-            { cssPropName: "fill" },
-            { cssPropName: "stroke" },
-            { cssPropName: "strokeWidth", xmlAttribName: "stroke-width" },
-            { cssPropName: "fontSize", xmlAttribName: "font-size" },
-            { cssPropName: "fontFamily", xmlAttribName: "font-family" },
-            { cssPropName: "strokeDasharray", xmlAttribName: "stroke-dasharray" }
-        ];
-
-        recurse(svg.children);
-
-        function recurse(children: HTMLCollection): void {
-            Array.from(children).forEach(element => {
-
-                const computedCssStyle = window.getComputedStyle(element);
-
-                if (computedCssStyle.display === "none" || computedCssStyle.opacity === "0") {
-                    element.remove();
-                } else {
-                    stylesToCopy.forEach(styleObj => {
-
-                        const cssPropName = styleObj.cssPropName;
-                        const cssValue = String(computedCssStyle[cssPropName]);
-                        const xmlAttribName = styleObj.xmlAttribName ? styleObj.xmlAttribName : String(cssPropName);
-
-                        if (!element.hasAttribute(xmlAttribName)) {
-                            element.setAttribute(xmlAttribName, cssValue);
-                        }
-                    });
-                    recurse(element.children);
-                }
-            });
-        }
-
-        window.navigator.clipboard.writeText(svg.outerHTML);
     }
 
 }

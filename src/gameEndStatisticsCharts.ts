@@ -1,6 +1,6 @@
 import * as Chartist from "chartist";
 import { Team } from "./Team";
-import { createSvgElement, querySelectorAndCheck } from "./commonFunctions";
+import { downloadSVG, createSvgElement, querySelectorAndCheck } from "./commonFunctions";
 import { Operator } from "./operator/Operator";
 
 /**
@@ -93,6 +93,9 @@ export function createGameEndPieChartsOfBuzzResults(operator: Operator, divForPi
         const pieChart = new Chartist.PieChart(containerForTeamPieChart, chartData, chartOptions);
 
         pieChart.on("created", () => {
+
+            // Remove window resize event listener
+            pieChart.detach();
 
             const svgCreatedByChartist = querySelectorAndCheck<SVGSVGElement>(containerForTeamPieChart, "svg");
 
@@ -192,7 +195,12 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
 
     const lineChart = new Chartist.LineChart(divForLineChart, chartData, chartOptions);
 
+
     lineChart.on("created", () => {
+
+        // Remove window resize event listener
+        lineChart.detach();
+
         /*
         Chartist creates:
          - grid lines
@@ -253,6 +261,7 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
         // Add legend
         const groupLegend = createSvgElement("g");
         groupLegend.setAttribute("id", "legend");
+        groupLegend.setAttribute("dominant-baseline", "middle");
         groupLegend.setAttribute("transform", `translate(${marginLeft + chartWidth + 40}, 20)`);
         svgCreatedByChartist.append(groupLegend);
 
@@ -289,13 +298,15 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
 
             const legendLabel = createSvgElement("text");
             legendLabel.innerHTML = teams[teamIdx].getTeamName();
-            legendLabel.setAttribute("dominant-baseline", "middle");
             legendLabel.setAttribute("x", String(legendLineWidth + 10));
             legendLabel.setAttribute("y", String(y));
             xAxisTitle.setAttribute("fill", "black");
             groupLegendRow.append(legendLabel);
 
         }
+
+        querySelectorAndCheck(document, "button#download-svg-game-end-line-chart")
+            .addEventListener("click", () => downloadSVG(svgCreatedByChartist, "game end money over time"));
 
     });
 
