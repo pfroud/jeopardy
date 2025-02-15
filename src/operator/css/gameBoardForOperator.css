@@ -12,11 +12,9 @@ table#game-board {
     tr.clues td {
         padding: 15px;
     }
-
-
 }
 
-body:not(.paused) tr.clues td[data-clue-revealed="no"] {
+body:not(.paused) tr.clues td[data-clue-state="available"] {
     &:hover {
         background-color: #444400;
         font-weight: bold;

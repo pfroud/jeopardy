@@ -10,7 +10,7 @@ import { Presentation } from "../presentation/Presentation";
 import { SCRAPED_GAME } from "../scrapedGame";
 import { checkSpecialCategory, SpecialCategory } from "../specialCategories";
 import { StateMachine } from "../stateMachine/StateMachine";
-import { Clue } from "../typesForGame";
+import { RevealedClue } from "../typesForGame";
 
 interface SavedGameInLocalStorage {
     readonly GAME_ROUND_TIMER_REMAINING_MILLISEC: number,
@@ -68,7 +68,7 @@ export class Operator {
     private teamNameInputElements?: HTMLInputElement[];
     private teamPresentlyAnswering: Team | undefined;
 
-    private presentClue?: Clue;
+    private presentClue?: RevealedClue;
     private buzzHistoryForClue?: BuzzHistoryForClue;
     private buzzHistoryChart: BuzzHistoryChart | undefined;
     private buzzHistoryRecordForActiveAnswer: BuzzHistoryRecord<BuzzResultStartAnswer> | undefined;
@@ -497,7 +497,7 @@ export class Operator {
 
     }
 
-    private clueShowToOperator(clue: Clue): void {
+    private clueShowToOperator(clue: RevealedClue): void {
         /*
         This function only shows the category, and dollar value to the operator.
         The state machine will show the clue question after a timeout.
@@ -508,7 +508,7 @@ export class Operator {
         this.TR_ANSWER.style.display = "none";
     }
 
-    private setPresentClue(clue: Clue): void {
+    private setPresentClue(clue: RevealedClue): void {
         this.presentClue = clue;
 
         this.buzzHistoryForClue = {
@@ -561,7 +561,7 @@ export class Operator {
     /**
      * Called when the human operator clicks on a cell in the game board table.
      */
-    public onGameBoardClueClicked(clue: Clue): void {
+    public onGameBoardClueClicked(clue: RevealedClue): void {
         this.stateMachine?.getCountdownTimerForState("showClueCategoryAndValue").reset();
 
         this.BUTTON_START_GAME.blur();
@@ -572,7 +572,7 @@ export class Operator {
     }
 
     public teamTimedOutChoosingClue(): void {
-        const randomUnrevealedClue = this.gameBoard!.getRandomUnrevealedClue();
+        const randomUnrevealedClue = this.gameBoard!.getRandomAvailableClue();
         this.onGameBoardClueClicked(randomUnrevealedClue);
     }
 

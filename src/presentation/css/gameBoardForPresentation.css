@@ -10,14 +10,12 @@ table#game-board {
         padding: 5px 0px;
     }
 
-
     tr#categories {
         font-size: 30px;
 
         div.special-category-icon-wrapper {
             filter: drop-shadow(5px 5px black);
         }
-
     }
 
     tr.clues {
@@ -26,8 +24,7 @@ table#game-board {
         letter-spacing: 2px;
         font-size: 50px;
 
-        td {
-
+        td[data-clue-state="available"] {
             &.hover-in-operator-window {
                 background-color: rgba(255, 255, 255, 0.4);
                 font-weight: bold;
@@ -39,12 +36,6 @@ table#game-board {
                 color: black;
                 text-shadow: 3px 3px lightgray, 5px 5px lightgray, 7px 7px lightgray;
             }
-
-
-
         }
-
     }
-
-
 }

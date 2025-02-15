@@ -2,7 +2,7 @@ import { GameBoard } from "../GameBoard";
 import { querySelectorAndCheck } from "../commonFunctions";
 import { Operator } from "../operator/Operator";
 import { SpecialCategory } from "../specialCategories";
-import { Clue, GameRound } from "../typesForGame";
+import { GameRound, RevealedClue } from "../typesForGame";
 
 export class Presentation {
     public readonly ALL_SLIDE_NAMES = new Set<string>();
@@ -137,7 +137,7 @@ export class Presentation {
         }
     }
 
-    public setClue(clue: Clue): void {
+    public setClue(clue: RevealedClue): void {
         this.SPAN_CLUE_CATEGORY_IN_HEADER.innerHTML = clue.CATEGORY_NAME;
         this.SPAN_CLUE_MONEY_IN_HEADER.innerHTML = `$${clue.VALUE}`;
 

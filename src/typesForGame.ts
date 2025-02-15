@@ -10,6 +10,8 @@ export type Game = {
 }
 
 export type RoundType = "single" | "double";
+
+export type Clue = HiddenClue | RevealedClue;
 export type GameRound = {
     readonly TYPE: RoundType;
     readonly CATEGORIES: Category[];
@@ -28,8 +30,20 @@ export type Category = {
     specialCategory?: SpecialCategory | undefined;
 }
 
-export type Clue = {
-    /** Text to show on screen to the players. */
+/** The clue was never revealed on the Jeopardy TV show, so J Archive does not have it. */
+type HiddenClue = {
+    readonly REVEALED_ON_TV_SHOW: false;
+}
+
+/**
+ * This clue was revealed on the Jeopardy TV show, so J Archive also has it.
+ * 
+ * The value and category name are redundant because we could get them from the row/column indexes,
+ * but it is much easier to include them here.
+ * */
+export type RevealedClue = {
+    readonly REVEALED_ON_TV_SHOW: true;
+    /** Text which is shown on screen and the game host reads out loud. */
     readonly QUESTION: string;
     /** If a player says this, they get the money. */
     readonly ANSWER: string;

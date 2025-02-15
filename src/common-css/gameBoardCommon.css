@@ -25,10 +25,8 @@ table#game-board {
                 font-weight: bold;
                 color: var(--blue);
                 font-family: monospace;
-
             }
         }
-
     }
 
     td {
@@ -36,8 +34,56 @@ table#game-board {
         vertical-align: middle;
     }
 
-    tr.clues td[data-clue-revealed="yes"] {
-        visibility: hidden;
+    tr.clues td {
+
+        &:not([data-clue-state="available"]) {
+            /* Hide text but keep background */
+            color: transparent;
+
+            /* Only needed for presentation window */
+            text-shadow: none;
+
+            /* Make position:absolute work so we can do annoying hack for background image */
+            position: relative;
+
+        }
+
+        /*
+        Annoying hack to set opacity of background image
+        https://www.digitalocean.com/community/tutorials/how-to-change-a-css-background-images-opacity#method-2-using-css-pseudo-elements
+        */
+        &[data-clue-state="not-revealed-on-tv-show"]::before,
+        &[data-clue-state="done"]::before {
+            opacity: 0.3;
+            /* Change the background size using padding. If you change the width or height, it stops being centered. */
+            padding: 14px;
+
+            /* Pseudo-element positioning */
+            content: ' ';
+            display: block;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+
+            /* Background positioning */
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+            background-size: 100% 100%;
+            background-origin: content-box;
+            box-sizing: border-box;
+        }
+
+        &[data-clue-state="not-revealed-on-tv-show"]::before {
+            background-image: url("../commonImg/hide.svg");
+        }
+
+        &[data-clue-state="done"]::before {
+            background-image: url("../commonImg/checkmark.svg");
+        }
+
     }
 
 }

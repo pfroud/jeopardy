@@ -1,5 +1,5 @@
 import { Operator } from "./operator/Operator";
-import { RoundType, GameRound, Clue } from "./typesForGame";
+import { GameRound, RevealedClue, RoundType } from "./typesForGame";
 
 /**
  * The <table>s in the operator window and presentation windows should have the exact same
@@ -12,13 +12,6 @@ export class GameBoard {
     /** The entire table has six rows. The first row is categories, followed by five rows of clues. */
     private static readonly TABLE_ROW_COUNT = 6;
     private static readonly TABLE_CLUE_ROW_COUNT = GameBoard.TABLE_ROW_COUNT - 1;
-
-    private static readonly TOTAL_CLUES_COUNT = GameBoard.TABLE_COLUMN_COUNT * GameBoard.TABLE_CLUE_ROW_COUNT;
-
-    /** Attribute name for whether the question behind a table cell has been revealed. */
-    private static readonly CELL_ATTRIBUTE_NAME_IS_CLUE_REVEALED = "data-clue-revealed";
-    private static readonly CELL_ATTRIBUTE_VALUE_NOT_REVEALED_YET = "no";
-    private static readonly CELL_ATTRIBUTE_VALUE_ALREADY_REVEALED = "yes";
 
     private static readonly CLUE_VALUES = [200, 400, 600, 800, 1000];
     /** For Double Jeopardy, each dollar value is doubled. */
@@ -59,7 +52,7 @@ export class GameBoard {
 
     private gameRound: GameRound | null = null;
 
-    private cluesNotYetRevealedThisRound: Set<Clue> | null = null;
+    private cluesStillAvailableThisRound: Set<RevealedClue> | null = null;
 
     public constructor(operator: Operator, tableInOperatorWindow: HTMLTableElement, tableInPresentationWindow: HTMLTableElement) {
         this.OPERATOR = operator;
@@ -100,7 +93,13 @@ export class GameBoard {
 
         });
 
-        // Add mouse listeners to the table in the operator window.
+        /*
+        Add mouse listeners to the table in the operator window.
+
+        I am putting mouse listeners on every table cell, including cells for clues not
+        revealed in the TV show, because the <table> element is re-used for every game
+        round. I don't want to late check which cells already have mouse listeners on them.
+        */
         this.CLUE_CELLS.get(tableInOperatorWindow)!.forEach((cellsInRow, clueRowIndex) =>
             cellsInRow.forEach((td, columnIndex) => {
 
@@ -117,19 +116,11 @@ export class GameBoard {
 
                     if (this.gameRound) {
                         const clue = this.gameRound.CLUES[clueRowIndex][columnIndex];
-                        this.OPERATOR.onGameBoardClueClicked(clue);
-
-                        if (this.cluesNotYetRevealedThisRound) {
-                            this.cluesNotYetRevealedThisRound.delete(clue);
-                        } else {
-                            throw new Error("clicked on a clue but the Set of clues not yet revealed hasn't been set up");
+                        if (clue.REVEALED_ON_TV_SHOW && this.cluesStillAvailableThisRound?.has(clue)) {
+                            this.OPERATOR.onGameBoardClueClicked(clue);
+                            this.cluesStillAvailableThisRound.delete(clue);
+                            this.CLUE_CELLS.forEach(twoDArray => twoDArray[clueRowIndex][columnIndex].setAttribute("data-clue-state", "done"));
                         }
-
-                        // Hide the cell so it cannot be clicked on again.
-                        this.CLUE_CELLS.forEach(twoDArray => twoDArray[clueRowIndex][columnIndex].setAttribute(
-                            GameBoard.CELL_ATTRIBUTE_NAME_IS_CLUE_REVEALED,
-                            GameBoard.CELL_ATTRIBUTE_VALUE_ALREADY_REVEALED));
-
                     } else {
                         throw new Error("clicked on a cell but the game round has not been set");
                     }
@@ -219,31 +210,29 @@ export class GameBoard {
             }
         });
 
-        // Set values
+        // Set dollar values
         this.CLUE_CELLS.forEach(cellsForTable => {
-            for (let rowIndex = 0; rowIndex < GameBoard.TABLE_CLUE_ROW_COUNT; rowIndex++) {
-                cellsForTable[rowIndex].forEach(td => td.innerText =
-                    `$${GameBoard.CLUE_VALUES[rowIndex] * GameBoard.MULTIPLIER[gameRound.TYPE]}`);
+            for (let clueRowIndex = 0; clueRowIndex < GameBoard.TABLE_CLUE_ROW_COUNT; clueRowIndex++) {
+                for (let columnIndex = 0; columnIndex < GameBoard.TABLE_COLUMN_COUNT; columnIndex++) {
+
+                    const clue = gameRound.CLUES[clueRowIndex][columnIndex];
+                    const tableCell = cellsForTable[clueRowIndex][columnIndex];
+
+                    if (clue.REVEALED_ON_TV_SHOW) {
+                        tableCell.setAttribute("data-clue-state", "available");
+                        tableCell.innerHTML = `$${GameBoard.CLUE_VALUES[clueRowIndex] * GameBoard.MULTIPLIER[gameRound.TYPE]}`;
+                    } else {
+                        tableCell.setAttribute("data-clue-state", "not-revealed-on-tv-show");
+                    }
+                }
             }
         });
 
-        // Set all clues to available
-        this.CLUE_CELLS.forEach(cellsForTable =>
-            cellsForTable.forEach(cellsInRow =>
-                cellsInRow.forEach(cell =>
-                    cell.setAttribute(
-                        GameBoard.CELL_ATTRIBUTE_NAME_IS_CLUE_REVEALED,
-                        GameBoard.CELL_ATTRIBUTE_VALUE_NOT_REVEALED_YET
-                    )
-                )
-            )
-        );
-
-        this.cluesNotYetRevealedThisRound = new Set(gameRound.CLUES.flat());
+        this.cluesStillAvailableThisRound = new Set(gameRound.CLUES.flat().filter(clue => clue.REVEALED_ON_TV_SHOW));
     }
 
-    public getRandomUnrevealedClue(): Clue {
-        if (this.cluesNotYetRevealedThisRound) {
+    public getRandomAvailableClue(): RevealedClue {
+        if (this.cluesStillAvailableThisRound) {
 
             /*
             There isn't a way to get a random element from a Set, and apparently
@@ -251,18 +240,18 @@ export class GameBoard {
             which is crazy. So I'm using keeping a Set<Clue> for easy element
             removal and converting it to an array to get a random element.
             */
-            const setToArray = Array.from(this.cluesNotYetRevealedThisRound);
+            const setToArray = Array.from(this.cluesStillAvailableThisRound);
 
+            // https://stackoverflow.com/a/42739372/7376577
             // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random#getting_a_random_integer_between_two_values
-            const randomIndex = Math.floor(Math.random() * setToArray.length); //https://stackoverflow.com/a/42739372/7376577
+            const randomIndex = Math.floor(Math.random() * setToArray.length);
 
             const rv = setToArray[randomIndex];
 
-            this.cluesNotYetRevealedThisRound.delete(rv);
+            this.cluesStillAvailableThisRound.delete(rv);
 
-            this.CLUE_CELLS.forEach(twoDArray => twoDArray[rv.ROW_INDEX][rv.COLUMN_INDEX].setAttribute(
-                GameBoard.CELL_ATTRIBUTE_NAME_IS_CLUE_REVEALED,
-                GameBoard.CELL_ATTRIBUTE_VALUE_ALREADY_REVEALED));
+            this.CLUE_CELLS.forEach(twoDArray => twoDArray[rv.ROW_INDEX][rv.COLUMN_INDEX]
+                .setAttribute("data-clue-state", "done"));
 
             return rv;
         } else {
@@ -271,11 +260,10 @@ export class GameBoard {
     }
 
     public isAllCluesRevealedThisRound(): boolean {
-        if (this.cluesNotYetRevealedThisRound) {
-            return this.cluesNotYetRevealedThisRound.size === 0;
+        if (this.cluesStillAvailableThisRound) {
+            return this.cluesStillAvailableThisRound.size === 0;
         } else {
             throw new Error("checking if all clues revealed in this round but the Set<Clue> is null");
         }
     }
-
 }

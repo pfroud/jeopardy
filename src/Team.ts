@@ -4,7 +4,7 @@ import { Settings } from "./Settings";
 import { querySelectorAndCheck } from "./commonFunctions";
 import { Operator } from "./operator/Operator";
 import { Presentation } from "./presentation/Presentation";
-import { Clue } from "./typesForGame";
+import { Clue, RevealedClue } from "./typesForGame";
 
 /** Used to create charts at the end of the game. */
 interface Statistics {
@@ -94,7 +94,7 @@ export class Team {
         this.setState("idle");
     }
 
-    public onAnswerCorrect(clue: Clue): void {
+    public onAnswerCorrect(clue: RevealedClue): void {
         this.answerStop();
         this.AUDIO_MANAGER.ANSWER_CORRECT.play();
         this.moneyAdd(clue.VALUE);
@@ -102,7 +102,7 @@ export class Team {
         this.hasBuzzedForCurrentQuestion_ = true;
     }
 
-    public onAnswerIncorrectOrAnswerTimeout(clue: Clue): void {
+    public onAnswerIncorrectOrAnswerTimeout(clue: RevealedClue): void {
         this.answerStop();
         this.AUDIO_MANAGER.ANSWER_WRONG_OR_ANSWER_TIMEOUT.play();
         this.moneySubtract(clue.VALUE * this.SETTINGS.wrongAnswerPenaltyMultiplier);
