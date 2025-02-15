@@ -11,7 +11,33 @@ div.overlay-popup {
         background: #dddddd;
 
         div#game-end-popup-buttons {
+
             margin-bottom: 40px;
+
+            /* For some reason, just putting buttons next to each
+            other makes them have different vertical alignment */
+            display: flex;
+            column-gap: 10px;
+
+            button {
+                width: 60px;
+                height: 60px;
+                padding: 4px;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                }
+
+                &#show-team-ranking-table {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    font-size: 8px;
+                    text-align: left;
+                    color: #222;
+                }
+            }
+
         }
 
         div#team-ranking-wrapper table {
