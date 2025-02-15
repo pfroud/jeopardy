@@ -30,7 +30,7 @@ div.overlay-popup {
                 display: block;
             }
 
-            div#line-chart-wrapper {
+            div#line-chart {
                 display: none;
             }
 
@@ -44,7 +44,7 @@ div.overlay-popup {
                 display: none;
             }
 
-            div#line-chart-wrapper {
+            div#line-chart {
                 display: block;
             }
 
@@ -58,7 +58,7 @@ div.overlay-popup {
                 display: none;
             }
 
-            div#line-chart-wrapper {
+            div#line-chart {
                 display: none;
             }
 

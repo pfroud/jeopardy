@@ -5,10 +5,8 @@ This stylesheet gets added with the Chartist stylesheet:
 "node_modules/chartist/dist/index.scss"
 */
 
-div#slide-gameEnd-line-chart {
-    --zero-line-color: white;
-    --grid-line-color: #9999ff88;
-    --axis-label-color: white;
+div.presentation-slide#slide-gameEnd-line-chart div#line-chart {
+    padding: 30px;
 }
 
 div.presentation-slide#slide-gameEnd-pie-charts {

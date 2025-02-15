@@ -37,7 +37,6 @@ export class Presentation {
     private readonly DIV_GAME_END_TEAM_RANKING_TABLE: HTMLDivElement;
     private readonly DIV_GAME_END_PIE_CHART_CONTAINER: HTMLDivElement;
     private readonly DIV_GAME_END_LINE_CHART_CONTAINER: HTMLDivElement;
-    private readonly DIV_GAME_END_LINE_CHART_LEGEND: HTMLDivElement;
     private readonly TABLE_GAME_BOARD: HTMLTableElement;
     private readonly SVG_BUZZ_HISTORY: SVGSVGElement;
 
@@ -71,7 +70,6 @@ export class Presentation {
         this.DIV_GAME_END_TEAM_RANKING_TABLE = querySelectorAndCheck(document, "div#slide-gameEnd-team-ranking-table div#team-ranking");
         this.DIV_GAME_END_PIE_CHART_CONTAINER = querySelectorAndCheck(document, "div#slide-gameEnd-pie-charts div#pie-charts");
         this.DIV_GAME_END_LINE_CHART_CONTAINER = querySelectorAndCheck(document, "div#slide-gameEnd-line-chart div#line-chart");
-        this.DIV_GAME_END_LINE_CHART_LEGEND = querySelectorAndCheck(document, "div#slide-gameEnd-line-chart div#line-chart-legend");
 
         this.SVG_BUZZ_HISTORY = querySelectorAndCheck(document, "div#slide-buzz-history-chart svg");
 
@@ -188,10 +186,6 @@ export class Presentation {
 
     public getGameEndLineChartContainer(): HTMLDivElement {
         return this.DIV_GAME_END_LINE_CHART_CONTAINER;
-    }
-
-    public getGameEndLineChartLegendContainer(): HTMLDivElement {
-        return this.DIV_GAME_END_LINE_CHART_LEGEND;
     }
 
     public headerAndFooterHide(): void {
