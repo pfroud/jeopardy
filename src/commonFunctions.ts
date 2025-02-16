@@ -124,6 +124,10 @@ export function downloadSVG(svg: SVGSVGElement, downloadFilenameLabel: string): 
         { cssPropName: "strokeWidth", xmlAttribName: "stroke-width" },
         { cssPropName: "fontSize", xmlAttribName: "font-size" },
 
+        // Used for labels on pie charts
+        { cssPropName: "paintOrder", xmlAttribName: "paint-order" },
+        { cssPropName: "dominantBaseline", xmlAttribName: "dominant-baseline" },
+
         // Dash array is used for grid lines
         { cssPropName: "strokeDasharray", xmlAttribName: "stroke-dasharray" },
 
@@ -208,7 +212,7 @@ export function downloadSVG(svg: SVGSVGElement, downloadFilenameLabel: string): 
 
     // Download the file
     const a = document.createElement('a');
-    a.href = `data:image/svg+xml,${svg.outerHTML}`;
+    a.href = `data:image/svg+xml,${encodeURIComponent(svg.outerHTML)}`;
     a.download = `Jeopardy ${downloadFilenameLabel} ${formattedDate}.svg`;
     a.click(); //no need to add the element to the document
 

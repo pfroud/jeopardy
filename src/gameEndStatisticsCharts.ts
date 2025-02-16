@@ -1,6 +1,6 @@
 import * as Chartist from "chartist";
 import { Team } from "./Team";
-import { downloadSVG, createSvgElement, querySelectorAndCheck } from "./commonFunctions";
+import { createSvgElement, downloadSVG, querySelectorAndCheck } from "./commonFunctions";
 import { Operator } from "./operator/Operator";
 
 /**
@@ -9,55 +9,114 @@ import { Operator } from "./operator/Operator";
  *  - how many questions they got wrong or timed out after buzzing
  *  - how many questions the did not buzz for
  */
-export function createGameEndPieChartsOfBuzzResults(operator: Operator, divForPieCharts: HTMLDivElement, teams: Team[]): void {
+export function createGameEndPieChartsOfBuzzResults(operator: Operator, divForPieCharts: HTMLDivElement, teams: Team[], isInOperatorWindow = false): void {
 
     const questionCount = operator.getQuestionCountForPieCharts();
 
+    // Size of a single pie chart
     const chartWidth = 180;
     const chartHeight = 180;
 
-    teams.forEach(team => {
-        const containerForTeamPieChart = document.createElement("div");
-        containerForTeamPieChart.className = "team-pie-chart";
-        divForPieCharts.appendChild(containerForTeamPieChart);
+    /*
+    We will use Chartist to generate a pie chart for each team. Chartist creates
+    an SVG for each chart, then I will move each pie chart into a single container
+    SVG with a legend. That way I can download it as a single SVG and put into readme.md.
+    The pie charts will go in a 2x4 grid at the top, and the legend will go below that.
+    */
 
-        const chartData: Chartist.PieChartData = {
-            series: []
-        };
+    const chartGridColumnCount = 4;
+    const chartGridSpacing = 30;
+    const chartGridHeight = Math.ceil(teams.length / chartGridColumnCount) * (chartHeight + chartGridSpacing);
 
-        const teamStats = team.getStatistics();
+    const legendRows = [
+        { color: "gray", text: "Not buzzed" },
+        { color: "green", text: "Buzzed then answered right" },
+        { color: "red", text: "Buzzed then answered wrong or timed out" }
+    ];
+    const legendColorSwatchSize = 25;
+    const legendRowSpacing = 10;
+    const legendHeight = legendRows.length * (legendColorSwatchSize + legendRowSpacing);
 
-        const seriesToPotentiallyAdd = [{
-            value: teamStats.questionsNotBuzzed,
-            className: "not-buzzed"
-        }, {
-            value: teamStats.questionsBuzzedThenAnsweredRight,
-            className: "buzzed-then-answered-right"
-        }, {
-            value: teamStats.questionsBuzzedThenAnsweredWrongOrTimedOut,
-            className: "buzzed-then-answered-wrong-or-timed-out"
-        }];
-        // only add if non-zero
-        seriesToPotentiallyAdd.forEach(candidate => { if (candidate.value > 0) chartData.series.push(candidate); });
+    const containerSvg = createSvgElement("svg");
+    containerSvg.setAttribute("id", "pie-charts-container");
+    containerSvg.setAttribute("class", "ct-chart-donut");
+    containerSvg.setAttribute("width", `${chartGridColumnCount * (chartWidth + chartGridSpacing)}`);
+    containerSvg.setAttribute("height", `${chartGridHeight + legendHeight}`);
+    divForPieCharts.append(containerSvg);
 
-        if (chartData.series.length === 0) {
-            return;
-        }
+    // Add legend
+    const groupLegend = createSvgElement("g");
+    groupLegend.setAttribute("id", "legend");
+    groupLegend.setAttribute("transform", `translate(0 ${chartGridHeight})`);
+    containerSvg.append(groupLegend);
+    legendRows.forEach((legendEntry, idx) => {
+
+        const groupLegendRow = createSvgElement("g");
+        groupLegendRow.setAttribute("id", `legend-row-${idx + 1}`);
+        groupLegendRow.setAttribute("transform", `translate(0 ${idx * (legendColorSwatchSize + legendRowSpacing)})`);
+        groupLegend.append(groupLegendRow);
+
+        const colorSwatch = createSvgElement("rect");
+        colorSwatch.setAttribute("fill", legendEntry.color);
+        colorSwatch.setAttribute("x", "0");
+        colorSwatch.setAttribute("y", "0");
+        colorSwatch.setAttribute("width", String(legendColorSwatchSize));
+        colorSwatch.setAttribute("height", String(legendColorSwatchSize));
+        groupLegendRow.append(colorSwatch);
+
+        const textElement = createSvgElement("text");
+        textElement.innerHTML = legendEntry.text;
+        // CSS sets dominant-baseline: middle
+        textElement.setAttribute("x", String(legendColorSwatchSize + 5));
+        textElement.setAttribute("y", `${legendColorSwatchSize / 2}`);
+        groupLegendRow.append(textElement);
+
+    });
+
+    // Create pie charts using Chartist
+    teams.forEach((team, teamIndex) => {
 
         /*
-        https://gionkunz.github.io/chartist-js/api-documentation.html#chartistpie-declaration-defaultoptions
-        You have to find the section called "declaration defaultOptions" and click the "show code" button!!
-         */
+        // need to give each pie chart its own container otherwise chartist re-uses the svg
+        Chartist will create an <svg> in a container, there's no way to tell it to use an existing SVG.
+        If we re-use a container, Chartist will delete the contents of the old chart and make a new one.
+        So we will need to create a container for each pie chart. But don't actually add it to the document.
+        THen I am moving the svgs into a single svg, so then we can delete the containers.
+        */
+        const temporaryContainer = document.createElement("div");
+
+        // Set up data series
+        const teamStats = team.getStatistics();
+        const allDataSeries: Chartist.FlatSeriesObjectValue<number>[] =
+            [
+                {
+                    value: teamStats.questionsNotBuzzed,
+                    className: "not-buzzed"
+                }, {
+                    value: teamStats.questionsBuzzedThenAnsweredRight,
+                    className: "buzzed-then-answered-right"
+                }, {
+                    value: teamStats.questionsBuzzedThenAnsweredWrongOrTimedOut,
+                    className: "buzzed-then-answered-wrong-or-timed-out"
+                }
+            ].filter(series => series.value > 0);
+
+        const chartData: Chartist.PieChartData = { series: allDataSeries };
+
+        /*
+        Comments for the PieChartOptions object below are copied from here:
+
+        interface Options:
+        https://github.com/chartist-js/chartist/blob/10679003a8cec24f9c1f559bdd0c241ec02319a4/src/core/types.ts#L28
+
+        interface PieChartOptions
+        https://github.com/chartist-js/chartist/blob/10679003a8cec24f9c1f559bdd0c241ec02319a4/src/charts/PieChart/PieChart.types.ts#L27
+        */
         const chartOptions: Chartist.PieChartOptions = {
             width: `${chartWidth}px`,
             height: `${chartHeight}px`,
             donut: true,
             donutWidth: "40%",
-            //
-            /*
-            Padding of the chart drawing area to the container element
-            and labels as a number or padding object {top: 5, right: 5, bottom: 5, left: 5}
-            */
             chartPadding: 0,
             showLabel: true,
             //
@@ -90,42 +149,66 @@ export function createGameEndPieChartsOfBuzzResults(operator: Operator, divForPi
             labelPosition: "center"
         };
 
-        const pieChart = new Chartist.PieChart(containerForTeamPieChart, chartData, chartOptions);
+        const pieChart = new Chartist.PieChart(temporaryContainer, chartData, chartOptions);
 
-        pieChart.on("created", () => {
+        pieChart.on("created", createdEvent => {
 
-            // Remove window resize event listener
-            pieChart.detach();
+            pieChart.detach(); //Remove window resize event listener
 
-            const svgCreatedByChartist = querySelectorAndCheck<SVGSVGElement>(containerForTeamPieChart, "svg");
-
-            const teamNameTextNode = createSvgElement("text");
-            teamNameTextNode.innerHTML = team.getTeamName();
-            teamNameTextNode.setAttribute("x", String(chartWidth / 2));
-            teamNameTextNode.setAttribute("y", String(chartHeight / 2));
-            teamNameTextNode.setAttribute("dominant-baseline", "middle");
-            teamNameTextNode.setAttribute("text-anchor", "middle");
-            teamNameTextNode.setAttribute("class", "team-name");
-            svgCreatedByChartist.append(teamNameTextNode);
+            const svgCreatedByChartist = createdEvent.svg.getNode<SVGSVGElement>();
 
             /*
-            If any of the series is 100% of the pie chart, Chartist puts the label in the center
-            of the chart, but we already put our own label for "Team #" in the center. In that 
-            case we will manually move the Chartist label.
+            If any series is 100% of the pie chart, Chartist puts the label in the center
+            of the donut. But we want put the team name label in center, so in this case we
+            will manually move the Chartist label down a little.
             */
-            const needToManuallyMoveLabel = seriesToPotentiallyAdd.map(obj => obj.value).some(n => n === questionCount);
-            if (needToManuallyMoveLabel) {
-                querySelectorAndCheck<SVGTextElement>(svgCreatedByChartist, "text").setAttribute("dy", "20");
+            if (allDataSeries.some(obj => obj.value === questionCount)) {
+                querySelectorAndCheck(svgCreatedByChartist, "text").setAttribute("dy", "20");
             }
+
+            // Add team name label in the center of the donut
+            const teamNameTextElement = createSvgElement("text");
+            teamNameTextElement.innerHTML = team.getTeamName();
+            teamNameTextElement.setAttribute("x", String(chartWidth / 2));
+            teamNameTextElement.setAttribute("y", String(chartHeight / 2));
+            teamNameTextElement.setAttribute("dominant-baseline", "middle");
+            teamNameTextElement.setAttribute("text-anchor", "middle");
+            teamNameTextElement.setAttribute("class", "team-name");
+            svgCreatedByChartist.append(teamNameTextElement);
+
+            // Move the svg created by chartist into the big svg created by me so I can download it for readme.md
+            const groupInContainerSvg = createSvgElement("g");
+            groupInContainerSvg.setAttribute("id", `team-${teamIndex + 1}`);
+            groupInContainerSvg.setAttribute("transform",
+                // weird inline block comment below to visually line up the % and / operators. need to use floor() to do integer division
+                `translate(
+                ${(chartWidth + chartGridSpacing) * /*      */ (teamIndex % chartGridColumnCount)}
+                ${(chartHeight + chartGridSpacing) * Math.floor(teamIndex / chartGridColumnCount)}
+                )`);
+            containerSvg.append(groupInContainerSvg);
+
+            // The append() function MOVES elements into the destination
+            groupInContainerSvg.append(...svgCreatedByChartist.children);
+            // The SVG created by Chartist is now empty.
+
+            temporaryContainer.remove(); //Also removes the svg created by Chartist inside the div
+
         });
 
 
     });
+
+
+    if (isInOperatorWindow) {
+        querySelectorAndCheck(document, "button#download-svg-game-end-pie-chart")
+            .addEventListener("click", () => downloadSVG(containerSvg, "game end pie charts"));
+    }
+
+
 }
 
 /** Create a single line chart with a series for each team. */
-export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivElement, teams: Team[]): void {
-
+export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivElement, teams: Team[], isInOperatorWindow = false): void {
     interface XYPoint {
         x: number;
         y: number;
@@ -196,7 +279,7 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
     const lineChart = new Chartist.LineChart(divForLineChart, chartData, chartOptions);
 
 
-    lineChart.on("created", () => {
+    lineChart.on("created", createdEvent => {
 
         // Remove window resize event listener
         lineChart.detach();
@@ -211,7 +294,7 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
          - axis titles
          - legend
         */
-        const svgCreatedByChartist = querySelectorAndCheck<SVGSVGElement>(divForLineChart, "svg");
+        const svgCreatedByChartist = createdEvent.svg.getNode<SVGSVGElement>();
 
         const marginLeft = 30; // add space on the left for the Y axis title
         const marginBottom = 20; // add space on the bottom for X axis title
@@ -305,8 +388,10 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
 
         }
 
-        querySelectorAndCheck(document, "button#download-svg-game-end-line-chart")
-            .addEventListener("click", () => downloadSVG(svgCreatedByChartist, "game end money over time"));
+        if (isInOperatorWindow) {
+            querySelectorAndCheck(document, "button#download-svg-game-end-line-chart")
+                .addEventListener("click", () => downloadSVG(svgCreatedByChartist, "game end money over time"));
+        }
 
     });
 

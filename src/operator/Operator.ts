@@ -886,9 +886,9 @@ export class Operator {
 
         if (this.teamArray) {
 
-            createGameEndPieChartsOfBuzzResults(this, this.DIV_GAME_END_PIE_CHARTS, this.teamArray);
+            createGameEndPieChartsOfBuzzResults(this, this.DIV_GAME_END_PIE_CHARTS, this.teamArray, true);
 
-            createGameEndLineChartOfMoneyOverTime(this.DIV_GAME_END_LINE_CHART, this.teamArray);
+            createGameEndLineChartOfMoneyOverTime(this.DIV_GAME_END_LINE_CHART, this.teamArray, true);
 
             if (this.presentation) {
                 createGameEndPieChartsOfBuzzResults(this, this.presentation.getGameEndPieChartContainer(), this.teamArray);
