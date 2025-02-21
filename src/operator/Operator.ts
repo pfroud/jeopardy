@@ -531,11 +531,6 @@ export class Operator {
         this.clueShowToOperator(clue);
         this.presentation?.setClue(clue);
 
-        /*
-        if (clue.SPECIAL_CATEGORY) {
-            this.specialCategoryPromptShow(clue.SPECIAL_CATEGORY);
-        }
-            */
     }
 
 
