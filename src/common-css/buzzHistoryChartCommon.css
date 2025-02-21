@@ -48,10 +48,17 @@ svg#buzz-history {
         stroke-width: 1;
     }
 
-    g.annotation path {
-        stroke-linecap: round;
-        stroke: var(--foreground-color);
-        fill: none;
+    g.annotation {
+
+        text {
+            font-size: 12px;
+        }
+
+        path {
+            stroke-linecap: round;
+            stroke: var(--foreground-color);
+            fill: none;
+        }
     }
 
     rect.buzz-record {
