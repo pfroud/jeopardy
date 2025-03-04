@@ -54,7 +54,7 @@ const CLUE_VALUE_MULTIPLIER: { [roundType in RoundType]: number } = {
 type Category = {
     readonly NAME: string;
     /** A few categories have a comment from the host explaining the meaning of the category name. */
-    COMMENT?: string;
+    COMMENT_FROM_TV_SHOW_HOST?: string;
 }
 
 /** This clue was never revealed on the Jeopardy TV show, so J Archive does not have it. */
@@ -145,7 +145,7 @@ function parseTableForRound(roundType: RoundType, table: HTMLTableElement): Game
                 };
                 const commentsString = td.querySelector<HTMLTableCellElement>("td.category_comments")!.innerText.trim();
                 if (commentsString.length > 0) {
-                    rv.COMMENT = commentsString;
+                    rv.COMMENT_FROM_TV_SHOW_HOST = commentsString;
                 }
                 return rv;
             });

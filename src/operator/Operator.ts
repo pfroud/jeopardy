@@ -160,7 +160,7 @@ export class Operator {
 
         this.BUTTON_START_GAME.removeAttribute("disabled");
         this.BUTTON_START_GAME.focus();
-        this.DIV_INSTRUCTIONS.innerHTML = "Ready. Click the button to start the game.";
+        this.DIV_INSTRUCTIONS.innerHTML = "Click the button to start the game.";
 
     }
 
@@ -993,10 +993,7 @@ export class Operator {
         this.categoryCarouselIndex = 0;
         this.presentation?.headerAndFooterHide();
         this.presentation?.setCategoryCarouselIndex(this.categoryCarouselIndex);
-
-        const categoryName = SCRAPED_GAME.ROUNDS[this.gameRoundIndex].CATEGORIES[this.categoryCarouselIndex].NAME;
-        this.DIV_INSTRUCTIONS.innerText =
-            `Category 1 of ${GameBoard.TABLE_COLUMN_COUNT}: "${categoryName}". Press space to show the next category in the carousel`;
+        this.categoryCarouselShowText();
     }
 
     /**
@@ -1030,8 +1027,11 @@ export class Operator {
         this.categoryCarouselIndex++;
         this.presentation?.setCategoryCarouselIndex(this.categoryCarouselIndex);
 
-        const categoryName = SCRAPED_GAME.ROUNDS[this.gameRoundIndex].CATEGORIES[this.categoryCarouselIndex].NAME;
-        const str = `Category ${this.categoryCarouselIndex + 1} of ${GameBoard.TABLE_COLUMN_COUNT}: "${categoryName}".`;
+        this.categoryCarouselShowText();
+    }
+
+    private categoryCarouselShowText(): void {
+        const category = SCRAPED_GAME.ROUNDS[this.gameRoundIndex].CATEGORIES[this.categoryCarouselIndex];
 
         const specialCategory = this.categoryCarouselGetSpecialCategory();
         if (specialCategory === undefined) {
@@ -1040,10 +1040,59 @@ export class Operator {
             this.specialCategoryPromptShow(specialCategory);
         }
 
+        let instructionsHtml = `Read this category out loud:<p>Category ${this.categoryCarouselIndex + 1} of ${GameBoard.TABLE_COLUMN_COUNT}: "${category.NAME}".<p>`;
+
+        if (category.COMMENT_FROM_TV_SHOW_HOST) {
+
+            /*
+            On J-Archive, category comments contain parentheses and speaker names.
+            Here are examples of particularly complex comments with multiple speakers:
+
+            Category: "genius: Aretha"
+            Comment: "(Cynthia Erivo: I'm Cynthia Erivo with clues about Aretha Franklin whose genius is captured in
+            a new \"National Geographic\" series.) (David Faber: The full season of National Geographic's Genius:
+            Aretha series is available on Hulu.)"
+            Source: https://j-archive.com/showgame.php?game_id=7111
+            
+            Category: "extreme weather"
+            Comment: "(Glen: I'm Glen Powell.) (Daisy: And I'm Daisy Edgar-Jones.) (Glen: We deal with some extreme weather
+            in the new movie Twisters.) (Daisy: And now it's your turn to deal with some in the clues we present.)"
+            Source: https://j-archive.com/showgame.php?game_id=8989
+
+            I want to show only the body of the comment in the operator window, without parentheses and speaker names.
+
+            Regular expression to do this:
+
+            /     start of a regex literal
+            \(    matches a literal open parenthesis character
+            [^:]+ matches one or more of any character except colon
+            :     matches a literal colon character
+                  matches a literal space character
+            (     start of a capture group
+            [^)]+ matches one or more of any character except close parenthesis
+            )     end of capture group
+            \)    matches a literal close parenthesis character
+            /     end of regex literal
+            g     global search flag
+            
+            Then all occurrences with "$1" which inserts the capture group.
+
+            Try it here: https://regexr.com/8cqpi
+            If you get an error because the expression took too long to execute, add then remove a character in the search
+            text or press one of the buttons in the RegExr page.
+
+            */
+            const regex = /\([^:]+: ([^)]+)\)/g;
+
+            const cleanedComment = category.COMMENT_FROM_TV_SHOW_HOST.replaceAll(regex, "$1");
+
+            instructionsHtml += `Comment from the TV show host: ${cleanedComment}<p>`;
+        }
+
         if (this.categoryCarouselHasMore()) {
-            this.DIV_INSTRUCTIONS.innerText = `${str} Press space to show the next category in the carousel`;
+            this.DIV_INSTRUCTIONS.innerHTML = `${instructionsHtml} Press space to show the next category in the carousel.`;
         } else {
-            this.DIV_INSTRUCTIONS.innerText = `${str} Press space to start the game`;
+            this.DIV_INSTRUCTIONS.innerHTML = `${instructionsHtml} Press space to start the game.`;
         }
     }
 
@@ -1063,7 +1112,7 @@ export class Operator {
 
         this.GAME_ROUND_TIMER.reset();
 
-        this.DIV_INSTRUCTIONS.innerText = `Get ready for round ${this.gameRoundIndex + 1}, press space to start the category carousel`;
+        this.DIV_INSTRUCTIONS.innerText = `Get ready for round ${this.gameRoundIndex + 1}, press space to start the category carousel.`;
         this.presentation?.setRoundStartText(`Get ready for round ${this.gameRoundIndex + 1}`);
         this.presentation?.setCategoryCarouselGameRound(gameRound);
         this.presentation?.headerMinimize();

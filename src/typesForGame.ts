@@ -25,8 +25,24 @@ export type GameRound = {
 
 export type Category = {
     readonly NAME: string;
-    /** A few categories have a comment from the host explaining the meaning of the category name. */
-    readonly COMMENT?: string;
+    /**
+     * Some categories have comments. On J-Archive, text in a &lt;td class="category_comments"&gt; can be:
+     * 
+     * - Explanation or flavor from the TV show host. For example:
+     *     - Explanation: for the category "4,4" Mayim added "the responses are two 4-letter words." (https://j-archive.com/showgame.php?game_id=7161)
+     *     - Flavor: for the category "I got rhythm" Ken added "I, in fact, do not". (https://j-archive.com/showgame.php?game_id=8963)
+     * - A pre-recorded video of someone presenting the category; all the clues in that category will
+     *   also be presented in pre-recorded videos of those people. For example:
+     *     - For the category "Franklin", a pre-recorded video of Michael Douglas saying "I'm Michael
+     *       Douglas. I play Ben Franklin during his tumultuous years as diplomat in France, making
+     *       friends and enemies." (https://j-archive.com/showgame.php?game_id=8942)
+     * 
+     * Most comments are said after the category on the TV show and appear under the category on J-Archive.
+     * But some comments are in the reverse order, for example here Ken started "and finally, the satirical work
+     * by Ambrose Bierce..." then read the title "definitions from The Devil's Dictionary". (https://j-archive.com/showgame.php?game_id=8855)
+     * 
+    */
+    readonly COMMENT_FROM_TV_SHOW_HOST?: string;
     specialCategory?: SpecialCategory | undefined;
 }
 

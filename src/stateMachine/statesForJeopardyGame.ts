@@ -106,7 +106,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             Also the category and dollar value are shown on the presentation header.
             */
             NAME: "showClueQuestion",
-            INSTRUCTIONS: "Read the question out loud. Buzzers open when you press space.",
+            INSTRUCTIONS: "Read the question out loud then press space to open the buzzers.",
             PRESENTATION_SLIDE_TO_SHOW: "slide-clue-question",
             ON_ENTER: presentation.fitClueQuestionToWindow.bind(presentation),
             TRANSITIONS: [{
@@ -147,7 +147,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             A team has pressed the buzzer, now we are waiting for them to say their answer.
             */
             NAME: "waitForTeamAnswer",
-            INSTRUCTIONS: "Did they answer correctly? y / n",
+            INSTRUCTIONS: "Decide whether they answer correctly. Press Y if correct or N if wrong.",
             ON_ENTER: operator.teamAnswerStart.bind(operator),
             TRANSITIONS: [{
                 TYPE: "keyboard",
@@ -176,7 +176,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             }]
         }, {
             NAME: "showAnswer",
-            INSTRUCTIONS: "Let people read the answer. Press space to continue.",
+            INSTRUCTIONS: "Let people read the answer then press space to continue.",
             ON_ENTER: operator.onShowAnswer.bind(operator),
             PRESENTATION_SLIDE_TO_SHOW: "slide-clue-answer",
             TRANSITIONS: [
@@ -196,7 +196,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             }]
         }, {
             NAME: "showBuzzHistory",
-            INSTRUCTIONS: "The buzz history is showing. Press space to continue.",
+            INSTRUCTIONS: "Discuss the buzz history if needed, press space to continue.",
             ON_ENTER: operator.onBuzzHistoryShow.bind(operator),
             ON_EXIT: operator.onBuzzHistoryHide.bind(operator),
             PRESENTATION_SLIDE_TO_SHOW: "slide-buzz-history-chart",

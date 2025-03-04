@@ -149,17 +149,22 @@
         <div class="tab-content" id="tab-content-play">
 
             <div id="game-round-timer-wrapper">
-
+                Game timer: &nbsp;&nbsp;
                 <div id="game-round-timer">
                     <progress></progress>
-                    <div class="label-on-progress">Game timer</div>
                     <div class="remaining-time-text"></div>
-
                 </div>
                 &nbsp;<button id="add-one-minute" disabled>Add one minute</button>
             </div>
 
-            <br>
+            <div id="current-state-wrapper">
+                Current state:&nbsp;
+                <div id="current-state">
+                    <progress></progress>
+                    <div class="label-on-progress" id="state-name"></div>
+                    <div class="remaining-time-text"></div>
+                </div>
+            </div>
 
             <div id="controls">
                 <button id="start-game" disabled>Start game</button> &emsp;
@@ -167,7 +172,17 @@
                 <span id="money-override-wrapper"><a href="#" id="aMoneyOverride">Override money...</a></span>
             </div>
 
-            <div id="instructions">Waiting for presentation window...</div>
+            <br>
+
+            Host instructions:
+            <div id="instructions">Wait for the presentation window to initialize...</div>
+
+            <div id="special-category-prompt" style="display:none">
+                Press Y to show information about
+                <span id="special-category-prompt-title"></span>
+            </div>
+
+            <br>
 
             <div id="clue-wrapper" style="display:none">
                 <table>
@@ -198,21 +213,7 @@
                 </table>
             </div>
 
-            <div id="special-category-prompt" style="display:none">
-                Press Y to show information about
-                <span id="special-category-prompt-title"></span>
-            </div>
-
             <br>
-
-            <div id="current-state-wrapper">
-                Current state:&nbsp;
-                <div id="current-state">
-                    <progress></progress>
-                    <div class="label-on-progress" id="state-name">not initialized...</div>
-                    <div class="remaining-time-text"></div>
-                </div>
-            </div>
 
         </div>
         <!-- ================================================================================================== -->

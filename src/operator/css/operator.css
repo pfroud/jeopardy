@@ -55,15 +55,18 @@ main {
                 }
             }
 
-
-            div#instructions {
-                font-weight: bold;
-            }
-
             div#clue-wrapper {
-                border: 1px solid var(--light-foreground-color);
-                border-radius: 30px;
-                padding: 20px;
+
+                table {
+                    /* Although there is no border, this reduces spacing between rows */
+                    border-collapse: collapse;
+                }
+
+                table td:nth-of-type(1) {
+                    padding-right: 10px;
+                    text-align: right;
+
+                }
 
                 span.clue-keyword {
                     font-weight: bold;
@@ -82,7 +85,10 @@ main {
             div#game-round-timer-wrapper,
             div#current-state-wrapper {
                 display: flex;
+            }
 
+            button#add-one-minute {
+                height: 30px;
             }
 
             div#current-state,
