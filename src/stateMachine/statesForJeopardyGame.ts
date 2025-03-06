@@ -19,12 +19,20 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             NAME: "startNextGameRound",
             PRESENTATION_SLIDE_TO_SHOW: "slide-round-start",
             ON_ENTER: operator.gameRoundStartNext.bind(operator),
-            TRANSITIONS: [{
-                TYPE: "keyboard",
-                KEYBOARD_KEYS: " ",// space
-                ON_TRANSITION: operator.categoryCarouselStart.bind(operator),
-                DESTINATION: "showCategoryCarousel"
-            }]
+            TRANSITIONS:
+                [{
+                    TYPE: "keyboardWithIf",
+                    KEYBOARD_KEYS: " ", //space
+                    CONDITION: () => new URLSearchParams(window.location.search).has("skipCategoryCarousel"),
+                    THEN: {
+                        DESTINATION: "showGameBoard",
+                        ON_TRANSITION: operator.categoryCarouselStop.bind(operator)
+                    },
+                    ELSE: {
+                        DESTINATION: "showCategoryCarousel",
+                        ON_TRANSITION: operator.categoryCarouselStart.bind(operator)
+                    }
+                }]
         }, {
             NAME: "showCategoryCarousel",
             PRESENTATION_SLIDE_TO_SHOW: "slide-category-carousel",

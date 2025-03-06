@@ -162,6 +162,53 @@ export class Operator {
         this.BUTTON_START_GAME.focus();
         this.DIV_INSTRUCTIONS.innerHTML = "Click the button to start the game.";
 
+        const testBuzzHistory = false;
+        if (testBuzzHistory) {
+            this.buzzHistoryForClue = {
+                timestampWhenClueQuestionFinishedReading: 0,
+                RECORDS: [
+                    // team 1
+                    [
+                        { startTimestamp: -350, RESULT: { TYPE: "too-early-start-lockout" } },
+                        { startTimestamp: -250, RESULT: { TYPE: "ignored", TEAM_STATE_WHY_IT_WAS_IGNORED: "lockout" } },
+                        { startTimestamp: -150, RESULT: { TYPE: "ignored", TEAM_STATE_WHY_IT_WAS_IGNORED: "lockout" } },
+                        { startTimestamp: -50, RESULT: { TYPE: "too-early-start-lockout" } },
+                        { startTimestamp: 50, RESULT: { TYPE: "ignored", TEAM_STATE_WHY_IT_WAS_IGNORED: "lockout" } },
+                    ],
+
+                    //team 2
+                    [
+                        { startTimestamp: 100, RESULT: { TYPE: "ignored", TEAM_STATE_WHY_IT_WAS_IGNORED: "other-team-is-answering" } }
+                    ],
+
+                    //team 3
+                    [
+                        { startTimestamp: 200, RESULT: { TYPE: "start-answer", answerResult: "answeredWrongOrTimedOut", endTimestamp: 300 } }
+                    ],
+
+                    //team 4
+                    [
+                        { startTimestamp: 400, RESULT: { TYPE: "start-answer", answerResult: "answeredWrongOrTimedOut", endTimestamp: 500 } }
+                    ]
+                ]
+            };
+            this.stateMachine?.goToState("showBuzzHistory");
+        }
+
+        const testGameEndStatsCharts = false;
+        if (testGameEndStatsCharts) {
+            this.teamArray?.forEach((team, idx) => {
+                const teamStats = team.getStatistics();
+                teamStats.moneyAtEndOfEachRound = [-200, 200, 500, 100, 300, 400].map(n => n * (idx + 1));
+                teamStats.questionsNotBuzzed = 10;
+                teamStats.questionsBuzzedThenAnsweredRight = 5;
+                teamStats.questionsBuzzedThenAnsweredWrongOrTimedOut = 2;
+            });
+
+            this.stateMachine?.goToState("gameEnd");
+
+        }
+
     }
 
     /**
