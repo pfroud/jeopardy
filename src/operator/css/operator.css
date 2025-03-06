@@ -14,6 +14,10 @@ body {
 
 }
 
+table {
+    border-collapse: collapse;
+}
+
 a:not(:active):visited {
     color: darkviolet;
 }
@@ -56,11 +60,6 @@ main {
             }
 
             div#clue-wrapper {
-
-                table {
-                    /* Although there is no border, this reduces spacing between rows */
-                    border-collapse: collapse;
-                }
 
                 table td:nth-of-type(1) {
                     padding-right: 10px;
@@ -129,13 +128,9 @@ main {
                 width: 50px;
             }
 
-            table {
-                border-collapse: collapse;
-
-                td {
-                    border: 1px solid var(--light-foreground-color);
-                    padding: 5px 10px 5px 10px;
-                }
+            td {
+                border: 1px solid var(--light-foreground-color);
+                padding: 5px 10px 5px 10px;
             }
 
 
@@ -143,8 +138,6 @@ main {
 
         /**************************************************/
         &#tab-content-load-game table#saved-game-details {
-            border-collapse: collapse;
-
             td {
                 border: 1px solid var(--light-foreground-color);
                 padding: 5px 10px 5px 10px;
@@ -168,31 +161,6 @@ main {
     }
 }
 
-div#paused {
-    background-color: #ffa900;
-    color: black;
-    font-weight: bold;
-    position: absolute;
-    font-size: 30px;
-    border-radius: 20px;
-    padding: 20px;
-    border: 1px solid darkorange;
-    text-shadow: 3px 3px rgba(0, 0, 0, 0.2);
-    filter: drop-shadow(10px 13px rgba(0, 0, 0, 0.4));
-    bottom: 160px;
-    z-index: 100;
-}
-
-@keyframes choose-clue-flash-keyframes {
-    from {
-        background-color: purple;
-    }
-
-    to {
-        background-color: transparent;
-    }
-}
-
 footer {
     display: flex;
     /* flex-wrap: nowrap; */
@@ -213,11 +181,6 @@ footer {
             color: var(--dark-background-color);
         }
 
-        &.choose-clue {
-            border: 2px solid white;
-            animation: 0.5s steps(2, jump-none) infinite alternate choose-clue-flash-keyframes;
-        }
-
         div.team-state {
             font-size: 15px;
         }
@@ -228,8 +191,4 @@ footer {
             padding-right: 5px;
         }
     }
-}
-
-body.paused div.team.choose-clue {
-    animation-play-state: paused;
 }

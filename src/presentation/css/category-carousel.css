@@ -2,8 +2,6 @@ div#slide-category-carousel {
     overflow: hidden;
 
     table#category-carousel {
-        border-collapse: collapse;
-
         --cell-width: calc(100vw - var(--border-size));
         --border-size: 50px;
 

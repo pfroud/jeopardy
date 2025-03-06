@@ -9,16 +9,6 @@
     --text-shadow-big: 3px 3px black, 5px 5px black, 7px 7px black, 9px 9px black, 11px 11px #000;
 }
 
-@keyframes choose-clue-flash-keyframes {
-    from {
-        background-color: purple;
-    }
-
-    to {
-        background-color: transparent;
-    }
-}
-
 body {
     height: 100vh;
     width: 100vw;
@@ -33,22 +23,8 @@ body {
     overflow: hidden;
 }
 
-div#paused {
-    background-color: #ffa900;
-    color: black;
-    font-weight: bold;
-    position: absolute;
-    top: 110px;
-    font-size: 30px;
-    border-radius: 20px;
-    padding: 20px;
-    border: 1px solid darkorange;
-
-    /* shadow on the text inside the div */
-    text-shadow: 3px 3px rgba(0, 0, 0, 0.2);
-
-    /* shadow on the entire div */
-    filter: drop-shadow(10px 13px rgba(0, 0, 0, 0.4));
+table {
+    border-collapse: collapse;
 }
 
 header {
@@ -210,11 +186,6 @@ footer {
             }
         }
 
-        &.choose-clue {
-            border: 2px solid white;
-            animation: 0.5s steps(2, jump-none) infinite alternate choose-clue-flash-keyframes;
-        }
-
         div.team-money {
             font-family: swiss911, sans-serif;
             font-size: 40px;
@@ -228,7 +199,6 @@ footer {
         table.countdown-dots {
             margin-left: auto;
             margin-right: auto;
-            border-collapse: collapse;
             margin-bottom: 10px;
 
             td {
@@ -302,8 +272,4 @@ body.showing-game-board header {
 h1,
 h2 {
     text-align: center;
-}
-
-body.paused div.team.choose-clue {
-    animation-play-state: paused;
 }

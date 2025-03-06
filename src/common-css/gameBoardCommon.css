@@ -1,5 +1,4 @@
 table#game-board {
-    border-collapse: collapse;
     table-layout: fixed;
 
     tr#categories {

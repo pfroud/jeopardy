@@ -56,7 +56,6 @@ div.overlay-popup {
             border-radius: 10px;
 
             table#special-category-popup-example-table {
-                border-collapse: collapse;
                 line-height: 200%;
 
                 /* make first column bold */
