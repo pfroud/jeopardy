@@ -248,17 +248,17 @@ export class Team {
         for (let dotIdx = 5; dotIdx > 1; dotIdx--) {
             const tdDescending = document.createElement("td");
             tdDescending.setAttribute("data-countdown", String(dotIdx));
-            tableCountdownDots.appendChild(tdDescending);
+            tableCountdownDots.append(tdDescending);
         }
 
         const tdOne = document.createElement("td");
         tdOne.setAttribute("data-countdown", "1");
-        tableCountdownDots.appendChild(tdOne);
+        tableCountdownDots.append(tdOne);
 
         for (let dotIdx = 2; dotIdx <= 5; dotIdx++) {
             const tdAscending = document.createElement("td");
             tdAscending.setAttribute("data-countdown", String(dotIdx));
-            tableCountdownDots.appendChild(tdAscending);
+            tableCountdownDots.append(tdAscending);
         }
 
         divTeam.append(tableCountdownDots);

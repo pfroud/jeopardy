@@ -192,7 +192,7 @@ export class StateMachineHistoryVisualizer {
         }
 
 
-        this.SVG.appendChild(styleTag);
+        this.SVG.append(styleTag);
     }
 
     public updateTrail(previousStateName: string | null, newStateName: string): void {

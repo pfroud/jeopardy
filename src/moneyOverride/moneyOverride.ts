@@ -34,18 +34,18 @@ document.addEventListener("DOMContentLoaded", function () {
         const dollarValues = [1000, 800, 600, 500, 400, 300, 200, 100, 50];
 
         const tableRowForTeam = document.createElement("tr");
-        table.appendChild(tableRowForTeam);
+        table.append(tableRowForTeam);
 
         // create text showing the team name
         const tdTeamName = document.createElement("td");
         tdTeamName.classList.add("team-name");
         tdTeamName.innerHTML = team.getTeamName();
-        tableRowForTeam.appendChild(tdTeamName);
+        tableRowForTeam.append(tdTeamName);
 
         // create buttons to subtract money
         dollarValues.forEach(function (dollarValue) {
             const tableCellSubtractMoney = document.createElement("td");
-            tableRowForTeam.appendChild(tableCellSubtractMoney);
+            tableRowForTeam.append(tableCellSubtractMoney);
 
             const buttonSubtractMoney = document.createElement("button");
             buttonSubtractMoney.classList.add("money-change");
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 team.moneySubtract(dollarValue, false);
                 textInput.value = String(team.getMoney());
             });
-            tableCellSubtractMoney.appendChild(buttonSubtractMoney);
+            tableCellSubtractMoney.append(buttonSubtractMoney);
         });
 
         // create text input field to type in a dollar value
@@ -67,14 +67,14 @@ document.addEventListener("DOMContentLoaded", function () {
         textInput.addEventListener("input", function () {
             team.moneySet(Number(textInput.value), false);
         });
-        tableCellPresentValue.appendChild(textInput);
-        tableRowForTeam.appendChild(tableCellPresentValue);
+        tableCellPresentValue.append(textInput);
+        tableRowForTeam.append(tableCellPresentValue);
 
         // create buttons to add money
         dollarValues.reverse();
         dollarValues.forEach(function (dollarValue) {
             const tableCellAddMoney = document.createElement("td");
-            tableRowForTeam.appendChild(tableCellAddMoney);
+            tableRowForTeam.append(tableCellAddMoney);
 
             const buttonAddMoney = document.createElement("button");
             buttonAddMoney.classList.add("money-change");
@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 team.moneyAdd(dollarValue, false);
                 textInput.value = String(team.getMoney());
             });
-            tableCellAddMoney.appendChild(buttonAddMoney);
+            tableCellAddMoney.append(buttonAddMoney);
         });
 
     }

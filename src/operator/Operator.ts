@@ -793,19 +793,19 @@ export class Operator {
         const tableDetails = querySelectorAndCheck(document, "table#saved-game-details tbody");
 
         const tableRowTeamNumber = document.createElement("tr");
-        tableDetails.appendChild(tableRowTeamNumber);
+        tableDetails.append(tableRowTeamNumber);
         parsedJson.TEAMS.forEach(team => {
             const cellTeamNumber = document.createElement("td");
             cellTeamNumber.innerHTML = team.TEAM_NAME;
-            tableRowTeamNumber.appendChild(cellTeamNumber);
+            tableRowTeamNumber.append(cellTeamNumber);
         });
 
         const tableRowTeamMoney = document.createElement("tr");
-        tableDetails.appendChild(tableRowTeamMoney);
+        tableDetails.append(tableRowTeamMoney);
         parsedJson.TEAMS.forEach(team => {
             const cellTeamMoney = document.createElement("td");
             cellTeamMoney.innerHTML = `$${team.MONEY}`;
-            tableRowTeamMoney.appendChild(cellTeamMoney);
+            tableRowTeamMoney.append(cellTeamMoney);
         });
 
         const divSavedGame = querySelectorAndCheck<HTMLDivElement>(document, "div#tab-content-load-game");

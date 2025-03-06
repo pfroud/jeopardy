@@ -203,14 +203,14 @@ export class BuzzHistoryChart {
             this.X_AXIS_GROUPS.set(theSvg, d3SelectionOfGroupXAxis);
             groupXAxis.setAttribute("id", "axis");
             groupXAxis.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
-            theSvg.appendChild(groupXAxis);
+            theSvg.append(groupXAxis);
 
             const groupXGrid = createSvgElement("g");
             const d3SelectionOfGroupXGrid = select(groupXGrid);
             this.VERTICAL_GRIDLINE_GROUPS.set(theSvg, d3SelectionOfGroupXGrid);
             groupXGrid.setAttribute("id", "grid");
             groupXGrid.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
-            theSvg.appendChild(groupXGrid);
+            theSvg.append(groupXGrid);
 
             const rowsGroup = createSvgElement("g");
             rowsGroup.setAttribute("id", "rows");
@@ -233,7 +233,7 @@ export class BuzzHistoryChart {
                 shadedBackground.setAttribute("y", "0");
                 shadedBackground.setAttribute("width", String(this.CONTENT_WIDTH));
                 shadedBackground.setAttribute("height", String(BuzzHistoryChart.ROW_HEIGHT));
-                group.appendChild(shadedBackground);
+                group.append(shadedBackground);
 
                 const separatorLine = createSvgElement("line");
                 separatorLine.classList.add("row-separator");
@@ -241,7 +241,7 @@ export class BuzzHistoryChart {
                 separatorLine.setAttribute("y1", String(BuzzHistoryChart.ROW_HEIGHT));
                 separatorLine.setAttribute("x2", String(this.CONTENT_WIDTH));
                 separatorLine.setAttribute("y2", String(BuzzHistoryChart.ROW_HEIGHT));
-                group.appendChild(separatorLine);
+                group.append(separatorLine);
 
                 /*
                  The buzz history records should go underneath the team name,
@@ -263,7 +263,7 @@ export class BuzzHistoryChart {
                 textNode.setAttribute("y", String(BuzzHistoryChart.ROW_HEIGHT / 2));
                 textNode.setAttribute("dominant-baseline", "middle");
                 textNode.innerHTML = teams[teamIndex].getTeamName();
-                group.appendChild(textNode);
+                group.append(textNode);
                 const teamNameTextElementsForThisSvg = this.TEAM_NAME_TEXT_ELEMENTS.get(theSvg);
                 if (!teamNameTextElementsForThisSvg) {
                     throw new Error("array of SVG <text> elements for this SVG is null or undefined");
@@ -280,7 +280,7 @@ export class BuzzHistoryChart {
             verticalLine.setAttribute("y2", String(this.CONTENT_HEIGHT));
             verticalLine.setAttribute("x1", String(xPositionAtTimeZero));
             verticalLine.setAttribute("x2", String(xPositionAtTimeZero));
-            groupContent.appendChild(verticalLine);
+            groupContent.append(verticalLine);
 
 
         }
@@ -317,7 +317,7 @@ export class BuzzHistoryChart {
             theText.setAttribute("x", String(x));
             theText.setAttribute("y", String(yPositionForText));
             theText.innerHTML = content;
-            legendGroup.appendChild(theText);
+            legendGroup.append(theText);
         };
 
         const createRect = (x: number, className: string): void => {
@@ -328,7 +328,7 @@ export class BuzzHistoryChart {
             theRect.setAttribute("height", String(BuzzHistoryChart.BAR_HEIGHT));
             theRect.setAttribute("x", String(x));
             theRect.setAttribute("y", String(yPositionForBottomRow));
-            legendGroup.appendChild(theRect);
+            legendGroup.append(theRect);
         };
 
         const createCircle = (cx: number): void => {
@@ -337,7 +337,7 @@ export class BuzzHistoryChart {
             theCircle.setAttribute("cx", String(cx));
             theCircle.setAttribute("cy", String(yPositionForBottomRow + (BuzzHistoryChart.DOT_RADIUS / 2)));
             theCircle.setAttribute("r", String(BuzzHistoryChart.DOT_RADIUS));
-            legendGroup.appendChild(theCircle);
+            legendGroup.append(theCircle);
         };
 
         const itemsCount = 4;
@@ -361,7 +361,7 @@ export class BuzzHistoryChart {
             createRect(xPosition + rectToAdd.xOffsetToLookLinedUp, rectToAdd.className);
         }
 
-        svgToCreateLegendIn.appendChild(legendGroup);
+        svgToCreateLegendIn.append(legendGroup);
     }
 
     private static getClampedLineFunction(x1: number, y1: number, x2: number, y2: number):

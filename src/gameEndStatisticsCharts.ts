@@ -347,7 +347,7 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
             const groupLegendRow = createSvgElement("g");
             groupLegendRow.setAttribute("id", `legend-row-${teamIdx + 1}`);
             groupLegendRow.setAttribute("transform", `translate(0 ${teamIdx * 50})`);
-            groupLegend.appendChild(groupLegendRow);
+            groupLegend.append(groupLegendRow);
 
             /*
             To make the line colors in the legend match the line colors in the 
@@ -366,7 +366,7 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
             */
             const groupLegendSeries = createSvgElement("g");
             groupLegendSeries.setAttribute("class", `ct-series team-${teamIdx + 1}`);
-            groupLegendRow.appendChild(groupLegendSeries);
+            groupLegendRow.append(groupLegendSeries);
 
             // Add short horizontal line
             const legendLineLength = 50;
