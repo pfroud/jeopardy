@@ -10,7 +10,7 @@ But when this file has .ts file extension, all the types from this file
 will be visible to VS Code in the rest of the project. But since this file is NOT an 
 Ecmascript module it will not actually work when used in a web browser.
 
-If you typececk the entire project by running "tsc -noemit" when this file has .ts file extension,
+If you typecheck the entire project by running "tsc -noemit" when this file has .ts file extension,
 you'll get this error:
     src/scraper/scraper.ts - error TS1208: 'scraper.ts' cannot be compiled under '--isolatedModules'
     because it is considered a global script file. Add an import, export, or an empty 'export {}'
@@ -19,6 +19,9 @@ you'll get this error:
 Info about isolatedModules: https://www.typescriptlang.org/tsconfig/#isolatedModules
 
 So when I am not editing this file I change the file extension to .ts.txt.
+
+For this to work in a bookmarklet, all comments must be block comments not line
+comments because the entire file becomes a single line in a bookmarklet!
 */
 
 type Game = {
@@ -82,11 +85,11 @@ type RevealedClue = {
 
 function main(): void {
 
-    // This header contains the show number and the airdate. Example: "Show #8708 - Wednesday, September 28, 2022"
+    /* This header contains the show number and the airdate. Example: "Show #8708 - Wednesday, September 28, 2022" */
     const h1Text = document.querySelector("h1")!.innerText;
 
     const result: Game = {
-        // example URL: https://j-archive.com/showgame.php?game_id=7451
+        /* example URL: https://j-archive.com/showgame.php?game_id=7451 */
         J_ARCHIVE_GAME_ID: Number(new URLSearchParams(window.location.search).get("game_id")),
         SHOW_NUMBER: Number(/Show #(\d+)/.exec(h1Text)![1]),
         AIRDATE: h1Text.split(" - ")[1],
@@ -96,24 +99,35 @@ function main(): void {
         ]
     };
 
-    // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText
-    window.navigator.clipboard.writeText(JSON.stringify(result, null, 2))
-        // The promise resolves once the clipboard's contents have been updated
-        .then(() =>
-            // https://developer.mozilla.org/en-US/docs/Web/API/console#styling_console_output
-            console.log("%cSuccess, copied the game from J-Archive to the clipboard.",
-                `
-                font-family: sans-serif;
-                font-size: large;
-                font-weight: bold;
-                background: green;
-                display: inline-block;
-                border: 1px solid lime;
-                border-radius: 5px;
-                padding: 5px 10px;
-                margin: 10px auto;
-                `)
-        );
+    const stringToCopyToClipboard =
+        `
+        import { Game } from "./typesForGame";
+        export const SCRAPED_GAME: Game =    
+        ${JSON.stringify(result, null, 2)};
+        `;
+
+    /* https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText */
+    try {
+        window.navigator.clipboard.writeText(stringToCopyToClipboard)
+            /* The promise resolves once the clipboard's contents have been updated */
+            .then(() => {
+                const successMessage = document.createElement("span");
+                successMessage.innerHTML = "Success, copied the game from J-Archive to the clipboard. You can put it in scrapedGame.ts.";
+                successMessage.style.fontSize = "30px";
+                successMessage.style.fontWeight = "bold";
+                successMessage.style.background = "green";
+                successMessage.style.border = "1px solid lime";
+                successMessage.style.borderRadius = "5px";
+                successMessage.style.padding = "15px 20px";
+                successMessage.style.position = "fixed";
+                successMessage.style.top = "10px";
+                successMessage.style.left = "10px";
+                successMessage.style.maxWidth = "1090px";
+                document.body.append(successMessage);
+            });
+    } catch (er) {
+        window.alert(`Clipboard write blocked by web browser: ${String(er)}`);
+    }
 
 
 }
@@ -151,28 +165,29 @@ function parseTableForRound(roundType: RoundType, table: HTMLTableElement): Game
             });
 
 
-    const clueRows = rows.slice(1); //skip the first item in the list, it is the row of categories.
+    /* skip the first item in the list, it is the row of categories. */
+    const clueRows = rows.slice(1);
 
     const clues = clueRows.map((clueRow: HTMLTableRowElement, rowIndex): Clue[] =>
         Array.from(clueRow.querySelectorAll<HTMLTableCellElement>("td.clue"))
             .map((tdClue: HTMLTableCellElement, categoryIndex): Clue => {
 
                 if (tdClue.childElementCount === 0) {
-                    // Clue was NOT revealed on the TV show
+                    /* Clue was NOT revealed on the TV show */
                     return { REVEALED_ON_TV_SHOW: false };
 
                 } else {
-                    // Clue was revealed on the TV show
+                    /* Clue was revealed on the TV show */
                     const directChildrenRowsOfTdClue = tdClue.querySelectorAll(":scope>table>tbody>tr");
                     if (directChildrenRowsOfTdClue.length !== 2) {
                         throw new Error(`the td.clue has ${directChildrenRowsOfTdClue.length} trs, expected exactly 2`);
                     }
                     const childRow = directChildrenRowsOfTdClue[1];
 
-                    // Text which is shown on screen and the game host reads out loud.
+                    /* Text which is shown on screen and the game host reads out loud. */
                     const question = childRow.querySelector<HTMLTableCellElement>('td.clue_text:not([display="none"])')!.innerText;
 
-                    // If a player says this, they get the money.
+                    /* If a player says this, they get the money. */
                     const answer = childRow.querySelector<HTMLTableCellElement>("td.clue_text em.correct_response")!.innerText;
 
                     return {
