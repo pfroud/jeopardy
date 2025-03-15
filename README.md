@@ -80,6 +80,8 @@ video file into the github.com code editor gui. I don't think you can make a vid
 player using a video file committed to the repository.
 -->
 
+https://github.com/user-attachments/assets/ef83fba0-1115-4bd3-b27f-d7f64035db71
+
 The categories and selected clue in the above screenshots are from the [last game hosted by Alex Trebek](https://j-archive.com/showgame.php?game_id=6900).
 
 ## Startup sequence
