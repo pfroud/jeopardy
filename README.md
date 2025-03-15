@@ -11,7 +11,7 @@ Software to run a Jeopardy quiz game.
 
 </details>
 
-One person, who I call the *operator*, hosts the game, which means they read questions out loud and judge whether responses are correct. Any numbers of players split into teams then use buzzers to answer questions.
+One person, who I call the *operator*, hosts the game, which means they read questions out loud and judge whether responses are correct. Any number of players split into teams then use buzzers to answer questions.
 
 The game is played with people in the same physical room; it is not a network multiplayer game.
 
@@ -26,6 +26,26 @@ In 2018, I was inspired by Tom Scott's YouTube game show [Lateral](https://www.y
 I wanted to be able to switch between hosting the game and being a player. That meant I needed questions which I didn't know the answers to. After researching sources of pre-made trivia question, it was clear that the best were from Jeopardy. Thanks to a devoted fanbase, more than 500,000 questions from nearly 40 years on air are available online at [J Archive](https://j-archive.com).
 
 I began the project using [JService](https://github.com/sottenad/jService), a web API to J Archive, which gave responses in JSON. Since Javascript was the quickest JSON parser to set up, I started writing the game with Javascript in a web browser. JService shut down in December 2023 but to this day the project is based on HTML and Javascript. Questions now come directly from J Archive with a few steps of copying and pasting.
+
+## Operator window
+
+<img src="images-for-readme/operator-window.png" alt="Screenshot of operator window" border="1">
+
+The operator window is only visible to the person operating the game. In a utilitarian design, this window shows the question *and* answer.
+
+A distinctive feature of Jeopardy is that players can only buzz in after the host finishes reading the question out loud. The buzzers are disabled while the host is speaking. On the TV show, an offscreen crew member presses a button to turn on the buzzers when the host finishes reading (see [How Does the Jeopardy Buzzer Work](https://www.jeopardy.com/jbuzz/behind-scenes/how-does-jeopardy-buzzer-work)). In my game, the operator reads the question from the operator window then presses the spacebar to enable the buzzers.
+
+Next, players press their buzzer and say an answer out loud. The human operator judges if spoken answers are close enough to the answer shown in the operator window. Most of the time it's clear whether an answer is acceptable, but if not the operator can briefly pause the game to look stuff up. For example once we had to  check if "fluorescence" is the same as "phosphorescence".
+
+The operator window runs all the game logic: state machine, keyboard listeners, countdown timers, scorekeeping, etc. Extra controls are separated into tabs:
+
+- Team setup - change how many teams are in play, and set custom team names.
+- Load game - load a game from `localStorage`, which is saved automatically.
+- Music - play opening and closing music.
+- Game settings - adjust some values, for example the time limit for teams to answer after buzzing in.
+- Developer - for example, buttons to manually change the state machine state.
+
+The clue in the above screenshot is from the [last game hosted by Alex Trebek](https://j-archive.com/showgame.php?game_id=6900).
 
 ## Startup sequence
 
