@@ -405,9 +405,9 @@ export class BuzzHistoryChart {
         */
         const handleZoom = (zoomEvent: D3ZoomEvent<SVGSVGElement, unknown>): void => {
 
-            this.redraw();
-
             this.scaleWithZoomTransform = zoomEvent.transform.rescaleX(this.SCALE_WITHOUT_ZOOM_TRANSFORM);
+
+            this.redraw();
 
             /*
             Normally you would just call 
