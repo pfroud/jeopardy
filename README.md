@@ -29,7 +29,7 @@ I began the project using [JService](https://github.com/sottenad/jService), a we
 
 ## Operator window
 
-<img src="images-for-readme/operator-window.png" alt="Screenshot of operator window" border="1">
+![Screenshot of operator window showing a clue category, value, question, and answer](images-for-readme/operator-window.png)
 
 The operator window is only visible to the person operating the game. In a utilitarian design, this window shows the question *and* answer.
 
@@ -51,9 +51,9 @@ The clue in the above screenshot is from the [last game hosted by Alex Trebek](h
 
 <table>
   <tr>
-    <td><img src="images-for-readme/presentation-window-idle.png" alt="Screenshot of presentation window"></td>
-    <td><img src="images-for-readme/presentation-window-game-board.png" alt="Screenshot of presentation window"></td>
-    <td><img src="images-for-readme/presentation-window-question.png" alt="Screenshot of presentation window"></td>
+    <td><img src="images-for-readme/presentation-window-idle.png" alt="Screenshot of presentation window showing the Jeopardy logo"></td>
+    <td><img src="images-for-readme/presentation-window-game-board.png" alt="Screenshot of presentation window showing table of available clues"></td>
+    <td><img src="images-for-readme/presentation-window-question.png" alt="Screenshot of presentation window showing a question"></td>
     </tr>
 </table>
 
@@ -62,24 +62,23 @@ The presentation window shows questions to all the players, ideally on a big TV.
 The screenshots above show what it looks like. From left to right:
 
 - Before a game has started, the presentation window sets the stage with the Jeopardy logo.
-- Showing the table of available clues. A flashing purple background on Team 1 indicates it's their turn to pick the next one to reveal.
+- Showing the table of available clues. A flashing purple background on Team 1 indicates it's their turn to pick the next clue to reveal.
 - Showing the question.
 
-At the top of the presentation window, two red bars represent remaining time for two countdown timers. At the very top is the time left in the entire game round, and below that is the time left for the item currently being shown on screen.
+At the top of the presentation window, two red bars display the remaining time for two countdown timers. At the very top is the time left in the entire game round, and below that is the time left for the item currently being shown on screen.
 
 At the bottom of the presentation window, each team has:
 
-- An icon of the [metal footswitch used for the buzzer](https://github.com/pfroud/jeopardy-buzzer-controller), which gives visual feedback to players that the software sees their buzzer being pressed. Before this feature was added, some players felt like their buzzer wasn't working; this icon lets everyone test their buzzer at any time during the game.
+- An icon of the [metal footswitch used for the buzzer](https://github.com/pfroud/jeopardy-buzzer-controller?tab=readme-ov-file#buzzers), which gives visual feedback to players that the software sees their buzzer being pressed. Before this feature was added, some players felt like their buzzer wasn't working; this icon lets everyone test their buzzer at any time during the game.
 - A segmented countdown bar [copied from the TV show](https://www.youtube.com/watch?v=cGSDLZ5wqy8&t=10s) for the five-second timer to say an answer after buzzing in.
 
-Here's a video of the footswitch icon and segmented countdown bar:
+Here's a video of the footswitch icon and segmented countdown bar in use:
 
 <!--
 To get a video player to appear in a markdown file, you need to drag-and-drop the
 video file into the github.com code editor gui. I don't think you can make a video
 player using a video file committed to the repository.
 -->
-
 https://github.com/user-attachments/assets/ef83fba0-1115-4bd3-b27f-d7f64035db71
 
 The categories and selected clue in the above screenshots are from the [last game hosted by Alex Trebek](https://j-archive.com/showgame.php?game_id=6900).
