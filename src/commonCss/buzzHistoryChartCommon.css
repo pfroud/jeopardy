@@ -10,19 +10,13 @@ svg#buzz-history {
         font-size: initial;
     }
 
-    g#axis {
-
-        /* The domain is the long horizontal line */
-        path.domain,
+    g#axis g.tick line {
         /* Ticks are short vertical lines where text labels are */
-        g.tick line {
-            stroke: var(--foreground-color);
-        }
+        stroke: var(--foreground-color);
     }
 
     g#grid {
 
-        path.domain,
         g.tick text {
             display: none;
         }

@@ -93,7 +93,7 @@ export class BuzzHistoryChart {
     } as const;
 
     private readonly LEGEND_HEIGHT = 30;
-    private readonly LEGEND_PADDING = 40;
+    private readonly LEGEND_PADDING = 60;
 
     private readonly SVG_WIDTH = 1000;
 
@@ -156,6 +156,8 @@ export class BuzzHistoryChart {
         Selection<SVGGElement, unknown, null, undefined>
     >;
     private readonly VERTICAL_LINES_WHEN_OPERATOR_FINISHED_READING_QUESTION = new Map<SVGSVGElement, SVGLineElement>;
+
+    /** One row for each team, in both SVGs */
     private readonly ROWS_ARRAY = new Map<
         SVGSVGElement,
         Selection<SVGGElement, unknown, null, undefined>[]
@@ -167,8 +169,9 @@ export class BuzzHistoryChart {
         this.LOCKOUT_DURATION_MILLISEC = lockoutDurationMillisec;
         this.SVG_IN_OPERATOR_WINDOW = select(svgInOperatorWindow);
 
-        const svgHeight = (teams.length * BuzzHistoryChart.ROW_HEIGHT) + this.SVG_MARGIN.TOP + this.SVG_MARGIN.BOTTOM + 30 + this.LEGEND_HEIGHT + this.LEGEND_PADDING;
+        const svgHeight = (teams.length * BuzzHistoryChart.ROW_HEIGHT) + this.SVG_MARGIN.TOP + this.SVG_MARGIN.BOTTOM + this.LEGEND_HEIGHT + this.LEGEND_PADDING;
 
+        // Content excludes legend and axis
         this.CONTENT_WIDTH = this.SVG_WIDTH - this.SVG_MARGIN.LEFT - this.SVG_MARGIN.RIGHT;
         this.CONTENT_HEIGHT = svgHeight - this.SVG_MARGIN.TOP - this.SVG_MARGIN.BOTTOM - this.LEGEND_HEIGHT - this.LEGEND_PADDING;
 
@@ -202,14 +205,14 @@ export class BuzzHistoryChart {
             const d3SelectionOfGroupXAxis = select(groupXAxis);
             this.X_AXIS_GROUPS.set(theSvg, d3SelectionOfGroupXAxis);
             groupXAxis.setAttribute("id", "axis");
-            groupXAxis.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
+            groupXAxis.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.SVG_MARGIN.TOP + this.CONTENT_HEIGHT})`);
             theSvg.append(groupXAxis);
 
             const groupXGrid = createSvgElement("g");
             const d3SelectionOfGroupXGrid = select(groupXGrid);
             this.VERTICAL_GRIDLINE_GROUPS.set(theSvg, d3SelectionOfGroupXGrid);
             groupXGrid.setAttribute("id", "grid");
-            groupXGrid.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.CONTENT_HEIGHT})`);
+            groupXGrid.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.SVG_MARGIN.TOP + this.CONTENT_HEIGHT})`);
             theSvg.append(groupXGrid);
 
             const rowsGroup = createSvgElement("g");
@@ -410,9 +413,8 @@ export class BuzzHistoryChart {
             this.redraw();
 
             /*
-            Normally you would just call 
+            To set how many ticks you want to be generated normally you would just call:
                 myAxisGenerator.ticks(n)
-            to set how many ticks you want to be generated.
             (It actually is only a hint to the tick algorithm, so it might not return
             exactly n ticks.)
 
@@ -446,13 +448,25 @@ export class BuzzHistoryChart {
 
             // Draw the X axis
             this.AXIS_GENERATOR.tickSizeInner(6);
-            this.X_AXIS_GROUPS.forEach(xAxisGroup => this.AXIS_GENERATOR(xAxisGroup));
+            this.X_AXIS_GROUPS.forEach(xAxisGroup => {
+                this.AXIS_GENERATOR(xAxisGroup);
+                /*
+                The domain is the horizontal line. Remove it because we added
+                <line class="row-separator"> in the same place.
+                */
+                xAxisGroup.select("path.domain").remove();
+            });
 
             // Draw vertical grid lines
             this.AXIS_GENERATOR.tickSizeInner(-this.CONTENT_HEIGHT);
             const gridOpacity = this.ZOOM_TO_GRIDLINE_OPACITY_FUNCTION(zoomEvent);
             this.VERTICAL_GRIDLINE_GROUPS.forEach(gridGroup => {
                 this.AXIS_GENERATOR(gridGroup);
+                /*
+                The domain is the horizontal line. Remove it because we added
+                <line class="row-separator"> in the same place.
+                */
+                gridGroup.select("path.domain").remove();
                 gridGroup.attr("opacity", gridOpacity);
             });
 
@@ -697,10 +711,11 @@ export class BuzzHistoryChart {
                         o               o
 
                     In the SVG path language:
-                        M is mode to
+                        M is move to
                         L is draw line to
 
-                    It is case sensitive. The lowercase versions of those commands are relative.
+                    It is case sensitive. The lowercase versions of those commands use
+                    relative position, the uppercase versions use absolute position.
 
                     See https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d#path_commands
                      */
