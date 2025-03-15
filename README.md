@@ -47,6 +47,41 @@ The operator window runs all the game logic: state machine, keyboard listeners, 
 
 The clue in the above screenshot is from the [last game hosted by Alex Trebek](https://j-archive.com/showgame.php?game_id=6900).
 
+## Presentation window
+
+<table>
+  <tr>
+    <td><img src="images-for-readme/presentation-window-idle.png" alt="Screenshot of presentation window"></td>
+    <td><img src="images-for-readme/presentation-window-game-board.png" alt="Screenshot of presentation window"></td>
+    <td><img src="images-for-readme/presentation-window-question.png" alt="Screenshot of presentation window"></td>
+    </tr>
+</table>
+
+The presentation window shows questions to all the players, ideally on a big TV. The fonts, colors, shadows, and background are styled after the TV show.
+
+The screenshots above show what it looks like. From left to right:
+
+- Before a game has started, the presentation window sets the stage with the Jeopardy logo.
+- Showing the table of available clues. A flashing purple background on Team 1 indicates it's their turn to pick the next one to reveal.
+- Showing the question.
+
+At the top of the presentation window, two red bars represent remaining time for two countdown timers. At the very top is the time left in the entire game round, and below that is the time left for the item currently being shown on screen.
+
+At the bottom of the presentation window, each team has:
+
+- An icon of the [metal footswitch used for the buzzer](https://github.com/pfroud/jeopardy-buzzer-controller), which gives visual feedback to players that the software sees their buzzer being pressed. Before this feature was added, some players felt like their buzzer wasn't working; this icon lets everyone test their buzzer at any time during the game.
+- A segmented countdown bar [copied from the TV show](https://www.youtube.com/watch?v=cGSDLZ5wqy8&t=10s) for the five-second timer to say an answer after buzzing in.
+
+Here's a video of the footswitch icon and segmented countdown bar:
+
+<!--
+To get a video player to appear in a markdown file, you need to drag-and-drop the
+video file into the github.com code editor gui. I don't think you can make a video
+player using a video file committed to the repository.
+-->
+
+The categories and selected clue in the above screenshots are from the [last game hosted by Alex Trebek](https://j-archive.com/showgame.php?game_id=6900).
+
 ## Startup sequence
 
 To set up two web browser windows which communicate with each other, the user opens the operator window which automatically opens the presentation window:
