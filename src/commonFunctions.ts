@@ -19,6 +19,7 @@ export function createSvgElement<K extends keyof SVGElementTagNameMap>(qualified
 /**
  * Downloading the SVG only takes four lines of Javascript. What the rest of this function does:
  * 
+ *  - Make a clone so the original is still usable
  *  - Add light background to make it readable in dark theme
  *  - Change Chartist axis labels from <span>s inside <foreignObject>s to <text>s
  *  - Copy styles from CSS to XML attributes
@@ -28,15 +29,31 @@ export function createSvgElement<K extends keyof SVGElementTagNameMap>(qualified
  * After downloading the SVG file, you should send it through SVG Optimizer (https://svgomg.net)
  * to get super small file size!
  */
-export function downloadSVG(svg: SVGSVGElement, downloadFilenameLabel: string): void {
+export function downloadSVG(originalSvg: SVGSVGElement, downloadFilenameLabel: string): void {
+
+    /*
+    To minimize the file size of the downloaded SVG, we will remove all the id and class
+    attributes. Removing those attributes breaks the D3 pan/zoom controller used for the 
+    buzz history chart. To preserve the original SVG, we will clone the SVG and do all the
+    processing only on the clone.
+    */
+    const clonedSvg = originalSvg.cloneNode(true) as SVGSVGElement;
+
+    /*
+    The cloned SVG must be added to the document for CSS style to get applied. To make the
+    clone a sibling of the original we need to do this annoying parentNode.insertBefore() thing.
+    The cloned SVG gets removed from the document at the end of this function. 
+    */
+    originalSvg.parentNode?.insertBefore(clonedSvg, originalSvg);
 
     /*
     Even though the file extension will be .svg, we still need to set the XML namespace attribute.
     Otherwise when opening the SVG file in Chrome or Firefox it says:
         This XML file does not appear to have any style information associated with it. The document tree is shown below.
-    Apparently the xmlns attribute is not needed then it's an <svg> tag inside an HTML document.
+    Apparently the xmlns attribute is not needed then it's an <svg> tag inside an HTML document,
+    only when opening it as an .svg file from disk.
     */
-    svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    clonedSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
 
 
     /* *****************************************************************
@@ -51,9 +68,9 @@ export function downloadSVG(svg: SVGSVGElement, downloadFilenameLabel: string): 
     backgroundRect.setAttribute("stroke", "none");
     backgroundRect.setAttribute("x", "0");
     backgroundRect.setAttribute("y", "0");
-    backgroundRect.setAttribute("width", String(svg.getAttribute("width")));
-    backgroundRect.setAttribute("height", String(svg.getAttribute("height")));
-    svg.insertBefore(backgroundRect, svg.firstChild);
+    backgroundRect.setAttribute("width", String(clonedSvg.getAttribute("width")));
+    backgroundRect.setAttribute("height", String(clonedSvg.getAttribute("height")));
+    clonedSvg.insertBefore(backgroundRect, clonedSvg.firstChild);
 
 
 
@@ -64,7 +81,7 @@ export function downloadSVG(svg: SVGSVGElement, downloadFilenameLabel: string): 
     */
 
     // Only needed for SVGs made with Chartist
-    const groupLabels = svg.querySelector("g.ct-labels");
+    const groupLabels = clonedSvg.querySelector("g.ct-labels");
     if (groupLabels) {
         groupLabels.setAttribute("font-size", "12");
 
@@ -108,10 +125,11 @@ export function downloadSVG(svg: SVGSVGElement, downloadFilenameLabel: string): 
     /* *************************************************************************
    ********************* Copy CSS styles to XML attributes *********************
    *****************************************************************************
-   A lot of stuff is set in CSS, which is not accessible after downloading the SVG to a file.
+   A lot of stuff is set in a separate CSS file, which is not accessible after
+   downloading the SVG to a file.
    */
 
-    svg.setAttribute("font-family", "sans-serif");
+    clonedSvg.setAttribute("font-family", "sans-serif");
 
     /*
     The CSS styles we care about. For some of them, the XML attribute name is different.
@@ -136,7 +154,7 @@ export function downloadSVG(svg: SVGSVGElement, downloadFilenameLabel: string): 
     ];
 
 
-    recurse(svg.children);
+    recurse(clonedSvg.children);
 
     function recurse(children: HTMLCollection): void {
         Array.from(children).forEach(child => {
@@ -169,10 +187,10 @@ export function downloadSVG(svg: SVGSVGElement, downloadFilenameLabel: string): 
       Remove stuff which is not removed by SVG Optimizer (https://svgomg.net)
       */
 
-    svg.removeAttribute("xmlns:ct"); //chartist namespace
-    svg.removeAttribute("class");
-    svg.removeAttribute("id");
-    svg.querySelectorAll("*").forEach(element => {
+    clonedSvg.removeAttribute("xmlns:ct"); //chartist namespace
+    clonedSvg.removeAttribute("class");
+    clonedSvg.removeAttribute("id");
+    clonedSvg.querySelectorAll("*").forEach(element => {
         element.removeAttribute("class");
         element.removeAttribute("id");
 
@@ -212,8 +230,10 @@ export function downloadSVG(svg: SVGSVGElement, downloadFilenameLabel: string): 
 
     // Download the file
     const a = document.createElement('a');
-    a.href = `data:image/svg+xml,${encodeURIComponent(svg.outerHTML)}`;
+    a.href = `data:image/svg+xml,${encodeURIComponent(clonedSvg.outerHTML)}`;
     a.download = `Jeopardy ${downloadFilenameLabel} ${formattedDate}.svg`;
-    a.click(); //no need to add the element to the document
+    a.click(); //no need to add the <a> to the document
+
+    clonedSvg.remove();
 
 }
