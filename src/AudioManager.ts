@@ -35,6 +35,7 @@ export class AudioManager {
     public constructor() {
         this.ANSWER_CORRECT = querySelectorAndCheck<HTMLAudioElement>(document, "audio#answer-correct");
         this.ANSWER_WRONG_OR_ANSWER_TIMEOUT = querySelectorAndCheck<HTMLAudioElement>(document, "audio#answer-incorrect");
+        this.ANSWER_WRONG_OR_ANSWER_TIMEOUT.volume = 0.3;
         this.QUESTION_TIMEOUT = querySelectorAndCheck<HTMLAudioElement>(document, "audio#question-timeout");
         this.ROUND_END = querySelectorAndCheck<HTMLAudioElement>(document, "audio#round-end");
         this.TEAM_BUZZ = querySelectorAndCheck<HTMLAudioElement>(document, "audio#team-buzz");
