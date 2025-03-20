@@ -51,7 +51,7 @@ export enum CountdownBehavior {
 }
 
 interface KeyboardBase {
-    readonly KEYBOARD_KEYS: string;
+    readonly KEYBOARD_KEYS: string | (() => Set<string>);
     readonly GUARD_CONDITION?: (keyboardEvent: KeyboardEvent) => boolean;
 }
 

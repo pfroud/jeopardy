@@ -134,7 +134,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
                 ON_TRANSITION: operator.onDoneReadingClueQuestion.bind(operator)
             }],
             KEYBOARD_LISTENERS: [{
-                KEYBOARD_KEYS: "123456789",
+                KEYBOARD_KEYS: operator.getKeyboardKeysForTeamNumbers.bind(operator),
                 ON_KEY_DOWN: operator.onTeamLockout.bind(operator)
             }]
         }, {
@@ -145,7 +145,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             INSTRUCTIONS: "Wait for people to answer.",
             TRANSITIONS: [{
                 TYPE: "keyboard",
-                KEYBOARD_KEYS: "123456789",
+                KEYBOARD_KEYS: operator.getKeyboardKeysForTeamNumbers.bind(operator),
                 DESTINATION: "waitForTeamAnswer",
                 GUARD_CONDITION: operator.teamCanBuzz.bind(operator)
             }, {

@@ -71,17 +71,20 @@ export class StateMachine {
             return;
         }
 
+        const keyPressedOnKeyboard = keyboardEvent.key.toLowerCase();
+
         if (this.presentState.KEYBOARD_LISTENERS) {
-
             for (const keyboardListener of this.presentState.KEYBOARD_LISTENERS) {
-                if (keyboardListener.KEYBOARD_KEYS.toLowerCase().includes(keyboardEvent.key.toLowerCase())) {
-
+                if (
+                    (typeof keyboardListener.KEYBOARD_KEYS === "string") ?
+                        keyboardListener.KEYBOARD_KEYS.toLowerCase().includes(keyPressedOnKeyboard) :
+                        keyboardListener.KEYBOARD_KEYS().has(keyPressedOnKeyboard)
+                ) {
                     if (keyboardListener.GUARD_CONDITION && !keyboardListener.GUARD_CONDITION(keyboardEvent)) {
                         continue;
                     }
                     keyboardListener.ON_KEY_DOWN(keyboardEvent);
                 }
-
             }
         }
 
@@ -89,7 +92,11 @@ export class StateMachine {
         for (const transition of this.presentState.TRANSITIONS) {
             if (
                 (transition.TYPE === "keyboard" || transition.TYPE === "keyboardWithIf") &&
-                transition.KEYBOARD_KEYS.toLowerCase().includes(keyboardEvent.key.toLowerCase())
+                (
+                    (typeof transition.KEYBOARD_KEYS === "string") ?
+                        transition.KEYBOARD_KEYS.toLowerCase().includes(keyPressedOnKeyboard) :
+                        transition.KEYBOARD_KEYS().has(keyPressedOnKeyboard)
+                )
             ) {
 
                 if (transition.GUARD_CONDITION && !transition.GUARD_CONDITION(keyboardEvent)) {
@@ -337,15 +344,17 @@ export class StateMachine {
                             break;
                         }
 
-                        // Verify each keyboard key is not used in multiple transitions leaving this state.
-                        const keyboardKeys: string = transition.KEYBOARD_KEYS;
-                        for (let i = 0; i < keyboardKeys.length; i++) {
-                            const keyboardKey = keyboardKeys.charAt(i);
-                            if (keyboardKey in keyboardKeysUsedInTransitionsFromThisState) {
-                                printWarning(state.NAME, transitionIndex,
-                                    `keyboard key "${keyboardKey}" was already used in a transition from this state with index ${keyboardKeysUsedInTransitionsFromThisState[keyboardKey]}`);
-                            } else {
-                                keyboardKeysUsedInTransitionsFromThisState[keyboardKey] = transitionIndex;
+                        if (typeof transition.KEYBOARD_KEYS === "string") {
+                            // Verify each keyboard key is not used in multiple transitions leaving this state.
+                            const keyboardKeys: string = transition.KEYBOARD_KEYS;
+                            for (let i = 0; i < keyboardKeys.length; i++) {
+                                const keyboardKey = keyboardKeys.charAt(i);
+                                if (keyboardKey in keyboardKeysUsedInTransitionsFromThisState) {
+                                    printWarning(state.NAME, transitionIndex,
+                                        `keyboard key "${keyboardKey}" was already used in a transition from this state with index ${keyboardKeysUsedInTransitionsFromThisState[keyboardKey]}`);
+                                } else {
+                                    keyboardKeysUsedInTransitionsFromThisState[keyboardKey] = transitionIndex;
+                                }
                             }
                         }
 

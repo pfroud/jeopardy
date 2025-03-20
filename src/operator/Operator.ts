@@ -59,6 +59,15 @@ export class Operator {
     private readonly DIV_GAME_BOARD_WRAPPER: HTMLDivElement;
 
     private readonly GAME_ROUND_TIMER: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
+    /**
+    * Set of strings representing keyboard keys which are valid buzzer
+    * inputs for the current team count.
+    * 
+    * Why does the Set contain strings? The `charCode` and `keyCode`
+    * properties on KeyboardEvent are both deprecated, and the `code`
+    * property is a string like "Digit1", "Digit2", so apparently we
+    * need to use the `key` property which is a string like "1", "2".
+    */
     private readonly KEYBOARD_KEYS_FOR_TEAM_NUMBERS = new Set<string>();
     private presentation?: Presentation;
     private stateMachine?: StateMachine;
@@ -252,40 +261,48 @@ export class Operator {
         ]);
 
         window.addEventListener("keydown", keyboardEvent => {
-            if (keyboardEvent.repeat) {
-                // ignore events fired from the key being held down
+            if (!this.teamArray) {
+                // Ignore if teams have not been initialized yet
                 return;
             }
-            const keyboardKey = keyboardEvent.key;
-            if (this.teamArray && this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.has(keyboardKey)) {
-                const teamIndex = Number(keyboardKey) - 1;
-                const team = this.teamArray[teamIndex];
-                team.showKeyboardKeyDown();
+            if (!this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.has(keyboardEvent.key)) {
+                // Ignore keys that do not correspond to team numbers
+                return;
+            }
+            if (keyboardEvent.repeat) {
+                // Ignore events fired from the key being held down
+                return;
+            }
 
-                const teamState = team.getState();
+            const teamNumber = Number(keyboardEvent.key);
+            const teamIndex = teamNumber - 1;
+            const team = this.teamArray[teamIndex];
+            team.showKeyboardKeyDown();
 
-                if (this.presentClue) {
-                    if (teamStatesWhereBuzzingDoesSomething.has(teamState)) {
-                        // Do not do anything. The history will be recorded by a dedicated method in Operator.
-                    } else if (teamState === "idle") {
-                        // Ignore, we don't need it to appear in the history chart.
-                    } else {
-                        this.buzzHistoryForClue?.RECORDS[teamIndex].push({
-                            startTimestamp: Date.now(),
-                            RESULT: {
-                                TYPE: "ignored",
-                                TEAM_STATE_WHY_IT_WAS_IGNORED: teamState
-                            }
-                        });
-                    }
+            const teamState = team.getState();
+
+            if (this.presentClue) {
+                if (teamStatesWhereBuzzingDoesSomething.has(teamState)) {
+                    // Do not do anything. The history will be recorded by a dedicated method in Operator.
+                } else if (teamState === "idle") {
+                    // Ignore, we don't need it to appear in the history chart.
+                } else {
+                    this.buzzHistoryForClue?.RECORDS[teamIndex].push({
+                        startTimestamp: Date.now(),
+                        RESULT: {
+                            TYPE: "ignored",
+                            TEAM_STATE_WHY_IT_WAS_IGNORED: teamState
+                        }
+                    });
                 }
             }
+
         });
 
         window.addEventListener("keyup", keyboardEvent => {
-            const keyboardKey = keyboardEvent.key;
-            if (this.teamArray && this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.has(keyboardKey)) {
-                const teamIndex = Number(keyboardKey) - 1;
+            if (this.teamArray && this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.has(keyboardEvent.key)) {
+                const teamNumber = Number(keyboardEvent.key);
+                const teamIndex = teamNumber - 1;
                 const team = this.teamArray[teamIndex];
                 team.showKeyboardKeyUp();
             }
@@ -455,24 +472,21 @@ export class Operator {
         const table = querySelectorAndCheck(document, "table#team-names tbody");
         table.innerHTML = "";
 
-        this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.clear();
-        for (let teamIndex = 0; teamIndex < this.teamCount; teamIndex++) {
-            this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.add(String(teamIndex + 1));
-        }
-
         this.teamArray = [];
         this.teamNameInputElements = [];
         querySelectorAndCheck(document, "footer").innerHTML = "";
         this.presentation.footerClear();
 
+        this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.clear();
         for (let teamIndex = 0; teamIndex < this.teamCount; teamIndex++) {
             const newTeam = new Team(teamIndex, this, this.presentation, this.SETTINGS, this.AUDIO_MANAGER);
             this.teamArray.push(newTeam);
 
             const tr = document.createElement("tr");
 
+            const teamNumberString = String(teamIndex + 1);
             const tdTeamNumber = document.createElement("td");
-            tdTeamNumber.innerText = String(teamIndex + 1);
+            tdTeamNumber.innerText = teamNumberString;
             tr.append(tdTeamNumber);
 
             const tdTeamNameInputContainer = document.createElement("td");
@@ -489,6 +503,8 @@ export class Operator {
             tr.append(tdTeamNameInputContainer);
 
             table.append(tr);
+
+            this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.add(teamNumberString);
         }
 
         this.buzzHistoryChart = new BuzzHistoryChart(
@@ -500,6 +516,9 @@ export class Operator {
 
     }
 
+    public getKeyboardKeysForTeamNumbers(): Set<string> {
+        return this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS;
+    }
 
     public playSoundQuestionTimeout(): void {
         this.AUDIO_MANAGER.QUESTION_TIMEOUT.play();
@@ -515,6 +534,10 @@ export class Operator {
         if (!keyboardEvent) {
             throw new Error("called handleBuzzerPress() without a keyboardEvent");
         }
+        if (!this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.has(keyboardEvent.key)) {
+            return;
+        }
+
         const teamNumber = Number(keyboardEvent.key);
         const teamIndex = teamNumber - 1;
         const teamAnswering = this.teamArray[teamIndex];
@@ -551,6 +574,10 @@ export class Operator {
         if (!this.teamArray) {
             throw new Error("called handleLockout() when teamArray is undefined");
         }
+        if (!this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.has(keyboardEvent.key)) {
+            return;
+        }
+
         const teamNumber = Number(keyboardEvent.key);
         const teamIndex = teamNumber - 1;
         const team = this.teamArray[teamIndex];
@@ -789,12 +816,13 @@ export class Operator {
         if (!this.teamArray) {
             throw new Error("called canTeamBuzz() when teamArray is null");
         }
-        const teamNumber = Number(keyboardEvent.key);
-        const teamIndex = teamNumber - 1;
-        if (teamIndex > this.teamCount - 1) {
-            return false;
-        } else {
+
+        if (this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.has(keyboardEvent.key)) {
+            const teamNumber = Number(keyboardEvent.key);
+            const teamIndex = teamNumber - 1;
             return this.teamArray[teamIndex].canBuzz();
+        } else {
+            return false;
         }
     }
 
