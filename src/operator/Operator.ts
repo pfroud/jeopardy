@@ -162,6 +162,27 @@ export class Operator {
         this.BUTTON_START_GAME.focus();
         this.DIV_INSTRUCTIONS.innerHTML = "Click the button to start the game.";
 
+        /*
+        In Firefox, when no other audio is playing from the page, the very beginning
+        (approximately the first quarter-second) of sounds are cut off, and very short
+        sounds are not played at all. The Jeopardy software uses invisible <audio>
+        elements and calls the HTMLAudioElement.play() function, but I can reproduce
+        the problem even when clicking the play button on an <audio> element with
+        visible controls. The problem does not happen in Chrome.
+
+        To prevent this, we will hold an audio context open by playing silence. This
+        solution prevents the computer from going to sleep from inactivity which
+        I guess is an unwanted side effect. How to see it:
+            - On Windows: open cmd as admin and run `powercfg /requests`.
+            - On macOS:
+                - GUI: open Activity Monitor and click View > Columns > Preventing Sleep.
+                - Terminal: run `pmset -g assertions`.
+        */
+        const audioContext = new AudioContext();
+        const constantSource = new ConstantSourceNode(audioContext, { offset: 0 });
+        constantSource.connect(audioContext.destination);
+        constantSource.start();
+
         const testBuzzHistory = false;
         if (testBuzzHistory) {
             this.buzzHistoryForClue = {
