@@ -15,7 +15,6 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
                 DESTINATION: "startNextGameRound"
             }]
         }, {
-            // This state 
             NAME: "startNextGameRound",
             PRESENTATION_SLIDE_TO_SHOW: "slide-round-start",
             ON_ENTER: operator.gameRoundStartNext.bind(operator),
@@ -47,6 +46,13 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
                     KEYBOARD_KEYS: " ", //space
                     CONDITION: operator.categoryCarouselHasMore.bind(operator),
                     THEN: {
+                        /*
+                        The destination is the same as the current state, which usually 
+                        means you should put this in KEYBOARD_LISTENERS instead of TRANSITIONS.
+                        But then we would need to check the condition in two separate places,
+                        which I think is harder to read/understand. Since this state does not
+                        have an ON_ENTER function I think it's ok.
+                        */
                         DESTINATION: "showCategoryCarousel",
                         ON_TRANSITION: operator.categoryCarouselShowNext.bind(operator)
                     },
@@ -122,15 +128,14 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
                 KEYBOARD_KEYS: " ", //space
                 DESTINATION: "waitForBuzzes",
                 /*
-                Don't put this function as the onEnter for the waitForBuzzes state
+                Don't put this function as the ON_ENTER for the waitForBuzzes state
                 because there are two other ways to enter the waitForBuzzes state.
                 */
                 ON_TRANSITION: operator.onDoneReadingClueQuestion.bind(operator)
-            }, {
-                TYPE: "keyboard",
+            }],
+            KEYBOARD_LISTENERS: [{
                 KEYBOARD_KEYS: "123456789",
-                DESTINATION: "showClueQuestion",
-                ON_TRANSITION: operator.onTeamLockout.bind(operator)
+                ON_KEY_DOWN: operator.onTeamLockout.bind(operator)
             }]
         }, {
             /*
@@ -184,16 +189,18 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             }]
         }, {
             NAME: "showAnswer",
-            INSTRUCTIONS: "Let people read the answer then press space to continue.",
+            INSTRUCTIONS: "Let people read the answer. Press Q to show what the question was. Press space to continue.",
             ON_ENTER: operator.onShowAnswer.bind(operator),
             PRESENTATION_SLIDE_TO_SHOW: "slide-clue-answer",
-            TRANSITIONS: [
-                {
-                    TYPE: "keyboard",
-                    KEYBOARD_KEYS: " ", //space
-                    DESTINATION: "maybeShowBuzzHistory"
-                }
-            ],
+            TRANSITIONS: [{
+                TYPE: "keyboard",
+                KEYBOARD_KEYS: " ", //space
+                DESTINATION: "maybeShowBuzzHistory"
+            }],
+            KEYBOARD_LISTENERS: [{
+                KEYBOARD_KEYS: "q",
+                ON_KEY_DOWN: operator.toggleQuestionInAnswerSlide.bind(operator)
+            }]
         }, {
             NAME: "maybeShowBuzzHistory",
             TRANSITIONS: [{

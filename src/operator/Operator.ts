@@ -1190,4 +1190,8 @@ export class Operator {
         return this.gameRoundIndex < SCRAPED_GAME.ROUNDS.length - 1;
     }
 
+    public toggleQuestionInAnswerSlide(): void {
+        this.presentation?.toggleQuestionInAnswerSlide();
+    }
+
 }

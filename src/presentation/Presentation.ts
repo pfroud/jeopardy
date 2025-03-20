@@ -15,7 +15,8 @@ export class Presentation {
     private readonly DIV_SLIDE_CLUE_QUESTION: HTMLDivElement;
     private readonly DIV_CLUE_CATEGORY_BIG: HTMLDivElement;
     private readonly DIV_CLUE_VALUE_BIG: HTMLDivElement;
-    private readonly DIV_SLIDE_CLUE_ANSWER_TEXT: HTMLDivElement;
+    private readonly DIV_CLUE_ANSWER_TEXT: HTMLDivElement;
+    private readonly CLUE_QUESTION_IN_ANSWER_SLIDE: HTMLElement;
 
     private readonly DIV_SLIDE_ROUND_START: HTMLDivElement;
 
@@ -54,7 +55,8 @@ export class Presentation {
         this.DIV_SLIDE_ROUND_START = querySelectorAndCheck(document, "div#slide-round-start");
 
         this.DIV_SLIDE_CLUE_QUESTION = querySelectorAndCheck(document, "div#slide-clue-question");
-        this.DIV_SLIDE_CLUE_ANSWER_TEXT = querySelectorAndCheck(document, "div#slide-clue-answer div#clue-answer-text");
+        this.DIV_CLUE_ANSWER_TEXT = querySelectorAndCheck(document, "div#slide-clue-answer div#clue-answer-text");
+        this.CLUE_QUESTION_IN_ANSWER_SLIDE = querySelectorAndCheck(document, "p#question-in-answer-slide");
 
         this.DIV_CLUE_CATEGORY_BIG = querySelectorAndCheck(document, "div#clue-category-big");
         this.DIV_CLUE_VALUE_BIG = querySelectorAndCheck(document, "div#clue-value-big");
@@ -144,7 +146,8 @@ export class Presentation {
 
         this.DIV_SLIDE_CLUE_QUESTION.innerHTML = clue.QUESTION;
 
-        this.DIV_SLIDE_CLUE_ANSWER_TEXT.innerHTML = clue.ANSWER;
+        this.DIV_CLUE_ANSWER_TEXT.innerHTML = clue.ANSWER;
+        this.CLUE_QUESTION_IN_ANSWER_SLIDE.innerHTML = clue.QUESTION;
     }
 
     public fitClueQuestionToWindow(): void {
@@ -258,6 +261,14 @@ export class Presentation {
 
     public setRoundStartText(message: string): void {
         this.DIV_SLIDE_ROUND_START.innerText = message;
+    }
+
+    public toggleQuestionInAnswerSlide(): void {
+        if (this.CLUE_QUESTION_IN_ANSWER_SLIDE.style.display === "block") {
+            this.CLUE_QUESTION_IN_ANSWER_SLIDE.style.display = "none";
+        } else {
+            this.CLUE_QUESTION_IN_ANSWER_SLIDE.style.display = "block";
+        }
     }
 
 }

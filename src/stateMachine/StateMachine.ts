@@ -67,33 +67,49 @@ export class StateMachine {
             return;
         }
 
-        if (!this.OPERATOR.isPaused()) {
+        if (this.OPERATOR.isPaused()) {
+            return;
+        }
 
-            // Search for the first transition with a keyboard transition for the key pressed.
-            for (const transition of this.presentState.TRANSITIONS) {
-                if (
-                    (transition.TYPE === "keyboard" || transition.TYPE === "keyboardWithIf") &&
-                    transition.KEYBOARD_KEYS.toLowerCase().includes(keyboardEvent.key.toLowerCase())
-                ) {
+        if (this.presentState.KEYBOARD_LISTENERS) {
 
-                    if (transition.TYPE === "keyboard") {
-                        if (transition.GUARD_CONDITION && !transition.GUARD_CONDITION(keyboardEvent)) {
-                            continue;
-                        }
-                        if (transition.ON_TRANSITION) {
-                            transition.ON_TRANSITION(keyboardEvent);
-                        }
-                        this.goToState(transition.DESTINATION, keyboardEvent);
-                        break;
+            for (const keyboardListener of this.presentState.KEYBOARD_LISTENERS) {
+                if (keyboardListener.KEYBOARD_KEYS.toLowerCase().includes(keyboardEvent.key.toLowerCase())) {
 
-                    } else if (transition.TYPE === "keyboardWithIf") {
-                        if (transition.CONDITION()) {
-                            transition.THEN.ON_TRANSITION?.();
-                            this.goToState(transition.THEN.DESTINATION, keyboardEvent);
-                        } else {
-                            transition.ELSE.ON_TRANSITION?.();
-                            this.goToState(transition.ELSE.DESTINATION, keyboardEvent);
-                        }
+                    if (keyboardListener.GUARD_CONDITION && !keyboardListener.GUARD_CONDITION(keyboardEvent)) {
+                        continue;
+                    }
+                    keyboardListener.ON_KEY_DOWN(keyboardEvent);
+                }
+
+            }
+        }
+
+        // Search for the first transition with a keyboard transition for the key pressed.
+        for (const transition of this.presentState.TRANSITIONS) {
+            if (
+                (transition.TYPE === "keyboard" || transition.TYPE === "keyboardWithIf") &&
+                transition.KEYBOARD_KEYS.toLowerCase().includes(keyboardEvent.key.toLowerCase())
+            ) {
+
+                if (transition.GUARD_CONDITION && !transition.GUARD_CONDITION(keyboardEvent)) {
+                    continue;
+                }
+
+                if (transition.TYPE === "keyboard") {
+                    if (transition.ON_TRANSITION) {
+                        transition.ON_TRANSITION(keyboardEvent);
+                    }
+                    this.goToState(transition.DESTINATION, keyboardEvent);
+                    break;
+
+                } else if (transition.TYPE === "keyboardWithIf") {
+                    if (transition.CONDITION()) {
+                        transition.THEN.ON_TRANSITION?.();
+                        this.goToState(transition.THEN.DESTINATION, keyboardEvent);
+                    } else {
+                        transition.ELSE.ON_TRANSITION?.();
+                        this.goToState(transition.ELSE.DESTINATION, keyboardEvent);
                     }
                 }
             }
