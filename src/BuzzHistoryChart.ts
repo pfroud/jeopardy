@@ -696,19 +696,22 @@ export class BuzzHistoryChart {
                     .join("g")
                     .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_GROUP, true);
 
-                const arrowY = (BuzzHistoryChart.ROW_HEIGHT / 2) + 9;
+                const arrowY = (BuzzHistoryChart.ROW_HEIGHT / 2) + BuzzHistoryChart.DOT_RADIUS + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE + 2;
 
                 const getSvgPathDataForAnnotationArrow = (d: Annotation): string => {
+                    const scaledStartTimestamp = this.scaleWithZoomTransform(d.startTimestamp);
+                    const scaledEndTimestamp = this.scaleWithZoomTransform(d.endTimestamp);
+
                     /*
                      The arrow we want to draw:
 
-                        o               o
-                       /                 \
-                      /                   \
-                     o---------------------o
-                      \                   /
-                       \                 /
-                        o               o
+                     o  o                            o  o
+                     | /                              \ |
+                     |/                                \|
+                     o----------------------------------o
+                     |\                                /|
+                     | \                              / |
+                     o  o                            o  o
 
                     In the SVG path language:
                         M is move to
@@ -724,12 +727,12 @@ export class BuzzHistoryChart {
                     /*
                     Body of the arrow:
 
-                    (x1, y1)               (x2, y2)
-                        o---------------------o
+                    (x1, y1)                            (x2, y2)
+                        o----------------------------------o
                     */
                     const body =
-                        `M ${this.scaleWithZoomTransform(d.startTimestamp)}, ${arrowY}\n` +
-                        `L ${this.scaleWithZoomTransform(d.endTimestamp)}, ${arrowY}`;
+                        `M ${scaledStartTimestamp}, ${arrowY}\n` +
+                        `L ${scaledEndTimestamp}, ${arrowY}`;
 
                     /*
                     Left arrow head:
@@ -743,9 +746,25 @@ export class BuzzHistoryChart {
                         o  (x3, y3)
                     */
                     const leftArrowHead =
-                        `M ${this.scaleWithZoomTransform(d.startTimestamp) + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}\n` +
-                        `L ${this.scaleWithZoomTransform(d.startTimestamp)}, ${arrowY}\n` +
-                        `L ${this.scaleWithZoomTransform(d.startTimestamp) + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}`;
+                        `M ${scaledStartTimestamp + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}\n` +
+                        `L ${scaledStartTimestamp}, ${arrowY}\n` +
+                        `L ${scaledStartTimestamp + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}`;
+
+                    /*
+                    Left vertical tick:
+
+                     o  (x1, y1)
+                     |
+                     |
+                     o  (x2, y2)
+                     |
+                     |
+                     o  (x3, y3)
+                    */
+                    const leftVerticalTick =
+                        `M ${scaledStartTimestamp}, ${arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}\n` +
+                        `L ${scaledStartTimestamp}, ${arrowY}\n` +
+                        `L ${scaledStartTimestamp}, ${arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}`;
 
 
                     /*
@@ -761,11 +780,27 @@ export class BuzzHistoryChart {
                     */
 
                     const rightArrowHead =
-                        `M ${this.scaleWithZoomTransform(d.endTimestamp) - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}\n` +
-                        `L ${this.scaleWithZoomTransform(d.endTimestamp)}, ${arrowY}\n` +
-                        `L ${this.scaleWithZoomTransform(d.endTimestamp) - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}`;
+                        `M ${scaledEndTimestamp - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}\n` +
+                        `L ${scaledEndTimestamp}, ${arrowY}\n` +
+                        `L ${scaledEndTimestamp - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}`;
 
-                    return `${leftArrowHead}\n\n${body}\n\n${rightArrowHead}`;
+                    /*
+                    Right vertical tick:
+
+                    o  (x1, y1)
+                    |
+                    |
+                    o  (x2, y2)
+                    |
+                    |
+                    o  (x3, y3)
+                    */
+                    const rightVerticalTick =
+                        `M ${scaledEndTimestamp}, ${arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}\n` +
+                        `L ${scaledEndTimestamp}, ${arrowY}\n` +
+                        `L ${scaledEndTimestamp}, ${arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}`;
+
+                    return `${leftArrowHead}\n\n${leftVerticalTick}\n\n${body}\n\n${rightArrowHead}\n\n${rightVerticalTick}`;
 
                 };
 
@@ -782,9 +817,10 @@ export class BuzzHistoryChart {
                     .selectAll("text")
                     .data(annotationForThisTeam)
                     .join("text")
-                    .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp) + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE)
-                    .attr("y", (BuzzHistoryChart.ROW_HEIGHT / 2) + 22)
+                    .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp) + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE + 2)
+                    .attr("y", arrowY + 1)
                     .attr("font-size", "12")
+                    .attr("dominant-baseline", "hanging")
                     .text(d => d.message);
 
 
