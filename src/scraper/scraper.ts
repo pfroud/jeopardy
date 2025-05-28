@@ -24,6 +24,12 @@ For this to work in a bookmarklet, all comments must be block comments not line
 comments because the entire file becomes a single line in a bookmarklet!
 */
 
+type FinalJeopardy = {
+    readonly CATEGORY: string;
+    readonly QUESTION: string;
+    readonly ANSWER: string
+};
+
 type Game = {
     /** From game_id in URL */
     readonly J_ARCHIVE_GAME_ID: number;
@@ -31,6 +37,7 @@ type Game = {
     readonly SHOW_NUMBER: number;
     readonly AIRDATE: string;
     readonly ROUNDS: GameRound[];
+    readonly FINAL_JEOPARDY?: FinalJeopardy;
 }
 
 type RoundType = "single" | "double";
@@ -96,7 +103,8 @@ function main(): void {
         ROUNDS: [
             parseTableForRound("single", document.querySelector<HTMLTableElement>("div#jeopardy_round table.round")!),
             parseTableForRound("double", document.querySelector<HTMLTableElement>("div#double_jeopardy_round table.round")!),
-        ]
+        ],
+        FINAL_JEOPARDY: getFinalJeopardy()
     };
 
     const stringToCopyToClipboard =
@@ -132,6 +140,15 @@ function main(): void {
 
 }
 main();
+
+function getFinalJeopardy(): FinalJeopardy {
+    const finalJeopardyContainer = document.querySelector<HTMLTableElement>("table.final_round")!;
+    return {
+        CATEGORY: finalJeopardyContainer.querySelector<HTMLTableCellElement>("td.category")!.innerText.trim(),
+        QUESTION: finalJeopardyContainer.querySelector<HTMLElement>("td#clue_FJ")!.innerText,
+        ANSWER: finalJeopardyContainer.querySelector<HTMLElement>("td#clue_FJ_r em.correct_response")!.innerText
+    };
+}
 
 function parseTableForRound(roundType: RoundType, table: HTMLTableElement): GameRound {
 

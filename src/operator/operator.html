@@ -251,13 +251,26 @@
         </div>
         <!-- ================================================================================================== -->
         <div class="tab-content" id="tab-content-music">
-            Opening music:<br>
-            <audio id="music-game-start" preload="auto" src="../sound/music-opening.mp3" controls loop
-                style="width:100%"></audio>
-            <p>
-                Closing music:<br>
-                <audio id="music-game-end" preload="auto" src="../sound/music-closing.mp3" controls
-                    style="width:100%"></audio>
+            <table>
+                <tr>
+                    <td>Opening music:</td>
+                    <td>
+                        <audio id="music-game-start" src="../sound/music-opening.mp3" preload="auto" controls></audio>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Closing music:</td>
+                    <td>
+                        <audio id="music-game-end" src="../sound/music-closing.mp3" preload="auto" controls></audio>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Final Jeopardy:</td>
+                    <td>
+                        <audio src="../sound/final-jeopardy-think.mp3" preload="auto" controls></audio>
+                    </td>
+                </tr>
+            </table>
         </div>
         <!-- ================================================================================================== -->
         <div class="tab-content" id="tab-content-game-settings">
@@ -290,12 +303,12 @@
         <!-- ================================================================================================== -->
         <div class="tab-content" id="tab-content-developer">
             <a href="#" id="aOpenStateMachineHistoryVisualizer">Open state machine history visualizer...</a>
-            <p>
-                Manually change states: &ensp;
-                <button id="nextRound">Next round</button> &ensp;
-                <button id="endGame">End game</button>
-            </p>
 
+            <br><br>
+            Manually change states: &ensp;
+            <button id="nextRoundOrEndGame">Next round</button> &ensp;
+            <button id="finalJeopardy">Final Jeopardy</button> &ensp;
+            <button id="endGame">End game</button>
 
         </div>
 

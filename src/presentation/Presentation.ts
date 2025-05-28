@@ -259,8 +259,8 @@ export class Presentation {
         this.CATEGORY_CAROUSEL_TABLE.setAttribute("data-show-category-index", String(n));
     }
 
-    public setRoundStartText(message: string): void {
-        this.DIV_SLIDE_ROUND_START.innerText = message;
+    public setRoundStartHTML(message: string): void {
+        this.DIV_SLIDE_ROUND_START.innerHTML = message;
     }
 
     public toggleQuestionInAnswerSlide(): void {
@@ -270,5 +270,12 @@ export class Presentation {
             this.CLUE_QUESTION_IN_ANSWER_SLIDE.style.display = "block";
         }
     }
+
+    public finalJeopardyStart(): void {
+        this.headerMinimize();
+        this.setRoundStartHTML("Get ready for Final Jeopardy");
+        this.DIV_CLUE_VALUE_BIG.style.display = "none";
+    }
+
 
 }

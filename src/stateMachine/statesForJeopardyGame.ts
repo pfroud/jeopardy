@@ -235,9 +235,55 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
                 TYPE: "if",
                 CONDITION: operator.gameRoundHasMore.bind(operator),
                 THEN: { DESTINATION: "startNextGameRound" },
-                ELSE: { DESTINATION: "gameEnd" }
+                ELSE: { DESTINATION: "finalJeopardyIntro" }
             }]
-        }, {
+        },
+        {
+            NAME: "finalJeopardyIntro",
+            PRESENTATION_SLIDE_TO_SHOW: "slide-round-start", // we will use this slide to display text
+            INSTRUCTIONS: "Get ready for Final Jeopardy. Press Space to show the category.",
+            ON_ENTER: operator.finalJeopardyStart.bind(operator),
+            TRANSITIONS: [{
+                TYPE: "keyboard",
+                KEYBOARD_KEYS: " ", //space
+                DESTINATION: "finalJeopardyShowCategory"
+            }
+            ]
+        },
+        {
+            NAME: "finalJeopardyShowCategory",
+            INSTRUCTIONS: "Read the Final Jeopardy category out loud. Press Space to show the question.",
+            ON_ENTER: operator.finalJeopardyShowCategory.bind(operator),
+            PRESENTATION_SLIDE_TO_SHOW: "slide-clue-category-and-value",
+            TRANSITIONS: [{
+                TYPE: "keyboard",
+                KEYBOARD_KEYS: " ", //space
+                DESTINATION: "finalJeopardyShowQuestion"
+            }]
+        },
+        {
+            NAME: "finalJeopardyShowQuestion",
+            INSTRUCTIONS: "Read the Final Jeopardy question out loud. Press Space to show the answer.",
+            PRESENTATION_SLIDE_TO_SHOW: "slide-clue-question",
+            ON_ENTER: operator.finalJeopardyShowQuestion.bind(operator),
+            TRANSITIONS: [{
+                TYPE: "keyboard",
+                KEYBOARD_KEYS: " ", //space
+                DESTINATION: "finalJeopardyShowAnswer"
+            }]
+        },
+        {
+            NAME: "finalJeopardyShowAnswer",
+            INSTRUCTIONS: "Read the Final Jeopardy answer. Press space to end the game.",
+            ON_ENTER: operator.finalJeopardyShowAnswer.bind(operator),
+            PRESENTATION_SLIDE_TO_SHOW: "slide-clue-answer",
+            TRANSITIONS: [{
+                TYPE: "keyboard",
+                KEYBOARD_KEYS: " ", //space
+                DESTINATION: "gameEnd"
+            }]
+        },
+        {
             NAME: "gameEnd",
             INSTRUCTIONS: "Game over",
             PRESENTATION_SLIDE_TO_SHOW: "slide-gameEnd-team-ranking-table",

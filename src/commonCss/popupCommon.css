@@ -59,7 +59,7 @@ div.overlay-popup {
                 line-height: 200%;
 
                 /* make first column bold */
-                td:nth-of-type(1) {
+                td:first-of-type {
                     font-weight: bold;
                     padding-right: 10px;
                 }

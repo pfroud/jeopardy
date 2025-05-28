@@ -65,4 +65,11 @@
         <td>https://freesound.org/people/waveplay_old/sounds/201766/ (dead link)</td>
         <td>Published September 28th 2013. CC0 license.</td>
     </tr>
+    <tr>
+        <td>final-jeopardy-think.mp3</td>
+        <td>"Jeopardy! Think! Theme (2008 - Present)"</td>
+        <td>Nguyễn Việt Thái</td>
+        <td>https://www.youtube.com/watch?v=SPBnhlgmAQM</td>
+        <td>Published March 6th 2019</td>
+    </tr>
 </table>

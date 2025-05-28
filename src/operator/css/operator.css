@@ -61,10 +61,10 @@ main {
 
             div#clue-wrapper {
 
-                table td:nth-of-type(1) {
+                table td:first-of-type {
                     padding-right: 10px;
                     text-align: right;
-
+                    vertical-align: top;
                 }
 
                 span.clue-keyword {
@@ -142,6 +142,32 @@ main {
                 border: 1px solid var(--light-foreground-color);
                 padding: 5px 10px 5px 10px;
             }
+        }
+
+        /**************************************************/
+        &#tab-content-music table {
+
+            /*
+            In Firefox, <audio> elements in a grid seems messed up (tries to be very tall)
+            so I'm using a <table> instead of grid layout.
+            */
+
+            td:first-of-type {
+                padding: 10px 10px 10px 0px;
+                text-align: right;
+                text-wrap: nowrap;
+                vertical-align: middle;
+            }
+
+            td:nth-of-type(2) {
+                width: 100%;
+
+                audio {
+                    vertical-align: middle;
+                    width: 100%;
+                }
+            }
+
         }
 
         /**************************************************/

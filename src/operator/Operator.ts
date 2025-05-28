@@ -439,11 +439,21 @@ export class Operator {
             }
         });
 
-        querySelectorAndCheck(document, "button#nextRound").addEventListener("click", () =>
-            this.stateMachine?.goToState("nextRoundOrEndGame"));
+        querySelectorAndCheck(document, "button#nextRoundOrEndGame").addEventListener("click", () => {
+            this.stateMachine?.goToState("nextRoundOrEndGame");
+            //go to the Play tab
+            querySelectorAndCheck<HTMLInputElement>(document, "input#tab-play").checked = true;
+        });
 
-        querySelectorAndCheck(document, "button#endGame").addEventListener("click", () =>
-            this.stateMachine?.goToState("gameEnd"));
+        querySelectorAndCheck(document, "button#finalJeopardy").addEventListener("click", () => {
+            this.stateMachine?.goToState("finalJeopardyIntro");
+            //go to the Play tab
+            querySelectorAndCheck<HTMLInputElement>(document, "input#tab-play").checked = true;
+        });
+
+        querySelectorAndCheck(document, "button#endGame").addEventListener("click", () => {
+            this.stateMachine?.goToState("gameEnd");
+        });
     }
 
     /**
@@ -1206,20 +1216,29 @@ export class Operator {
     public gameRoundStartNext(): void {
         this.gameRoundIndex++;
         const gameRound = SCRAPED_GAME.ROUNDS[this.gameRoundIndex];
-
         gameRound.CATEGORIES.forEach(category => category.specialCategory = checkSpecialCategory(category.NAME));
-
-
         this.gameBoard?.setGameRound(gameRound);
-
         this.DIV_CLUE_WRAPPER.style.display = "none";
-
         this.GAME_ROUND_TIMER.reset();
 
-        this.DIV_INSTRUCTIONS.innerText = `Get ready for round ${this.gameRoundIndex + 1}, press space to start the category carousel.`;
-        this.presentation?.setRoundStartText(`Get ready for round ${this.gameRoundIndex + 1}`);
         this.presentation?.setCategoryCarouselGameRound(gameRound);
         this.presentation?.headerMinimize();
+
+        const messageLines = [`Get ready for round ${this.gameRoundIndex + 1}.`];
+        if (this.gameRoundIndex === 0) {
+            // example format of the airdate string: "Thursday, July 12, 2018"
+            const split1 = SCRAPED_GAME.AIRDATE.split(", ");
+            const year = split1[2];
+            const monthAndDay = split1[1];
+            const split2 = monthAndDay.split(" ");
+            const month = split2[0];
+            messageLines.push(`This game is from ${month} ${year}.`);
+        }
+
+        this.presentation?.setRoundStartHTML(messageLines.join("<br><br>"));
+
+        messageLines.push("Press space to start the category carousel.");
+        this.DIV_INSTRUCTIONS.innerHTML = messageLines.join("<br><br>");
     }
 
     public gameRoundHasMore(): boolean {
@@ -1228,6 +1247,39 @@ export class Operator {
 
     public toggleQuestionInAnswerSlide(): void {
         this.presentation?.toggleQuestionInAnswerSlide();
+    }
+
+    public finalJeopardyStart(): void {
+        this.presentation?.setClue({
+            REVEALED_ON_TV_SHOW: true,
+            QUESTION: SCRAPED_GAME.FINAL_JEOPARDY.QUESTION,
+            ANSWER: SCRAPED_GAME.FINAL_JEOPARDY.ANSWER,
+            VALUE: 0,
+            CATEGORY_NAME: SCRAPED_GAME.FINAL_JEOPARDY.CATEGORY,
+            ROW_INDEX: 0,
+            COLUMN_INDEX: 0
+        });
+        this.presentation?.finalJeopardyStart();
+
+        querySelectorAndCheck<HTMLElement>(this.DIV_CLUE_WRAPPER, "tr#tr-clue-value").style.display = "none";
+    }
+
+    public finalJeopardyShowCategory(): void {
+        this.DIV_CLUE_WRAPPER.style.display = ""; //show it by removing "display=none"
+        this.DIV_CLUE_CATEGORY.innerHTML = SCRAPED_GAME.FINAL_JEOPARDY.CATEGORY;
+        this.TR_QUESTION.style.display = "none";
+        this.TR_ANSWER.style.display = "none";
+    }
+
+    public finalJeopardyShowQuestion(): void {
+        this.TR_QUESTION.style.display = ""; //show it by removing "display=none"
+        this.DIV_CLUE_QUESTION.innerHTML =
+            this.getQuestionHtmlWithSubjectInBold(SCRAPED_GAME.FINAL_JEOPARDY.QUESTION);
+    }
+
+    public finalJeopardyShowAnswer(): void {
+        this.TR_ANSWER.style.display = ""; //show it by removing "display=none"
+        this.DIV_CLUE_ANSWER.innerHTML = SCRAPED_GAME.FINAL_JEOPARDY.ANSWER;
     }
 
 }

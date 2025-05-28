@@ -7,6 +7,7 @@ export type Game = {
     readonly SHOW_NUMBER: number;
     readonly AIRDATE: string;
     readonly ROUNDS: GameRound[];
+    readonly FINAL_JEOPARDY: FinalJeopardy;
 }
 
 export type RoundType = "single" | "double";
@@ -68,3 +69,9 @@ export type RevealedClue = {
     readonly ROW_INDEX: number;
     readonly COLUMN_INDEX: number;
 }
+
+export type FinalJeopardy = {
+    readonly CATEGORY: string;
+    readonly QUESTION: string;
+    readonly ANSWER: string
+};
