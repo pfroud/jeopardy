@@ -32,6 +32,8 @@ export class Settings {
 
     public timeBeforeRandomClueIsChosen = 10_000;
 
+    public teamToChooseNextClue: "rotate" | "previousCorrectAnswer" = "previousCorrectAnswer";
+
     private readonly GUI_INPUT: {
         readonly DISPLAY_DURATION_CATEGORY: HTMLInputElement;
         readonly DISPLAY_DURATION_ANSWER: HTMLInputElement;

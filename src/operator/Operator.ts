@@ -322,10 +322,17 @@ export class Operator {
      */
     public onAnswerCorrect(): void {
         if (!this.presentClue) {
-            throw new Error("called handleAnswerCorrect() when presentClue is undefined");
+            throw new Error("called onAnswerCorrect() when presentClue is undefined");
         }
-        this.teamPresentlyAnswering?.onAnswerCorrect(this.presentClue);
+        if (!this.teamPresentlyAnswering) {
+            throw new Error("called onAnswerCorrect() when teamPresentlyAnswering is undefined");
+        }
+        this.teamPresentlyAnswering.onAnswerCorrect(this.presentClue);
         this.buzzHistoryPopulateRecordForActiveAnswerAndSave("answeredRight");
+
+        if (this.SETTINGS.teamToChooseNextClue === "previousCorrectAnswer") {
+            this.teamIndexToPickClue = this.teamPresentlyAnswering.getTeamIndex();
+        }
 
         this.setStatesOfTeamsNotAnswering("can-answer"); //only correct if teams can answer multiple questions for the same clue
         this.teamPresentlyAnswering = undefined;
@@ -540,10 +547,9 @@ export class Operator {
 
         const teamNumber = Number(keyboardEvent.key);
         const teamIndex = teamNumber - 1;
-        const teamAnswering = this.teamArray[teamIndex];
+        this.teamPresentlyAnswering = this.teamArray[teamIndex];
 
-        this.teamPresentlyAnswering = teamAnswering;
-        teamAnswering.answerStart();
+        this.teamPresentlyAnswering.answerStart();
         this.setStatesOfTeamsNotAnswering("other-team-is-answering");
 
         this.AUDIO_MANAGER.TEAM_BUZZ.play();
@@ -801,10 +807,12 @@ export class Operator {
 
         this.questionCountForPieCharts++;
 
-        if (this.teamIndexToPickClue === this.teamCount - 1) {
-            this.teamIndexToPickClue = 0;
-        } else {
-            this.teamIndexToPickClue++;
+        if (this.SETTINGS.teamToChooseNextClue === "rotate") {
+            if (this.teamIndexToPickClue === this.teamCount - 1) {
+                this.teamIndexToPickClue = 0;
+            } else {
+                this.teamIndexToPickClue++;
+            }
         }
     }
 
