@@ -98,7 +98,16 @@ function main(): void {
     const result: Game = {
         /* example URL: https://j-archive.com/showgame.php?game_id=7451 */
         J_ARCHIVE_GAME_ID: Number(new URLSearchParams(window.location.search).get("game_id")),
-        SHOW_NUMBER: Number(/Show #(\d+)/.exec(h1Text)![1]),
+
+        /*
+        All seasons listed on the J-Archive homepage have "Show #" in the <h1>.
+        But some specials seasons from j-archive.com/listseasons.php instead have:
+            - "The Greatest of All Time game #"
+            - "National College Championship game #"
+            - "Primetime Celebrity Jeopardy! game #"
+            - Jeopardy! Masters game #"
+        */
+        SHOW_NUMBER: Number(/#(\d+)/.exec(h1Text)![1]),
         AIRDATE: h1Text.split(" - ")[1],
         ROUNDS: [
             parseTableForRound("single", document.querySelector<HTMLTableElement>("div#jeopardy_round table.round")!),
