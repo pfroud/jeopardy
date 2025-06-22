@@ -311,7 +311,7 @@ export class Operator {
 
     private initKeyboardListenerToPause(): void {
         window.addEventListener("keydown", keyboardEvent => {
-            if (keyboardEvent.key === "p" && document.activeElement?.tagName !== "INPUT") {
+            if (keyboardEvent.key.toLowerCase() === "p" && document.activeElement?.tagName !== "INPUT") {
                 this.togglePaused();
             }
         });
