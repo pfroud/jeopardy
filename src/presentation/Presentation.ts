@@ -273,8 +273,12 @@ export class Presentation {
 
     public finalJeopardyStart(): void {
         this.headerMinimize();
-        this.setRoundStartHTML("Get ready for Final Jeopardy");
+        this.setRoundStartHTML("Get ready for Final Jeopardy<br><br>Write your team name on a piece of paper");
         this.DIV_CLUE_VALUE_BIG.style.display = "none";
+    }
+
+    public finalJeopardyShowTable(table: HTMLTableElement): void {
+        querySelectorAndCheck(document, "div#slide-clue-answer").append(table);
     }
 
 

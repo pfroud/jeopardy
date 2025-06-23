@@ -35,3 +35,15 @@ footer div.team.choose-clue {
 body.paused footer div.team.choose-clue {
     animation-play-state: paused;
 }
+
+table#final-jeopardy-wagers td {
+    border: 1px solid white;
+    padding: 5px;
+
+    &.money,
+    input[type="text"] {
+        text-align: right;
+    }
+
+
+}

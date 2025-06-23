@@ -241,7 +241,10 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
         {
             NAME: "finalJeopardyIntro",
             PRESENTATION_SLIDE_TO_SHOW: "slide-round-start", // we will use this slide to display text
-            OPERATOR_INSTRUCTIONS_HTML: "Get ready for Final Jeopardy. Press Space to show the category.",
+            OPERATOR_INSTRUCTIONS_HTML:
+                `Get ready for Final Jeopardy.<br>
+            Have all the teams write their name name on a piece of paper.<br>
+            Press Space to show the category.`,
             ON_ENTER: operator.finalJeopardyStart.bind(operator),
             TRANSITIONS: [{
                 TYPE: "keyboard",
@@ -262,6 +265,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             }]
         },
         {
+            // TODO automatically play music
             NAME: "finalJeopardyShowQuestion",
             OPERATOR_INSTRUCTIONS_HTML: "Read the Final Jeopardy question out loud.<br>Press Space to show the answer to the operator only.",
             PRESENTATION_SLIDE_TO_SHOW: "slide-clue-question",
@@ -273,6 +277,8 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             }]
         },
         {
+            // TODO change this state so it shows the answer to the operator only, and shows the table of wagers with before/after money.
+            // then add another state to show the answer in the presentation?
             NAME: "finalJeopardyShowAnswer",
             OPERATOR_INSTRUCTIONS_HTML: "Read the Final Jeopardy answer. Press space to end the game.",
             ON_ENTER: operator.finalJeopardyShowAnswer.bind(operator),

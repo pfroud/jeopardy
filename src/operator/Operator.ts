@@ -1,6 +1,7 @@
 import { AudioManager } from "../AudioManager";
 import { BuzzAnswerResult, BuzzHistoryChart, BuzzHistoryForClue, BuzzHistoryRecord, BuzzResult, BuzzResultStartAnswer } from "../BuzzHistoryChart";
 import { CountdownTimer } from "../CountdownTimer";
+import { FinalJeopardyTable } from "../FinalJeopardyTable";
 import { GameBoard } from "../GameBoard";
 import { Settings } from "../Settings";
 import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
@@ -1261,6 +1262,8 @@ export class Operator {
         });
         this.presentation?.finalJeopardyStart();
 
+        this.DIV_CLUE_WRAPPER.style.display = "none";
+
         querySelectorAndCheck<HTMLElement>(this.DIV_CLUE_WRAPPER, "tr#tr-clue-value").style.display = "none";
     }
 
@@ -1280,6 +1283,14 @@ export class Operator {
     public finalJeopardyShowAnswer(): void {
         this.TR_ANSWER.style.display = ""; //show it by removing "display=none"
         this.DIV_CLUE_ANSWER.innerHTML = SCRAPED_GAME.FINAL_JEOPARDY.ANSWER;
+
+
+        const tableThing = new FinalJeopardyTable(this.teamArray!);
+
+        querySelectorAndCheck(document, "div#tab-content-play").append(tableThing.getTableForOperatorWindow());
+
+        this.presentation?.finalJeopardyShowTable(tableThing.getTableForPresentationWindow());
+
     }
 
 }
