@@ -176,8 +176,8 @@ export class StateMachine {
             }
         }
 
-        if (this.presentState.INSTRUCTIONS) {
-            this.OPERATOR.setInstructions(this.presentState.INSTRUCTIONS);
+        if (this.presentState.OPERATOR_INSTRUCTIONS_HTML) {
+            this.OPERATOR.setInstructionsHtml(this.presentState.OPERATOR_INSTRUCTIONS_HTML);
         }
 
         this.presentState.ON_ENTER?.(keyboardEvent);

@@ -1,7 +1,7 @@
 export interface StateMachineState {
     readonly NAME: string;
     readonly PRESENTATION_SLIDE_TO_SHOW?: string;
-    readonly INSTRUCTIONS?: string;
+    readonly OPERATOR_INSTRUCTIONS_HTML?: string;
     readonly ON_ENTER?: (keyboardEvent?: KeyboardEvent) => void; //keyboard event is used for Operator.handleBuzzerPress()
     readonly ON_EXIT?: () => void;
     readonly TRANSITIONS: StateMachineTransition[];

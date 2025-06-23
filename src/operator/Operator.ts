@@ -1085,7 +1085,7 @@ export class Operator {
         return this.questionCountForPieCharts;
     }
 
-    public setInstructions(text: string): void {
+    public setInstructionsHtml(text: string): void {
         this.DIV_INSTRUCTIONS.innerHTML = text;
     }
 

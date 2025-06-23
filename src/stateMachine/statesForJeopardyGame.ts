@@ -76,7 +76,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             }]
         }, {
             NAME: "showGameBoard",
-            INSTRUCTIONS: "Click on a clue in the game board.",
+            OPERATOR_INSTRUCTIONS_HTML: "Click on a clue in the game board.",
             PRESENTATION_SLIDE_TO_SHOW: "slide-game-board",
             ON_ENTER: operator.gameBoardShow.bind(operator),
             ON_EXIT: operator.gameBoardHide.bind(operator),
@@ -98,7 +98,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             presentation window for a fixed amount of time.
             */
             NAME: "showClueCategoryAndValue",
-            INSTRUCTIONS: "Read aloud the category and dollar value.",
+            OPERATOR_INSTRUCTIONS_HTML: "Read aloud the category and dollar value.",
             ON_ENTER: operator.onShowClueCategoryAndValue.bind(operator),
             PRESENTATION_SLIDE_TO_SHOW: "slide-clue-category-and-value",
             TRANSITIONS: [{
@@ -120,7 +120,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             Also the category and dollar value are shown on the presentation header.
             */
             NAME: "showClueQuestion",
-            INSTRUCTIONS: "Read the question out loud then press space to open the buzzers.",
+            OPERATOR_INSTRUCTIONS_HTML: "Read the question out loud then press space to open the buzzers.",
             PRESENTATION_SLIDE_TO_SHOW: "slide-clue-question",
             ON_ENTER: presentation.fitClueQuestionToWindow.bind(presentation),
             TRANSITIONS: [{
@@ -142,7 +142,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             The operator has finished reading the clue question, people can press the buzzer now.
             */
             NAME: "waitForBuzzes",
-            INSTRUCTIONS: "Wait for people to answer.",
+            OPERATOR_INSTRUCTIONS_HTML: "Wait for people to answer.",
             TRANSITIONS: [{
                 TYPE: "keyboard",
                 KEYBOARD_KEYS: operator.getKeyboardKeysForTeamNumbers.bind(operator),
@@ -160,7 +160,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             A team has pressed the buzzer, now we are waiting for them to say their answer.
             */
             NAME: "waitForTeamAnswer",
-            INSTRUCTIONS: "Decide whether they answer correctly. Press Y if correct or N if wrong.",
+            OPERATOR_INSTRUCTIONS_HTML: "Decide whether they answer correctly. Press Y if correct or N if wrong.",
             ON_ENTER: operator.teamAnswerStart.bind(operator),
             TRANSITIONS: [{
                 TYPE: "keyboard",
@@ -189,7 +189,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             }]
         }, {
             NAME: "showAnswer",
-            INSTRUCTIONS: "Let people read the answer. Press Q to show what the question was. Press space to continue.",
+            OPERATOR_INSTRUCTIONS_HTML: "Let people read the answer. Press Q to show what the question was. Press space to continue.",
             ON_ENTER: operator.onShowAnswer.bind(operator),
             PRESENTATION_SLIDE_TO_SHOW: "slide-clue-answer",
             TRANSITIONS: [{
@@ -211,7 +211,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             }]
         }, {
             NAME: "showBuzzHistory",
-            INSTRUCTIONS: "Discuss the buzz history if needed, press space to continue.",
+            OPERATOR_INSTRUCTIONS_HTML: "Discuss the buzz history if needed, press space to continue.",
             ON_ENTER: operator.onBuzzHistoryShow.bind(operator),
             ON_EXIT: operator.onBuzzHistoryHide.bind(operator),
             PRESENTATION_SLIDE_TO_SHOW: "slide-buzz-history-chart",
@@ -241,7 +241,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
         {
             NAME: "finalJeopardyIntro",
             PRESENTATION_SLIDE_TO_SHOW: "slide-round-start", // we will use this slide to display text
-            INSTRUCTIONS: "Get ready for Final Jeopardy. Press Space to show the category.",
+            OPERATOR_INSTRUCTIONS_HTML: "Get ready for Final Jeopardy. Press Space to show the category.",
             ON_ENTER: operator.finalJeopardyStart.bind(operator),
             TRANSITIONS: [{
                 TYPE: "keyboard",
@@ -252,7 +252,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
         },
         {
             NAME: "finalJeopardyShowCategory",
-            INSTRUCTIONS: "Read the Final Jeopardy category out loud. Press Space to show the question.",
+            OPERATOR_INSTRUCTIONS_HTML: "Read the Final Jeopardy category out loud. Press Space to show the question.",
             ON_ENTER: operator.finalJeopardyShowCategory.bind(operator),
             PRESENTATION_SLIDE_TO_SHOW: "slide-clue-category-and-value",
             TRANSITIONS: [{
@@ -263,7 +263,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
         },
         {
             NAME: "finalJeopardyShowQuestion",
-            INSTRUCTIONS: "Read the Final Jeopardy question out loud. Press Space to show the answer.",
+            OPERATOR_INSTRUCTIONS_HTML: "Read the Final Jeopardy question out loud.<br>Press Space to show the answer to the operator only.",
             PRESENTATION_SLIDE_TO_SHOW: "slide-clue-question",
             ON_ENTER: operator.finalJeopardyShowQuestion.bind(operator),
             TRANSITIONS: [{
@@ -274,7 +274,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
         },
         {
             NAME: "finalJeopardyShowAnswer",
-            INSTRUCTIONS: "Read the Final Jeopardy answer. Press space to end the game.",
+            OPERATOR_INSTRUCTIONS_HTML: "Read the Final Jeopardy answer. Press space to end the game.",
             ON_ENTER: operator.finalJeopardyShowAnswer.bind(operator),
             PRESENTATION_SLIDE_TO_SHOW: "slide-clue-answer",
             TRANSITIONS: [{
@@ -285,7 +285,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
         },
         {
             NAME: "gameEnd",
-            INSTRUCTIONS: "Game over",
+            OPERATOR_INSTRUCTIONS_HTML: "Game over",
             PRESENTATION_SLIDE_TO_SHOW: "slide-gameEnd-team-ranking-table",
             ON_ENTER: operator.onGameEnd.bind(operator),
             TRANSITIONS: [{
