@@ -42,13 +42,6 @@
 <body>
     <script type="module" src="main.ts"></script>
 
-    <header>
-        <progress id="game-round-timer"></progress>
-        <span id="clue-category-in-header">category</span>
-        <span id="clue-value-in-header">$0000</span>
-        <progress id="state-machine"></progress>
-    </header>
-
     <div id="paused" style="display:none">
         <!-- https://stackoverflow.com/a/22885848 -->
         &#9612;&#9612; PAUSED
@@ -84,98 +77,111 @@
         </div>
     </div>
 
-    <main>
-        <!--
+    <div id="flex-container">
+
+        <header data-header-display="full">
+            <progress id="game-round-timer"></progress>
+            <span id="clue-category-in-header">category</span>
+            <span id="clue-value-in-header">$0000</span>
+            <progress id="state-machine"></progress>
+        </header>
+
+        <main>
+            <!--
             The presentation uses a slideshow metaphor. There is always exactly one
             slide visible at a time.
-        -->
-        <div class="presentation-slide" id="slide-jeopardy-logo">
-            <img id="logo-jeopardy" src="img/j-logo.png" alt="Jeopardy logo">
-            <!-- The same image becomes its own shadow using a bunch of CSS -->
-            <img id="logo-jeopardy-shadow" src="img/j-logo.png" alt="Jeopardy logo shadow">
-        </div>
+            -->
+            <div class="presentation-slide" id="slide-jeopardy-logo">
+                <img id="logo-jeopardy" src="img/j-logo.png" alt="Jeopardy logo">
+                <!-- The same image becomes its own shadow using a bunch of CSS -->
+                <img id="logo-jeopardy-shadow" src="img/j-logo.png" alt="Jeopardy logo shadow">
+            </div>
 
-        <div class="presentation-slide" id="slide-round-start"></div>
+            <div class="presentation-slide" id="slide-round-start"></div>
 
-        <div class="presentation-slide" id="slide-category-carousel">
-            <table id="category-carousel">
+            <div class="presentation-slide" id="slide-category-carousel">
+                <table id="category-carousel">
+                    <!-- HTML comment to disable VS Code formatter is set by "html.format.unformattedContentDelimiter" in .vscode/settings.json -->
+                    <!-- formatter-toggle -->
+                    <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <!-- formatter-toggle -->
+                </table>
+            </div>
+
+            <div class="presentation-slide" id="slide-game-board">
                 <!-- HTML comment to disable VS Code formatter is set by "html.format.unformattedContentDelimiter" in .vscode/settings.json -->
                 <!-- formatter-toggle -->
-                <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <table id="game-board">
+                    <tr id="categories"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                </table>
                 <!-- formatter-toggle -->
-            </table>
-        </div>
+            </div>
 
-        <div class="presentation-slide" id="slide-game-board">
-            <!-- HTML comment to disable VS Code formatter is set by "html.format.unformattedContentDelimiter" in .vscode/settings.json -->
-            <!-- formatter-toggle -->
-            <table id="game-board">
-                <tr id="categories"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-            </table>
-            <!-- formatter-toggle -->
-        </div>
-
-        <div class="presentation-slide" id="slide-clue-category-and-value">
-            <!-- This slide shows info about the upcoming question in big text
+            <div class="presentation-slide" id="slide-clue-category-and-value">
+                <!-- This slide shows info about the upcoming question in big text
                 centered on the screen. The same info will then continue to be visible in
                 the header. -->
-            <div id="clue-category-big"></div>
-            <div id="clue-value-big"></div>
-        </div>
+                <div id="clue-category-big"></div>
+                <div id="clue-value-big"></div>
+            </div>
 
-        <div class="presentation-slide" id="slide-clue-question">
-            <!-- The operator reads this out loud. -->
-        </div>
+            <div class="presentation-slide" id="slide-clue-question">
+                <!-- The operator reads this out loud. -->
+            </div>
 
-        <div class="presentation-slide" id="slide-clue-answer">
+            <div class="presentation-slide" id="slide-clue-answer">
 
-            <!--
-            We can optionally show the question here along with the answer.
-            Useful for clues with wordplay (especially anagrams) or when the
-            exact phrasing of the question is called into question.
-            -->
-            <p id="question-in-answer-slide" style="display:none">
-            </p>
+                <!--
+                We can optionally show the question here along with the answer.
+                Useful for clues with wordplay (especially anagrams) or when the
+                exact phrasing of the question is called into question.
+                -->
+                <p id="question-in-answer-slide" style="display:none">
+                </p>
 
-            <!-- If a team says this, they get money. -->
-            Answer:
-            <p>
-            <div id="clue-answer-text"></div>
-        </div>
+                <!-- If a team says this, they get money. -->
+                Answer:
+                <p>
+                <div id="clue-answer-text"></div>
+            </div>
 
-        <div class="presentation-slide" id="slide-buzz-history-chart">
-            <h1>Buzz history chart</h1>
-            <svg id="buzz-history"></svg>
-        </div>
+            <div class="presentation-slide" id="slide-buzz-history-chart">
+                <h1>Buzz history chart</h1>
+                <svg id="buzz-history"></svg>
+            </div>
 
-        <div class="presentation-slide" id="slide-gameEnd-team-ranking-table">
-            <h1>Game over!</h1>
-            <h2>Team ranking</h2>
-            <div id="team-ranking"></div>
-        </div>
+            <div class="presentation-slide" id="slide-gameEnd-team-ranking-table">
+                <h1>Game over!</h1>
+                <h2>Team ranking</h2>
+                <div id="team-ranking"></div>
+            </div>
 
-        <div class="presentation-slide" id="slide-gameEnd-pie-charts">
-            <h1>Game over!</h1>
-            <h2>Buzz results</h2>
-            <div id="pie-charts"></div>
-        </div>
+            <div class="presentation-slide" id="slide-gameEnd-pie-charts">
+                <h1>Game over!</h1>
+                <h2>Buzz results</h2>
+                <div id="pie-charts"></div>
+            </div>
 
-        <div class="presentation-slide" id="slide-gameEnd-line-chart">
-            <h1>Game over!</h1>
-            <h2>Money over time</h2>
-            <div id="line-chart"></div>
-        </div>
+            <div class="presentation-slide" id="slide-gameEnd-line-chart">
+                <h1>Game over!</h1>
+                <h2>Money over time</h2>
+                <div id="line-chart"></div>
+            </div>
 
-    </main>
+        </main>
 
-    <footer>
-        <!-- contents of the footer is generated at runtime -->
-    </footer>
+        <footer data-footer-display="full">
+            <!-- contents of the footer is generated at runtime -->
+        </footer>
+
+    </div>
+
+
 
 
 </body>

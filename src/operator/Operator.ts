@@ -651,7 +651,6 @@ export class Operator {
      */
     public gameBoardShow(): void {
         this.DIV_GAME_BOARD_WRAPPER.style.display = ""; //show it by removing display=none
-        this.presentation?.headerMinimize();
 
         this.DIV_CLUE_WRAPPER.style.display = "none";
 
@@ -660,7 +659,7 @@ export class Operator {
 
     public gameBoardHide(): void {
         this.DIV_GAME_BOARD_WRAPPER.style.display = "none";
-        this.presentation?.headerMaximize();
+        this.presentation?.setHeaderDisplayFull();
 
         this.teamArray?.[this.teamIndexToPickClue].choosingClueClear();
     }
@@ -1223,7 +1222,7 @@ export class Operator {
         this.GAME_ROUND_TIMER.reset();
 
         this.presentation?.setCategoryCarouselGameRound(gameRound);
-        this.presentation?.headerMinimize();
+        this.presentation?.setHeaderDisplayMinimized(); //minimize header for the game board
 
         const messageLines = [`Get ready for round ${this.gameRoundIndex + 1}.`];
         if (this.gameRoundIndex === 0) {
@@ -1284,6 +1283,7 @@ export class Operator {
         this.TR_ANSWER.style.display = ""; //show it by removing "display=none"
         this.DIV_CLUE_ANSWER.innerHTML = SCRAPED_GAME.FINAL_JEOPARDY.ANSWER;
 
+        this.presentation?.setFooterDisplayNone();
 
         const tableThing = new FinalJeopardyTable(this.teamArray!);
 

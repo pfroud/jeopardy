@@ -3,7 +3,7 @@ table#game-board {
     margin-left: 50px;
 
     text-shadow: 3px 3px black, 5px 5px black, 7px 7px black;
-    font-family: swiss911, sans-serif;
+    font-family: "swiss911", sans-serif;
 
     td {
         border: 3px solid #000;

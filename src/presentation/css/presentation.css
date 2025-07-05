@@ -1,17 +1,12 @@
 :root {
     /* https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties#using_the_root_pseudo-class */
 
-    --height-header: 80px;
-    --height-footer: 180px;
-
     --color-money: #e3a147;
 
     --text-shadow-big: 3px 3px black, 5px 5px black, 7px 7px black, 9px 9px black, 11px 11px #000;
 }
 
 body {
-    height: 100vh;
-    width: 100vw;
     margin: 0px;
     padding: 0px;
     font-family: sans-serif;
@@ -20,16 +15,23 @@ body {
     background-repeat: no-repeat;
     background-size: cover;
     color: white;
-    overflow: hidden;
 }
 
 table {
     border-collapse: collapse;
 }
 
+div#flex-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+}
+
 header {
-    height: var(--height-header);
-    font-family: swiss911, sans-serif;
+
+    font-family: "swiss911", sans-serif;
+
     font-size: 60px;
     letter-spacing: 2px;
     text-shadow: var(--text-shadow-big);
@@ -55,40 +57,62 @@ header {
         height: 8px;
         display: block;
     }
+
+    /* Hide text, only show progress bars */
+    &[data-header-display="minimized"] {
+
+        progress#state-machine {
+            margin-top: 20px;
+        }
+
+        span {
+            /* Hide category name and clue value */
+            display: none;
+        }
+    }
+
+    &[data-header-display="none"] {
+        /* Hide the entire <header> */
+        display: none;
+    }
 }
 
 main {
-    height: calc(100vh - var(--height-header) - var(--height-footer));
+
+    /* Allow the <main> to grow in the div#flex-container's flex layout */
+    flex-grow: 1;
+
+    /* Make the CONTENTS of the <main> use flex layout */
     display: flex;
     justify-content: center;
     align-items: center;
-    /* padding: 0px 100px; */
+
+    /* Allow auto text sizing of the clue question to work. It checks if the slide is bigger than <main> */
+    overflow: hidden;
 
     div.presentation-slide {
+        /* Hide all the slides by default. One slide will be shown by setting style="display:block" */
         display: none;
 
         &#slide-jeopardy-logo {
-            /* need special treatment to get the logo and shadow to center */
-            width: 100%;
-            height: 100%;
 
             img {
-                position: absolute;
-
                 /* https://stackoverflow.com/a/17624161 */
+                position: absolute;
                 left: 0;
                 right: 0;
                 top: 0;
                 bottom: 0;
                 margin: auto;
-            }
 
-            img#logo-jeopardy-shadow {
-                z-index: -1;
-                filter: brightness(0) blur(2px) opacity(0.6);
-                transform: translateY(35px) scale(0.9);
+                &#logo-jeopardy-shadow {
+                    z-index: -1;
+                    filter: brightness(0) blur(2px) opacity(0.6);
+                    transform: translateY(35px) scale(0.9);
+                }
             }
         }
+
 
         &#slide-round-start {
             font-size: 70px;
@@ -96,7 +120,7 @@ main {
         }
 
         &#slide-clue-category-and-value {
-            font-family: swiss911, sans-serif;
+            font-family: "swiss911", sans-serif;
             text-shadow: var(--text-shadow-big);
             font-size: 80px;
             text-align: center;
@@ -110,7 +134,7 @@ main {
 
         &#slide-clue-question {
             text-align: center;
-            font-family: korinna, serif;
+            font-family: "korinna", serif;
             font-size: 80px;
             text-transform: uppercase;
             text-shadow: var(--text-shadow-big);
@@ -124,6 +148,16 @@ main {
             div#clue-answer-text {
                 font-weight: bold;
             }
+
+            table#final-jeopardy-wagers {
+
+                td {
+                    /* top, right , bottom, left */
+                    padding: 10px 20px 15px 10px;
+
+                }
+            }
+
         }
 
         &#slide-gameEnd-team-ranking-table {
@@ -153,19 +187,36 @@ main {
 }
 
 footer {
+
+    /* Make the CONTENTS of the <footer> use flex layout */
     display: flex;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    width: 100%;
-    position: absolute;
-    bottom: 0px;
-    left: 0px;
-    height: var(--height-footer);
+
+    /* Show only team name and team money */
+    &[data-footer-display="minimized"] div.team {
+
+        div.buzzer-show,
+        table.countdown-dots {
+            display: none;
+        }
+    }
+
+    &[data-footer-display="none"] {
+        /* Hide the entire <footer> */
+        display: none;
+
+    }
 
     div.team {
+
+        /* Allow div.team to grow in the <footer>'s flex layout */
+        flex-grow: 1;
+
+        /* Make the CONTENTS of div.team use flex layout */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
         padding: 10px;
-        text-align: center;
-        flex: 1;
 
         &[data-team-state="lockout"]:not(progress) {
             opacity: 0.4;
@@ -186,29 +237,17 @@ footer {
             }
         }
 
-        div.team-money {
-            font-family: swiss911, sans-serif;
-            font-size: 40px;
-            text-shadow: 3px 3px 0px black;
-        }
-
-        div.team-name {
-            font-size: 20px;
-        }
-
         table.countdown-dots {
-            margin-left: auto;
-            margin-right: auto;
             margin-bottom: 10px;
 
             td {
                 border: 2px solid gray;
                 width: 30px;
                 height: 13px;
+            }
 
-                &.active {
-                    background-color: red;
-                }
+            &:not(.paused) td.active {
+                background-color: red;
             }
 
             &.paused td.active {
@@ -218,8 +257,6 @@ footer {
 
         div.buzzer-show {
             img {
-                /* TODO why do we need to set the z-index? */
-                z-index: -2;
                 width: 100px;
                 margin-bottom: 5px;
             }
@@ -232,40 +269,18 @@ footer {
                 display: none;
             }
         }
-    }
-}
 
-body.hide-header-and-footer {
-    header {
-        display: none;
-    }
+        div.team-money {
+            font-family: "swiss911", sans-serif;
+            font-size: 40px;
+            text-shadow: 3px 3px 0px black;
+        }
 
-    /*
-     Normally, the <main> element has its height set to be 
-     100vh minus the height of the header and footer. When 
-     the header and footer are hidden, we should make the
-     <main> element take up the entire height of the window.
-     */
-    main {
-        height: 100%;
-    }
+        div.team-name {
+            font-size: 20px;
+        }
 
-    footer {
-        display: none;
-    }
-}
 
-body.showing-game-board header {
-
-    height: 50px;
-
-    progress#state-machine {
-        margin-top: 20px;
-    }
-
-    /* Hide category name and clue value spans */
-    span {
-        display: none;
     }
 }
 

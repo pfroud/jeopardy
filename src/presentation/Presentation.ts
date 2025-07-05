@@ -9,6 +9,10 @@ export class Presentation {
 
     private readonly MAIN: HTMLElement; // there's no HTMLMainElement
     private readonly HEADER: HTMLElement; // there's no HTMLHeaderElement
+
+    private readonly HEADER_DISPLAY_ATTRIBUTE_NAME = "data-header-display";
+    private readonly FOOTER_DISPLAY_ATTRIBUTE_NAME = "data-footer-display";
+
     private readonly SPAN_CLUE_CATEGORY_IN_HEADER: HTMLSpanElement;
     private readonly SPAN_CLUE_MONEY_IN_HEADER: HTMLSpanElement;
 
@@ -192,20 +196,41 @@ export class Presentation {
     }
 
     public headerAndFooterHide(): void {
-        document.body.classList.add("hide-header-and-footer");
+        this.setHeaderDisplayNone();
+        this.setFooterDisplayNone();
     }
 
     public headerAndFooterShow(): void {
-        document.body.classList.remove("hide-header-and-footer");
+        this.setHeaderDisplayFull();
+        this.setFooterDisplayFull();
     }
 
-    public headerMinimize(): void {
-        document.body.classList.add("showing-game-board");
+    public setHeaderDisplayFull(): void {
+        this.HEADER.setAttribute(this.HEADER_DISPLAY_ATTRIBUTE_NAME, "full");
     }
 
-    public headerMaximize(): void {
-        document.body.classList.remove("showing-game-board");
+    /** Hide text in header, only show progress bars */
+    public setHeaderDisplayMinimized(): void {
+        this.HEADER.setAttribute(this.HEADER_DISPLAY_ATTRIBUTE_NAME, "minimized");
     }
+
+    public setHeaderDisplayNone(): void {
+        this.HEADER.setAttribute(this.HEADER_DISPLAY_ATTRIBUTE_NAME, "none");
+    }
+
+    public setFooterDisplayFull(): void {
+        this.FOOTER.setAttribute(this.FOOTER_DISPLAY_ATTRIBUTE_NAME, "full");
+    }
+
+    /** Only show team name and team money */
+    public setFooterDisplayMinimized(): void {
+        this.FOOTER.setAttribute(this.FOOTER_DISPLAY_ATTRIBUTE_NAME, "minimized");
+    }
+
+    public setFooterDisplayNone(): void {
+        this.FOOTER.setAttribute(this.FOOTER_DISPLAY_ATTRIBUTE_NAME, "none");
+    }
+
 
     public footerClear(): void {
         this.FOOTER.innerHTML = "";
@@ -272,7 +297,10 @@ export class Presentation {
     }
 
     public finalJeopardyStart(): void {
-        this.headerMinimize();
+
+        this.setHeaderDisplayNone();
+        this.setFooterDisplayMinimized();
+
         this.setRoundStartHTML("Get ready for Final Jeopardy<br><br>Write your team name on a piece of paper");
         this.DIV_CLUE_VALUE_BIG.style.display = "none";
     }
