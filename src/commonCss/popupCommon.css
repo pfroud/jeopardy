@@ -58,6 +58,10 @@ div.overlay-popup {
             table#special-category-popup-example-table {
                 line-height: 200%;
 
+                td {
+                    vertical-align: top;
+                }
+
                 /* make first column bold */
                 td:first-of-type {
                     font-weight: bold;
