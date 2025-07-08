@@ -296,6 +296,10 @@ export class Presentation {
         }
     }
 
+    public hideQuestionInAnswerSlide(): void {
+        this.CLUE_QUESTION_IN_ANSWER_SLIDE.style.display = "none";
+    }
+
     public finalJeopardyStart(): void {
 
         this.setHeaderDisplayNone();

@@ -815,6 +815,8 @@ export class Operator {
             team.statisticsUpdateMoneyAtEndOfRound();
         });
 
+        this.presentation?.hideQuestionInAnswerSlide();
+
         this.questionCountForPieCharts++;
 
         if (this.SETTINGS.teamToChooseNextClue === "rotate") {
