@@ -50,6 +50,11 @@ main {
         /**************************************************/
         &#tab-content-play {
 
+            div#operator-reads-this {
+                font-size: 30px;
+                line-height: initial;
+            }
+
             div#controls {
                 display: flex;
 
@@ -188,18 +193,8 @@ main {
 }
 
 footer {
-    display: flex;
-    /* flex-wrap: nowrap; */
-    align-items: stretch;
-    width: 100%;
-    position: absolute;
-    bottom: 0px;
-    height: 85px;
 
     div.team {
-        text-align: center;
-        flex: 1;
-        padding-top: 5px;
 
         &[data-team-state="answering"] {
             background-color: orange;
@@ -207,14 +202,13 @@ footer {
             color: var(--dark-background-color);
         }
 
+        &:not([data-team-state="answering"]) progress {
+            visibility: hidden;
+        }
+
         div.team-state {
             font-size: 15px;
         }
 
-        progress {
-            width: 100%;
-            padding-left: 5px;
-            padding-right: 5px;
-        }
     }
 }

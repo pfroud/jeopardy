@@ -21,13 +21,6 @@ table {
     border-collapse: collapse;
 }
 
-div#flex-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    width: 100vw;
-}
-
 header {
 
     font-family: "swiss911", sans-serif;
@@ -78,9 +71,6 @@ header {
 }
 
 main {
-
-    /* Allow the <main> to grow in the div#flex-container's flex layout */
-    flex-grow: 1;
 
     /* Make the CONTENTS of the <main> use flex layout */
     display: flex;
@@ -188,11 +178,8 @@ main {
 
 footer {
 
-    /* Make the CONTENTS of the <footer> use flex layout */
-    display: flex;
-
-    /* Show only team name and team money */
     &[data-footer-display="minimized"] div.team {
+        /* Show only team name and team money */
 
         div.buzzer-show,
         table.countdown-dots {
@@ -203,27 +190,12 @@ footer {
     &[data-footer-display="none"] {
         /* Hide the entire <footer> */
         display: none;
-
     }
 
     div.team {
 
-        /* Allow div.team to grow in the <footer>'s flex layout */
-        flex-grow: 1;
-
-        /* Make the CONTENTS of div.team use flex layout */
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-
-        padding: 10px;
-
         &[data-team-state="lockout"]:not(progress) {
             opacity: 0.4;
-        }
-
-        &[data-team-state="buzzers-off"] table.countdown-dots {
-            visibility: hidden;
         }
 
         &[data-team-state="answering"] {
@@ -235,6 +207,10 @@ footer {
             div.team-money {
                 text-shadow: 2px 2px 0px lightgray;
             }
+        }
+
+        &:not([data-team-state="lockout"]) progress {
+            visibility: hidden;
         }
 
         table.countdown-dots {

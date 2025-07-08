@@ -45,5 +45,33 @@ table#final-jeopardy-wagers td {
         text-align: right;
     }
 
+}
 
+div#flex-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+
+    main {
+        /* Allow the <main> to grow in the div#flex-container's flex layout */
+        flex-grow: 1;
+    }
+}
+
+footer {
+    /* Make the CONTENTS of the <footer> use flex layout */
+    display: flex;
+
+    div.team {
+        /* Allow div.team to grow in the <footer>'s flex layout */
+        flex-grow: 1;
+
+        /* Make the CONTENTS of div.team use flex layout */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        padding: 10px;
+    }
 }

@@ -111,11 +111,13 @@
 
     </div>
 
-    <main>
+    <div id="flex-container">
 
-        <div id="game-board-wrapper" style="display:none">
-            <!-- HTML comment to disable VS Code formatter is set by "html.format.unformattedContentDelimiter" in .vscode/settings.json -->
-            <!-- formatter-toggle -->
+        <main>
+
+            <div id="game-board-wrapper" style="display:none">
+                <!-- HTML comment to disable VS Code formatter is set by "html.format.unformattedContentDelimiter" in .vscode/settings.json -->
+                <!-- formatter-toggle -->
             <table id="game-board">
                 <tr id="categories"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
                 <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
@@ -125,209 +127,214 @@
                 <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
             </table>
             <!-- formatter-toggle -->
-            <br>
-        </div>
+                <br>
+            </div>
 
-        <input id="tab-play" type="radio" name="tabs" checked>
-        <label for="tab-play">Play</label>
+            <input id="tab-play" type="radio" name="tabs" checked>
+            <label for="tab-play">Play</label>
 
-        <input id="tab-team-setup" type="radio" name="tabs">
-        <label for="tab-team-setup">Team setup</label>
+            <input id="tab-team-setup" type="radio" name="tabs">
+            <label for="tab-team-setup">Team setup</label>
 
-        <input id="tab-load-game" type="radio" name="tabs">
-        <label for="tab-load-game">Load game</label>
+            <input id="tab-load-game" type="radio" name="tabs">
+            <label for="tab-load-game">Load game</label>
 
-        <input id="tab-music" type="radio" name="tabs">
-        <label for="tab-music">Music</label>
+            <input id="tab-music" type="radio" name="tabs">
+            <label for="tab-music">Music</label>
 
-        <input id="tab-game-settings" type="radio" name="tabs">
-        <label for="tab-game-settings">Game settings</label>
+            <input id="tab-game-settings" type="radio" name="tabs">
+            <label for="tab-game-settings">Game settings</label>
 
-        <input id="tab-developer" type="radio" name="tabs">
-        <label for="tab-developer">Developer</label>
+            <input id="tab-developer" type="radio" name="tabs">
+            <label for="tab-developer">Developer</label>
 
-        <!-- ================================================================================================== -->
-        <div class="tab-content" id="tab-content-play">
+            <!-- ================================================================================================== -->
+            <div class="tab-content" id="tab-content-play">
 
-            <div id="game-round-timer-wrapper">
-                Game timer: &nbsp;&nbsp;
-                <div id="game-round-timer">
-                    <progress></progress>
-                    <div class="remaining-time-text"></div>
+                <div id="game-round-timer-wrapper">
+                    Game timer: &nbsp;&nbsp;
+                    <div id="game-round-timer">
+                        <progress></progress>
+                        <div class="remaining-time-text"></div>
+                    </div>
+                    &nbsp;<button id="add-one-minute" disabled>Add one minute</button>
                 </div>
-                &nbsp;<button id="add-one-minute" disabled>Add one minute</button>
-            </div>
 
-            <div id="current-state-wrapper">
-                Current state:&nbsp;
-                <div id="current-state">
-                    <progress></progress>
-                    <div class="label-on-progress" id="state-name"></div>
-                    <div class="remaining-time-text"></div>
+                <div id="current-state-wrapper">
+                    Current state:&nbsp;
+                    <div id="current-state">
+                        <progress></progress>
+                        <div class="label-on-progress" id="state-name"></div>
+                        <div class="remaining-time-text"></div>
+                    </div>
                 </div>
+
+                <div id="controls">
+                    <button id="start-game" disabled>Start game</button> &emsp;
+                    <button id="skip-clue" disabled>Skip clue</button>
+                    <span id="money-override-wrapper"><a href="#" id="aMoneyOverride">Override money...</a></span>
+                </div>
+
+                <br>
+
+                <div id="operator-reads-this">
+
+                    Host instructions:
+                    <div id="instructions">Wait for the presentation window to initialize...</div>
+
+                    <div id="special-category-prompt" style="display:none">
+                        Press Y to show information about
+                        <span id="special-category-prompt-title"></span>
+                    </div>
+
+                    <br>
+
+                    <div id="clue-wrapper" style="display:none">
+                        <table>
+                            <tr>
+                                <td>Category:</td>
+                                <td>
+                                    <div id="div-clue-category"></div>
+                                </td>
+                            </tr>
+                            <tr id="tr-clue-value">
+                                <td>Value:</td>
+                                <td>
+                                    <div id="div-clue-value"></div>
+                                </td>
+                            </tr>
+                            <tr id="tr-clue-question">
+                                <td>Question:</td>
+                                <td>
+                                    <div id="div-clue-question"></div>
+                                </td>
+                            </tr>
+                            <tr id="tr-clue-answer" style="display:none">
+                                <td>Answer:</td>
+                                <td>
+                                    <div id="div-clue-answer"></div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </div>
+
             </div>
+            <!-- ================================================================================================== -->
+            <div class="tab-content" id="tab-content-team-setup">
 
-            <div id="controls">
-                <button id="start-game" disabled>Start game</button> &emsp;
-                <button id="skip-clue" disabled>Skip clue</button>
-                <span id="money-override-wrapper"><a href="#" id="aMoneyOverride">Override money...</a></span>
+                How many teams:
+                <input id="team-count" type="number" min="1" max="8">
+                <button id="apply-team-count">Apply</button>
+                <p></p>
+
+                <table id="team-names">
+                    <thead>
+                        <tr>
+                            <td>Team number</td>
+                            <td>Team name</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tbody>
+                </table>
+                <button id="reset-team-names">Reset team names to default</button>
+
             </div>
-
-            <br>
-
-            Host instructions:
-            <div id="instructions">Wait for the presentation window to initialize...</div>
-
-            <div id="special-category-prompt" style="display:none">
-                Press Y to show information about
-                <span id="special-category-prompt-title"></span>
+            <!-- ================================================================================================== -->
+            <div class="tab-content" id="tab-content-load-game">
+                <div id="saved-game-message"></div>
+                <br>
+                <table id="saved-game-details">
+                    <tbody></tbody>
+                </table>
+                <br>
+                <button id="saved-game-load">Load game</button>&nbsp;
+                <button id="saved-game-delete">Delete</button>
             </div>
-
-            <br>
-
-            <div id="clue-wrapper" style="display:none">
+            <!-- ================================================================================================== -->
+            <div class="tab-content" id="tab-content-music">
                 <table>
                     <tr>
-                        <td>Category:</td>
+                        <td>Opening music:</td>
                         <td>
-                            <div id="div-clue-category"></div>
+                            <audio id="music-game-start" src="../sound/music-opening.mp3" preload="auto"
+                                controls></audio>
                         </td>
                     </tr>
                     <tr>
-                        <td>Value:</td>
+                        <td>Closing music:</td>
                         <td>
-                            <div id="div-clue-value"></div>
+                            <audio id="music-game-end" src="../sound/music-closing.mp3" preload="auto" controls></audio>
                         </td>
                     </tr>
-                    <tr id="tr-clue-question">
-                        <td>Question:</td>
+                    <tr>
+                        <td>Final Jeopardy:</td>
                         <td>
-                            <div id="div-clue-question"></div>
-                        </td>
-                    </tr>
-                    <tr id="tr-clue-answer" style="display:none">
-                        <td>Answer:</td>
-                        <td>
-                            <div id="div-clue-answer"></div>
+                            <audio src="../sound/final-jeopardy-think.mp3" preload="auto" controls></audio>
                         </td>
                     </tr>
                 </table>
             </div>
+            <!-- ================================================================================================== -->
+            <div class="tab-content" id="tab-content-game-settings">
 
-            <br>
-
-        </div>
-        <!-- ================================================================================================== -->
-        <div class="tab-content" id="tab-content-team-setup">
-
-            How many teams:
-            <input id="team-count" type="number" min="1" max="8">
-            <button id="apply-team-count">Apply</button>
-            <p></p>
-
-            <table id="team-names">
-                <thead>
+                <table id="table-settings">
                     <tr>
-                        <td>Team number</td>
-                        <td>Team name</td>
+                        <td>How long to show the category before showing the clue:</td>
+                        <td><input type="number" id="display-duration-category"> millisec</td>
                     </tr>
-                </thead>
-                <tbody>
-                <tbody>
-            </table>
-            <button id="reset-team-names">Reset team names to default</button>
+                    <tr>
+                        <td>How long to show the question answer:</td>
+                        <td><input type="number" id="display-duration-answer"> millisec</td>
+                    </tr>
+                    <tr>
+                        <td>How long you have to buzz in once the question has been read:</td>
+                        <td><input type="number" id="timeout-wait-for-buzzes"> millisec</td>
+                    </tr>
+                    <tr>
+                        <td>How long you have to answer once you buzz in:</td>
+                        <td><input type="number" id="timeout-answer"> millisec</td>
+                    </tr>
+                </table>
 
-        </div>
-        <!-- ================================================================================================== -->
-        <div class="tab-content" id="tab-content-load-game">
-            <div id="saved-game-message"></div>
-            <br>
-            <table id="saved-game-details">
-                <tbody></tbody>
-            </table>
-            <br>
-            <button id="saved-game-load">Load game</button>&nbsp;
-            <button id="saved-game-delete">Delete</button>
-        </div>
-        <!-- ================================================================================================== -->
-        <div class="tab-content" id="tab-content-music">
-            <table>
-                <tr>
-                    <td>Opening music:</td>
-                    <td>
-                        <audio id="music-game-start" src="../sound/music-opening.mp3" preload="auto" controls></audio>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Closing music:</td>
-                    <td>
-                        <audio id="music-game-end" src="../sound/music-closing.mp3" preload="auto" controls></audio>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Final Jeopardy:</td>
-                    <td>
-                        <audio src="../sound/final-jeopardy-think.mp3" preload="auto" controls></audio>
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <!-- ================================================================================================== -->
-        <div class="tab-content" id="tab-content-game-settings">
+                <p><label><input type="checkbox" id="allow-multiple-tries">Allow teams to buzz multiple times on same
+                        question </label></p>
 
-            <table id="table-settings">
-                <tr>
-                    <td>How long to show the category before showing the clue:</td>
-                    <td><input type="number" id="display-duration-category"> millisec</td>
-                </tr>
-                <tr>
-                    <td>How long to show the question answer:</td>
-                    <td><input type="number" id="display-duration-answer"> millisec</td>
-                </tr>
-                <tr>
-                    <td>How long you have to buzz in once the question has been read:</td>
-                    <td><input type="number" id="timeout-wait-for-buzzes"> millisec</td>
-                </tr>
-                <tr>
-                    <td>How long you have to answer once you buzz in:</td>
-                    <td><input type="number" id="timeout-answer"> millisec</td>
-                </tr>
-            </table>
+                <p><button id="saveSettings">Save settings</button></p>
 
-            <p><label><input type="checkbox" id="allow-multiple-tries">Allow teams to buzz multiple times on same
-                    question </label></p>
+            </div>
+            <!-- ================================================================================================== -->
+            <div class="tab-content" id="tab-content-developer">
+                <a href="#" id="aOpenStateMachineHistoryVisualizer">Open state machine history visualizer...</a>
 
-            <p><button id="saveSettings">Save settings</button></p>
+                <br><br>
+                Manually change states: &ensp;
+                <button id="nextRoundOrEndGame">Next round</button> &ensp;
+                <button id="finalJeopardy">Final Jeopardy</button> &ensp;
+                <button id="endGame">End game</button>
 
-        </div>
-        <!-- ================================================================================================== -->
-        <div class="tab-content" id="tab-content-developer">
-            <a href="#" id="aOpenStateMachineHistoryVisualizer">Open state machine history visualizer...</a>
+            </div>
 
-            <br><br>
-            Manually change states: &ensp;
-            <button id="nextRoundOrEndGame">Next round</button> &ensp;
-            <button id="finalJeopardy">Final Jeopardy</button> &ensp;
-            <button id="endGame">End game</button>
+        </main>
 
+        <div style="display:none">
+            <audio preload="auto" src="../sound/answer-correct.mp3" id="answer-correct"></audio>
+            <audio preload="auto" src="../sound/answer-incorrect.mp3" id="answer-incorrect"></audio>
+            <audio preload="auto" src="../sound/question-timeout.mp3" id="question-timeout"></audio>
+            <audio preload="auto" src="../sound/round-end.wav" id="round-end"></audio>
+            <audio preload="auto" src="../sound/team-buzz.wav" id="team-buzz"></audio>
+            <audio preload="auto" src="../sound/tick.wav" id="tick"></audio>
+            <audio preload="auto" src="../sound/done-reading-clue-question.wav" id="done-reading-clue-question"></audio>
         </div>
 
-    </main>
 
-    <div style="display:none">
-        <audio preload="auto" src="../sound/answer-correct.mp3" id="answer-correct"></audio>
-        <audio preload="auto" src="../sound/answer-incorrect.mp3" id="answer-incorrect"></audio>
-        <audio preload="auto" src="../sound/question-timeout.mp3" id="question-timeout"></audio>
-        <audio preload="auto" src="../sound/round-end.wav" id="round-end"></audio>
-        <audio preload="auto" src="../sound/team-buzz.wav" id="team-buzz"></audio>
-        <audio preload="auto" src="../sound/tick.wav" id="tick"></audio>
-        <audio preload="auto" src="../sound/done-reading-clue-question.wav" id="done-reading-clue-question"></audio>
+        <footer>
+            <!-- Contents of the footer is created at runtime -->
+        </footer>
+
     </div>
-
-
-    <footer>
-        <!-- Contents of the footer is created at runtime -->
-    </footer>
 
 
 </body>

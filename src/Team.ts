@@ -275,9 +275,8 @@ export class Team {
         divName.innerHTML = this.teamName;
         divTeam.append(divName);
 
-        const progress = this.progressElementInPresentationWindow = document.createElement("progress");
-        progress.style.display = "none";
-        divTeam.append(progress);
+        this.progressElementInPresentationWindow = document.createElement("progress");
+        divTeam.append(this.progressElementInPresentationWindow);
 
         this.PRESENTATION.footerAppendTeamDiv(this.TEAM_INDEX, divTeam);
 
@@ -304,9 +303,8 @@ export class Team {
         divMoney.innerHTML = `$${this.money}`;
         divTeam.append(divMoney);
 
-        const progress = this.progressElementInOperatorWindow = document.createElement("progress");
-        progress.style.display = "none";
-        divTeam.append(progress);
+        this.progressElementInOperatorWindow = document.createElement("progress");
+        divTeam.append(this.progressElementInOperatorWindow);
 
         querySelectorAndCheck(document, "footer").prepend(divTeam);
     }
@@ -343,7 +341,6 @@ export class Team {
         const countdownShowCategory = this.countdownTimer = new CountdownTimer(this.SETTINGS.durationLockoutMillisec);
         if (this.progressElementInPresentationWindow) {
             countdownShowCategory.addProgressElement(this.progressElementInPresentationWindow);
-            this.progressElementInPresentationWindow.style.display = ""; //show it by removing "display=none"
         }
         countdownShowCategory.onFinished = (): void => this.lockoutStop();
         countdownShowCategory.start();
@@ -351,9 +348,6 @@ export class Team {
     }
 
     public lockoutStop(): void {
-        if (this.progressElementInPresentationWindow) {
-            this.progressElementInPresentationWindow.style.display = "none";
-        }
         if (this.stateBeforeLockout) {
             this.setState(this.stateBeforeLockout, true);
         }
@@ -363,17 +357,10 @@ export class Team {
 
     public answerStart(): void {
         this.setState("answering");
-
-        if (this.progressElementInOperatorWindow) {
-            this.progressElementInOperatorWindow.style.display = ""; //show it by removing "display=none"
-        }
     }
 
     public answerStop(): void {
         this.allCountdownDots?.forEach(td => td.classList.remove("active"));
-        if (this.progressElementInOperatorWindow) {
-            this.progressElementInOperatorWindow.style.display = "none";
-        }
 
         const timer = this.OPERATOR.getStateMachine()?.getCountdownTimerForState("waitForTeamAnswer");
 
