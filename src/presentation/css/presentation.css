@@ -194,19 +194,15 @@ footer {
 
     div.team {
 
-        &[data-team-state="lockout"]:not(progress) {
-            opacity: 0.4;
-        }
+        --text-shadow-color: black;
+        text-shadow: 3px 3px 0px var(--text-shadow-color);
 
         &[data-team-state="answering"] {
-            font-weight: bold;
-            background-color: white;
-            font-weight: bold;
-            color: black;
+            --text-shadow-color: lightgray;
+        }
 
-            div.team-money {
-                text-shadow: 2px 2px 0px lightgray;
-            }
+        &[data-team-state="lockout"]:not(progress) {
+            opacity: 0.4;
         }
 
         &:not([data-team-state="lockout"]) progress {
@@ -249,7 +245,6 @@ footer {
         div.team-money {
             font-family: "swiss911", sans-serif;
             font-size: 40px;
-            text-shadow: 3px 3px 0px black;
         }
 
         div.team-name {

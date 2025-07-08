@@ -27,6 +27,11 @@ div#paused {
     }
 }
 
+body {
+    margin: 0px;
+    padding: 0px;
+}
+
 footer div.team.choose-clue {
     border: 2px solid white;
     animation: 0.5s steps(2, jump-none) infinite alternate choose-clue-flash-keyframes;
@@ -72,6 +77,14 @@ footer {
         flex-direction: column;
         align-items: center;
 
-        padding: 10px;
+        &[data-team-state="answering"] {
+            /* Normally in the operator window we would want to use
+            --light-foreground-color and --dark-background-color
+            instead of black and white, but I think we want 
+            maximum contrast for this */
+            background-color: white;
+            font-weight: bold;
+            color: black;
+        }
     }
 }

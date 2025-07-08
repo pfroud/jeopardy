@@ -5,7 +5,6 @@
 
 body {
     font-family: sans-serif;
-    overflow-x: hidden;
     --font-size: 20px;
     font-size: var(--font-size);
 
@@ -28,6 +27,7 @@ a:not(:active):not(:visited) {
 
 main {
     line-height: 150%;
+    margin: 5px;
 
     input,
     button {
@@ -196,11 +196,15 @@ footer {
 
     div.team {
 
+        padding: 5px;
+
         &[data-team-state="answering"] {
-            background-color: orange;
+            background-color: var(--light-foreground-color);
             font-weight: bold;
             color: var(--dark-background-color);
         }
+
+
 
         &:not([data-team-state="answering"]) progress {
             visibility: hidden;
@@ -208,6 +212,13 @@ footer {
 
         div.team-state {
             font-size: 15px;
+        }
+
+        progress {
+            /* decrease height */
+            font-size: initial;
+
+            width: 100%;
         }
 
     }
