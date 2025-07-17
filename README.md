@@ -138,7 +138,24 @@ player using a video file committed to the repository.
 -->
 https://github.com/user-attachments/assets/5d5fbda3-2886-40ba-bed8-7e6227eca1c9
 
+## Extra features
 
+### Game-end statistics charts
+
+At the end of each game, two charts let teams compare their gameplay. A line chart shows the rise and fall of each team's money, and a group of pie charts show how each team responded to the questions.
+
+The charts below are from from an actual game played in early 2025:
+
+<table>
+  <tr>
+    <td><img src="images-for-readme/line-chart-of-money-over-time.svg" alt="Line chart of money over time"></td>
+    <td><img src="images-for-readme/pie-charts-of-buzz-results.svg" alt="Pie chart of buzz results"></td>
+    </tr>
+</table>
+
+The line chart captures the game's excitement: team 4 (green line) secured the first question but stagnated while team 2 (orange line) chased team 3's (yellow line) growth and surpassed it biefly only to be outdone by team 1's (red line) quick rise. In the midgame team 3's early foundation was eroded as teams 1 & 2 traded first place, then team 4 rocketed to the lead but team 2 soon followed to overtake them in the endgame.
+
+The pie charts can quickly show whether the teams are balanced. To keep the game fun for everyone, I reshuffle team members if any team leading or lagging too much. These pie charts above show that this game was very well balanced (which is why I chose it to include here).
 
 ## "Clue" vs "question" vs "answer"
 
