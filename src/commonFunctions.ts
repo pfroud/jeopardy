@@ -64,7 +64,7 @@ export function downloadSVG(originalSvg: SVGSVGElement, downloadFilenameLabel: s
     */
     const backgroundRect = createSvgElement("rect");
     backgroundRect.setAttribute("id", "background");
-    backgroundRect.setAttribute("fill", "#dddddd"); //same background color as div#game-end-popup
+    backgroundRect.setAttribute("fill", "white"); //same background color as div#game-end-popup
     backgroundRect.setAttribute("stroke", "none");
     backgroundRect.setAttribute("x", "0");
     backgroundRect.setAttribute("y", "0");

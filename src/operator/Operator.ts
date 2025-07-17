@@ -198,28 +198,25 @@ export class Operator {
             this.buzzHistoryForClue = {
                 timestampWhenClueQuestionFinishedReading: 0,
                 RECORDS: [
-                    // team 1
+                    // team 1 - buzzed too early and was locked out
                     [
-                        { startTimestamp: -350, RESULT: { TYPE: "too-early-start-lockout" } },
-                        { startTimestamp: -250, RESULT: { TYPE: "ignored", TEAM_STATE_WHY_IT_WAS_IGNORED: "lockout" } },
-                        { startTimestamp: -150, RESULT: { TYPE: "ignored", TEAM_STATE_WHY_IT_WAS_IGNORED: "lockout" } },
-                        { startTimestamp: -50, RESULT: { TYPE: "too-early-start-lockout" } },
-                        { startTimestamp: 50, RESULT: { TYPE: "ignored", TEAM_STATE_WHY_IT_WAS_IGNORED: "lockout" } },
+                        { startTimestamp: -60, RESULT: { TYPE: "too-early-start-lockout" } },
+                        { startTimestamp: 30, RESULT: { TYPE: "ignored", TEAM_STATE_WHY_IT_WAS_IGNORED: "lockout" } },
                     ],
 
-                    //team 2
+                    //team 2 - answered wrong
                     [
-                        { startTimestamp: 100, RESULT: { TYPE: "ignored", TEAM_STATE_WHY_IT_WAS_IGNORED: "other-team-is-answering" } }
+                        { startTimestamp: 90, RESULT: { TYPE: "start-answer", answerResult: "answeredWrongOrTimedOut", endTimestamp: 900 } }
                     ],
 
-                    //team 3
+                    //team 3 - buzzed while team 2 was answering
                     [
-                        { startTimestamp: 200, RESULT: { TYPE: "start-answer", answerResult: "answeredWrongOrTimedOut", endTimestamp: 300 } }
+                        { startTimestamp: 120, RESULT: { TYPE: "ignored", TEAM_STATE_WHY_IT_WAS_IGNORED: "other-team-is-answering" } }
                     ],
 
-                    //team 4
+                    //team 4 - answered right
                     [
-                        { startTimestamp: 400, RESULT: { TYPE: "start-answer", answerResult: "answeredWrongOrTimedOut", endTimestamp: 500 } }
+                        { startTimestamp: 1050, RESULT: { TYPE: "start-answer", answerResult: "answeredRight", endTimestamp: 1400 } }
                     ]
                 ]
             };
@@ -235,9 +232,7 @@ export class Operator {
                 teamStats.questionsBuzzedThenAnsweredRight = 5;
                 teamStats.questionsBuzzedThenAnsweredWrongOrTimedOut = 2;
             });
-
             this.stateMachine?.goToState("gameEnd");
-
         }
 
     }

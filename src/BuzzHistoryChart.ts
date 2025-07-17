@@ -353,8 +353,8 @@ export class BuzzHistoryChart {
 
         const rectanglesToAdd = [
             { label: "Too early (lockout)", xOffsetToLookLinedUp: 4, className: BuzzHistoryChart.CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT },
+            { label: "Answered wrong or timed out", xOffsetToLookLinedUp: 1, className: BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_WRONG_OR_TIMED_OUT },
             { label: "Answered right", xOffsetToLookLinedUp: 1, className: BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_RIGHT },
-            { label: "Answered wrong or timed out", xOffsetToLookLinedUp: 1, className: BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_WRONG_OR_TIMED_OUT }
         ];
 
         for (let i = 0; i < rectanglesToAdd.length; i++) {
