@@ -7,7 +7,7 @@ svg#buzz-history {
     }
 
     g#legend text {
-        font-size: initial;
+        font-size: 14px;
     }
 
     g#axis g.tick line {

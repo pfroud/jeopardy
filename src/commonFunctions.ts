@@ -64,7 +64,7 @@ export function downloadSVG(originalSvg: SVGSVGElement, downloadFilenameLabel: s
     */
     const backgroundRect = createSvgElement("rect");
     backgroundRect.setAttribute("id", "background");
-    backgroundRect.setAttribute("fill", "white"); //same background color as div#game-end-popup
+    backgroundRect.setAttribute("fill", "white");
     backgroundRect.setAttribute("stroke", "none");
     backgroundRect.setAttribute("x", "0");
     backgroundRect.setAttribute("y", "0");
@@ -73,14 +73,11 @@ export function downloadSVG(originalSvg: SVGSVGElement, downloadFilenameLabel: s
     clonedSvg.insertBefore(backgroundRect, clonedSvg.firstChild);
 
 
-
     /* ******************************************************************************************
     ******** Change Chartist axis labels from <span>s inside <foreignObject>s to <text>s ********
     *********************************************************************************************
     I don't know why Chartist does this. Doing this replacement reduces the file size a lot.
     */
-
-    // Only needed for SVGs made with Chartist
     const groupLabels = clonedSvg.querySelector("g.ct-labels");
     if (groupLabels) {
         groupLabels.setAttribute("font-size", "12");
@@ -169,7 +166,7 @@ export function downloadSVG(originalSvg: SVGSVGElement, downloadFilenameLabel: s
 
                     const cssPropName = styleToCopy.cssPropName;
                     const cssValue = String(computedCssStyle[cssPropName]);
-                    const xmlAttribName = styleToCopy.xmlAttribName ? styleToCopy.xmlAttribName : String(cssPropName);
+                    const xmlAttribName = styleToCopy.xmlAttribName ?? String(cssPropName);
 
                     if (!child.hasAttribute(xmlAttribName)) {
                         child.setAttribute(xmlAttribName, cssValue);
