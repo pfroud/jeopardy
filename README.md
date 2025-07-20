@@ -207,3 +207,7 @@ In summary:
     <td>answer</td>
   </tr>
 </table>
+
+## Known issues & future work
+
+- The CSS uses hard-coded pixel sizes so the design is not responsive. Previously this was not a problem because I always ran the game on the same displays, and nobody else used this project. Starting in July 2025 it seems other people may be using this software so responsive design might become relevant.
