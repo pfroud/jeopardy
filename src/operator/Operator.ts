@@ -1088,7 +1088,7 @@ export class Operator {
 
     public buzzHistoryShouldShow(): boolean {
         if (this.teamArray) {
-            return this.teamArray.filter(t => t.hasBuzzedForCurrentQuestion()).length > 1;
+            return this.teamArray.some(t => t.hasBuzzedForCurrentQuestion());
         } else {
             throw new Error("called shouldShowBuzzHistory() when teamArray is undefined");
         }
