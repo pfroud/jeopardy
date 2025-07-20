@@ -54,7 +54,6 @@ type GameRound = {
     readonly CLUES: Clue[][];
 }
 
-const CLUE_VALUES = [200, 400, 600, 800, 1000];
 /** For Double Jeopardy, each dollar value is doubled. */
 const CLUE_VALUE_MULTIPLIER: { [roundType in RoundType]: number } = {
     "single": 1,
@@ -222,7 +221,7 @@ function parseTableForRound(roundType: RoundType, table: HTMLTableElement): Game
                         ANSWER: answer,
                         ROW_INDEX: rowIndex,
                         COLUMN_INDEX: categoryIndex,
-                        VALUE: CLUE_VALUES[rowIndex] * CLUE_VALUE_MULTIPLIER[roundType],
+                        VALUE: (rowIndex + 1) * 200 * CLUE_VALUE_MULTIPLIER[roundType],
                         CATEGORY_NAME: categories[categoryIndex].NAME
                     };
                 }

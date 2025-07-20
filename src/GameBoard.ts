@@ -10,12 +10,11 @@ export class GameBoard {
     public static readonly TABLE_COLUMN_COUNT = 6;
 
     /** The entire table has six rows. The first row is categories, followed by five rows of clues. */
-    private static readonly TABLE_ROW_COUNT = 6;
-    private static readonly TABLE_CLUE_ROW_COUNT = GameBoard.TABLE_ROW_COUNT - 1;
+    public static readonly TABLE_ROW_COUNT = 6;
+    public static readonly TABLE_CLUE_ROW_COUNT = GameBoard.TABLE_ROW_COUNT - 1;
 
-    private static readonly CLUE_VALUES = [200, 400, 600, 800, 1000];
     /** For Double Jeopardy, each dollar value is doubled. */
-    private static readonly MULTIPLIER: { [roundType in RoundType]: number } = {
+    public static readonly GAME_ROUND_VALUE_MULTIPLIER: { [roundType in RoundType]: number } = {
         "single": 1,
         "double": 2
     };
@@ -220,7 +219,7 @@ export class GameBoard {
 
                     if (clue.REVEALED_ON_TV_SHOW) {
                         tableCell.setAttribute("data-clue-state", "available");
-                        tableCell.innerHTML = `$${GameBoard.CLUE_VALUES[clueRowIndex] * GameBoard.MULTIPLIER[gameRound.TYPE]}`;
+                        tableCell.innerHTML = `$${(clueRowIndex + 1) * 200 * GameBoard.GAME_ROUND_VALUE_MULTIPLIER[gameRound.TYPE]}`;
                     } else {
                         tableCell.setAttribute("data-clue-state", "not-revealed-on-tv-show");
                     }
