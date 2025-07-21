@@ -649,6 +649,8 @@ export class Operator {
 
         this.DIV_CLUE_WRAPPER.style.display = "none";
 
+        this.presentation?.setHeaderDisplayMinimized();
+
         this.teamArray?.[this.teamIndexToPickClue].choosingClueSet();
     }
 
