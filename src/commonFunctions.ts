@@ -133,12 +133,16 @@ export function downloadSVG(originalSvg: SVGSVGElement, downloadFilenameLabel: s
 
     clonedSvg.setAttribute("font-family", "sans-serif");
 
+    // https://stackoverflow.com/a/54520829/7376577
+    type KeysMatching<T, V> = { [K in keyof T]-?: T[K] extends V ? K : never }[keyof T];
+    type KeysOfCssStyleDeclarationWhichReturnString = KeysMatching<CSSStyleDeclaration, string>;
+
     /*
     The CSS styles we care about. For some of them, the XML attribute name is different.
     We are going to set all these attributes on every element, then SVG Optimizer (https://svgomg.net)
     will removes ones with no effect.
     */
-    const stylesToCopy: { cssPropName: keyof CSSStyleDeclaration, xmlAttribName?: string }[] = [
+    const stylesToCopy: { cssPropName: KeysOfCssStyleDeclarationWhichReturnString, xmlAttribName?: string }[] = [
         { cssPropName: "fill" },
         { cssPropName: "stroke" },
         { cssPropName: "strokeWidth", xmlAttribName: "stroke-width" },
@@ -170,7 +174,7 @@ export function downloadSVG(originalSvg: SVGSVGElement, downloadFilenameLabel: s
                 stylesToCopy.forEach(styleToCopy => {
 
                     const cssPropName = styleToCopy.cssPropName;
-                    const cssValue = String(computedCssStyle[cssPropName]);
+                    const cssValue = computedCssStyle[cssPropName];
                     const xmlAttribName = styleToCopy.xmlAttribName ?? String(cssPropName);
 
                     if (!child.hasAttribute(xmlAttribName)) {
