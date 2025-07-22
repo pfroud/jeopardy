@@ -57,6 +57,8 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     let transitionLabel = "keyboard: ";
                     if (transition.KEYBOARD_KEYS === " ") {
                         transitionLabel += "space";
+                    } else if (typeof transition.KEYBOARD_KEYS === "function") {
+                        transitionLabel += `\\"(() => Set<string>)\\"`;
                     } else {
                         transitionLabel += `\\"${transition.KEYBOARD_KEYS}\\"`;
                     }
@@ -131,6 +133,8 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     let keyboardLabel = "keyboard: ";
                     if (transition.KEYBOARD_KEYS === " ") {
                         keyboardLabel += "space";
+                    } else if (typeof transition.KEYBOARD_KEYS === "function") {
+                        keyboardLabel += `\\"(() => Set<string>)\\"`;
                     } else {
                         keyboardLabel += `\\"${transition.KEYBOARD_KEYS}\\"`;
                     }

@@ -4,7 +4,7 @@ import { Settings } from "./Settings";
 import { querySelectorAndCheck } from "./commonFunctions";
 import { Operator } from "./operator/Operator";
 import { Presentation } from "./presentation/Presentation";
-import { Clue, RevealedClue } from "./typesForGame";
+import { RevealedClue } from "./typesForGame";
 
 /** Used to create charts at the end of the game. */
 interface Statistics {

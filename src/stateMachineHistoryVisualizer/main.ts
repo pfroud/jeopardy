@@ -58,7 +58,7 @@ window.addEventListener('DOMContentLoaded', () => {
             document.body.insertAdjacentHTML("beforeend", svgString);
 
             // The body will now contain an <svg> tag.
-            const svgElement = querySelectorAndCheck(document, "svg");
+            const svgElement = querySelectorAndCheck<SVGSVGElement>(document, "svg");
             svgElement.setAttribute("width", "100%");
             svgElement.removeAttribute("height");
 

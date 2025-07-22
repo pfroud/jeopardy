@@ -41,6 +41,15 @@ export interface TimeoutTransition extends SimpleTransitionBase {
     readonly TYPE: "timeout";
     readonly BEHAVIOR: CountdownBehavior;
     readonly INITIAL_DURATION_MILLISEC: number;
+
+    /**
+     * Once a team has buzzed and we're waiting for them to answer, we want some special stuff to happen:
+     *  - In the presentation window: the state machine uses a timeout transition, but instead of showing a
+     *    progress bar like what would normally happen for a timeout transition, we want to show it on
+     *    the nine countdown dots.
+     *  - In the operator window: use a second <progress> element, instead of using the same one that shows
+     *    how much time is left for teams to buzz in.
+     */
     readonly IS_WAITING_FOR_TEAM_TO_ANSWER_AFTER_BUZZ?: boolean;
 }
 
