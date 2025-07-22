@@ -1,0 +1,134 @@
+div.tab-content#tab-content-play div#final-jeopardy-wagers-table-container table {
+    /*
+    Originally from
+    https://www.geeksforgeeks.org/css/how-to-make-a-toggle-button-using-checkbox-and-css
+    */
+
+    button,
+    label {
+        vertical-align: middle;
+    }
+
+    button.right-or-wrong {
+        /* Remove web browser style */
+        background: none;
+        border: none;
+        padding: 0px;
+        margin: 0px;
+
+        &#right:hover:not(:active) {
+            filter: brightness(200%);
+        }
+
+        &#wrong:hover:not(:active) {
+            /*
+            Due to weird color perception things, increasing the brightness on the red 
+            X emoji makes it orange
+              */
+            filter: grayscale(60%) brightness(250%) hue-rotate(-40deg)
+        }
+
+        /* The same active style works for both icons */
+        &:active {
+            filter: brightness(50%);
+        }
+
+    }
+
+    label.toggle-switch {
+
+        --toggle-switch-width: 60px;
+        --toggle-switch-height: 34px;
+
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: var(--toggle-switch-height);
+
+        /* Hide the default checkbox */
+        input {
+            display: none;
+        }
+
+        span.toggle-switch-background {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+
+            border-radius: var(--toggle-switch-height);
+            --margin: 4px;
+            --handle-size: calc((var(--toggle-switch-width) / 2) - var(--margin));
+
+            /* Create white circle handle */
+            &::before {
+                position: absolute;
+                content: "";
+                height: var(--handle-size);
+                width: var(--handle-size);
+                left: var(--margin);
+                bottom: var(--margin);
+                background-color: white;
+                border-radius: 50%;
+            }
+
+        }
+
+        /* The + selector is for next sibling */
+
+        input:checked:not(:indeterminate)+span.toggle-switch-background {
+            background-color: green;
+
+            &:hover:not(:active) {
+                background-color: limegreen;
+            }
+
+            &:active {
+                background-color: darkgreen;
+            }
+
+            /* Move the handle */
+            &::before {
+                transform: translateX(var(--handle-size));
+            }
+        }
+
+        input:not(:checked):not(:indeterminate)+span.toggle-switch-background {
+            background-color: firebrick;
+
+            &:hover:not(:active) {
+                background-color: red;
+            }
+
+            &:active {
+                background-color: darkred;
+            }
+        }
+
+        input:indeterminate+span.toggle-switch-background {
+            background-color: #888;
+
+            &:hover:not(:active) {
+                background-color: #bbb;
+            }
+
+            &:active {
+                background-color: #666;
+            }
+
+            /* Change the handle from a circle to a rectangle */
+            &::before {
+                --width-when-indeterminate: calc(var(--toggle-switch-width) / 3);
+                --height-when-indeterminate: 4px;
+
+                width: var(--width-when-indeterminate);
+                height: var(--height-when-indeterminate);
+
+                left: calc((var(--toggle-switch-width) - var(--width-when-indeterminate)) / 2);
+                bottom: calc((var(--toggle-switch-height) - var(--height-when-indeterminate)) / 2);
+
+                border-radius: calc(var(--height-when-indeterminate) / 2);
+            }
+        }
+
+    }
+}

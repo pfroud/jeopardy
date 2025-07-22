@@ -9,7 +9,7 @@ export class FinalJeopardyWagersTable {
     private readonly WAGER_CELLS_IN_PRESENTATION_WINDOW: HTMLTableCellElement[] = [];
 
     /** Table cells for correct/incorrect symbol in the presentation window. Index is the team index. */
-    private readonly CORRECT_IN_PRESENTATION_WINDOW: HTMLTableCellElement[] = [];
+    private readonly RIGHT_OR_WRONG_ICON_IN_PRESENTATION_WINDOW: HTMLTableCellElement[] = [];
 
     /**
      * The Map key is the table element (in either operator or presentation window).
@@ -60,9 +60,9 @@ export class FinalJeopardyWagersTable {
             this.WAGER_CELLS_IN_PRESENTATION_WINDOW.push(cellWager);
             tableRow.append(cellWager);
 
-            const cellCorrect = createTableCell("");
-            this.CORRECT_IN_PRESENTATION_WINDOW.push(cellCorrect);
-            tableRow.append(cellCorrect);
+            const cellRightOrWrongIcon = createTableCell("");
+            this.RIGHT_OR_WRONG_ICON_IN_PRESENTATION_WINDOW.push(cellRightOrWrongIcon);
+            tableRow.append(cellRightOrWrongIcon);
 
             const cellMoneyAfter = createTableCell("", "money");
             this.MONEY_AFTER_CELLS.get(this.TABLE_FOR_PRESENTATION_WINDOW)?.push(cellMoneyAfter);
@@ -107,14 +107,20 @@ export class FinalJeopardyWagersTable {
 
             tableRow.append(createTableCell(inputWager, "money"));
 
-            const checkboxCorrect = document.createElement("input");
-            checkboxCorrect.type = "checkbox";
-            checkboxCorrect.indeterminate = true;
+            const iconRight = "✅";
+            const iconWrong = "❌";
+
+            const labelToggleSwitch = document.createElement("label");
+            labelToggleSwitch.className = "toggle-switch";
+
+            const inputCheckboxRightOrWrong = document.createElement("input");
+            inputCheckboxRightOrWrong.type = "checkbox";
+            inputCheckboxRightOrWrong.indeterminate = true;
 
             const updateMoneyAfter = (): void => {
-                if (!isNaN(wager) && !checkboxCorrect.indeterminate) {
+                if (!isNaN(wager) && !inputCheckboxRightOrWrong.indeterminate) {
                     let newValue;
-                    if (checkboxCorrect.checked) {
+                    if (inputCheckboxRightOrWrong.checked) {
                         newValue = moneyBefore + wager;
                     } else {
                         newValue = moneyBefore - wager;
@@ -124,12 +130,48 @@ export class FinalJeopardyWagersTable {
                 }
             };
 
-            checkboxCorrect.addEventListener("change", () => {
-                this.CORRECT_IN_PRESENTATION_WINDOW[teamIndex].innerText = checkboxCorrect.checked ? "✅" : "❌";
+            const updateMoneyAndPresentationIcons = (): void => {
+                this.RIGHT_OR_WRONG_ICON_IN_PRESENTATION_WINDOW[teamIndex].innerText =
+                    inputCheckboxRightOrWrong.checked ? iconRight : iconWrong;
                 updateMoneyAfter();
-            });
 
-            tableRow.append(createTableCell(checkboxCorrect));
+            };
+
+            inputCheckboxRightOrWrong.addEventListener("input", updateMoneyAndPresentationIcons);
+
+            labelToggleSwitch.append(inputCheckboxRightOrWrong);
+
+            const spanToggleSwitchBackground = document.createElement("span");
+            spanToggleSwitchBackground.className = "toggle-switch-background";
+            labelToggleSwitch.append(spanToggleSwitchBackground);
+
+            const cellRightOrWrong = document.createElement("td");
+
+            const buttonWrong = document.createElement("button");
+            buttonWrong.innerText = iconWrong;
+            buttonWrong.className = "right-or-wrong";
+            buttonWrong.id = "wrong";
+            buttonWrong.addEventListener("click", () => {
+                inputCheckboxRightOrWrong.indeterminate = false;
+                inputCheckboxRightOrWrong.checked = false;
+                updateMoneyAndPresentationIcons();
+            });
+            cellRightOrWrong.append(buttonWrong);
+
+            cellRightOrWrong.append(labelToggleSwitch);
+
+            const buttonRight = document.createElement("button");
+            buttonRight.innerText = iconRight;
+            buttonRight.className = "right-or-wrong";
+            buttonRight.id = "right";
+            buttonRight.addEventListener("click", () => {
+                inputCheckboxRightOrWrong.indeterminate = false;
+                inputCheckboxRightOrWrong.checked = true;
+                updateMoneyAndPresentationIcons();
+            });
+            cellRightOrWrong.append(buttonRight);
+
+            tableRow.append(cellRightOrWrong);
 
             const cellMoneyAfter = createTableCell("", "money");
             this.MONEY_AFTER_CELLS.get(this.TABLE_FOR_OPERATOR_WINDOW)?.push(cellMoneyAfter);
