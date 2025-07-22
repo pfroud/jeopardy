@@ -4,14 +4,20 @@ import { Presentation } from "./Presentation";
 document.addEventListener("DOMContentLoaded", function () {
 
     if (!window.opener) {
-        document.body.innerHTML = "no window.opener";
+        document.body.innerHTML =
+            `
+            To launch the Jeopardy game, open src/operator/operator.html. 
+            The operator page will try to open presentation.html. You will probably
+            need to tell your web browser to allow the popup.
+            `;
+        document.body.style.fontSize = "2em";
         return;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-type-assertion, @typescript-eslint/no-explicit-any
     const operator = (window.opener as any).operator as Operator;
     if (!operator) {
-        document.body.innerHTML = "no window.opener.operator";
+        document.body.innerHTML = "no <code>window.opener.operator</code>";
         return;
     }
 
