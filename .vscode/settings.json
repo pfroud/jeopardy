@@ -5,7 +5,7 @@
         "dist": true
     },
     "files.readonlyInclude": {
-        "src/scraper/*.js": true
+        "src/scraper/scraper.js": true
     },
     "cSpell.words": [
         "aduh",

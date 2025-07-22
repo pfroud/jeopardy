@@ -1,8 +1,8 @@
 /*
 This file is not an Ecmascript module because that would make
-it not work when you paste it into a web browser debugger console.
+it not work when run from a web browser bookmarklet.
 
-To compile the scraper only to a Javascript file to run in the browser:
+To compile the only the scraper to a Javascript file to run in the browser:
 1. If needed, change the file extension of this file from .ts.txt to .ts.
 2. On the terminal, run "tsc src/scraper/scraper.ts". It will generate scraper.js.
 
@@ -54,12 +54,6 @@ type GameRound = {
     readonly CLUES: Clue[][];
 }
 
-/** For Double Jeopardy, each dollar value is doubled. */
-const CLUE_VALUE_MULTIPLIER: { [roundType in RoundType]: number } = {
-    "single": 1,
-    "double": 2
-};
-
 type Category = {
     readonly NAME: string;
     /** A few categories have a comment from the host explaining the meaning of the category name. */
@@ -90,9 +84,29 @@ type RevealedClue = {
 }
 
 function main(): void {
+    if (!window.location.href.includes("j-archive.com/showgame.php")) {
+        window.alert(
+            "Jeopardy scraper: not running because this does not appear to be a J Archive game page.\n" +
+            "\n" +
+            "The scraper should be run on a page with a URL like \"j-archive.com/showgame.php\".\n" +
+            "\n" +
+            "To get to a page like that:\n" +
+            "1. Go to j-archive.com.\n" +
+            "2. Click on one of the season numbers in square brackets.\n" +
+            "3. Click on a game.\n" +
+            "4. Run scraper."
+        );
+        return;
+    }
+    addEventListener("error", (error) =>
+        window.alert(`Error from Jeopardy scraper: ${error.message}`)
+    );
+
 
     /* This header contains the show number and the airdate. Example: "Show #8708 - Wednesday, September 28, 2022" */
     const h1Text = document.querySelector("h1")!.innerText;
+
+    const finalJeopardyContainer = document.querySelector("table.final_round")!;
 
     const result: Game = {
         /* example URL: https://j-archive.com/showgame.php?game_id=7451 */
@@ -109,130 +123,172 @@ function main(): void {
         SHOW_NUMBER: Number(/#(\d+)/.exec(h1Text)![1]),
         AIRDATE: h1Text.split(" - ")[1],
         ROUNDS: [
-            parseTableForRound("single", document.querySelector<HTMLTableElement>("div#jeopardy_round table.round")!),
-            parseTableForRound("double", document.querySelector<HTMLTableElement>("div#double_jeopardy_round table.round")!),
+            parseTableForRound("single", document.querySelector("div#jeopardy_round table.round")!),
+            parseTableForRound("double", document.querySelector("div#double_jeopardy_round table.round")!),
         ],
-        FINAL_JEOPARDY: getFinalJeopardy()
+        FINAL_JEOPARDY: {
+            CATEGORY: finalJeopardyContainer.querySelector<HTMLTableCellElement>("td.category")!.innerText.trim(),
+            QUESTION: finalJeopardyContainer.querySelector<HTMLElement>("td#clue_FJ")!.innerText,
+            ANSWER: finalJeopardyContainer.querySelector<HTMLElement>("td#clue_FJ_r em.correct_response")!.innerText
+        }
     };
 
-    const stringToCopyToClipboard =
+
+    function parseTableForRound(roundType: RoundType, table: HTMLTableElement): GameRound {
+
+        /*
+        About the :scope pseudo-class:
+        https://developer.mozilla.org/en-US/docs/Web/CSS/:scope
+    
+        About the > combinator (it does direct children):
+        https://developer.mozilla.org/en-US/docs/Web/CSS/Child_combinator
+    
+        From https://stackoverflow.com/a/17206138/7376577
+        */
+
+        const rows = Array.from(table.querySelectorAll<HTMLTableRowElement>(":scope>tbody>tr"));
+        if (rows.length !== 6) {
+            throw new Error(`got ${rows.length} row(s), expected exactly 6`);
+        }
+
+        const categoryRow = rows[0];
+        const categories =
+            Array.from(categoryRow.querySelectorAll<HTMLTableCellElement>("td.category")).
+                map(td => {
+                    const rv: Category = {
+                        NAME: td.querySelector<HTMLTableCellElement>("td.category_name")!.innerText
+                    };
+                    const commentsString = td.querySelector<HTMLTableCellElement>("td.category_comments")!.innerText.trim();
+                    if (commentsString.length > 0) {
+                        rv.COMMENT_FROM_TV_SHOW_HOST = commentsString;
+                    }
+                    return rv;
+                });
+
+
+        /* Skip the first item in the list because it is the row of categories. */
+        const clueRows = rows.slice(1);
+
+        /** For Double Jeopardy, each dollar value is doubled. */
+        const clueValueMultiplier: { [roundType in RoundType]: number } = {
+            "single": 1,
+            "double": 2
+        };
+
+        const clues = clueRows.map((clueRow: HTMLTableRowElement, rowIndex): Clue[] =>
+            Array.from(clueRow.querySelectorAll<HTMLTableCellElement>("td.clue"))
+                .map((tdClue: HTMLTableCellElement, categoryIndex): Clue => {
+
+                    if (tdClue.childElementCount === 0) {
+                        /* Clue was NOT revealed on the TV show */
+                        return { REVEALED_ON_TV_SHOW: false };
+
+                    } else {
+                        /* Clue was revealed on the TV show */
+                        const directChildrenRowsOfTdClue = tdClue.querySelectorAll(":scope>table>tbody>tr");
+                        if (directChildrenRowsOfTdClue.length !== 2) {
+                            throw new Error(`the td.clue has ${directChildrenRowsOfTdClue.length} trs, expected exactly 2`);
+                        }
+                        const childRow = directChildrenRowsOfTdClue[1];
+
+                        /* Text which is shown on screen and the game host reads out loud. */
+                        const question = childRow.querySelector<HTMLTableCellElement>('td.clue_text:not([display="none"])')!.innerText;
+
+                        /* If a player says this, they get the money. */
+                        const answer = childRow.querySelector<HTMLTableCellElement>("td.clue_text em.correct_response")!.innerText;
+
+                        return {
+                            REVEALED_ON_TV_SHOW: true,
+                            QUESTION: question,
+                            ANSWER: answer,
+                            ROW_INDEX: rowIndex,
+                            COLUMN_INDEX: categoryIndex,
+                            VALUE: (rowIndex + 1) * 200 * clueValueMultiplier[roundType],
+                            CATEGORY_NAME: categories[categoryIndex].NAME
+                        };
+                    }
+                })
+        );
+
+        return {
+            TYPE: roundType,
+            CATEGORIES: categories,
+            CLUES: clues
+        };
+
+    }
+
+    const outputString =
         `
         import { Game } from "./typesForGame";
-        export const SCRAPED_GAME: Game =    
+        export const SCRAPED_GAME: Game =
         ${JSON.stringify(result, null, 2)};
         `;
 
-    /* https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText */
-    try {
-        window.navigator.clipboard.writeText(stringToCopyToClipboard)
-            /* The promise resolves once the clipboard's contents have been updated */
-            .then(() => {
-                const successMessage = document.createElement("span");
-                successMessage.innerHTML = "Success, copied the game from J-Archive to the clipboard. You can put it in scrapedGame.ts.";
-                successMessage.style.fontSize = "30px";
-                successMessage.style.fontWeight = "bold";
-                successMessage.style.background = "green";
-                successMessage.style.border = "1px solid lime";
-                successMessage.style.borderRadius = "5px";
-                successMessage.style.padding = "15px 20px";
-                successMessage.style.position = "fixed";
-                successMessage.style.top = "10px";
-                successMessage.style.left = "10px";
-                successMessage.style.maxWidth = "1090px";
-                document.body.append(successMessage);
-            });
-    } catch (er) {
-        window.alert(`Clipboard write blocked by web browser: ${String(er)}`);
-    }
+    /*
+    For security, web browsers restrict when Javascript can write to the 
+    computer's clipboard.
+    
+    If you run the scraper from a bookmarklet, the clipboard write will work
+    because the user clicked on something to trigger the write.
+    
+    If you run the scraper by pasting code into the developer console, the
+    clipboard write will fail:
+    - Firefox says "Clipboard write was blocked due to lack of user activation."
+    - Chrome says "Document is not focused."
+
+    https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText
+
+    If the clipboard write fails then we'll try to open a popup window containing
+    the output, which will probably also be blocked by the web browser. If opening
+    a window fails then we'll just write the output to the console and notify the
+    user using window.alert().
+    */
+    window.navigator.clipboard.writeText(outputString)
+        .then(() => {
+            /* The promise resolves once the clipboard's contents have been updated. */
+            const successMessage = document.createElement("div");
+            successMessage.innerHTML = "Success, copied the game from J-Archive to the clipboard. You can put it in scrapedGame.ts.";
+            successMessage.style.fontSize = "30px";
+            successMessage.style.fontWeight = "bold";
+            successMessage.style.background = "green";
+            successMessage.style.border = "1px solid lime";
+            successMessage.style.borderRadius = "5px";
+            successMessage.style.padding = "15px 20px";
+            successMessage.style.position = "fixed";
+            successMessage.style.top = "10px";
+            successMessage.style.left = "10px";
+            successMessage.style.maxWidth = "1090px";
+            document.body.append(successMessage);
+        })
+        .catch((error: unknown) => {
+            console.log(`Jeopardy scraper: clipboard write failed: ${String(error)}`);
+
+            /* Try fallback of opening a popup window containing the output,
+            which will probably also be blocked by the web browser. */
+            const outputWindow = window.open("");
+            if (outputWindow) {
+                /*
+                Set the window title.
+                If you do
+                    document.head.title = "abc";
+                then it sets the title attribute of the <head> tag:
+                   <head title="abc">
+                */
+                outputWindow.document.head.innerHTML = "<title>Jeopardy scraper output</title>";
+                outputWindow.document.body.innerHTML = `<pre>${outputString}</pre>`;
+
+            } else {
+                console.log("Jeopardy scraper: tried to open a window but the window object was null.");
+
+                /* Popup window didn't work, just write the output to the console and notify the user. */
+                console.log("Jeopardy scraper output:");
+                console.log(outputString);
+                window.alert("Jeopardy scraper: the output was logged to the web browser console.");
+            }
+
+        });
 
 
 }
 main();
-
-function getFinalJeopardy(): FinalJeopardy {
-    const finalJeopardyContainer = document.querySelector<HTMLTableElement>("table.final_round")!;
-    return {
-        CATEGORY: finalJeopardyContainer.querySelector<HTMLTableCellElement>("td.category")!.innerText.trim(),
-        QUESTION: finalJeopardyContainer.querySelector<HTMLElement>("td#clue_FJ")!.innerText,
-        ANSWER: finalJeopardyContainer.querySelector<HTMLElement>("td#clue_FJ_r em.correct_response")!.innerText
-    };
-}
-
-function parseTableForRound(roundType: RoundType, table: HTMLTableElement): GameRound {
-
-    /*
-    About the :scope pseudo-class:
-    https://developer.mozilla.org/en-US/docs/Web/CSS/:scope
-
-    About the > combinator (it does direct children):
-    https://developer.mozilla.org/en-US/docs/Web/CSS/Child_combinator
-
-    From https://stackoverflow.com/a/17206138/7376577
-    */
-
-    const rows = Array.from(table.querySelectorAll<HTMLTableRowElement>(":scope>tbody>tr"));
-    if (rows.length !== 6) {
-        throw new Error(`got ${rows.length} row(s), expected exactly 6`);
-    }
-
-    const categoryRow = rows[0];
-    const categories =
-        Array.from(categoryRow.querySelectorAll<HTMLTableCellElement>("td.category")).
-            map(td => {
-                const rv: Category = {
-                    NAME: td.querySelector<HTMLTableCellElement>("td.category_name")!.innerText
-                };
-                const commentsString = td.querySelector<HTMLTableCellElement>("td.category_comments")!.innerText.trim();
-                if (commentsString.length > 0) {
-                    rv.COMMENT_FROM_TV_SHOW_HOST = commentsString;
-                }
-                return rv;
-            });
-
-
-    /* skip the first item in the list, it is the row of categories. */
-    const clueRows = rows.slice(1);
-
-    const clues = clueRows.map((clueRow: HTMLTableRowElement, rowIndex): Clue[] =>
-        Array.from(clueRow.querySelectorAll<HTMLTableCellElement>("td.clue"))
-            .map((tdClue: HTMLTableCellElement, categoryIndex): Clue => {
-
-                if (tdClue.childElementCount === 0) {
-                    /* Clue was NOT revealed on the TV show */
-                    return { REVEALED_ON_TV_SHOW: false };
-
-                } else {
-                    /* Clue was revealed on the TV show */
-                    const directChildrenRowsOfTdClue = tdClue.querySelectorAll(":scope>table>tbody>tr");
-                    if (directChildrenRowsOfTdClue.length !== 2) {
-                        throw new Error(`the td.clue has ${directChildrenRowsOfTdClue.length} trs, expected exactly 2`);
-                    }
-                    const childRow = directChildrenRowsOfTdClue[1];
-
-                    /* Text which is shown on screen and the game host reads out loud. */
-                    const question = childRow.querySelector<HTMLTableCellElement>('td.clue_text:not([display="none"])')!.innerText;
-
-                    /* If a player says this, they get the money. */
-                    const answer = childRow.querySelector<HTMLTableCellElement>("td.clue_text em.correct_response")!.innerText;
-
-                    return {
-                        REVEALED_ON_TV_SHOW: true,
-                        QUESTION: question,
-                        ANSWER: answer,
-                        ROW_INDEX: rowIndex,
-                        COLUMN_INDEX: categoryIndex,
-                        VALUE: (rowIndex + 1) * 200 * CLUE_VALUE_MULTIPLIER[roundType],
-                        CATEGORY_NAME: categories[categoryIndex].NAME
-                    };
-                }
-            })
-    );
-
-    return {
-        TYPE: roundType,
-        CATEGORIES: categories,
-        CLUES: clues
-    };
-
-}
-
