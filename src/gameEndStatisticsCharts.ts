@@ -38,7 +38,7 @@ export function createGameEndPieChartsOfBuzzResults(operator: Operator, divForPi
     const legendHeight = legendRows.length * (legendColorSwatchSize + legendRowSpacing);
 
     const containerSvg = createSvgElement("svg");
-    containerSvg.setAttribute("id", "pieChartsContainer");
+    containerSvg.id = "pieChartsContainer";
     containerSvg.setAttribute("class", "ct-chart-donut");
     containerSvg.setAttribute("width", `${chartGridColumnCount * (chartWidth + chartGridSpacing)}`);
     containerSvg.setAttribute("height", `${chartGridHeight + legendHeight}`);
@@ -46,7 +46,7 @@ export function createGameEndPieChartsOfBuzzResults(operator: Operator, divForPi
 
     // Add legend
     const groupLegend = createSvgElement("g");
-    groupLegend.setAttribute("id", "legend");
+    groupLegend.id = "legend";
     groupLegend.setAttribute("transform", `translate(0 ${chartGridHeight})`);
     containerSvg.append(groupLegend);
     legendRows.forEach((legendEntry, idx) => {
@@ -305,7 +305,7 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
 
         // Move everything created by Chartist into a new group
         const groupChartistCreated = createSvgElement("g");
-        groupChartistCreated.setAttribute("id", "createdByChartist");
+        groupChartistCreated.id = "createdByChartist";
         groupChartistCreated.setAttribute("transform", `translate(${extraSpaceLeftForYAxisTitle}, 0)`);
         // The append() function MOVES elements to the destination
         groupChartistCreated.append(...svgCreatedByChartist.children);
@@ -313,7 +313,7 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
 
         // Add axis titles
         const groupAxisTitles = createSvgElement("g");
-        groupAxisTitles.setAttribute("id", "axisTitles");
+        groupAxisTitles.id = "axisTitles";
         svgCreatedByChartist.append(groupAxisTitles);
 
         // Add X axis title
@@ -337,7 +337,7 @@ export function createGameEndLineChartOfMoneyOverTime(divForLineChart: HTMLDivEl
 
         // Add legend
         const groupLegend = createSvgElement("g");
-        groupLegend.setAttribute("id", "legend");
+        groupLegend.id = "legend";
         groupLegend.setAttribute("dominant-baseline", "middle");
         groupLegend.setAttribute("transform", `translate(${extraSpaceLeftForYAxisTitle + chartWidth + 40}, 20)`);
         svgCreatedByChartist.append(groupLegend);

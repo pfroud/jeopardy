@@ -63,7 +63,7 @@ export function downloadSVG(originalSvg: SVGSVGElement, downloadFilenameLabel: s
     Text in the SVG is black, so we need a light background to make it readable.
     */
     const backgroundRect = createSvgElement("rect");
-    backgroundRect.setAttribute("id", "background");
+    backgroundRect.id = "background";
     backgroundRect.setAttribute("fill", "white");
     backgroundRect.setAttribute("stroke", "none");
     backgroundRect.setAttribute("x", "0");
@@ -84,12 +84,12 @@ export function downloadSVG(originalSvg: SVGSVGElement, downloadFilenameLabel: s
 
         // Create new groups so we can set the text alignment on the groups instead of on each <text>.
         const groupXAxisLabels = createSvgElement("g");
-        groupXAxisLabels.setAttribute("id", "xAxisLabels");
+        groupXAxisLabels.id = "xAxisLabels";
         groupXAxisLabels.setAttribute("dominant-baseline", "hanging");
         groupLabels.append(groupXAxisLabels);
 
         const groupYAxisLabels = createSvgElement("g");
-        groupYAxisLabels.setAttribute("id", "yAxisLabels");
+        groupYAxisLabels.id = "yAxisLabels";
         groupYAxisLabels.setAttribute("text-anchor", "end");
         groupLabels.append(groupYAxisLabels);
 

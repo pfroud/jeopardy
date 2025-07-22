@@ -197,26 +197,26 @@ export class BuzzHistoryChart {
 
             // the content group is everything except the axis
             const groupContent = createSvgElement("g");
-            groupContent.setAttribute("id", "content");
+            groupContent.id = "content";
             groupContent.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.SVG_MARGIN.TOP})`);
             theSvg.append(groupContent);
 
             const groupXAxis = createSvgElement("g");
             const d3SelectionOfGroupXAxis = select(groupXAxis);
             this.X_AXIS_GROUPS.set(theSvg, d3SelectionOfGroupXAxis);
-            groupXAxis.setAttribute("id", "axis");
+            groupXAxis.id = "axis";
             groupXAxis.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.SVG_MARGIN.TOP + this.CONTENT_HEIGHT})`);
             theSvg.append(groupXAxis);
 
             const groupXGrid = createSvgElement("g");
             const d3SelectionOfGroupXGrid = select(groupXGrid);
             this.VERTICAL_GRIDLINE_GROUPS.set(theSvg, d3SelectionOfGroupXGrid);
-            groupXGrid.setAttribute("id", "grid");
+            groupXGrid.id = "grid";
             groupXGrid.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.SVG_MARGIN.TOP + this.CONTENT_HEIGHT})`);
             theSvg.append(groupXGrid);
 
             const rowsGroup = createSvgElement("g");
-            rowsGroup.setAttribute("id", "rows");
+            rowsGroup.id = "rows";
             groupContent.append(rowsGroup);
 
             this.ROWS_ARRAY.set(theSvg, []);
@@ -257,7 +257,7 @@ export class BuzzHistoryChart {
                     throw new Error("no rows for the svg!!");
                 }
                 rowsForThisSvg[teamIndex] = select(recordsGroup);
-                recordsGroup.setAttribute("id", "records");
+                recordsGroup.id = "records";
                 group.append(recordsGroup);
 
                 const textNode = createSvgElement("text");
@@ -278,7 +278,7 @@ export class BuzzHistoryChart {
             const verticalLine = createSvgElement("line");
             this.VERTICAL_LINES_WHEN_OPERATOR_FINISHED_READING_QUESTION.set(theSvg, verticalLine);
             verticalLine.classList.add("vertical-line");
-            verticalLine.setAttribute("id", "operator-finished-reading-question");
+            verticalLine.id = "operator-finished-reading-question";
             verticalLine.setAttribute("y1", "0");
             verticalLine.setAttribute("y2", String(this.CONTENT_HEIGHT));
             verticalLine.setAttribute("x1", String(xPositionAtTimeZero));
@@ -309,7 +309,7 @@ export class BuzzHistoryChart {
 
     private createLegend(svgToCreateLegendIn: SVGSVGElement): void {
         const legendGroup = createSvgElement("g");
-        legendGroup.setAttribute("id", "legend");
+        legendGroup.id = "legend";
         legendGroup.setAttribute("transform", `translate(${this.SVG_MARGIN.LEFT}, ${this.SVG_MARGIN.TOP + this.CONTENT_HEIGHT + this.LEGEND_PADDING})`);
 
         const yPositionForText = 20;
