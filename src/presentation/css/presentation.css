@@ -139,6 +139,14 @@ main {
                 font-weight: bold;
             }
 
+        }
+
+        &#slide-final-jeopardy-wagers-table {
+
+            text-shadow: var(--text-shadow-big);
+            font-size: 60px;
+            text-wrap: nowrap;
+
             table#final-jeopardy-wagers {
 
                 td {
@@ -147,7 +155,6 @@ main {
 
                 }
             }
-
         }
 
         &#slide-gameEnd-team-ranking-table {

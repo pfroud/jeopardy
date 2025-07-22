@@ -1,7 +1,7 @@
 import { AudioManager } from "../AudioManager";
 import { BuzzAnswerResult, BuzzHistoryChart, BuzzHistoryForClue, BuzzHistoryRecord, BuzzResult, BuzzResultStartAnswer } from "../BuzzHistoryChart";
 import { CountdownTimer } from "../CountdownTimer";
-import { FinalJeopardyTable } from "../FinalJeopardyTable";
+import { FinalJeopardyWagersTable } from "../FinalJeopardyWagersTable";
 import { GameBoard } from "../GameBoard";
 import { Settings } from "../Settings";
 import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
@@ -1278,18 +1278,21 @@ export class Operator {
             this.getQuestionHtmlWithSubjectInBold(SCRAPED_GAME.FINAL_JEOPARDY.QUESTION);
     }
 
-    public finalJeopardyShowAnswer(): void {
+    public finalJeopardyShowWagersTable(): void {
+
+        // Show the answer to the operator only
         this.TR_ANSWER.style.display = ""; //show it by removing "display=none"
         this.DIV_CLUE_ANSWER.innerHTML = SCRAPED_GAME.FINAL_JEOPARDY.ANSWER;
 
         this.presentation?.setFooterDisplayNone();
 
-        const tableThing = new FinalJeopardyTable(this.teamArray!);
+        const wagersTable = new FinalJeopardyWagersTable(this.teamArray!);
 
-        querySelectorAndCheck(document, "div#tab-content-play").append(tableThing.getTableForOperatorWindow());
+        const tableContainer = querySelectorAndCheck(document, "div#final-jeopardy-wagers-table-container");
+        // tableContainer.append(document.createElement("br"));
+        tableContainer.append(wagersTable.getTableForOperatorWindow());
 
-        this.presentation?.finalJeopardyShowTable(tableThing.getTableForPresentationWindow());
-
+        this.presentation?.finalJeopardyShowWagersTable(wagersTable.getTableForPresentationWindow());
     }
 
 }

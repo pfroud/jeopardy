@@ -124,6 +124,12 @@ main {
                 margin-top: 30px;
                 margin-bottom: 40px;
             }
+
+            div#final-jeopardy-wagers-table-container table input[type="checkbox"] {
+                --checkbox-size: 30px;
+                width: var(--checkbox-size);
+                height: var(--checkbox-size);
+            }
         }
 
         /**************************************************/

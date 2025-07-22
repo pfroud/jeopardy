@@ -273,16 +273,15 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             TRANSITIONS: [{
                 TYPE: "keyboard",
                 KEYBOARD_KEYS: " ", //space
-                DESTINATION: "finalJeopardyShowAnswer"
+                DESTINATION: "finalJeopardyShowWagersTable"
             }]
         },
         {
-            // TODO change this state so it shows the answer to the operator only, and shows the table of wagers with before/after money.
             // then add another state to show the answer in the presentation?
-            NAME: "finalJeopardyShowAnswer",
-            OPERATOR_INSTRUCTIONS_HTML: "Read the Final Jeopardy answer. Press space to end the game.",
-            ON_ENTER: operator.finalJeopardyShowAnswer.bind(operator),
-            PRESENTATION_SLIDE_TO_SHOW: "slide-clue-answer",
+            NAME: "finalJeopardyShowWagersTable",
+            OPERATOR_INSTRUCTIONS_HTML: "Do the wagers.",
+            ON_ENTER: operator.finalJeopardyShowWagersTable.bind(operator),
+            PRESENTATION_SLIDE_TO_SHOW: "slide-final-jeopardy-wagers-table",
             TRANSITIONS: [{
                 TYPE: "keyboard",
                 KEYBOARD_KEYS: " ", //space

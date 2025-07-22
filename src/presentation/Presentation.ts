@@ -309,8 +309,8 @@ export class Presentation {
         this.DIV_CLUE_VALUE_BIG.style.display = "none";
     }
 
-    public finalJeopardyShowTable(table: HTMLTableElement): void {
-        querySelectorAndCheck(document, "div#slide-clue-answer").append(table);
+    public finalJeopardyShowWagersTable(table: HTMLTableElement): void {
+        querySelectorAndCheck(document, "div#slide-final-jeopardy-wagers-table").append(table);
     }
 
 
