@@ -3,7 +3,12 @@ Most of this stuff from lib.dom.d.ts.
 To get to that file, right-click on a querySelector() function then choose Go to Definition.
 */
 
-export function querySelectorAndCheck<E extends Element = Element>(parent: ParentNode, query: string): E {
+/*
+I'm pretty sure this type parameter is actually necessary
+https://typescript-eslint.io/rules/no-unnecessary-type-parameters/#im-using-the-type-parameter-inside-the-function-so-why-is-the-rule-reporting
+*/
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+export function querySelectorAndCheck<E extends Element = HTMLElement>(parent: ParentNode, query: string): E {
     const result = parent.querySelector<E>(query);
     if (result) {
         return result;

@@ -33,16 +33,16 @@ export class AudioManager {
     public readonly DONE_READING_CLUE_QUESTION: HTMLAudioElement;
 
     public constructor() {
-        this.ANSWER_CORRECT = querySelectorAndCheck<HTMLAudioElement>(document, "audio#answer-correct");
-        this.ANSWER_WRONG_OR_ANSWER_TIMEOUT = querySelectorAndCheck<HTMLAudioElement>(document, "audio#answer-incorrect");
-        this.ANSWER_WRONG_OR_ANSWER_TIMEOUT.volume = 0.5;
-        this.QUESTION_TIMEOUT = querySelectorAndCheck<HTMLAudioElement>(document, "audio#question-timeout");
-        this.ROUND_END = querySelectorAndCheck<HTMLAudioElement>(document, "audio#round-end");
-        this.TEAM_BUZZ = querySelectorAndCheck<HTMLAudioElement>(document, "audio#team-buzz");
-        this.TICK = querySelectorAndCheck<HTMLAudioElement>(document, "audio#tick");
-        this.MUSIC_GAME_END = querySelectorAndCheck<HTMLAudioElement>(document, "audio#music-game-end");
-        this.MUSIC_GAME_START = querySelectorAndCheck<HTMLAudioElement>(document, "audio#music-game-start");
-        this.DONE_READING_CLUE_QUESTION = querySelectorAndCheck<HTMLAudioElement>(document, "audio#done-reading-clue-question");
+        this.ANSWER_CORRECT = querySelectorAndCheck(document, "audio#answer-correct");
+        this.ANSWER_WRONG_OR_ANSWER_TIMEOUT = querySelectorAndCheck(document, "audio#answer-incorrect");
+        this.ANSWER_WRONG_OR_ANSWER_TIMEOUT.volume = 0.8;
+        this.QUESTION_TIMEOUT = querySelectorAndCheck(document, "audio#question-timeout");
+        this.ROUND_END = querySelectorAndCheck(document, "audio#round-end");
+        this.TEAM_BUZZ = querySelectorAndCheck(document, "audio#team-buzz");
+        this.TICK = querySelectorAndCheck(document, "audio#tick");
+        this.MUSIC_GAME_END = querySelectorAndCheck(document, "audio#music-game-end");
+        this.MUSIC_GAME_START = querySelectorAndCheck(document, "audio#music-game-start");
+        this.DONE_READING_CLUE_QUESTION = querySelectorAndCheck(document, "audio#done-reading-clue-question");
     }
 
     public playInOrder(...audioElements: HTMLAudioElement[]): void {

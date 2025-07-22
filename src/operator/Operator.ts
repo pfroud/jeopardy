@@ -120,8 +120,8 @@ export class Operator {
         this.SPECIAL_CATEGORY_POPUP_EXAMPLE_QUESTION = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-popup-example-question");
         this.SPECIAL_CATEGORY_POPUP_EXAMPLE_ANSWER = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_POPUP, "#special-category-popup-example-answer");
 
-        this.DIV_GAME_END_POPUP = querySelectorAndCheck<HTMLDivElement>(document, "div#game-end-popup");
-        this.DIV_GAME_END_POPUP_BUTTONS = querySelectorAndCheck<HTMLDivElement>(this.DIV_GAME_END_POPUP, "div#game-end-popup-buttons");
+        this.DIV_GAME_END_POPUP = querySelectorAndCheck(document, "div#game-end-popup");
+        this.DIV_GAME_END_POPUP_BUTTONS = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#game-end-popup-buttons");
         this.DIV_GAME_END_TEAM_RANKING_WRAPPER = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#team-ranking-wrapper");
         this.DIV_GAME_END_PIE_CHARTS = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#pie-charts");
         this.DIV_GAME_END_LINE_CHART = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#line-chart");
@@ -158,7 +158,7 @@ export class Operator {
         this.initTeams();
 
         this.gameBoard = new GameBoard(this,
-            querySelectorAndCheck<HTMLTableElement>(document, "table#game-board"),
+            querySelectorAndCheck(document, "table#game-board"),
             this.presentation.getGameBoardTable()
         );
 
@@ -523,7 +523,7 @@ export class Operator {
         this.buzzHistoryChart = new BuzzHistoryChart(
             this.teamArray,
             this.SETTINGS.durationLockoutMillisec,
-            querySelectorAndCheck<SVGSVGElement>(document, "svg#buzz-history"),
+            querySelectorAndCheck(document, "svg#buzz-history"),
             this.presentation.getBuzzHistorySvg()
         );
 
@@ -890,7 +890,7 @@ export class Operator {
 
     private lookForSavedGame(): void {
 
-        const divMessage = querySelectorAndCheck<HTMLDivElement>(document, "div#saved-game-message");
+        const divMessage = querySelectorAndCheck(document, "div#saved-game-message");
 
         const rawLocalStorageResult = window.localStorage.getItem(Operator.LOCAL_STORAGE_KEY);
         if (rawLocalStorageResult === null) {
@@ -921,7 +921,7 @@ export class Operator {
             tableRowTeamMoney.append(cellTeamMoney);
         });
 
-        const divSavedGame = querySelectorAndCheck<HTMLDivElement>(document, "div#tab-content-load-game");
+        const divSavedGame = querySelectorAndCheck(document, "div#tab-content-load-game");
 
         querySelectorAndCheck(document, "button#saved-game-load").addEventListener("click", () => {
             this.gameLoad(parsedJson);
@@ -1262,7 +1262,7 @@ export class Operator {
 
         this.DIV_CLUE_WRAPPER.style.display = "none";
 
-        querySelectorAndCheck<HTMLElement>(this.DIV_CLUE_WRAPPER, "tr#tr-clue-value").style.display = "none";
+        querySelectorAndCheck(this.DIV_CLUE_WRAPPER, "tr#tr-clue-value").style.display = "none";
     }
 
     public finalJeopardyShowCategory(): void {
