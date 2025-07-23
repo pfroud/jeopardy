@@ -180,6 +180,13 @@ The line chart captures the game's excitement: team 4 (green line) secured the f
 
 The pie charts can quickly show whether the teams are balanced. To keep the game fun for everyone, I reshuffle team members if any team leading or lagging too much. These pie charts above show that this game was very well balanced (which is why I chose it to include here).
 
+### Explanation of special categories
+
+Some categories on the Jeopardy TV show have special meaning. For example, a category name with a word in quotation marks means all answers in that category contain the quoted word. Sometimes the TV show host explains these categories, but usually the players and audience are expected to already know them.
+
+That means guests at my game who have seen the TV show may have an unfair advantage over players who are new to Jeopardy. To make the game more fair, my software detects special categories from [this list](https://list.fandom.com/wiki/Jeopardy!_recurring_categories), prompts the operator to show a popup to everyone, and provides an explanation with an example:
+
+![screenshot of special category popup](images-for-readme/special-category-explanation-popup.png)
 ## "Clue" vs "question" vs "answer"
 
 A *clue* contains a category, dollar value, question, and answer.

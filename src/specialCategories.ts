@@ -181,7 +181,7 @@ export const specialCategories: SpecialCategory[] = [
         }
     }, {
         DISPLAY_NAME: "Potpourri, hodgepodge, goulash, leftovers, mixed bag",
-        CATEGORY_NAME_MATCHES: /(POTPOURRI)|(HODGEPODGE)|(GOULASH)|(LEFTOVERS)|(MIXED BAG)/i,
+        CATEGORY_NAME_MATCHES: /(POURRI)|(HODGEPODGE)|(GOULASH)|(LEFTOVERS)|(MIXED BAG)/i, // match any kind of -pourri
         DESCRIPTION: "It can be anything."
     }, {
         DISPLAY_NAME: "Quotation-mark categories",
