@@ -186,7 +186,10 @@ Some categories on the Jeopardy TV show have special meaning. For example, a cat
 
 That means guests at my game who have seen the TV show may have an unfair advantage over players who are new to Jeopardy. To make the game more fair, my software detects special categories from [this list](https://list.fandom.com/wiki/Jeopardy!_recurring_categories), prompts the operator to show a popup to everyone, and provides an explanation with an example:
 
-![screenshot of special category popup](images-for-readme/special-category-explanation-popup.png)
+<p align="center">
+<img src="images-for-readme/special-category-explanation-popup.png" alt="Screenshot of special category popup" width="600">
+</p>
+
 ## "Clue" vs "question" vs "answer"
 
 A *clue* contains a category, dollar value, question, and answer.
