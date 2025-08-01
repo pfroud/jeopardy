@@ -104,7 +104,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             TRANSITIONS: [{
                 TYPE: "timeout",
                 INITIAL_DURATION_MILLISEC: settings.displayDurationCategoryMillisec,
-                BEHAVIOR: CountdownBehavior.ContinueTimerUntilManuallyReset,
+                BEHAVIOR: CountdownBehavior.ResetTimerEveryTimeYouEnterTheState,
                 DESTINATION: "showClueQuestion",
                 /*
                 Don't put this as onEnter of the showClueQuestion state because it does
@@ -152,6 +152,12 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
                 TYPE: "timeout",
                 DESTINATION: "showAnswer",
                 INITIAL_DURATION_MILLISEC: settings.timeoutWaitForBuzzesMillisec,
+
+                /*
+                This timer is reset manually in Operator.onDoneReadingClueQuestion().
+                We want the timer to continue when this sequence of states happens:
+                waitForBuzzes -> waitForTeamAnswer -> answerWrongOrTimeout -> waitForBuzzes
+                */
                 BEHAVIOR: CountdownBehavior.ContinueTimerUntilManuallyReset,
                 ON_TRANSITION: operator.playSoundQuestionTimeout.bind(operator)
             }]

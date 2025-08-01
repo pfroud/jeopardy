@@ -665,8 +665,6 @@ export class Operator {
      * Called when the human operator clicks on a cell in the game board table.
      */
     public onGameBoardClueClicked(clue: RevealedClue): void {
-        this.stateMachine?.getCountdownTimerForState("showClueCategoryAndValue").reset();
-
         this.BUTTON_START_GAME.blur();
         this.TR_QUESTION.style.display = "none";
 
@@ -784,6 +782,11 @@ export class Operator {
         this.setAllTeamsState("can-answer");
         this.BUTTON_SKIP_CLUE.setAttribute("disabled", "disabled");
 
+        /*
+        The waitForBuzzes state has CountdownBehavior.ContinueTimerUntilManuallyReset
+        because we want the timer to continue when this sequence of states happens:
+        waitForBuzzes -> waitForTeamAnswer -> answerWrongOrTimeout -> waitForBuzzes
+        */
         this.stateMachine?.getCountdownTimerForState("waitForBuzzes").reset();
 
         this.teamArray?.forEach(team => team.resetHasBuzzedForCurrentQuestion());
