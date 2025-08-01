@@ -645,6 +645,8 @@ export class Operator {
      * The game board is the table of categories and dollar values.
      */
     public gameBoardShow(): void {
+        this.GAME_ROUND_TIMER.resume(); //paused in onShowAnswer()
+
         this.DIV_GAME_BOARD_WRAPPER.style.display = ""; //show it by removing display=none
 
         this.DIV_CLUE_WRAPPER.style.display = "none";
@@ -805,6 +807,8 @@ export class Operator {
         if (this.teamArray?.some(team => team.getMoney() > 0)) {
             this.gameSave();
         }
+
+        this.GAME_ROUND_TIMER.pause();
 
         this.stateMachine?.getCountdownTimerForState("waitForBuzzes").showProgressBarFinished();
         this.stateMachine?.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
@@ -1044,8 +1048,6 @@ export class Operator {
      */
     public onBuzzHistoryShow(): void {
         if (this.buzzHistoryForClue && this.buzzHistoryChart) {
-            this.GAME_ROUND_TIMER.pause();
-
             this.backdropForPopupsShow();
             this.DIV_BUZZ_HISTORY_POPUP.setAttribute("data-popup-visibility", "visible");
 
@@ -1070,7 +1072,6 @@ export class Operator {
      * Buzz history is for each clue. It shows a timeline of when teams buzzed in.
      */
     public onBuzzHistoryHide(): void {
-        this.GAME_ROUND_TIMER.resume();
         this.backdropForPopupsHide();
         this.DIV_BUZZ_HISTORY_POPUP.setAttribute("data-popup-visibility", "hidden");
     }
