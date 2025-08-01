@@ -285,7 +285,7 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
         {
             // then add another state to show the answer in the presentation?
             NAME: "finalJeopardyShowWagersTable",
-            OPERATOR_INSTRUCTIONS_HTML: "Do the wagers.",
+            OPERATOR_INSTRUCTIONS_HTML: "Do the wagers. Press space to end the game.",
             ON_ENTER: operator.finalJeopardyShowWagersTable.bind(operator),
             PRESENTATION_SLIDE_TO_SHOW: "slide-final-jeopardy-wagers-table",
             TRANSITIONS: [{

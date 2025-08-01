@@ -16,6 +16,8 @@ div.tab-content#tab-content-play div#final-jeopardy-wagers-table-container table
         padding: 0px;
         margin: 0px;
 
+        cursor: pointer;
+
         &#right:hover:not(:active) {
             filter: brightness(200%);
         }
