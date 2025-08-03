@@ -1,12 +1,13 @@
 import { AudioManager } from "../AudioManager";
-import { BuzzAnswerResult, BuzzHistoryChart, BuzzHistoryForClue, BuzzHistoryRecord, BuzzResult, BuzzResultStartAnswer } from "../BuzzHistoryChart";
+import { BuzzAnswerResult, BuzzHistoryChart, BuzzHistoryForOneClue, BuzzHistoryRecord, BuzzResultStartAnswer } from "../BuzzHistoryChart";
 import { CountdownTimer } from "../CountdownTimer";
 import { FinalJeopardyWagersTable } from "../FinalJeopardyWagersTable";
 import { GameBoard } from "../GameBoard";
 import { Settings } from "../Settings";
 import { Team, TeamSavedInLocalStorage, TeamState } from "../Team";
 import { querySelectorAndCheck } from "../commonFunctions";
-import { createGameEndLineChartOfMoneyOverTime, createGameEndPieChartsOfBuzzResults } from "../gameEndStatisticsCharts";
+import { createGameEndLineChartOfMoneyOverTime } from "../gameEndStatisticsCharts/gameEndLineChartOfMoneyOverTime";
+import { createGameEndPieChartsOfBuzzResults } from "../gameEndStatisticsCharts/gameEndPieChart";
 import { Presentation } from "../presentation/Presentation";
 import { SCRAPED_GAME } from "../scrapedGame";
 import { checkSpecialCategory, SpecialCategory } from "../specialCategories";
@@ -79,12 +80,14 @@ export class Operator {
     private teamPresentlyAnswering: Team | undefined;
 
     private presentClue?: RevealedClue;
-    private buzzHistoryForClue?: BuzzHistoryForClue;
+
+    private buzzHistoryForCurrentClue?: BuzzHistoryForOneClue;
+    public buzzHistoryFor_ALL_clues: BuzzHistoryForOneClue[] = [];
+
     private buzzHistoryChart: BuzzHistoryChart | undefined;
     private buzzHistoryRecordForActiveAnswer: BuzzHistoryRecord<BuzzResultStartAnswer> | undefined;
 
     private isPaused_ = false; // add underscore to property name so the method can be called isPaused
-    private questionCountForPieCharts = 0;
     private gameRoundIndex = -1;
     private categoryCarouselIndex = -1;
     private teamIndexToPickClue = 0;
@@ -193,6 +196,7 @@ export class Operator {
         constantSource.connect(audioContext.destination);
         constantSource.start();
 
+        /*
         const testBuzzHistory = false;
         if (testBuzzHistory) {
             this.buzzHistoryForClue = {
@@ -234,6 +238,7 @@ export class Operator {
             });
             this.stateMachine?.goToState("gameEnd");
         }
+            */
 
     }
 
@@ -283,7 +288,7 @@ export class Operator {
                 } else if (teamState === "idle") {
                     // Ignore, we don't need it to appear in the history chart.
                 } else {
-                    this.buzzHistoryForClue?.RECORDS[teamIndex].push({
+                    this.buzzHistoryForCurrentClue?.RECORDS[teamIndex].push({
                         startTimestamp: Date.now(),
                         RESULT: {
                             TYPE: "ignored",
@@ -374,10 +379,14 @@ export class Operator {
             this.buzzHistoryRecordForActiveAnswer.RESULT.endTimestamp = Date.now();
             this.buzzHistoryRecordForActiveAnswer.RESULT.answerResult = answerResult;
 
-            this.buzzHistoryForClue?.RECORDS[this.teamPresentlyAnswering.getTeamIndex()]
+            this.buzzHistoryForCurrentClue?.RECORDS[this.teamPresentlyAnswering.getTeamIndex()]
                 .push(this.buzzHistoryRecordForActiveAnswer);
 
             this.buzzHistoryRecordForActiveAnswer = undefined;
+
+            if (this.buzzHistoryForCurrentClue) {
+                this.buzzHistoryFor_ALL_clues.push(this.buzzHistoryForCurrentClue);
+            }
         }
     }
 
@@ -596,7 +605,7 @@ export class Operator {
         if (team.canBeLockedOut()) {
             team.lockoutStart();
 
-            this.buzzHistoryForClue?.RECORDS[teamIndex].push({
+            this.buzzHistoryForCurrentClue?.RECORDS[teamIndex].push({
                 startTimestamp: Date.now(),
                 RESULT: { TYPE: "too-early-start-lockout" }
             });
@@ -618,17 +627,17 @@ export class Operator {
     private setPresentClue(clue: RevealedClue): void {
         this.presentClue = clue;
 
-        this.buzzHistoryForClue = {
+        this.buzzHistoryForCurrentClue = {
             RECORDS: getEmpty2DArray(this.teamCount),
             timestampWhenClueQuestionFinishedReading: NaN
         };
 
-        function getEmpty2DArray(size: number): BuzzHistoryRecord<BuzzResult>[][] {
+        function getEmpty2DArray(size: number): BuzzHistoryRecord[][] {
             /*
              Do not use array.fill([]) because it creates one new empty array and sets
              all the elements to that empty array.
              */
-            const rv = new Array<BuzzHistoryRecord<BuzzResult>[]>(size);
+            const rv = new Array<BuzzHistoryRecord[]>(size);
             for (let teamIdx = 0; teamIdx < size; teamIdx++) {
                 rv[teamIdx] = [];
             }
@@ -793,8 +802,8 @@ export class Operator {
 
         this.teamArray?.forEach(team => team.resetHasBuzzedForCurrentQuestion());
 
-        if (this.buzzHistoryForClue) {
-            this.buzzHistoryForClue.timestampWhenClueQuestionFinishedReading = Date.now();
+        if (this.buzzHistoryForCurrentClue) {
+            this.buzzHistoryForCurrentClue.timestampWhenClueQuestionFinishedReading = Date.now();
         }
     }
 
@@ -804,9 +813,11 @@ export class Operator {
     public onShowAnswer(): void {
 
         // only save the game if somebody has more than $0
+        /*
         if (this.teamArray?.some(team => team.getMoney() > 0)) {
             this.gameSave();
         }
+            */
 
         this.GAME_ROUND_TIMER.pause();
 
@@ -820,8 +831,6 @@ export class Operator {
         });
 
         this.presentation?.hideQuestionInAnswerSlide();
-
-        this.questionCountForPieCharts++;
 
         if (this.SETTINGS.teamToChooseNextClue === "rotate") {
             if (this.teamIndexToPickClue === this.teamCount - 1) {
@@ -927,11 +936,10 @@ export class Operator {
             cellTeamMoney.innerHTML = `$${team.MONEY}`;
             tableRowTeamMoney.append(cellTeamMoney);
         });
-
         const divSavedGame = querySelectorAndCheck(document, "div#tab-content-load-game");
 
         querySelectorAndCheck(document, "button#saved-game-load").addEventListener("click", () => {
-            this.gameLoad(parsedJson);
+            // this.gameLoad(parsedJson);
             divSavedGame.style.display = "none";
         });
 
@@ -943,6 +951,7 @@ export class Operator {
         });
     }
 
+    /*
     private gameSave(): void {
         if (!this.teamArray) {
             throw new Error("called saveGame() when teamArray is undefined");
@@ -977,6 +986,7 @@ export class Operator {
             this.stateMachine?.goToState("gameEnd");
         }
     }
+        */
 
     /**
      * Called from the state machine.
@@ -1047,11 +1057,11 @@ export class Operator {
      * Buzz history is for each clue. It shows a timeline of when teams buzzed in.
      */
     public onBuzzHistoryShow(): void {
-        if (this.buzzHistoryForClue && this.buzzHistoryChart) {
+        if (this.buzzHistoryForCurrentClue && this.buzzHistoryChart) {
             this.backdropForPopupsShow();
             this.DIV_BUZZ_HISTORY_POPUP.setAttribute("data-popup-visibility", "visible");
 
-            this.buzzHistoryChart.showNewHistory(this.buzzHistoryForClue);
+            this.buzzHistoryChart.showNewHistory(this.buzzHistoryForCurrentClue);
         }
     }
 
@@ -1082,10 +1092,6 @@ export class Operator {
 
     public getTeamArray(): Team[] | undefined {
         return this.teamArray;
-    }
-
-    public getQuestionCountForPieCharts(): number {
-        return this.questionCountForPieCharts;
     }
 
     public setInstructionsHtml(text: string): void {

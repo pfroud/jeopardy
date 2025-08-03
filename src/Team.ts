@@ -1,18 +1,11 @@
 import { AudioManager } from "./AudioManager";
+import { BuzzHistoryRecord } from "./BuzzHistoryChart";
 import { CountdownTimer } from "./CountdownTimer";
 import { Settings } from "./Settings";
 import { querySelectorAndCheck } from "./commonFunctions";
 import { Operator } from "./operator/Operator";
 import { Presentation } from "./presentation/Presentation";
 import { RevealedClue } from "./typesForGame";
-
-/** Used to create charts at the end of the game. */
-interface Statistics {
-    questionsNotBuzzed: number;
-    questionsBuzzedThenAnsweredRight: number;
-    questionsBuzzedThenAnsweredWrongOrTimedOut: number;
-    moneyAtEndOfEachRound: number[]
-}
 
 export type TeamState =
     "idle" | // the question has not been presented to the players yet
@@ -27,7 +20,7 @@ export type TeamState =
 export interface TeamSavedInLocalStorage {
     readonly MONEY: number;
     readonly TEAM_NAME: string;
-    readonly STATISTICS: Statistics;
+    // readonly STATISTICS: StatisticsForGameEndCharts;
 }
 
 export class Team {
@@ -69,12 +62,17 @@ export class Team {
 
     private hasBuzzedForCurrentQuestion_ = false;
 
-    private statistics: Statistics = {
-        questionsNotBuzzed: 0,
-        questionsBuzzedThenAnsweredRight: 0,
-        questionsBuzzedThenAnsweredWrongOrTimedOut: 0,
-        moneyAtEndOfEachRound: []
-    };
+    public moneyAtEndOfEachRound: number[] = [];
+
+    /**
+     * The first array is for each clue.
+     * The second index is for how many times the team buzzes for that clue.
+     * 
+     * WATCH OUT because in BuzzHistoryChart, the first array is the TEAM INDEX.
+     * BuzzHistoryChart does NOT keep track of multiple clues.
+     * */
+    public buzzHistoryForAllClues: BuzzHistoryRecord[][] = [];
+
 
     public constructor(teamIdx: number, operator: Operator, presentation: Presentation, settings: Settings, audioManager: AudioManager) {
         this.SETTINGS = settings;
@@ -98,7 +96,6 @@ export class Team {
         this.answerStop();
         this.AUDIO_MANAGER.ANSWER_CORRECT.play();
         this.moneyAdd(clue.VALUE);
-        this.statistics.questionsBuzzedThenAnsweredRight++;
         this.hasBuzzedForCurrentQuestion_ = true;
     }
 
@@ -107,7 +104,6 @@ export class Team {
         this.AUDIO_MANAGER.ANSWER_WRONG_OR_ANSWER_TIMEOUT.play();
         this.moneySubtract(clue.VALUE * this.SETTINGS.wrongAnswerPenaltyMultiplier);
         this.setState(this.SETTINGS.allowMultipleAnswersToSameQuestion ? "can-answer" : "already-answered-this-clue");
-        this.statistics.questionsBuzzedThenAnsweredWrongOrTimedOut++;
         this.hasBuzzedForCurrentQuestion_ = true;
     }
 
@@ -345,6 +341,18 @@ export class Team {
         countdownShowCategory.onFinished = (): void => this.lockoutStop();
         countdownShowCategory.start();
 
+        /*
+        How does a Team know what the clue index is?
+
+        Actually this is a bad way to do it, because we would need to check if it's the first 
+        time adding a record for the present clue index to either create the array or
+        push to the array.
+
+        So I guess we have a buzzRecordsForPresentClue in Team (which I think was
+        already in Operator). Then the Team needs to know about questions incrementing.
+
+        */
+
     }
 
     public lockoutStop(): void {
@@ -399,27 +407,24 @@ export class Team {
     }
 
     public statisticsUpdateMoneyAtEndOfRound(): void {
-        this.statistics.moneyAtEndOfEachRound.push(this.money);
-
-        if (!this.hasBuzzedForCurrentQuestion_) {
-            this.statistics.questionsNotBuzzed++;
-        }
-
+        this.moneyAtEndOfEachRound.push(this.money);
     }
 
+    /*
     public getObjectToSaveInLocalStorage(): TeamSavedInLocalStorage {
         return {
             MONEY: this.money,
             TEAM_NAME: this.teamName,
-            STATISTICS: this.statistics
+            STATISTICS: this.statisticsForGameEndCharts
         };
     }
 
     public loadFromLocalStorage(source: TeamSavedInLocalStorage): void {
         this.moneySet(source.MONEY, false);
-        this.statistics = source.STATISTICS;
+        this.statisticsForGameEndCharts = source.STATISTICS;
         this.setTeamName(source.TEAM_NAME);
     }
+        */
 
     public getTeamIndex(): number {
         return this.TEAM_INDEX;
@@ -443,9 +448,12 @@ export class Team {
         this.hasBuzzedForCurrentQuestion_ = false;
     }
 
-    public getStatistics(): Statistics {
-        return this.statistics;
+    /*
+    public getStatistics(): StatisticsForGameEndCharts {
+        return this.statisticsForGameEndCharts;
     }
+        */
+
 
 
 }

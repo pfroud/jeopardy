@@ -16,17 +16,27 @@ div.presentation-slide#slide-gameEnd-pie-charts {
         svg.ct-chart-donut {
 
             g.ct-series {
-                &.not-buzzed path.ct-slice-donut {
+                &.notPressedBuzzer path.ct-slice-donut {
                     stroke: gray;
                 }
 
-                &.buzzed-then-answered-right path.ct-slice-donut {
+                &.pressedBuzzerButDidNotStartAnswer path.ct-slice-donut {
+                    stroke: orange;
+                }
+
+                &.pressedBuzzerThenAnsweredRight path.ct-slice-donut {
                     stroke: green;
                 }
 
-                &.buzzed-then-answered-wrong-or-timed-out path.ct-slice-donut {
+                &.pressedBuzzerThenAnsweredWrongOrTimedOut path.ct-slice-donut {
                     stroke: red;
                 }
+
+                &.pressedBuzzerThenAnsweredWrongOrTimedOutThenBuzzedAgainAndAnsweredRight path.ct-slice-donut {
+                    stroke: magenta;
+                    /* stroke: url(#stripes); */
+                }
+
             }
 
             text.ct-label {
@@ -41,10 +51,18 @@ div.presentation-slide#slide-gameEnd-pie-charts {
                 fill: var(--text-color);
             }
 
-            g#legend text {
-                fill: var(--text-color);
-                dominant-baseline: middle;
-                font-size: 20px;
+            g#legend {
+
+                g.ct-series path.ct-slice-donut {
+                    /* The stroke-width is set on attributes on each <path> because it comes from a typescript variable */
+                    stroke-width: revert-layer;
+                }
+
+                text {
+                    fill: var(--text-color);
+                    dominant-baseline: middle;
+                    font-size: 20px;
+                }
             }
 
         }

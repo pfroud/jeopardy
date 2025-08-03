@@ -9,19 +9,19 @@ import { Team, TeamState } from "./Team";
 /**
  * This is history of buzzes for one single clue.
  */
-export interface BuzzHistoryForClue {
+export interface BuzzHistoryForOneClue {
     /**
      * The first index of the array is the team index.
-     * Each subarray is a list of records in the order they happened.
+     * Each subarray is an array of records in the order they happened.
      */
-    readonly RECORDS: BuzzHistoryRecord<BuzzResult>[][];
+    readonly RECORDS: BuzzHistoryRecord[][];
     timestampWhenClueQuestionFinishedReading: number;
 }
 
 /**
  * One BuzzHistoryRecord corresponds to one press of the physical buzzer button.
  */
-export interface BuzzHistoryRecord<R extends BuzzResult> {
+export interface BuzzHistoryRecord<R extends BuzzResult = BuzzResult> {
     startTimestamp: number;
     readonly RESULT: R;
 }
@@ -123,7 +123,7 @@ export class BuzzHistoryChart {
     private static readonly ANNOTATION_ARROWHEAD_SIZE = 5;
 
     /**
-     * The first index is the team index. Then the second list is annotations for that team.
+     * The first index is the team index. Then the second array is annotations for that team.
      */
     private readonly ANNOTATIONS: Annotation[][] = [];
 
@@ -144,7 +144,7 @@ export class BuzzHistoryChart {
     /** The SVG in the operator window needs mouse listeners */
     private readonly SVG_IN_OPERATOR_WINDOW: Selection<SVGSVGElement, unknown, null, undefined>;
 
-    private history: BuzzHistoryForClue | null = null;
+    private history: BuzzHistoryForOneClue | null = null;
 
     // one for each SVG
     private readonly X_AXIS_GROUPS = new Map<
@@ -555,7 +555,7 @@ export class BuzzHistoryChart {
 
     }
 
-    public showNewHistory(history: BuzzHistoryForClue): void {
+    public showNewHistory(history: BuzzHistoryForOneClue): void {
 
         if (history.RECORDS.length === 0) {
             console.warn("array of buzz history records is empty");
@@ -658,12 +658,12 @@ export class BuzzHistoryChart {
                     .data(
                         recordsForTeam.filter(
                             /*
-                            Need to use a type predicate (aka "user-defined type guard") for
-                            Typescript to be able to infer types from the array filter function.
+                            Need to use a type predicate aka user-defined type guard for
+                            Typescript to be able to infer types from the array filter() function.
                             https://stackoverflow.com/questions/65279417/typescript-narrow-down-type-based-on-class-property-from-filter-find-etc
                             https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates
                             */
-                            function (record: BuzzHistoryRecord<BuzzResult>): record is BuzzHistoryRecord<BuzzResultStartAnswer> {
+                            function (record: BuzzHistoryRecord): record is BuzzHistoryRecord<BuzzResultStartAnswer> {
                                 return record.RESULT.TYPE === "start-answer";
                             }
                         )
