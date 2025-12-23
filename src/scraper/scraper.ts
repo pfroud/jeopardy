@@ -247,19 +247,38 @@ function main(): void {
     window.navigator.clipboard.writeText(outputString)
         .then(() => {
             /* The promise resolves once the clipboard's contents have been updated. */
-            const successMessage = document.createElement("div");
-            successMessage.innerHTML = "Success, copied the game from J-Archive to the clipboard. You can put it in scrapedGame.ts.";
-            successMessage.style.fontSize = "30px";
-            successMessage.style.fontWeight = "bold";
-            successMessage.style.background = "green";
-            successMessage.style.border = "1px solid lime";
-            successMessage.style.borderRadius = "5px";
-            successMessage.style.padding = "15px 20px";
-            successMessage.style.position = "fixed";
-            successMessage.style.top = "10px";
-            successMessage.style.left = "10px";
-            successMessage.style.maxWidth = "1090px";
-            document.body.append(successMessage);
+
+            const popup = document.createElement("div");
+            popup.style.background = "green";
+            popup.style.border = "1px solid lime";
+            popup.style.borderRadius = "5px";
+            popup.style.padding = "15px 20px";
+            popup.style.position = "fixed";
+            popup.style.top = "10px";
+            popup.style.left = "10px";
+            popup.style.maxWidth = "1090px";
+
+            const message = document.createElement("div");
+            message.innerHTML = "Success, copied the game from J-Archive to the clipboard. You can put it in scrapedGame.ts.";
+            message.style.fontSize = "30px";
+            message.style.fontWeight = "bold";
+            popup.append(message);
+
+            const closeButton = document.createElement("button");
+            closeButton.innerHTML = "&times;";
+            closeButton.addEventListener("click", () => popup.remove());
+            closeButton.style.position = "absolute";
+            closeButton.style.top = "-7px";
+            closeButton.style.right = "-7px";
+            closeButton.style.width = "25px";
+            closeButton.style.height = "25px";
+            closeButton.style.fontSize = "25px";
+            closeButton.style.padding = "0px";
+            closeButton.style.cursor = "pointer";
+            closeButton.style.lineHeight = "0px";
+            popup.append(closeButton);
+
+            document.body.append(popup);
         })
         .catch((error: unknown) => {
             console.log(`Jeopardy scraper: clipboard write failed: ${String(error)}`);
