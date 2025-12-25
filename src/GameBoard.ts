@@ -35,6 +35,8 @@ export class GameBoard {
      */
     private readonly CLUE_CELLS = new Map<HTMLTableElement, HTMLTableCellElement[][]>();
 
+    private readonly CELL_SELECTED_LAST_TIME = new Set<HTMLTableCellElement>();
+
     /** Only used to remove style from presentation window when the game pauses. */
     private cellHovering: HTMLTableCellElement | null = null;
 
@@ -118,7 +120,17 @@ export class GameBoard {
                         if (clue.REVEALED_ON_TV_SHOW && this.cluesStillAvailableThisRound?.has(clue)) {
                             this.OPERATOR.onGameBoardClueClicked(clue);
                             this.cluesStillAvailableThisRound.delete(clue);
-                            this.CLUE_CELLS.forEach(twoDArray => twoDArray[clueRowIndex][columnIndex].setAttribute("data-clue-state", "done"));
+
+                            this.CELL_SELECTED_LAST_TIME.forEach(cell => cell.classList.remove("clueWasChosenLastTime"));
+                            this.CELL_SELECTED_LAST_TIME.clear();
+
+                            // Do the same thing in both the operator window and presentation window
+                            this.CLUE_CELLS.forEach(twoDArray => {
+                                const cell = twoDArray[clueRowIndex][columnIndex];
+                                cell.setAttribute("data-clue-state", "done");
+                                cell.classList.add("clueWasChosenLastTime");
+                                this.CELL_SELECTED_LAST_TIME.add(cell);
+                            });
                         }
                     } else {
                         throw new Error("clicked on a cell but the game round has not been set");
@@ -209,7 +221,7 @@ export class GameBoard {
             }
         });
 
-        // Set dollar values
+        // Set dollar values in both the operator window and presentation window
         this.CLUE_CELLS.forEach(cellsForTable => {
             for (let clueRowIndex = 0; clueRowIndex < GameBoard.TABLE_CLUE_ROW_COUNT; clueRowIndex++) {
                 for (let columnIndex = 0; columnIndex < GameBoard.TABLE_COLUMN_COUNT; columnIndex++) {
@@ -249,6 +261,7 @@ export class GameBoard {
 
             this.cluesStillAvailableThisRound.delete(rv);
 
+            // Mark the clue done in both the operator window and presentation window
             this.CLUE_CELLS.forEach(twoDArray => twoDArray[rv.ROW_INDEX][rv.COLUMN_INDEX]
                 .setAttribute("data-clue-state", "done"));
 
