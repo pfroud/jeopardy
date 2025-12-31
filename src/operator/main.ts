@@ -9,12 +9,29 @@ document.addEventListener("DOMContentLoaded", function () {
     window.addEventListener("error", function (errorEvent) {
         const errorDiv = document.createElement("div");
         errorDiv.innerText = errorEvent.message;
-        errorDiv.style.backgroundColor = "red";
+        errorDiv.style.backgroundColor = "darkred";
         errorDiv.style.color = "white";
         errorDiv.style.padding = "20px";
         errorDiv.style.fontSize = "30px";
         errorDiv.style.position = "absolute";
         errorDiv.style.zIndex = "500";
+        errorDiv.style.margin = "20px";
+        errorDiv.style.border = "5px solid red";
+
+        const closeButton = document.createElement("button");
+        closeButton.innerHTML = "&times;";
+        closeButton.addEventListener("click", () => errorDiv.remove());
+        closeButton.style.position = "absolute";
+        closeButton.style.top = "-15px";
+        closeButton.style.right = "-12px";
+        closeButton.style.width = "30px";
+        closeButton.style.height = "30px";
+        closeButton.style.fontSize = "30px";
+        closeButton.style.padding = "0px";
+        closeButton.style.cursor = "pointer";
+        closeButton.style.lineHeight = "0px";
+        errorDiv.append(closeButton);
+
         document.body.prepend(errorDiv);
     });
 
