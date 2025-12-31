@@ -35,6 +35,11 @@ table#game-board {
 
     tr.clues td {
 
+        &.clueWasChosenLastTime {
+            outline: 1px dashed 666;
+            outline-offset: -7px;
+        }
+
         &:not([data-clue-state="available"]) {
             /* Hide text but keep background */
             color: transparent;
