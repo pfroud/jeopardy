@@ -177,19 +177,6 @@ main {
         }
 
         /**************************************************/
-        &.content-game-settings table#table-settings {
-            td {
-                padding-bottom: 20px;
-            }
-
-            input[type="number"] {
-                width: 100px;
-                text-align: right;
-            }
-
-        }
-
-        /**************************************************/
     }
 }
 
