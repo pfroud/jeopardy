@@ -41,13 +41,16 @@ table#game-board {
         }
 
         &:not([data-clue-state="available"]) {
-            /* Hide text but keep background */
+            /* Hide text but keep background image */
             color: transparent;
 
             /* Only needed for presentation window */
             text-shadow: none;
 
-            /* Make position:absolute work so we can do annoying hack for background image */
+            /*
+            Set position to relative to make position:absolute work
+            to do annoying hack to set opacity of background image
+            */
             position: relative;
 
         }
@@ -59,7 +62,11 @@ table#game-board {
         &[data-clue-state="not-revealed-on-tv-show"]::before,
         &[data-clue-state="done"]::before {
             opacity: 0.3;
-            /* Change the background size using padding. If you change the width or height, it stops being centered. */
+
+            /*
+            Change the background size using padding. If you change
+            the width or height, it stops being centered.
+            */
             padding: 14px;
 
             /* Pseudo-element positioning */

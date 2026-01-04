@@ -7,11 +7,12 @@ import { GameRound, RevealedClue } from "../typesForGame";
 export class Presentation {
     public readonly ALL_SLIDE_NAMES = new Set<string>();
 
-    private readonly MAIN: HTMLElement; // there's no HTMLMainElement
-    private readonly HEADER: HTMLElement; // there's no HTMLHeaderElement
-
-    private readonly HEADER_DISPLAY_ATTRIBUTE_NAME = "data-header-display";
-    private readonly FOOTER_DISPLAY_ATTRIBUTE_NAME = "data-footer-display";
+    /** HTML <main> element */
+    private readonly MAIN: HTMLElement;
+    /** HTML <header> element */
+    private readonly HEADER: HTMLElement;
+    /** HTML <footer> element */
+    private readonly FOOTER: HTMLElement;
 
     private readonly SPAN_CLUE_CATEGORY_IN_HEADER: HTMLSpanElement;
     private readonly SPAN_CLUE_MONEY_IN_HEADER: HTMLSpanElement;
@@ -20,6 +21,11 @@ export class Presentation {
     private readonly DIV_CLUE_CATEGORY_BIG: HTMLDivElement;
     private readonly DIV_CLUE_VALUE_BIG: HTMLDivElement;
     private readonly DIV_CLUE_ANSWER_TEXT: HTMLDivElement;
+    /**
+     * When showing the answer to the players, we can optionally show the question
+     * as well. This is useful for clues with wordplay (especially anagrams) or
+     * when the exact phrasing of the question is unclear.
+    */
     private readonly CLUE_QUESTION_IN_ANSWER_SLIDE: HTMLElement;
 
     private readonly DIV_SLIDE_ROUND_START: HTMLDivElement;
@@ -33,7 +39,6 @@ export class Presentation {
     private readonly SPECIAL_CATEGORY_EXAMPLE_ANSWER: HTMLElement;
 
     private readonly DIV_PAUSED: HTMLDivElement;
-    private readonly FOOTER: HTMLElement;
     private readonly PROGRESS_ELEMENT_FOR_STATE_MACHINE: HTMLProgressElement;
     private readonly PROGRESS_ELEMENT_FOR_GAME_ROUND_TIMER: HTMLProgressElement;
     private readonly ALL_SLIDE_DIVS: { [slideName: string]: HTMLDivElement } = {};
@@ -206,29 +211,29 @@ export class Presentation {
     }
 
     public setHeaderDisplayFull(): void {
-        this.HEADER.setAttribute(this.HEADER_DISPLAY_ATTRIBUTE_NAME, "full");
+        this.HEADER.setAttribute("data-header-display-type", "full");
     }
 
     /** Hide text in header, only show progress bars */
     public setHeaderDisplayMinimized(): void {
-        this.HEADER.setAttribute(this.HEADER_DISPLAY_ATTRIBUTE_NAME, "minimized");
+        this.HEADER.setAttribute("data-header-display-type", "minimized");
     }
 
     public setHeaderDisplayNone(): void {
-        this.HEADER.setAttribute(this.HEADER_DISPLAY_ATTRIBUTE_NAME, "none");
+        this.HEADER.setAttribute("data-header-display-type", "none");
     }
 
     public setFooterDisplayFull(): void {
-        this.FOOTER.setAttribute(this.FOOTER_DISPLAY_ATTRIBUTE_NAME, "full");
+        this.FOOTER.setAttribute("data-footer-display-type", "full");
     }
 
-    /** Only show team name and team money */
+    /** Hide symmetric-shrinking segmented progress bar and buzzer switch state visualizer, only show team name and team money */
     public setFooterDisplayMinimized(): void {
-        this.FOOTER.setAttribute(this.FOOTER_DISPLAY_ATTRIBUTE_NAME, "minimized");
+        this.FOOTER.setAttribute("data-footer-display-type", "minimized");
     }
 
     public setFooterDisplayNone(): void {
-        this.FOOTER.setAttribute(this.FOOTER_DISPLAY_ATTRIBUTE_NAME, "none");
+        this.FOOTER.setAttribute("data-footer-display-type", "none");
     }
 
 

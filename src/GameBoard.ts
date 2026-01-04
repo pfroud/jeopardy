@@ -1,5 +1,22 @@
 import { Operator } from "./operator/Operator";
-import { GameRound, RevealedClue, RoundType } from "./typesForGame";
+import { GameRound, RevealedClue } from "./typesForGame";
+
+/*
+Example of what the game board looks like:
+|------------+------------+------------+------------+------------+------------+
+| Category 1 | Category 2 | Category 3 | Category 4 | Category 5 | Category 6 |
+|------------+------------+------------+------------+------------+------------|
+|    $200    |    $200    |    $200    |    $200    |    $200    |    $200    |
+|------------+------------+------------+------------+------------+------------|
+|    $400    |    $400    |    $400    |    $400    |    $400    |    $400    |
+|------------+------------+------------+------------+------------+------------|
+|    $600    |    $600    |    $600    |    $600    |    $600    |    $600    |
+|------------+------------+------------+------------+------------+------------|
+|    $800    |    $800    |    $800    |    $800    |    $800    |    $800    |
+|------------+------------+------------+------------+------------+------------|
+|   $1000    |   $1000    |   $1000    |   $1000    |   $1000    |   $1000    |
+|------------+------------+------------+------------+------------+------------+
+*/
 
 /**
  * The <table>s in the operator window and presentation windows should have the exact same
@@ -9,47 +26,78 @@ export class GameBoard {
 
     public static readonly TABLE_COLUMN_COUNT = 6;
 
-    /** The entire table has six rows. The first row is categories, followed by five rows of clues. */
-    public static readonly TABLE_ROW_COUNT = 6;
-    public static readonly TABLE_CLUE_ROW_COUNT = GameBoard.TABLE_ROW_COUNT - 1;
-
-    /** For Double Jeopardy, each dollar value is doubled. */
-    public static readonly GAME_ROUND_VALUE_MULTIPLIER: { [roundType in RoundType]: number } = {
-        "single": 1,
-        "double": 2
-    };
-
-    /** 
-     * The Map value is an array of table cells.
-     * There is one array of <tds> for the game board in the operator window, 
-     * and one array of <td>s for the game board in the presentation window.
-     */
-    private readonly CATEGORY_CELLS = new Set<HTMLTableCellElement[]>();
+    /** The entire HTML <table> has six rows. */
+    public static readonly TABLE_TOTAL_ROW_COUNT = 6;
 
     /**
-     * The Map key is the table in either the operator window and presentation window.
-     * The 2D array is structured like an HTML table.
-     * The Map value is a 2D array:
-     *     The first array index is the <tr> (row) index.
-     *     The second array index is the <td> (column) index.
+     * How many rows in the HTML <table> are for clues. Clues on the game board are represented
+     * by a dollar value.
+     *  
+     * The first row shows category names, and all the other rows are for clues.
      */
-    private readonly CLUE_CELLS = new Map<HTMLTableElement, HTMLTableCellElement[][]>();
+    public static readonly TABLE_CLUE_ROW_COUNT = GameBoard.TABLE_TOTAL_ROW_COUNT - 1;
 
+    /**
+     * CSS class added to table cells in the presentation window to show mouse interactions in the operator window.
+     * Replicates the CSS :hover pseudo-class.
+     * 
+     * The class is added to a cell on the mouseenter event.
+     * The class is removed from a cell on the mouseleave event (and some other ways).
+     */
+    private static readonly CELL_CLASS_MOUSE_OVER_IN_OPERATOR_WINDOW = "mouse-over-cell-in-operator-window";
+
+
+    /**
+     * CSS class added to table cells in the presentation window to show mouse interactions in the operator window.
+     * Replicates the CSS :active pseudo-class.
+     * 
+     * The class is added to a cell on the mousedown event.
+     * The class is removed from a cell on the mouseup event (and some other ways).
+     */
+    private static readonly CELL_CLASS_MOUSE_DOWN_IN_OPERATOR_WINDOW = "mouse-down-on-cell-in-operator-window";
+
+    private readonly OPERATOR;
+
+    /** 
+     * Data structure containing all the cells which show a category name, in both the operator window and
+     * the presentation window.
+     * 
+     * There is one array of <td>s for the game board in the operator window, and one array of <td>s for
+     * the game board in the presentation window.
+     */
+    private readonly ALL_CATEGORY_CELLS = new Set<HTMLTableCellElement[]>();
+
+    /**
+     * Data structure containing all the cells which represent a clue (displayed a dollar value), in both
+     * the operator window and the presentation window.
+     * 
+     * The Map key is the <table> element in either the operator window or the presentation window.
+     * 
+     * The Map value is a 2D array, structured like an HTML table:
+     * - The first array index is the <tr> (row) index.
+     * - The second array index is the <td> (column) index.
+     */
+    private readonly ALL_CLUE_CELLS = new Map<HTMLTableElement, HTMLTableCellElement[][]>();
+
+    /**
+     * Keep track of which clue was selected previously to show a little GUI accent.
+     * 
+     * This is a Set because we need to keep track of one cell in the operator window
+     * and one cell in the presentation window.
+     */
     private readonly CELL_SELECTED_LAST_TIME = new Set<HTMLTableCellElement>();
 
     /** Only used to remove style from presentation window when the game pauses. */
-    private cellHovering: HTMLTableCellElement | null = null;
+    private cellInPresentationWindowShowingMouseOver: HTMLTableCellElement | null = null;
 
     /** Only used to remove style from presentation window when the game pauses. */
-    private cellActive: HTMLTableCellElement | null = null;
+    private cellInPresentationWindowShowingMouseDown: HTMLTableCellElement | null = null;
 
     /** Only used to check if the game paused while the mouse was down. */
     private isMouseDown = false;
 
     /** Only used to check if the game paused while the mouse was down. */
     private cancelClickEventBecauseGamePausedWhenMouseWasDown = false;
-
-    private readonly OPERATOR;
 
     private gameRound: GameRound | null = null;
 
@@ -58,39 +106,47 @@ export class GameBoard {
     public constructor(operator: Operator, tableInOperatorWindow: HTMLTableElement, tableInPresentationWindow: HTMLTableElement) {
         this.OPERATOR = operator;
 
+        /*
+        Validate the structure of the HTML <tables>s and populate data structures.
+
+        Here we are running the same forEach callback on both tables. Later we will do stuff
+        to only the table in the operator window.
+        */
         [tableInOperatorWindow, tableInPresentationWindow].forEach(table => {
 
-            const allRows = table.querySelectorAll("tr");
-            if (allRows.length !== GameBoard.TABLE_ROW_COUNT) {
-                throw new Error(`The table has ${allRows.length} <tr> element(s), expected exactly ${GameBoard.TABLE_ROW_COUNT}`);
+            const allRowsInThisTable = table.querySelectorAll("tr");
+            if (allRowsInThisTable.length !== GameBoard.TABLE_TOTAL_ROW_COUNT) {
+                throw new Error(`The table has ${allRowsInThisTable.length} <tr> element(s), expected exactly ${GameBoard.TABLE_TOTAL_ROW_COUNT}`);
             }
 
             /*
-            This 2D array is structured like an HTML table.
+            This 2D array is structured like an HTML table:
             The first array index is the <tr> (row) index.
             The second array index is the <td> (column) index.
             */
-            const clueCells: HTMLTableCellElement[][] = [];
+            const clueCellsForThisTable: HTMLTableCellElement[][] = [];
 
-            allRows.forEach((tr, trIndex) => {
+            allRowsInThisTable.forEach((tr, trIndex) => {
                 const tds = tr.querySelectorAll("td");
                 if (tds.length !== GameBoard.TABLE_COLUMN_COUNT) {
                     throw new Error(`The table row at index ${trIndex} has ${tds.length} <td> element(s), expected exactly ${GameBoard.TABLE_COLUMN_COUNT}`);
                 }
 
                 if (trIndex === 0) {
-                    // The first row is the categories.
-                    this.CATEGORY_CELLS.add(Array.from(tds));
+                    // The first row shows the category names.
+                    this.ALL_CATEGORY_CELLS.add(Array.from(tds));
                 } else {
                     /*
-                    The first row in the table is categories, so the second row
-                    in the table is the first row of clues.
+                    The SECOND row in the table is the FIRST row of clues
+                    (because the first row in the table is categories).
+
+                    So when trIndex is one, clueRowIndex is zero.
                     */
                     const clueRowIndex = trIndex - 1;
-                    clueCells[clueRowIndex] = Array.from(tds);
+                    clueCellsForThisTable[clueRowIndex] = Array.from(tds);
                 }
             });
-            this.CLUE_CELLS.set(table, clueCells);
+            this.ALL_CLUE_CELLS.set(table, clueCellsForThisTable);
 
         });
 
@@ -99,9 +155,10 @@ export class GameBoard {
 
         I am putting mouse listeners on every table cell, including cells for clues not
         revealed in the TV show, because the <table> element is re-used for every game
-        round. I don't want to late check which cells already have mouse listeners on them.
+        round. I don't want to later check which cells already have mouse listeners on them.
         */
-        this.CLUE_CELLS.get(tableInOperatorWindow)!.forEach((cellsInRow, clueRowIndex) =>
+        const clueCellsInOperatorWindow = this.ALL_CLUE_CELLS.get(tableInOperatorWindow)!;
+        clueCellsInOperatorWindow.forEach((cellsInRow, clueRowIndex) =>
             cellsInRow.forEach((td, columnIndex) => {
 
                 td.addEventListener("click", () => {
@@ -116,20 +173,23 @@ export class GameBoard {
                     }
 
                     if (this.gameRound) {
-                        const clue = this.gameRound.CLUES[clueRowIndex][columnIndex];
-                        if (clue.REVEALED_ON_TV_SHOW && this.cluesStillAvailableThisRound?.has(clue)) {
-                            this.OPERATOR.onGameBoardClueClicked(clue);
-                            this.cluesStillAvailableThisRound.delete(clue);
+                        const clueClickedOn = this.gameRound.CLUES[clueRowIndex][columnIndex];
+                        if (clueClickedOn.REVEALED_ON_TV_SHOW && this.cluesStillAvailableThisRound?.has(clueClickedOn)) {
+                            this.OPERATOR.onGameBoardClueClicked(clueClickedOn);
+                            this.cluesStillAvailableThisRound.delete(clueClickedOn);
 
                             this.CELL_SELECTED_LAST_TIME.forEach(cell => cell.classList.remove("clueWasChosenLastTime"));
                             this.CELL_SELECTED_LAST_TIME.clear();
 
-                            // Do the same thing in both the operator window and presentation window
-                            this.CLUE_CELLS.forEach(twoDArray => {
-                                const cell = twoDArray[clueRowIndex][columnIndex];
-                                cell.setAttribute("data-clue-state", "done");
-                                cell.classList.add("clueWasChosenLastTime");
-                                this.CELL_SELECTED_LAST_TIME.add(cell);
+                            /*
+                            Don't need to use a Map key here, just run the forEach callback on all the Map values.
+                            The Map values are arrays of table cells in the operator window and presentation window.
+                            */
+                            this.ALL_CLUE_CELLS.forEach(twoDArray => {
+                                const cellClickedOn = twoDArray[clueRowIndex][columnIndex];
+                                cellClickedOn.setAttribute("data-clue-state", "done");
+                                cellClickedOn.classList.add("clueWasChosenLastTime");
+                                this.CELL_SELECTED_LAST_TIME.add(cellClickedOn);
                             });
                         }
                     } else {
@@ -138,40 +198,40 @@ export class GameBoard {
                 });
 
 
-                const clueCellsForPresentation = this.CLUE_CELLS.get(tableInPresentationWindow);
+                const twoDArrayOfClueCellsInPresentationWindow = this.ALL_CLUE_CELLS.get(tableInPresentationWindow)!;
 
                 td.addEventListener("mouseenter", () => {
                     if (!this.OPERATOR.isPaused()) {
-                        const cell = clueCellsForPresentation![clueRowIndex][columnIndex];
-                        cell.classList.add("hover-in-operator-window");
-                        this.cellHovering = cell;
+                        const cellInPresentationWindow = twoDArrayOfClueCellsInPresentationWindow[clueRowIndex][columnIndex];
+                        cellInPresentationWindow.classList.add(GameBoard.CELL_CLASS_MOUSE_OVER_IN_OPERATOR_WINDOW);
+                        this.cellInPresentationWindowShowingMouseOver = cellInPresentationWindow;
                     }
                 });
 
                 td.addEventListener("mousedown", () => {
                     if (!this.OPERATOR.isPaused()) {
-                        const cell = clueCellsForPresentation![clueRowIndex][columnIndex];
-                        cell.classList.add("active-in-operator-window");
-                        this.cellActive = cell;
+                        const cellInPresentationWindow = twoDArrayOfClueCellsInPresentationWindow[clueRowIndex][columnIndex];
+                        cellInPresentationWindow.classList.add(GameBoard.CELL_CLASS_MOUSE_DOWN_IN_OPERATOR_WINDOW);
+                        this.cellInPresentationWindowShowingMouseDown = cellInPresentationWindow;
                         this.isMouseDown = true;
                     }
                 });
 
                 td.addEventListener("mouseleave", () => {
                     if (!this.OPERATOR.isPaused()) {
-                        const cell = clueCellsForPresentation![clueRowIndex][columnIndex];
-                        cell.classList.remove("hover-in-operator-window");
-                        cell.classList.remove("active-in-operator-window");
-                        this.cellActive = null;
-                        this.cellHovering = null;
+                        const cellInPresentationWindow = twoDArrayOfClueCellsInPresentationWindow[clueRowIndex][columnIndex];
+                        cellInPresentationWindow.classList.remove(GameBoard.CELL_CLASS_MOUSE_OVER_IN_OPERATOR_WINDOW);
+                        cellInPresentationWindow.classList.remove(GameBoard.CELL_CLASS_MOUSE_DOWN_IN_OPERATOR_WINDOW);
+                        this.cellInPresentationWindowShowingMouseDown = null;
+                        this.cellInPresentationWindowShowingMouseOver = null;
                     }
                 });
 
                 td.addEventListener("mouseup", () => {
                     if (!this.OPERATOR.isPaused()) {
-                        const cell = clueCellsForPresentation![clueRowIndex][columnIndex];
-                        cell.classList.remove("active-in-operator-window");
-                        this.cellActive = null;
+                        const cellInPresentationWindow = twoDArrayOfClueCellsInPresentationWindow[clueRowIndex][columnIndex];
+                        cellInPresentationWindow.classList.remove(GameBoard.CELL_CLASS_MOUSE_DOWN_IN_OPERATOR_WINDOW);
+                        this.cellInPresentationWindowShowingMouseDown = null;
                         this.isMouseDown = false;
                     }
                 });
@@ -182,8 +242,8 @@ export class GameBoard {
     }
 
     public onGamePause(): void {
-        this.cellActive?.classList.remove("active-in-operator-window");
-        this.cellHovering?.classList.remove("hover-in-operator-window");
+        this.cellInPresentationWindowShowingMouseDown?.classList.remove(GameBoard.CELL_CLASS_MOUSE_DOWN_IN_OPERATOR_WINDOW);
+        this.cellInPresentationWindowShowingMouseOver?.classList.remove(GameBoard.CELL_CLASS_MOUSE_OVER_IN_OPERATOR_WINDOW);
         if (this.isMouseDown) {
             this.cancelClickEventBecauseGamePausedWhenMouseWasDown = true;
         }
@@ -197,13 +257,13 @@ export class GameBoard {
         if (categories.length !== GameBoard.TABLE_COLUMN_COUNT) {
             throw new Error(`The array of categories has length ${categories.length}, expected exactly ${GameBoard.TABLE_COLUMN_COUNT}`);
         }
-        this.CATEGORY_CELLS.forEach(arrayOfTds => {
+        this.ALL_CATEGORY_CELLS.forEach(arrayOfTds => {
             for (let i = 0; i < GameBoard.TABLE_COLUMN_COUNT; i++) {
                 const category = categories[i];
                 const td = arrayOfTds[i];
                 td.innerText = category.NAME;
 
-                if (category.specialCategory !== undefined) {
+                if (category.specialCategory) {
 
                     const specialCategoryIconWrapper = document.createElement("div");
                     specialCategoryIconWrapper.classList.add("special-category-icon-wrapper");
@@ -222,7 +282,7 @@ export class GameBoard {
         });
 
         // Set dollar values in both the operator window and presentation window
-        this.CLUE_CELLS.forEach(cellsForTable => {
+        this.ALL_CLUE_CELLS.forEach(cellsForTable => {
             for (let clueRowIndex = 0; clueRowIndex < GameBoard.TABLE_CLUE_ROW_COUNT; clueRowIndex++) {
                 for (let columnIndex = 0; columnIndex < GameBoard.TABLE_COLUMN_COUNT; columnIndex++) {
 
@@ -231,7 +291,7 @@ export class GameBoard {
 
                     if (clue.REVEALED_ON_TV_SHOW) {
                         tableCell.setAttribute("data-clue-state", "available");
-                        tableCell.innerHTML = `$${(clueRowIndex + 1) * 200 * GameBoard.GAME_ROUND_VALUE_MULTIPLIER[gameRound.TYPE]}`;
+                        tableCell.innerHTML = `$${(clueRowIndex + 1) * 200 * (gameRound.ROUND_INDEX + 1)}`;
                     } else {
                         tableCell.setAttribute("data-clue-state", "not-revealed-on-tv-show");
                     }
@@ -262,7 +322,7 @@ export class GameBoard {
             this.cluesStillAvailableThisRound.delete(rv);
 
             // Mark the clue done in both the operator window and presentation window
-            this.CLUE_CELLS.forEach(twoDArray => twoDArray[rv.ROW_INDEX][rv.COLUMN_INDEX]
+            this.ALL_CLUE_CELLS.forEach(twoDArray => twoDArray[rv.ROW_INDEX][rv.COLUMN_INDEX]
                 .setAttribute("data-clue-state", "done"));
 
             return rv;

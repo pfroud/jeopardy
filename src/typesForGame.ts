@@ -10,11 +10,9 @@ export type Game = {
     readonly FINAL_JEOPARDY: FinalJeopardy;
 }
 
-export type RoundType = "single" | "double";
-
 export type Clue = HiddenClue | RevealedClue;
 export type GameRound = {
-    readonly TYPE: RoundType;
+    readonly ROUND_INDEX: number;
     readonly CATEGORIES: Category[];
     /**
      * This 2D array follows the structure of an HTML table.

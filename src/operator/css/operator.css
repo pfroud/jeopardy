@@ -139,7 +139,6 @@ main {
                 padding: 5px 10px 5px 10px;
             }
 
-
         }
 
         /**************************************************/
@@ -154,8 +153,9 @@ main {
         &#tab-content-music table {
 
             /*
-            In Firefox, <audio> elements in a grid seems messed up (tries to be very tall)
-            so I'm using a <table> instead of grid layout.
+            In Firefox, <audio> elements in a grid seems messed
+            up (they all try to be very tall) so I'm using a <table>
+            instead of grid layout.
             */
 
             td:first-of-type {
@@ -177,19 +177,6 @@ main {
         }
 
         /**************************************************/
-        &.content-game-settings table#table-settings {
-            td {
-                padding-bottom: 20px;
-            }
-
-            input[type="number"] {
-                width: 100px;
-                text-align: right;
-            }
-
-        }
-
-        /**************************************************/
     }
 }
 
@@ -204,8 +191,6 @@ footer {
             font-weight: bold;
             color: var(--dark-background-color);
         }
-
-
 
         &:not([data-team-state="answering"]) progress {
             visibility: hidden;

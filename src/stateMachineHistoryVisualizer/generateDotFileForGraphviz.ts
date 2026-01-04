@@ -14,11 +14,10 @@ import { StateMachineHistoryVisualizer } from "./StateMachineHistoryVisualizer";
  */
 export function stateMachineToGraphviz(stateArray: StateMachineState[]): string {
 
-
     const dotFileLines: string[] = [];
     dotFileLines.push('digraph jeopardy {\n');
 
-    // The ID attribute is copied to the SVG. Here it makes the top-level group be <g id="jeopardy">
+    // The ID attribute is copied to the SVG, which makes the top-level SVG group be <g id="jeopardy">
     dotFileLines.push('graph [id="jeopardy"];');
 
     /*
@@ -51,14 +50,13 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
 
         state.TRANSITIONS.forEach((transition) => {
 
-
             switch (transition.TYPE) {
                 case "keyboard": {
                     let transitionLabel = "keyboard: ";
                     if (transition.KEYBOARD_KEYS === " ") {
                         transitionLabel += "space";
                     } else if (typeof transition.KEYBOARD_KEYS === "function") {
-                        transitionLabel += `\\"(() => Set<string>)\\"`;
+                        transitionLabel += `(() => Set<string>)`;
                     } else {
                         transitionLabel += `\\"${transition.KEYBOARD_KEYS}\\"`;
                     }
@@ -78,7 +76,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                 }
 
                 case "timeout": {
-                    let transitionLabel = `${transition.TYPE.toString()}: `;
+                    let transitionLabel = `${transition.TYPE}: `;
 
                     transitionLabel += `${transition.BEHAVIOR} ${transition.INITIAL_DURATION_MILLISEC} ms`;
 
@@ -96,7 +94,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                 }
 
                 case "manualTrigger": {
-                    let transitionLabel = `${transition.TYPE.toString()}: \\"${transition.TRIGGER_NAME.replace("manualTrigger_", "")}\\"`;
+                    let transitionLabel = `${transition.TYPE}: \\"${transition.TRIGGER_NAME.replace("manualTrigger_", "")}\\"`;
                     if (transition.GUARD_CONDITION) {
                         transitionLabel += ` [${transition.GUARD_CONDITION.name.replace("bound ", "")}] `;
                     }
@@ -134,7 +132,7 @@ export function stateMachineToGraphviz(stateArray: StateMachineState[]): string 
                     if (transition.KEYBOARD_KEYS === " ") {
                         keyboardLabel += "space";
                     } else if (typeof transition.KEYBOARD_KEYS === "function") {
-                        keyboardLabel += `\\"(() => Set<string>)\\"`;
+                        keyboardLabel += `(() => Set<string>)`;
                     } else {
                         keyboardLabel += `\\"${transition.KEYBOARD_KEYS}\\"`;
                     }

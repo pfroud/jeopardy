@@ -1,27 +1,40 @@
 import { Team } from "./Team";
 
+/*
+
+This class creates and manages an HTML table which look like this: (but with a row for each team)
+|-------+--------+-------+----------+-------|
+|       | Before | Wager | Correct? | After |
+|-------+--------+-------+----------+-------|
+|Team 1 |        |       |          |       |
+|-------+--------+-------+----------+-------|
+
+The "before" column has the team's money before Final Jeopardy.
+The "wager" column has how much they wagered.
+The "correct" column has an icon showing whether the team answered correctly.
+The "after" column has the result or adding or subtracting the wager.
+*/
 export class FinalJeopardyWagersTable {
 
     private readonly TABLE_FOR_OPERATOR_WINDOW: HTMLTableElement;
     private readonly TABLE_FOR_PRESENTATION_WINDOW: HTMLTableElement;
 
-    /** Table cells for the wager values in the presentation window. Index is the team index. */
+    /** Table cells containing text fields for the wager values in the presentation window. Array index is the team index. */
     private readonly WAGER_CELLS_IN_PRESENTATION_WINDOW: HTMLTableCellElement[] = [];
 
-    /** Table cells for correct/incorrect symbol in the presentation window. Index is the team index. */
+    /** Table cells for correct/incorrect symbol in the presentation window. Array index is the team index. */
     private readonly RIGHT_OR_WRONG_ICON_IN_PRESENTATION_WINDOW: HTMLTableCellElement[] = [];
 
     /**
-     * The Map key is the table element (in either operator or presentation window).
-     * The Map value is an array of table cells to show the team's money with the wager result. The index is the team index.
+     * Cells which show how much money each team has after adding or subtracting the wager.
+     * 
+     * The Map key is the <table> element in either the operator window or the presentation window.
+     * The Map value is an array of table cells displaying the team's money after adding or
+     * subtracting the wager. The array index is the team index.
      */
-    private readonly MONEY_AFTER_CELLS: Map<HTMLTableElement, HTMLTableCellElement[]>;
+    private readonly MONEY_AFTER_CELLS = new Map<HTMLTableElement, HTMLTableCellElement[]>();
 
     public constructor(teamArray: Team[]) {
-
-        this.TABLE_FOR_OPERATOR_WINDOW = document.createElement("table");
-        this.TABLE_FOR_PRESENTATION_WINDOW = document.createElement("table");
-        this.MONEY_AFTER_CELLS = new Map();
 
         function createTableCell(contents: Node | string, className?: string): HTMLTableCellElement {
             const rv = document.createElement("td");
@@ -42,18 +55,20 @@ export class FinalJeopardyWagersTable {
             return rowHeader;
         }
 
-        ///////////////////////////////////////////////////////////////////
-        //////////// Create table for presentation window /////////////////
-        ///////////////////////////////////////////////////////////////////
-
-        this.TABLE_FOR_PRESENTATION_WINDOW.append(createTableHeaderRow());
+        ////////////////////////////////////////////////////////////////////////////////
+        //////////// Create and populate table for presentation window /////////////////
+        ////////////////////////////////////////////////////////////////////////////////
+        this.TABLE_FOR_PRESENTATION_WINDOW = document.createElement("table");
         this.TABLE_FOR_PRESENTATION_WINDOW.id = "final-jeopardy-wagers";
+        this.TABLE_FOR_PRESENTATION_WINDOW.append(createTableHeaderRow());
         this.MONEY_AFTER_CELLS.set(this.TABLE_FOR_PRESENTATION_WINDOW, []);
 
         teamArray.forEach(teamObj => {
             const tableRow = document.createElement("tr");
 
             tableRow.append(createTableCell(teamObj.getTeamName()));
+
+            // money before Final Jeopardy
             tableRow.append(createTableCell(`$${teamObj.getMoney().toLocaleString()}`, "money"));
 
             const cellWager = createTableCell("", "money");
@@ -71,10 +86,10 @@ export class FinalJeopardyWagersTable {
             this.TABLE_FOR_PRESENTATION_WINDOW.append(tableRow);
         });
 
-        ///////////////////////////////////////////////////////////////////
-        ////////////// Create table for operator window ///////////////////
-        ///////////////////////////////////////////////////////////////////
-
+        ////////////////////////////////////////////////////////////////////////////////
+        ////////////// Create and populate table for operator window ///////////////////
+        ////////////////////////////////////////////////////////////////////////////////
+        this.TABLE_FOR_OPERATOR_WINDOW = document.createElement("table");
         this.TABLE_FOR_OPERATOR_WINDOW.id = "final-jeopardy-wagers";
         this.TABLE_FOR_OPERATOR_WINDOW.append(createTableHeaderRow());
         this.MONEY_AFTER_CELLS.set(this.TABLE_FOR_OPERATOR_WINDOW, []);
@@ -91,16 +106,20 @@ export class FinalJeopardyWagersTable {
             const inputWager = document.createElement("input");
             inputWager.type = "text";
             inputWager.size = 6;
-            inputWager.addEventListener("focus", () => inputWager.select());
+            inputWager.addEventListener("focus", () => inputWager.select()); //select all text in field
 
             let wager = NaN;
 
-            // The input event fires on every keystroke
+            /*
+            The input event fires on every keystroke.
+            As the human operator types into the wager text field in the operator window,
+            also update the wager display in the presentation window.
+            */
             inputWager.addEventListener("input", () => {
-                const wagerNumber = Number(inputWager.value);
-                if (!isNaN(wagerNumber) && wagerNumber >= 0) {
-                    this.WAGER_CELLS_IN_PRESENTATION_WINDOW[teamIndex].innerText = `$${wagerNumber.toLocaleString()}`;
-                    wager = wagerNumber;
+                const parsedWager = Number(inputWager.value);
+                if (!isNaN(parsedWager) && parsedWager >= 0) {
+                    this.WAGER_CELLS_IN_PRESENTATION_WINDOW[teamIndex].innerText = `$${parsedWager.toLocaleString()}`;
+                    wager = parsedWager;
                     updateMoneyAfter();
                 }
             });
@@ -110,6 +129,11 @@ export class FinalJeopardyWagersTable {
             const iconRight = "✅";
             const iconWrong = "❌";
 
+            /*
+            Create a sliding toggle switch using a checkbox.
+            Originally from
+            https://www.geeksforgeeks.org/css/how-to-make-a-toggle-button-using-checkbox-and-css
+            */
             const labelToggleSwitch = document.createElement("label");
             labelToggleSwitch.className = "toggle-switch";
 
@@ -118,6 +142,7 @@ export class FinalJeopardyWagersTable {
             inputCheckboxRightOrWrong.indeterminate = true;
 
             const updateMoneyAfter = (): void => {
+                // Add or subtract the wager from the team's "before" money and populate the "after" column.
                 if (!isNaN(wager) && !inputCheckboxRightOrWrong.indeterminate) {
                     let newValue;
                     if (inputCheckboxRightOrWrong.checked) {
@@ -130,14 +155,13 @@ export class FinalJeopardyWagersTable {
                 }
             };
 
-            const updateMoneyAndPresentationIcons = (): void => {
+            const updateIconAndMoney = (): void => {
                 this.RIGHT_OR_WRONG_ICON_IN_PRESENTATION_WINDOW[teamIndex].innerText =
                     inputCheckboxRightOrWrong.checked ? iconRight : iconWrong;
                 updateMoneyAfter();
-
             };
 
-            inputCheckboxRightOrWrong.addEventListener("input", updateMoneyAndPresentationIcons);
+            inputCheckboxRightOrWrong.addEventListener("input", updateIconAndMoney);
 
             labelToggleSwitch.append(inputCheckboxRightOrWrong);
 
@@ -154,7 +178,7 @@ export class FinalJeopardyWagersTable {
             buttonWrong.addEventListener("click", () => {
                 inputCheckboxRightOrWrong.indeterminate = false;
                 inputCheckboxRightOrWrong.checked = false;
-                updateMoneyAndPresentationIcons();
+                updateIconAndMoney();
             });
             cellRightOrWrong.append(buttonWrong);
 
@@ -167,7 +191,7 @@ export class FinalJeopardyWagersTable {
             buttonRight.addEventListener("click", () => {
                 inputCheckboxRightOrWrong.indeterminate = false;
                 inputCheckboxRightOrWrong.checked = true;
-                updateMoneyAndPresentationIcons();
+                updateIconAndMoney();
             });
             cellRightOrWrong.append(buttonRight);
 

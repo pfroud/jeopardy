@@ -1,75 +1,60 @@
-import { querySelectorAndCheck } from "./commonFunctions";
-
 export class Settings {
-    // How long to show the category in big text in the presentation window
+    /**
+     * After the human operator clicks on a clue on the game board, the category name
+     * and clue value are shown in big text for this amount of time before showing
+     * the clue question.
+     */
     public displayDurationCategoryMillisec = 1000;
 
-    // How long to show the answer in the presentation window
-    public displayDurationAnswerMillisec = 5 * 1000;
-
-    // How long to wait for a team to buzz
+    /** 
+     * After the human operator presses space to indicate that they are done reading
+     * the clue question out loud, there is this much time for players to buzz before
+     * the answer is automatically shown to everyone.
+     */
     public timeoutWaitForBuzzesMillisec = 5 * 1000;
 
-    // Once a team has buzzed, how long they have to answer
+    /**
+     * Once a team has buzzed, they have this much time to say an answer before their
+     * answer is counted as wrong.
+     */
     public timeoutWaitForAnswerMillisec = 5 * 1000;
 
-    /*
-     * Two sources on the quarter-second lockout:
-     * https://www.jeopardy.com/jbuzz/behind-scenes/how-does-jeopardy-buzzer-work
-     * https://www.facebook.com/Jeopardy/photos/a.187939387923652/710960202288232/
+    /**
+     * If teams press their buzzer BEFORE the operator has finished reading the clue
+     * question out loud, this buzzer is disabled for this amount of time.
+     * 
+     * Two sources for the lockout being one-quarter of a second:
+     * - https://www.jeopardy.com/jbuzz/behind-scenes/how-does-jeopardy-buzzer-work
+     * - https://www.facebook.com/Jeopardy/photos/a.187939387923652/710960202288232
      */
     public durationLockoutMillisec = 250;
 
-    // Set this to 1 to be like the the TV show, set it to 0 for no guessing penalty.
+    /**
+     * When a team answers wrong (or doesn't say an answer in time after buzzing),
+     * the amount of money subtracted from their team is the clue value multiplied
+     * by this number.
+     * 
+     * Set this to 1 to be like the the TV show; set it to 0 for no guessing penalty.
+     */
     public wrongAnswerPenaltyMultiplier = 0.5;
 
     public allowMultipleAnswersToSameQuestion = true;
 
-    // Stop the game when a team reaches this much money
-    public teamMoneyWhenGameShouldEnd = 10_000;
-
     public gameRoundTimeLimitMillisec = 10 * 60 * 1000;
 
-    public timeBeforeRandomClueIsChosen = 10_000;
+    /**
+     * If a clue is not selected on the game board after this amount of time, a random
+     * clue is automatically chosen.
+     */
+    public gameBoardChooseClueTimeout = 10_000;
 
+    /**
+     * Method to determine which team gets to choose clues.
+     * 
+     * - When set to "rotate": team 1 chooses first, then team 2, etc, until it wraps back around to team 1.
+     * - When set to "previousCorrectAnswer": team 1 chooses first. When a team answers a clue correctly, they
+     *   get to choose the next clue.
+     */
     public teamToChooseNextClue: "rotate" | "previousCorrectAnswer" = "previousCorrectAnswer";
-
-    private readonly GUI_INPUT: {
-        readonly DISPLAY_DURATION_CATEGORY: HTMLInputElement;
-        readonly DISPLAY_DURATION_ANSWER: HTMLInputElement;
-        readonly TIMEOUT_WAIT_FOR_BUZZES: HTMLInputElement;
-        readonly TIMEOUT_ANSWER: HTMLInputElement;
-        readonly ALLOW_MULTIPLE_TRIES: HTMLInputElement;
-    };
-
-    public constructor() {
-        this.GUI_INPUT = {
-            DISPLAY_DURATION_CATEGORY: querySelectorAndCheck(document, "input#display-duration-category"),
-            DISPLAY_DURATION_ANSWER: querySelectorAndCheck(document, "input#display-duration-answer"),
-            TIMEOUT_WAIT_FOR_BUZZES: querySelectorAndCheck(document, "input#timeout-wait-for-buzzes"),
-            TIMEOUT_ANSWER: querySelectorAndCheck(document, "input#timeout-answer"),
-            ALLOW_MULTIPLE_TRIES: querySelectorAndCheck(document, "input#allow-multiple-tries")
-        };
-        Object.freeze(this.GUI_INPUT);
-        this.populateGui();
-        querySelectorAndCheck(document, "button#saveSettings").addEventListener("click", () => this.parseGui());
-    }
-
-    public populateGui(): void {
-        this.GUI_INPUT.DISPLAY_DURATION_CATEGORY.value = String(this.displayDurationCategoryMillisec);
-        this.GUI_INPUT.DISPLAY_DURATION_ANSWER.value = String(this.displayDurationAnswerMillisec);
-        this.GUI_INPUT.TIMEOUT_WAIT_FOR_BUZZES.value = String(this.timeoutWaitForBuzzesMillisec);
-        this.GUI_INPUT.TIMEOUT_ANSWER.value = String(this.timeoutWaitForAnswerMillisec);
-        this.GUI_INPUT.ALLOW_MULTIPLE_TRIES.toggleAttribute("checked", this.allowMultipleAnswersToSameQuestion);
-    }
-
-    public parseGui(): void {
-        this.displayDurationCategoryMillisec = Number(this.GUI_INPUT.DISPLAY_DURATION_CATEGORY.value);
-        this.displayDurationAnswerMillisec = Number(this.GUI_INPUT.DISPLAY_DURATION_ANSWER.value);
-        this.timeoutWaitForBuzzesMillisec = Number(this.GUI_INPUT.TIMEOUT_WAIT_FOR_BUZZES.value);
-        this.timeoutWaitForAnswerMillisec = Number(this.GUI_INPUT.TIMEOUT_ANSWER.value);
-
-        this.allowMultipleAnswersToSameQuestion = this.GUI_INPUT.ALLOW_MULTIPLE_TRIES.hasAttribute("checked");
-    }
 
 }

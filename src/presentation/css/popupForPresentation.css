@@ -8,8 +8,6 @@ div#backdrop-for-popups {
 }
 
 div.overlay-popup {
-    /* Currently the only popup in the presentation window is the special category popup. */
-
     --popup-text-color: black;
 
     /* Make text bigger because people are viewing it on a TV from a distance */

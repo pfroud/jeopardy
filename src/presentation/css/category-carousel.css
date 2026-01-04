@@ -46,7 +46,6 @@ div#slide-category-carousel {
             font-size: 100px;
 
             /* setting width directly does not work! */
-            /* min-width: var(--cell-width); */
             min-width: var(--cell-width);
 
             height: calc(100vh - var(--border-size));

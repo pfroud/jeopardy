@@ -52,7 +52,7 @@ header {
     }
 
     /* Hide text, only show progress bars */
-    &[data-header-display="minimized"] {
+    &[data-header-display-type="minimized"] {
 
         progress#state-machine {
             margin-top: 20px;
@@ -64,7 +64,7 @@ header {
         }
     }
 
-    &[data-header-display="none"] {
+    &[data-header-display-type="none"] {
         /* Hide the entire <header> */
         display: none;
     }
@@ -185,16 +185,16 @@ main {
 
 footer {
 
-    &[data-footer-display="minimized"] div.team {
+    &[data-footer-display-type="minimized"] div.team {
         /* Show only team name and team money */
 
-        div.buzzer-show,
-        table.countdown-dots {
+        div.buzzer-switch-state-display,
+        table.symmetric-shrinking-segmented-progress-bar {
             display: none;
         }
     }
 
-    &[data-footer-display="none"] {
+    &[data-footer-display-type="none"] {
         /* Hide the entire <footer> */
         display: none;
     }
@@ -216,7 +216,7 @@ footer {
             visibility: hidden;
         }
 
-        table.countdown-dots {
+        table.symmetric-shrinking-segmented-progress-bar {
             margin-bottom: 10px;
 
             td {
@@ -234,7 +234,7 @@ footer {
             }
         }
 
-        div.buzzer-show {
+        div.buzzer-switch-state-display {
             img {
                 width: 100px;
                 margin-bottom: 5px;

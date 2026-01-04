@@ -25,13 +25,14 @@ table#game-board {
         font-size: 50px;
 
         td[data-clue-state="available"] {
-            &.hover-in-operator-window {
+
+            &.mouse-over-cell-in-operator-window {
                 background-color: rgba(255, 255, 255, 0.4);
                 font-weight: bold;
                 color: #ffbb55;
             }
 
-            &.active-in-operator-window {
+            &.mouse-down-on-cell-in-operator-window {
                 background-color: white;
                 color: black;
                 text-shadow: 3px 3px lightgray, 5px 5px lightgray, 7px 7px lightgray;

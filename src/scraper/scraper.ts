@@ -40,11 +40,9 @@ type Game = {
     readonly FINAL_JEOPARDY?: FinalJeopardy;
 }
 
-type RoundType = "single" | "double";
-
 type Clue = HiddenClue | RevealedClue;
 type GameRound = {
-    readonly TYPE: RoundType;
+    readonly ROUND_INDEX: number;
     readonly CATEGORIES: Category[];
     /**
      * This 2D array follows the structure of an HTML table.
@@ -123,8 +121,8 @@ function main(): void {
         SHOW_NUMBER: Number(/#(\d+)/.exec(h1Text)![1]),
         AIRDATE: h1Text.split(" - ")[1],
         ROUNDS: [
-            parseTableForRound("single", document.querySelector("div#jeopardy_round table.round")!),
-            parseTableForRound("double", document.querySelector("div#double_jeopardy_round table.round")!),
+            parseTableForRound(0, document.querySelector("div#jeopardy_round table.round")!),
+            parseTableForRound(1, document.querySelector("div#double_jeopardy_round table.round")!),
         ],
         FINAL_JEOPARDY: {
             CATEGORY: finalJeopardyContainer.querySelector<HTMLTableCellElement>("td.category")!.innerText.trim(),
@@ -134,7 +132,7 @@ function main(): void {
     };
 
 
-    function parseTableForRound(roundType: RoundType, table: HTMLTableElement): GameRound {
+    function parseTableForRound(roundIndex: number, table: HTMLTableElement): GameRound {
 
         /*
         About the :scope pseudo-class:
@@ -169,12 +167,6 @@ function main(): void {
         /* Skip the first item in the list because it is the row of categories. */
         const clueRows = rows.slice(1);
 
-        /** For Double Jeopardy, each dollar value is doubled. */
-        const clueValueMultiplier: { [roundType in RoundType]: number } = {
-            "single": 1,
-            "double": 2
-        };
-
         const clues = clueRows.map((clueRow: HTMLTableRowElement, rowIndex): Clue[] =>
             Array.from(clueRow.querySelectorAll<HTMLTableCellElement>("td.clue"))
                 .map((tdClue: HTMLTableCellElement, categoryIndex): Clue => {
@@ -203,7 +195,7 @@ function main(): void {
                             ANSWER: answer,
                             ROW_INDEX: rowIndex,
                             COLUMN_INDEX: categoryIndex,
-                            VALUE: (rowIndex + 1) * 200 * clueValueMultiplier[roundType],
+                            VALUE: (rowIndex + 1) * 200 * (roundIndex + 1),
                             CATEGORY_NAME: categories[categoryIndex].NAME
                         };
                     }
@@ -211,7 +203,7 @@ function main(): void {
         );
 
         return {
-            TYPE: roundType,
+            ROUND_INDEX: roundIndex,
             CATEGORIES: categories,
             CLUES: clues
         };

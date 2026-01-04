@@ -6,7 +6,7 @@ div.overlay-popup {
         --special-category-popup-background-color: #dddd11;
     }
 
-    /* In the presentation window, the game end stuff in a presentation slide not a popup. */
+    /* In the presentation window, the game-end stuff is in a presentation slide not a popup. */
     &#game-end-popup {
         background: #dddddd;
 
@@ -40,7 +40,7 @@ div.overlay-popup {
 
         }
 
-        div#team-ranking-wrapper table {
+        div#team-ranking-table-wrapper table {
             td {
                 font-size: 40px;
                 padding-right: 60px;
@@ -52,7 +52,7 @@ div.overlay-popup {
         }
 
         &[data-show-game-end-item="team-ranking-table"] {
-            div#team-ranking-wrapper {
+            div#team-ranking-table-wrapper {
                 display: block;
             }
 
@@ -66,7 +66,7 @@ div.overlay-popup {
         }
 
         &[data-show-game-end-item="line-chart"] {
-            div#team-ranking-wrapper {
+            div#team-ranking-table-wrapper {
                 display: none;
             }
 
@@ -80,7 +80,7 @@ div.overlay-popup {
         }
 
         &[data-show-game-end-item="pie-charts"] {
-            div#team-ranking-wrapper {
+            div#team-ranking-table-wrapper {
                 display: none;
             }
 
