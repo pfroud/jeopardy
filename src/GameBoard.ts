@@ -1,5 +1,5 @@
 import { Operator } from "./operator/Operator";
-import { GameRound, RevealedClue, RoundType } from "./typesForGame";
+import { GameRound, RevealedClue } from "./typesForGame";
 
 /*
 Example of what the game board looks like:
@@ -36,12 +36,6 @@ export class GameBoard {
      * The first row shows category names, and all the other rows are for clues.
      */
     public static readonly TABLE_CLUE_ROW_COUNT = GameBoard.TABLE_TOTAL_ROW_COUNT - 1;
-
-    /** For Double Jeopardy, each dollar value is doubled. */
-    public static readonly GAME_ROUND_VALUE_MULTIPLIER: { [roundType in RoundType]: number } = {
-        "single": 1,
-        "double": 2
-    };
 
     /**
      * CSS class added to table cells in the presentation window to show mouse interactions in the operator window.
@@ -297,7 +291,7 @@ export class GameBoard {
 
                     if (clue.REVEALED_ON_TV_SHOW) {
                         tableCell.setAttribute("data-clue-state", "available");
-                        tableCell.innerHTML = `$${(clueRowIndex + 1) * 200 * GameBoard.GAME_ROUND_VALUE_MULTIPLIER[gameRound.TYPE]}`;
+                        tableCell.innerHTML = `$${(clueRowIndex + 1) * 200 * (gameRound.ROUND_INDEX + 1)}`;
                     } else {
                         tableCell.setAttribute("data-clue-state", "not-revealed-on-tv-show");
                     }

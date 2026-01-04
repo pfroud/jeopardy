@@ -1,5 +1,5 @@
 import { GameBoard } from "./GameBoard";
-import { Game, RoundType, GameRound } from "./typesForGame";
+import { Game, GameRound } from "./typesForGame";
 
 /*
 This is a placeholder game.
@@ -12,13 +12,13 @@ To get a real game:
  - Overwrite this file with the contents of the clipboard
 */
 
-function getExampleGameRound(roundType: RoundType): GameRound {
+function getExampleGameRound(roundIndex: number): GameRound {
     return {
-        TYPE: roundType,
+        ROUND_INDEX: roundIndex,
         CATEGORIES: Array.from({ length: GameBoard.TABLE_COLUMN_COUNT }, (_, catIdx) => ({ NAME: `Category ${catIdx + 1}` })),
         CLUES: Array.from({ length: GameBoard.TABLE_CLUE_ROW_COUNT }, (_, rowIdx) =>
             Array.from({ length: GameBoard.TABLE_COLUMN_COUNT }, (__, colIdx) => {
-                const value = (rowIdx + 1) * 200 * GameBoard.GAME_ROUND_VALUE_MULTIPLIER[roundType];
+                const value = (rowIdx + 1) * 200 * (roundIndex + 1);
                 return {
                     REVEALED_ON_TV_SHOW: true,
                     QUESTION: `Category ${colIdx + 1} $${value} question`,
@@ -37,8 +37,8 @@ export const SCRAPED_GAME: Game = {
     SHOW_NUMBER: 0,
     AIRDATE: "Saturday, January 1, 2000",
     ROUNDS: [
-        getExampleGameRound("single"),
-        getExampleGameRound("double")
+        getExampleGameRound(0),
+        getExampleGameRound(1)
     ],
     FINAL_JEOPARDY: {
         CATEGORY: "Final Jeopardy category",
