@@ -34,7 +34,7 @@ export class Team {
     private teamName: string;
 
     private money = 0;
-    private countdownDotsInPresentationWindow?: HTMLTableElement;
+    private symmetricShrinkingSegmentedProgressBarTableInPresentationWindow?: HTMLTableElement;
     private readonly SETTINGS: Settings;
     private readonly AUDIO_MANAGER: AudioManager;
     private readonly PRESENTATION: Presentation;
@@ -46,7 +46,8 @@ export class Team {
     private stateBeforeLockout: TeamState | null = null;
     private progressElementInPresentationWindow?: HTMLProgressElement;
     private progressElementInOperatorWindow?: HTMLProgressElement;
-    private allCountdownDots?: NodeListOf<HTMLTableCellElement>;
+
+    private readonly SYMMETRIC_SHRINKING_SEGMENTED_PROGRESS_BAR_SEGMENTS = new Set<HTMLTableCellElement>;
     private readonly DIV: {
         readonly OPERATOR: {
             wrapper?: HTMLDivElement;
@@ -238,32 +239,40 @@ export class Team {
         how much time is left to answer a question.
         Here's a video from the official Jeopardy Youtube channel where you can see how it works:
         https://www.youtube.com/watch?v=cGSDLZ5wqy8&t=10s
-        
-        For some reason I call the rectangles "dots."
         */
 
-        const tableCountdownDots = this.countdownDotsInPresentationWindow = document.createElement("table");
-        tableCountdownDots.classList.add("countdown-dots");
+        this.symmetricShrinkingSegmentedProgressBarTableInPresentationWindow = document.createElement("table");
+        this.symmetricShrinkingSegmentedProgressBarTableInPresentationWindow.classList.add("symmetric-shrinking-segmented-progress-bar");
 
-        for (let dotIdx = 5; dotIdx > 1; dotIdx--) {
-            const tdDescending = document.createElement("td");
-            tdDescending.setAttribute("data-countdown", String(dotIdx));
-            tableCountdownDots.append(tdDescending);
+        const tr = document.createElement("tr");
+
+        const maxTimeSeconds = this.SETTINGS.timeoutWaitForAnswerMillisec / 1000;
+
+        /*
+        The table cells we want to make:
+        ┌───┬───┬───┬───┬───┬───┬───┬───┬───┐
+        │ 5 │ 4 │ 3 │ 2 │ 1 │ 2 │ 3 │ 4 │ 5 │
+        └───┴───┴───┴───┴───┴───┴───┴───┴───┘
+        */
+
+        // create segments maxTimeSeconds, ..., 3, 2, 1
+        for (let i = maxTimeSeconds; i > 0; i--) {
+            const td = document.createElement("td");
+            this.SYMMETRIC_SHRINKING_SEGMENTED_PROGRESS_BAR_SEGMENTS.add(td);
+            td.setAttribute(CountdownTimer.ATTRIBUTE_NAME_SYMMETRIC_SHRINKING_SEGMENTED_PROGRESS_BAR_TIME_REMAINING_SECONDS, String(i));
+            tr.append(td);
         }
 
-        const tdOne = document.createElement("td");
-        tdOne.setAttribute("data-countdown", "1");
-        tableCountdownDots.append(tdOne);
-
-        for (let dotIdx = 2; dotIdx <= 5; dotIdx++) {
-            const tdAscending = document.createElement("td");
-            tdAscending.setAttribute("data-countdown", String(dotIdx));
-            tableCountdownDots.append(tdAscending);
+        // create segments 2, 3, 4, ..., maxTimeSeconds
+        for (let i = 2; i <= maxTimeSeconds; i++) {
+            const td = document.createElement("td");
+            this.SYMMETRIC_SHRINKING_SEGMENTED_PROGRESS_BAR_SEGMENTS.add(td);
+            td.setAttribute(CountdownTimer.ATTRIBUTE_NAME_SYMMETRIC_SHRINKING_SEGMENTED_PROGRESS_BAR_TIME_REMAINING_SECONDS, String(i));
+            tr.append(td);
         }
 
-        divTeam.append(tableCountdownDots);
-
-        this.allCountdownDots = this.countdownDotsInPresentationWindow.querySelectorAll("td");
+        this.symmetricShrinkingSegmentedProgressBarTableInPresentationWindow.append(tr);
+        divTeam.append(this.symmetricShrinkingSegmentedProgressBarTableInPresentationWindow);
 
         const divMoney = this.DIV.PRESENTATION.money = document.createElement("div");
         divMoney.classList.add("team-money");
@@ -360,12 +369,12 @@ export class Team {
     }
 
     public answerStop(): void {
-        this.allCountdownDots?.forEach(td => td.classList.remove("active"));
+        this.SYMMETRIC_SHRINKING_SEGMENTED_PROGRESS_BAR_SEGMENTS.forEach(td => td.classList.remove("active"));
 
         const timer = this.OPERATOR.getStateMachine()?.getCountdownTimerForState("waitForTeamAnswer");
 
-        if (this.countdownDotsInPresentationWindow) {
-            timer?.removeDotsTable(this.countdownDotsInPresentationWindow);
+        if (this.symmetricShrinkingSegmentedProgressBarTableInPresentationWindow) {
+            timer?.removeSymmetricShrinkingSegmentedProgressBarTable(this.symmetricShrinkingSegmentedProgressBarTableInPresentationWindow);
         }
         if (this.progressElementInOperatorWindow) {
             timer?.removeProgressElement(this.progressElementInOperatorWindow);
@@ -382,8 +391,8 @@ export class Team {
         this.DIV.PRESENTATION.buzzerShow?.classList.remove("pressed");
     }
 
-    public getCountdownDotsInPresentationWindow(): HTMLTableElement | undefined {
-        return this.countdownDotsInPresentationWindow;
+    public getSymmetricShrinkingSegmentedProgressBarTableInPresentationWindow(): HTMLTableElement | undefined {
+        return this.symmetricShrinkingSegmentedProgressBarTableInPresentationWindow;
     }
 
     public getProgressElementInOperatorWindow(): HTMLProgressElement | undefined {

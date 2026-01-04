@@ -14,7 +14,7 @@ export class Settings {
     public timeoutWaitForBuzzesMillisec = 5 * 1000;
 
     /**
-     * Once a team has buzzed, they have this much time to say  an answer before their
+     * Once a team has buzzed, they have this much time to say an answer before their
      * answer is counted as wrong.
      */
     public timeoutWaitForAnswerMillisec = 5 * 1000;

@@ -201,7 +201,7 @@ export class StateMachine {
                 Once a team has buzzed and we're waiting for them to answer, we want some special stuff to happen:
                 - In the presentation window: the state machine uses a timeout transition, but instead of showing a
                     progress bar like what would normally happen for a timeout transition, we want to show it on
-                    the nine countdown dots.
+                    the symmetric-shrinking segmented progress bar.
                 - In the operator window: use a second <progress> element, instead of using the same one that shows
                     how much time is left for teams to buzz in.
                 */
@@ -211,9 +211,9 @@ export class StateMachine {
                         const teamIndex = Number(keyboardEvent.key) - 1;
                         const team = this.OPERATOR.getTeam(teamIndex);
                         if (team) {
-                            const dotsInPresentationWindow = team.getCountdownDotsInPresentationWindow();
-                            if (dotsInPresentationWindow) {
-                                countdownTimer.addDotsTable(dotsInPresentationWindow);
+                            const symmetricShrinkingSegmentedProgressBarTable = team.getSymmetricShrinkingSegmentedProgressBarTableInPresentationWindow();
+                            if (symmetricShrinkingSegmentedProgressBarTable) {
+                                countdownTimer.addSymmetricShrinkingSegmentedProgressBarTable(symmetricShrinkingSegmentedProgressBarTable);
                             }
                             const progressElement = team.getProgressElementInOperatorWindow();
                             if (progressElement) {
@@ -227,7 +227,7 @@ export class StateMachine {
                     }
 
                     if (transition.BEHAVIOR !== CountdownBehavior.ResetTimerEveryTimeYouEnterTheState) {
-                        console.warn(`in state ${this.presentState.NAME}: transition to ${transition.DESTINATION}: dots table and progress element will be repeatedly added to the countdown timer`);
+                        console.warn(`in state ${this.presentState.NAME}: transition to ${transition.DESTINATION}: symmetric-shrinking segmented progress bar table and progress element will be repeatedly added to the countdown timer`);
                     }
 
                 }
@@ -286,7 +286,7 @@ export class StateMachine {
         Once a team has buzzed and we're waiting for them to answer, we want some special stuff to happen:
         - In the presentation window: the state machine uses a timeout transition, but instead of showing a
             progress bar like what would normally happen for a timeout transition, we want to show it on
-            the nine countdown dots.
+            the symmetric-shrinking segmented progress bar.
         - In the operator window: use a second <progress> element, instead of using the same one that shows
             how much time is left for teams to buzz in.
         */

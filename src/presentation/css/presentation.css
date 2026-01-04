@@ -189,7 +189,7 @@ footer {
         /* Show only team name and team money */
 
         div.buzzer-switch-state-display,
-        table.countdown-dots {
+        table.symmetric-shrinking-segmented-progress-bar {
             display: none;
         }
     }
@@ -216,7 +216,7 @@ footer {
             visibility: hidden;
         }
 
-        table.countdown-dots {
+        table.symmetric-shrinking-segmented-progress-bar {
             margin-bottom: 10px;
 
             td {

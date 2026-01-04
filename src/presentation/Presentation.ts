@@ -227,7 +227,7 @@ export class Presentation {
         this.FOOTER.setAttribute("data-footer-display-type", "full");
     }
 
-    /** Hide countdown dots and buzzer switch state visualizer, only show team name and team money */
+    /** Hide symmetric-shrinking segmented progress bar and buzzer switch state visualizer, only show team name and team money */
     public setFooterDisplayMinimized(): void {
         this.FOOTER.setAttribute("data-footer-display-type", "minimized");
     }

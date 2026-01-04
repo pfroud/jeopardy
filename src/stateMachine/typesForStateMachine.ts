@@ -46,7 +46,7 @@ export interface TimeoutTransition extends SimpleTransitionBase {
      * Once a team has buzzed and we're waiting for them to answer, we want some special stuff to happen:
      *  - In the presentation window: the state machine uses a timeout transition, but instead of showing a
      *    progress bar like what would normally happen for a timeout transition, we want to show it on
-     *    the nine countdown dots.
+     *    the symmetric-shrinking segmented progress bar.
      *  - In the operator window: use a second <progress> element, instead of using the same one that shows
      *    how much time is left for teams to buzz in.
      */
