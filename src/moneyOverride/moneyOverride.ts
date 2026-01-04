@@ -1,6 +1,19 @@
 import { querySelectorAndCheck } from "../commonFunctions";
 import { Operator } from "../operator/Operator";
 
+/*
+Creates a table which looks like this, but with a row for each team:
+
+|--------+--------+-------+     +-------+------+-----------+------+-------+     +-------+--------|
+| Team 1 | -$1000 | -$800 | ... | -$100 | -$50 | textField | +$50 | +$100 | ... | +$800 | +$1000 |
+|--------+--------+-------+     +-------+------+-----------+------+-------+     +-------+--------|
+
+The leftmost column is a label for the team name.
+The center column is a text field where the user can type in a dollar amount.
+All the other columns are buttons to add or subtract pre-selected amounts of money.
+
+*/
+
 document.addEventListener("DOMContentLoaded", function () {
 
     if (!window.opener) {
@@ -31,6 +44,11 @@ document.addEventListener("DOMContentLoaded", function () {
             throw new Error("called createTableRow() when teamArray is undefined");
         }
         const team = teamArray[teamIndex];
+
+        /*
+        Includes numbers which are half of the possible clue values because
+        Settings.wrongAnswerPenaltyMultiplier is currently set to 0.5
+        */
         const dollarValues = [1000, 800, 600, 500, 400, 300, 200, 100, 50];
 
         const tableRowForTeam = document.createElement("tr");

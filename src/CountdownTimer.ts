@@ -2,28 +2,34 @@ import { AudioManager } from "./AudioManager";
 
 export class CountdownTimer {
 
-    public readonly MAX_DURATION_MILLISEC: number; //the value passed into the constructor
+    public readonly MAX_DURATION_MILLISEC: number;
+
     public onStart?: () => void;
     public onPause?: () => void;
     /** Called when the timer is un-paused */
     public onResume?: () => void;
     public onReset?: () => void;
     public onFinished?: () => void;
+    /** Runs every time the window.onInterval() callback happens */
     public onTick?: () => void;
 
     private static readonly DESIRED_FRAME_RATE_HZ = 30;
     private readonly UPDATE_INTERVAL_MILLISEC = 1000 / CountdownTimer.DESIRED_FRAME_RATE_HZ;
+
     private readonly AUDIO_MANAGER?: AudioManager | undefined;
+    /** HTML elements on which to set the innerHTML property on every interval to a string like "1 min 30 sec" */
     private readonly TEXT_ELEMENTS = new Set<HTMLElement>();
+    /** HTML <progress> elements to update every interval */
     private readonly PROGRESS_ELEMENTS = new Set<HTMLProgressElement>();
     private readonly DOTS_TABLES = new Set<HTMLTableElement>();
+
     private remainingMillisec: number;
     private timestampOfLastInterval = NaN;
     private previousDotsDeactivated = NaN; //only used for dots elements
     /** Value returned by window.setInterval(), used to cancel interval later */
     private intervalID = NaN;
-    private isStarted_ = false; // add underscore to property name so the method can be called isStarted
-    private isFinished_ = false; // add underscore to property name so the method can be called isFinished
+    private isStarted_ = false; // add underscore to property name so the method can be named isStarted()
+    private isFinished_ = false; // add underscore to property name so the method can be named isFinished()
     private isPaused = false;
 
     public constructor(durationMillisec: number, audioManager?: AudioManager) {
@@ -40,9 +46,7 @@ export class CountdownTimer {
             throw new RangeError(`duration cannot be less than one: ${durationMillisec}`);
         }
         this.AUDIO_MANAGER = audioManager;
-
         this.MAX_DURATION_MILLISEC = durationMillisec;
-
         this.remainingMillisec = durationMillisec;
     }
 
@@ -50,7 +54,7 @@ export class CountdownTimer {
         this.remainingMillisec = this.MAX_DURATION_MILLISEC;
 
         this.setPaused(false);
-        this.guiUpdatePaused();
+        this.showPausedStateInGui();
 
         if (!isNaN(this.intervalID)) {
             clearInterval(this.intervalID);
@@ -105,7 +109,7 @@ export class CountdownTimer {
         if (this.isStarted_ && !this.isFinished_ && !this.isPaused) {
             clearInterval(this.intervalID);
             this.isPaused = true;
-            this.guiUpdatePaused();
+            this.showPausedStateInGui();
 
             const presentTimestamp = Date.now();
             const elapsedMillisecSinceLastInterval = presentTimestamp - this.timestampOfLastInterval;
@@ -124,7 +128,7 @@ export class CountdownTimer {
         if (this.isStarted_ && !this.isFinished_ && this.isPaused) {
 
             this.isPaused = false;
-            this.guiUpdatePaused();
+            this.showPausedStateInGui();
             this.timestampOfLastInterval = Date.now();
 
             this.intervalID = window.setInterval(this.onInterval.bind(this), this.UPDATE_INTERVAL_MILLISEC);
@@ -134,7 +138,7 @@ export class CountdownTimer {
         }
     }
 
-    private guiUpdatePaused(): void {
+    private showPausedStateInGui(): void {
         this.PROGRESS_ELEMENTS.forEach(elem => elem.classList.toggle("paused", this.isPaused));
         this.TEXT_ELEMENTS.forEach(elem => elem.classList.toggle("paused", this.isPaused));
         this.DOTS_TABLES.forEach(e => e.classList.toggle("paused", this.isPaused));
@@ -148,24 +152,20 @@ export class CountdownTimer {
             this.onStart?.();
 
             ////////////////////// Update GUI //////////////////////////////////////////////////////////////
-            this.guiUpdatePaused();
+            this.showPausedStateInGui();
             this.PROGRESS_ELEMENTS.forEach(progressElement => {
                 progressElement.setAttribute("max", String(this.MAX_DURATION_MILLISEC));
                 progressElement.setAttribute("value", String(this.MAX_DURATION_MILLISEC));
             });
 
-            this.DOTS_TABLES.forEach(tableElement => {
-                const tds = tableElement.querySelectorAll("td");
-                if (tds.length !== 9) {
-                    console.warn(`found ${tds.length} dots <td> element(s), expected exactly 9`);
-                }
-                tds.forEach(td => td.classList.add("active"));
-            });
+            this.DOTS_TABLES.forEach(tableElement =>
+                tableElement.querySelectorAll("td").forEach(td => td.classList.add("active")));
 
             this.guiUpdateForInterval();
         }
     }
 
+    /** Called from window.setInterval() */
     private onInterval(): void {
         const presentTimestamp = Date.now(); //unix epoch
         const elapsedMillisecSinceLastInterval = presentTimestamp - this.timestampOfLastInterval;
@@ -184,11 +184,11 @@ export class CountdownTimer {
     private guiUpdateForInterval(): void {
 
         let newText: string;
-        const remainingSeconds = this.remainingMillisec / 1000;
         if (this.remainingMillisec > 60 * 1000) {
             const date = new Date(this.remainingMillisec);
             newText = `${date.getMinutes()} min ${date.getSeconds()} sec`;
         } else {
+            const remainingSeconds = this.remainingMillisec / 1000;
             newText = `${remainingSeconds.toFixed(1)} sec`;
         }
 
@@ -280,6 +280,22 @@ export class CountdownTimer {
     }
 
     public addDotsTable(dotsTable: HTMLTableElement): void {
+        const trs = dotsTable.querySelectorAll("tr");
+        if (trs.length !== 1) {
+            console.warn(`table has ${trs.length} <tr> element(s), expected exactly 1`);
+        }
+
+        const tds = dotsTable.querySelectorAll("td");
+        if (tds.length !== 9) {
+            console.warn(`found ${tds.length} dots <td> element(s), expected exactly 9`);
+        }
+
+        tds.forEach(td => {
+            if (!td.hasAttribute("data-countdown")) {
+                console.warn("table cell does not have attribute");
+            }
+        });
+
         this.DOTS_TABLES.add(dotsTable);
     }
 

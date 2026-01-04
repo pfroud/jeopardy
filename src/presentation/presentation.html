@@ -43,13 +43,14 @@
     <script type="module" src="main.ts"></script>
 
     <div id="paused" style="display:none">
-        <!-- https://stackoverflow.com/a/22885848 -->
+        <!-- Source for paused symbols https://stackoverflow.com/a/22885848 -->
         &#9612;&#9612; PAUSED
     </div>
 
+    <!-- The backdrop slightly darkens and blurs the page to make the popups more prominent -->
     <div id="backdrop-for-popups" data-backdrop-state="disabled"></div>
 
-    <!-- Currently the only popup in the presentation window is the special category popup. -->
+    <!-- This popup shows explanation for categories with special rules -->
     <div class="overlay-popup" id="special-category-popup" data-popup-visibility="hidden">
         <div id="info-icon">i</div>
         <span class="popup-title"></span>
@@ -58,7 +59,7 @@
 
         <p id="special-category-popup-example-title">Example:</p>
 
-        <!-- Add wrapper because border-radius does not work on <table> element -->
+        <!-- Add wrapper because CSS border-radius does not work on <table> element -->
         <div id="special-category-popup-example-wrapper">
             <table id="special-category-popup-example-table">
                 <tr>
@@ -77,9 +78,10 @@
         </div>
     </div>
 
-    <div id="flex-container">
+    <!-- The top-level flex container lays out the <header>, <main>, and <footer> in a column. -->
+    <div id="top-level-flex-container">
 
-        <header data-header-display="full">
+        <header data-header-display-type="full">
             <progress id="game-round-timer"></progress>
             <span id="clue-category-in-header">category</span>
             <span id="clue-value-in-header">$0000</span>
@@ -88,8 +90,8 @@
 
         <main>
             <!--
-            The presentation uses a slideshow metaphor. There is always exactly one
-            slide visible at a time.
+            The presentation window uses a slideshow metaphor.
+            There is always exactly one slide visible at a time.
             -->
             <div class="presentation-slide" id="slide-jeopardy-logo">
                 <img id="logo-jeopardy" src="img/j-logo.png" alt="Jeopardy logo">
@@ -102,30 +104,32 @@
             <div class="presentation-slide" id="slide-category-carousel">
                 <table id="category-carousel">
                     <!-- HTML comment to disable VS Code formatter is set by "html.format.unformattedContentDelimiter" in .vscode/settings.json -->
-                    <!-- formatter-toggle -->
+                    <!-- html-formatter-toggle -->
                     <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                    <!-- formatter-toggle -->
+                    <!-- html-formatter-toggle -->
                 </table>
             </div>
 
             <div class="presentation-slide" id="slide-game-board">
                 <!-- HTML comment to disable VS Code formatter is set by "html.format.unformattedContentDelimiter" in .vscode/settings.json -->
-                <!-- formatter-toggle -->
+                <!-- html-formatter-toggle -->
                 <table id="game-board">
                     <tr id="categories"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                    <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                    <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                    <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                    <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                    <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="clues">  <td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="clues">  <td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="clues">  <td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="clues">  <td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="clues">  <td></td><td></td><td></td><td></td><td></td><td></td></tr>
                 </table>
-                <!-- formatter-toggle -->
+                <!-- html-formatter-toggle -->
             </div>
 
             <div class="presentation-slide" id="slide-clue-category-and-value">
-                <!-- This slide shows info about the upcoming question in big text
-                centered on the screen. The same info will then continue to be visible in
-                the header. -->
+                <!--
+                This slide shows info about the upcoming question in big text
+                centered on the screen. The same info will then continue to be
+                visible in the header.
+                -->
                 <div id="clue-category-big"></div>
                 <div id="clue-value-big"></div>
             </div>
@@ -139,7 +143,7 @@
                 <!--
                 We can optionally show the question here along with the answer.
                 Useful for clues with wordplay (especially anagrams) or when the
-                exact phrasing of the question is called into question.
+                exact phrasing of the question is unclear.
                 -->
                 <p id="question-in-answer-slide" style="display:none">
                 </p>
@@ -150,9 +154,7 @@
                 <div id="clue-answer-text"></div>
             </div>
 
-            <div class="presentation-slide" id="slide-final-jeopardy-wagers-table">
-                <!-- The table is generated at runtime. -->
-            </div>
+            <div class="presentation-slide" id="slide-final-jeopardy-wagers-table"></div>
 
             <div class="presentation-slide" id="slide-buzz-history-chart">
                 <h1>Buzz history chart</h1>
@@ -179,14 +181,9 @@
 
         </main>
 
-        <footer data-footer-display="full">
-            <!-- contents of the footer is generated at runtime -->
-        </footer>
+        <footer data-footer-display-type="full"></footer>
 
     </div>
-
-
-
 
 </body>
 

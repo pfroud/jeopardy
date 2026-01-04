@@ -54,8 +54,8 @@ export function downloadSVG(originalSvg: SVGSVGElement, downloadFilenameLabel: s
     /*
     Even though the file extension will be .svg, we still need to set the XML namespace attribute.
     Otherwise when opening the SVG file in Chrome or Firefox it says:
-        This XML file does not appear to have any style information associated with it. The document tree is shown below.
-    Apparently the xmlns attribute is not needed then it's an <svg> tag inside an HTML document,
+        "This XML file does not appear to have any style information associated with it. The document tree is shown below."
+    Apparently the xmlns attribute is not needed when it's an <svg> tag inside an HTML document,
     only when opening it as an .svg file from disk.
     */
     clonedSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
@@ -64,7 +64,7 @@ export function downloadSVG(originalSvg: SVGSVGElement, downloadFilenameLabel: s
     /* *****************************************************************
     ************************** Add background **************************
     ********************************************************************
-    The purpose of downloading SVGs is to put them in readme.md, which can be viewed in dark theme.
+    The purpose of downloading SVGs is to put them in readme.md for GitHub, which can be viewed in dark theme.
     Text in the SVG is black, so we need a light background to make it readable.
     */
     const backgroundRect = createSvgElement("rect");
@@ -138,7 +138,7 @@ export function downloadSVG(originalSvg: SVGSVGElement, downloadFilenameLabel: s
     type KeysOfCssStyleDeclarationWhichReturnString = KeysMatching<CSSStyleDeclaration, string>;
 
     /*
-    The CSS styles we care about. For some of them, the XML attribute name is different.
+    The CSS styles we care about. For some of them, the XML attribute name is different than the CSS style name.
     We are going to set all these attributes on every element, then SVG Optimizer (https://svgomg.net)
     will removes ones with no effect.
     */
@@ -202,14 +202,14 @@ export function downloadSVG(originalSvg: SVGSVGElement, downloadFilenameLabel: s
 
         /*
         In the game-end line chart of money over time, Chartist generates dots for each data
-        point using <line> elements for some reason. Each <line> has the data values in an
-        attribute which do not get removed by SVG Optimizer.
+        point using <line> elements for some reason. Each <line> element has the data values
+        in an attribute, which do not get removed by SVG Optimizer.
         
         In fact, after removing the "xmlns:ct" attribute from the <svg>, if any of these
         attributes are still on anything, Firefox shows this error:
-            XML Parsing Error: prefix not bound to a namespace
+            "XML Parsing Error: prefix not bound to a namespace"
         and Chrome shows this error:
-            Namespace prefix ct for value on line is not defined
+            "Namespace prefix ct for value on line is not defined"
         */
         element.removeAttribute("ct:value");
     });

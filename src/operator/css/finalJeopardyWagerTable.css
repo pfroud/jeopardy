@@ -23,14 +23,13 @@ div.tab-content#tab-content-play div#final-jeopardy-wagers-table-container table
         }
 
         &#wrong:hover:not(:active) {
-            /*
-            Due to weird color perception things, increasing the brightness on the red 
-            X emoji makes it orange
-              */
+            /* Due to weird color perception things, increasing the brightness
+            on the red X emoji makes it appear orange. */
             filter: grayscale(60%) brightness(250%) hue-rotate(-40deg)
         }
 
-        /* The same active style works for both icons */
+        /* Unlike for the :hover state, we can use the same :active style
+        for both right and wrong icons. */
         &:active {
             filter: brightness(50%);
         }

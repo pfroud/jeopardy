@@ -3,8 +3,9 @@ import { createSvgElement, querySelectorAndCheck } from "../commonFunctions";
 type TrailStyle = { color: string, strokeWidth: number };
 
 /**
- * This thing takes an SVG state diagram and shows the current state
- * and which states and transitions led to the current state.
+ * This class takes an SVG state diagram and shows the current state and which
+ * states and transitions led to the current state. The historical states/transitions
+ * trail behind the current state.
  * 
  * Some state are entered then immediately exited (possibly an impure state machine)
 */
@@ -32,10 +33,9 @@ export class StateMachineHistoryVisualizer {
     public static readonly FOREGROUND_COLOR = "#dddddd";
 
     /**
-     * The length of the trail and what each index looks like are specified here.
+     * Specification for the length of the trail and what each index looks.
      * Index zero is the current state and the transition which lead to the current state.
      * Index one is the previous state and the transition which led to that state.
-     * 
      */
     private static readonly TRAIL_STYLES: TrailStyle[] = [
         { color: "lime", strokeWidth: 10 },
@@ -74,7 +74,7 @@ export class StateMachineHistoryVisualizer {
     private readonly TRANSITION_TRAIL: SVGGElement[] = [];
 
     /**
-     * Call this constructor after the states have been converted to an SVG and added to the page.
+     * Call this constructor AFTER the states have been converted to an SVG and added to the page.
      */
     public constructor(svgElement: SVGSVGElement) {
         this.SVG = svgElement;
@@ -117,7 +117,8 @@ export class StateMachineHistoryVisualizer {
         const propNameGetters:
             // see https://www.typescriptlang.org/docs/handbook/2/mapped-types.html
             { [styleType in keyof TrailStyle]: (trailIndex: number) => string }
-            = {
+            =
+        {
             color: (trailIndex: number): string => `--trail-index-${trailIndex}-color`,
             strokeWidth: (trailIndex: number): string => `--trail-index-${trailIndex}-stroke-width`,
         };
@@ -148,7 +149,7 @@ export class StateMachineHistoryVisualizer {
             styleTag.append(`g.node[${StateMachineHistoryVisualizer.ATTRIBUTE_STATE_TRAIL_INDEX} = "${trailIndex}"] {`);
 
             if (trailIndex === 0) {
-                // Scale the whole group for index zero only. Move this to the TrailStyle type?
+                // Make index zero (the current state) bigger
                 styleTag.append("transform: scale(120%);");
                 styleTag.append("transform-box: border-box;");
                 styleTag.append("transform-origin: center;");
@@ -211,7 +212,6 @@ export class StateMachineHistoryVisualizer {
         for (let trailIdx = 0; trailIdx < this.STATE_TRAIL.length; trailIdx++) {
             this.STATE_TRAIL[trailIdx].setAttribute(StateMachineHistoryVisualizer.ATTRIBUTE_STATE_TRAIL_INDEX, trailIdx.toString());
         }
-
 
         if (previousStateName) {
             const groupForTransition = querySelectorAndCheck<SVGGElement>(this.SVG, `g#${previousStateName}_to_${newStateName}`);

@@ -54,7 +54,7 @@ export class Operator {
 
     private readonly DIV_GAME_END_POPUP_BUTTONS: HTMLDivElement;
     private readonly DIV_GAME_END_POPUP: HTMLDivElement;
-    private readonly DIV_GAME_END_TEAM_RANKING_WRAPPER: HTMLDivElement;
+    private readonly DIV_GAME_END_TEAM_RANKING_TABLE_WRAPPER: HTMLDivElement;
     private readonly DIV_GAME_END_PIE_CHARTS: HTMLDivElement;
     private readonly DIV_GAME_END_LINE_CHART: HTMLDivElement;
     private readonly DIV_GAME_BOARD_WRAPPER: HTMLDivElement;
@@ -122,7 +122,7 @@ export class Operator {
 
         this.DIV_GAME_END_POPUP = querySelectorAndCheck(document, "div#game-end-popup");
         this.DIV_GAME_END_POPUP_BUTTONS = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#game-end-popup-buttons");
-        this.DIV_GAME_END_TEAM_RANKING_WRAPPER = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#team-ranking-wrapper");
+        this.DIV_GAME_END_TEAM_RANKING_TABLE_WRAPPER = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#team-ranking-table-wrapper");
         this.DIV_GAME_END_PIE_CHARTS = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#pie-charts");
         this.DIV_GAME_END_LINE_CHART = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#line-chart");
 
@@ -996,7 +996,7 @@ export class Operator {
         this.DIV_GAME_END_POPUP.setAttribute("data-popup-visibility", "visible");
 
         const teamRankingTableHtml = this.getGameEndTeamRankingTableHtml();
-        this.DIV_GAME_END_TEAM_RANKING_WRAPPER.innerHTML = teamRankingTableHtml;
+        this.DIV_GAME_END_TEAM_RANKING_TABLE_WRAPPER.innerHTML = teamRankingTableHtml;
         this.presentation?.setGameEndTeamRankingHtml(teamRankingTableHtml);
 
         if (this.teamArray) {

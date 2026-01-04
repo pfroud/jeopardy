@@ -52,14 +52,14 @@ table#final-jeopardy-wagers td {
 
 }
 
-div#flex-container {
+div#top-level-flex-container {
     display: flex;
     flex-direction: column;
     height: 100vh;
     width: 100vw;
 
     main {
-        /* Allow the <main> to grow in the div#flex-container's flex layout */
+        /* Allow the <main> to grow in the div#top-level-flex-container's flex layout */
         flex-grow: 1;
     }
 }

@@ -41,10 +41,15 @@
 <body>
     <script type="module" src="main.ts"></script>
 
-    <div id="paused" style="display:none">&#9612;&#9612; PAUSED</div>
+    <div id="paused" style="display:none">
+        <!-- Source for paused symbols https://stackoverflow.com/a/22885848 -->
+        &#9612;&#9612; PAUSED
+    </div>
 
+    <!-- The backdrop slightly darkens and blurs the page to make the popups more prominent -->
     <div id="backdrop-for-popups" data-backdrop-state="disabled"></div>
 
+    <!-- This popup shows explanation for categories with special rules -->
     <div class="overlay-popup" id="special-category-popup" data-popup-visibility="hidden">
         <div id="info-icon">i</div>
         <span class="popup-title"></span>
@@ -53,7 +58,7 @@
 
         <p id="special-category-popup-example-title">Example:</p>
 
-        <!-- Add wrapper because border-radius does not work on <table> element -->
+        <!-- Add wrapper because CSS border-radius does not work on <table> element -->
         <div id="special-category-popup-example-wrapper">
             <table id="special-category-popup-example-table">
                 <tr>
@@ -98,36 +103,36 @@
             </button>
         </div>
 
-        <div id="team-ranking-wrapper"></div>
+        <div id="team-ranking-table-wrapper"></div>
 
-        <div id="line-chart">
-            <!-- SVG will be created here by Chartist -->
+        <div id="line-chart"><!-- SVG are created here by Chartist -->
             <button id="download-svg-game-end-line-chart">Download line chart SVG</button>
         </div>
 
         <div id="pie-chart-wrapper">
-            <div id="pie-charts"></div>
+            <div id="pie-charts"><!-- SVGs are created here by Chartist --></div>
             <button id="download-svg-game-end-pie-chart">Download pie charts SVG</button>
         </div>
 
     </div>
 
-    <div id="flex-container">
+    <!-- The top-level flex container lays out the <main> and <footer> in a column. -->
+    <div id="top-level-flex-container">
 
         <main>
 
             <div id="game-board-wrapper" style="display:none">
                 <!-- HTML comment to disable VS Code formatter is set by "html.format.unformattedContentDelimiter" in .vscode/settings.json -->
-                <!-- formatter-toggle -->
-            <table id="game-board">
-                <tr id="categories"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                <tr class="clues"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-            </table>
-            <!-- formatter-toggle -->
+                <!-- html-formatter-toggle -->
+                <table id="game-board">
+                    <tr id="categories"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="clues">  <td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="clues">  <td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="clues">  <td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="clues">  <td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="clues">  <td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                </table>
+                <!-- html-formatter-toggle -->
                 <br>
             </div>
 
@@ -217,9 +222,7 @@
                     </div>
 
                     <br>
-                    <div id="final-jeopardy-wagers-table-container">
-                        <!-- The table is generated at runtime. -->
-                    </div>
+                    <div id="final-jeopardy-wagers-table-container"></div>
 
                 </div>
 
@@ -304,10 +307,7 @@
             <audio preload="auto" src="../sound/done-reading-clue-question.wav" id="done-reading-clue-question"></audio>
         </div>
 
-
-        <footer>
-            <!-- Contents of the footer is created at runtime -->
-        </footer>
+        <footer></footer>
 
     </div>
 

@@ -213,9 +213,9 @@ export class Team {
         divTeam.setAttribute("data-team-index", String(this.TEAM_INDEX));
         divTeam.setAttribute("data-team-state", "");
 
-        const divBuzzerDisplay = this.DIV.PRESENTATION.buzzerShow = document.createElement("div");
-        divBuzzerDisplay.classList.add("buzzer-show");
-        divBuzzerDisplay.classList.add("not-pressed");
+        const divBuzzerSwitchStateDisplay = this.DIV.PRESENTATION.buzzerShow = document.createElement("div");
+        divBuzzerSwitchStateDisplay.classList.add("buzzer-switch-state-display");
+        divBuzzerSwitchStateDisplay.classList.add("not-pressed");
 
         // https://parceljs.org/languages/svg/#url-references
         const switchClosedSvg = new URL("./presentation/img/switch-closed.svg", import.meta.url);
@@ -229,9 +229,9 @@ export class Team {
         imgSwitchOpened.setAttribute("src", switchOpenSvg.toString());
         imgSwitchOpened.classList.add("buzzer-not-pressed");
 
-        divBuzzerDisplay.append(imgSwitchClosed);
-        divBuzzerDisplay.append(imgSwitchOpened);
-        divTeam.append(divBuzzerDisplay);
+        divBuzzerSwitchStateDisplay.append(imgSwitchClosed);
+        divBuzzerSwitchStateDisplay.append(imgSwitchOpened);
+        divTeam.append(divBuzzerSwitchStateDisplay);
 
         /*
         In the TV show, there are nine light-up rectangles below each contestant which shows

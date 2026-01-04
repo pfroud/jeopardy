@@ -154,9 +154,7 @@ export class StateMachine {
 
         this.presentState.ON_EXIT?.();
 
-        ////////////////////////////////////////////////////////////////////////////////////////
-        /////////////////////////////// Change the state ///////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////////////
+        //  Change the state
         const previousState = this.presentState;
         this.presentState = this.STATE_MAP[destinationStateName];
         this.OPERATOR_WINDOW_DIV_STATE_NAME.innerHTML = destinationStateName;
@@ -165,9 +163,7 @@ export class StateMachine {
         }
 
 
-        ///////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////// Change presentation slide //////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////
+        // Change presentation slide
         if (this.presentState.PRESENTATION_SLIDE_TO_SHOW) {
             if (this.PRESENTATION.ALL_SLIDE_NAMES.has(this.presentState.PRESENTATION_SLIDE_TO_SHOW)) {
                 this.PRESENTATION.showSlide(this.presentState.PRESENTATION_SLIDE_TO_SHOW);
@@ -184,7 +180,7 @@ export class StateMachine {
 
 
         //////////////////////////////////////////////////////////////////////
-        ///////////////////// Start countdown timer ///////// ////////////////
+        ///////////////////// Start countdown timer //////////////////////////
         //////////////////////////////////////////////////////////////////////
         const transitionArray = this.presentState.TRANSITIONS;
         let foundCountdownTimer = false;
@@ -340,7 +336,7 @@ export class StateMachine {
                     case "keyboard": {
 
                         if (transition.GUARD_CONDITION) {
-                            // do not check for multiple transitions using the same keyboard key leaving this state
+                            // skip checking for multiple transitions using the same keyboard key leaving this state
                             break;
                         }
 
@@ -364,7 +360,7 @@ export class StateMachine {
                     case "if":
                     case "keyboardWithIf":
                         {
-                            // Verify DESTINATION states exist.
+                            // Verify destination states exist
                             if (!(transition.THEN.DESTINATION in this.STATE_MAP)) {
                                 printWarning(state.NAME, transitionIndex,
                                     `unknown 'then' state "${transition.THEN.DESTINATION}"`);

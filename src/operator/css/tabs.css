@@ -2,7 +2,7 @@
 https://codepen.io/oknoblich/pen/tfjFl
 Now is an error 404. Author was Oliver Knoblich.
 Archive.org link sort of works:
-https: //web.archive.org/web/20190205041122/https://codepen.io/oknoblich/pen/tfjFl
+https://web.archive.org/web/20190205041122/https://codepen.io/oknoblich/pen/tfjFl
 */
 
 div.tab-content {
@@ -11,6 +11,7 @@ div.tab-content {
     border-top: 1px solid var(--light-foreground-color);
 }
 
+/* selects <label> elements where the "for" attribute starts with "tab" */
 label[for^="tab"] {
     --color-inactive: #555;
 
@@ -41,7 +42,7 @@ input[type="radio"] {
     &:checked+label {
         color: var(--light-foreground-color);
         border: 1px solid var(--light-foreground-color);
-        /* border-bottom: 2px solid var(--light-foreground-color); */
+        border-bottom: 1px solid var(--dark-background-color);
 
         &:hover {
             cursor: default;
