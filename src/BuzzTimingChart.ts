@@ -24,7 +24,7 @@ export interface BuzzTimingForOneClue {
 export interface BuzzTimingRecord<R extends BuzzResult = BuzzResult> {
     /** Unix epoch */
     timestampStartAbsolute: number;
-    timestampStartRelativeToOperatorPressedSpace?: number;
+    timestampStartRelativeToOperatorPressedSpace: number;
     readonly RESULT: R;
 }
 
@@ -50,9 +50,9 @@ export interface BuzzResultStartAnswer {
     readonly TYPE: "start-answer";
     answerResult: BuzzAnswerResult;
     /** Unix epoch */
-    timestampEnd: number;
+    timestampEndAbsolute: number;
     /** After subtracting the timestamp of when the operator pressed space */
-    timestampEndRelativeToOperatorPressedSpace?: number;
+    timestampEndRelativeToOperatorPressedSpace: number;
 }
 
 /**
@@ -73,8 +73,8 @@ interface BuzzResultIgnore {
  * An annotation is an arrow with text.
  */
 interface Annotation {
-    startTimestamp: number;
-    endTimestamp: number;
+    timestampStartRelativeToOperatorPressedSpace: number;
+    timestampEndRelativeToOperatorPressedSpace: number;
     message: string;
     /**
      * If not defined, then this Annotation starts and ends in the 
@@ -521,7 +521,7 @@ export class BuzzTimingChart {
         // Find the first buzz from any team which started an answer.
         const answeringRecords = this.buzzTimingData.RECORDS.flat()
             .filter(record => record.RESULT.TYPE === "start-answer")
-            .sort((a, b) => a.timestampStartAbsolute - b.timestampStartAbsolute);
+            .sort((a, b) => a.timestampStartRelativeToOperatorPressedSpace - b.timestampStartRelativeToOperatorPressedSpace);
         if (answeringRecords.length < 1) {
             return;
         }
@@ -543,15 +543,15 @@ export class BuzzTimingChart {
             // eslint-disable-next-line @typescript-eslint/prefer-for-of
             for (let recordIdx = 0; recordIdx < records.length; recordIdx++) {
                 const record = records[recordIdx];
-                const difference = record.timestampStartAbsolute - firstAnswer.timestampStartAbsolute;
+                const difference = record.timestampStartRelativeToOperatorPressedSpace - firstAnswer.timestampStartRelativeToOperatorPressedSpace;
                 if (
                     record.RESULT.TYPE === "ignored" // buzzes that happened when someone else was answering
                     && record.RESULT.TEAM_STATE_WHY_IT_WAS_IGNORED === "other-team-is-answering"
                     && difference <= BuzzTimingChart.ANNOTATION_RANGE_MILLISEC
                 ) {
                     this.ANNOTATIONS[teamIdx].push({
-                        startTimestamp: firstAnswer.timestampStartAbsolute,
-                        endTimestamp: record.timestampStartAbsolute,
+                        timestampStartRelativeToOperatorPressedSpace: firstAnswer.timestampStartRelativeToOperatorPressedSpace,
+                        timestampEndRelativeToOperatorPressedSpace: record.timestampStartRelativeToOperatorPressedSpace,
                         message: `${difference} millisec too late`
                     });
                     break;
@@ -567,14 +567,14 @@ export class BuzzTimingChart {
             for (let recordIdx = records.length - 1; recordIdx >= 0; recordIdx--) {
                 const record = records[recordIdx];
                 if (
-                    record.timestampStartAbsolute < 0
-                    && record.timestampStartAbsolute >= -BuzzTimingChart.ANNOTATION_RANGE_MILLISEC
+                    record.timestampStartRelativeToOperatorPressedSpace < 0
+                    && record.timestampStartRelativeToOperatorPressedSpace >= -BuzzTimingChart.ANNOTATION_RANGE_MILLISEC
                     && record.RESULT.TYPE === "too-early-start-lockout"
                 ) {
                     this.ANNOTATIONS[teamIdx].push({
-                        startTimestamp: record.timestampStartAbsolute,
-                        endTimestamp: 0, //the time when the operator finished reading the clue question
-                        message: `${-record.timestampStartAbsolute} millisec too early`
+                        timestampStartRelativeToOperatorPressedSpace: record.timestampStartRelativeToOperatorPressedSpace,
+                        timestampEndRelativeToOperatorPressedSpace: 0, //the time when the operator finished reading the clue question
+                        message: `${-record.timestampStartRelativeToOperatorPressedSpace} millisec too early`
                     });
                     break;
                 }
@@ -603,10 +603,10 @@ export class BuzzTimingChart {
         // TODO do not change the timestamp, use a new field!!!!!
         this.buzzTimingData.RECORDS.forEach(arrayOfRecordsForTeam => arrayOfRecordsForTeam.forEach(record => {
             record.timestampStartRelativeToOperatorPressedSpace = record.timestampStartAbsolute - this.buzzTimingData!.timestampWhenClueQuestionFinishedReading;
-            allTimestamps.push(record.timestampStartAbsolute);
+            allTimestamps.push(record.timestampStartRelativeToOperatorPressedSpace);
             if (record.RESULT.TYPE === "start-answer") {
-                record.RESULT.timestampEndRelativeToOperatorPressedSpace = record.RESULT.timestampEnd - this.buzzTimingData!.timestampWhenClueQuestionFinishedReading;
-                allTimestamps.push(record.RESULT.timestampEnd);
+                record.RESULT.timestampEndRelativeToOperatorPressedSpace = record.RESULT.timestampEndAbsolute - this.buzzTimingData!.timestampWhenClueQuestionFinishedReading;
+                allTimestamps.push(record.RESULT.timestampEndRelativeToOperatorPressedSpace);
             }
         }));
 
@@ -677,7 +677,7 @@ export class BuzzTimingChart {
                     .join("rect")
                     .classed("buzz-record", true)
                     .classed(BuzzTimingChart.CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT, true)
-                    .attr("x", d => this.scaleWithZoomTransform(d.timestampStartAbsolute))
+                    .attr("x", d => this.scaleWithZoomTransform(d.timestampStartRelativeToOperatorPressedSpace))
                     .attr("y", BuzzTimingChart.Y_POSITION_FOR_BARS)
                     .attr("width", lockoutBarWidth)
                     .attr("height", BuzzTimingChart.BAR_HEIGHT);
@@ -703,9 +703,9 @@ export class BuzzTimingChart {
                     .classed(BuzzTimingChart.CLASS_NAME_FOR_START_ANSWER, true)
                     .classed(BuzzTimingChart.CLASS_NAME_FOR_ANSWERED_RIGHT, d => d.RESULT.answerResult === "answeredRight")
                     .classed(BuzzTimingChart.CLASS_NAME_FOR_ANSWERED_WRONG_OR_TIMED_OUT, d => d.RESULT.answerResult === "answeredWrongOrTimedOut")
-                    .attr("x", d => this.scaleWithZoomTransform(d.timestampStartAbsolute))
+                    .attr("x", d => this.scaleWithZoomTransform(d.timestampStartRelativeToOperatorPressedSpace))
                     .attr("y", BuzzTimingChart.Y_POSITION_FOR_BARS)
-                    .attr("width", d => this.scaleWithZoomTransform(d.RESULT.timestampEnd) - this.scaleWithZoomTransform(d.timestampStartAbsolute))
+                    .attr("width", d => this.scaleWithZoomTransform(d.RESULT.timestampEndRelativeToOperatorPressedSpace) - this.scaleWithZoomTransform(d.timestampStartRelativeToOperatorPressedSpace))
                     .attr("height", BuzzTimingChart.BAR_HEIGHT);
 
                 // Draw a dot for every time a team pressed a buzzer
@@ -714,7 +714,7 @@ export class BuzzTimingChart {
                     .data(recordsForTeam)
                     .join("circle")
                     .classed(BuzzTimingChart.CLASS_NAME_FOR_BUZZER_PRESS, true)
-                    .attr("cx", d => this.scaleWithZoomTransform(d.timestampStartAbsolute))
+                    .attr("cx", d => this.scaleWithZoomTransform(d.timestampStartRelativeToOperatorPressedSpace))
                     .attr("cy", BuzzTimingChart.ROW_HEIGHT / 2)
                     .attr("r", BuzzTimingChart.DOT_RADIUS);
 
@@ -729,8 +729,8 @@ export class BuzzTimingChart {
                 const arrowY = (BuzzTimingChart.ROW_HEIGHT / 2) + BuzzTimingChart.DOT_RADIUS + BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE + 2;
 
                 const getSvgPathDataForAnnotationArrow = (d: Annotation): string => {
-                    const scaledStartTimestamp = this.scaleWithZoomTransform(d.startTimestamp);
-                    const scaledEndTimestamp = this.scaleWithZoomTransform(d.endTimestamp);
+                    const scaledStartTimestamp = this.scaleWithZoomTransform(d.timestampStartRelativeToOperatorPressedSpace);
+                    const scaledEndTimestamp = this.scaleWithZoomTransform(d.timestampEndRelativeToOperatorPressedSpace);
 
                     /*
                      The arrow we want to draw:
@@ -847,7 +847,7 @@ export class BuzzTimingChart {
                     .selectAll("text")
                     .data(annotationForThisTeam)
                     .join("text")
-                    .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp) + BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE + 2)
+                    .attr("x", d => this.scaleWithZoomTransform(d.timestampStartRelativeToOperatorPressedSpace) + BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE + 2)
                     .attr("y", arrowY + 1)
                     .attr("font-size", "12")
                     .attr("dominant-baseline", "hanging")

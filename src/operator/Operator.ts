@@ -297,6 +297,7 @@ export class Operator {
                 } else {
                     this.buzzTimingForCurrentClue?.RECORDS[teamIndex].push({
                         timestampStartAbsolute: Date.now(),
+                        timestampStartRelativeToOperatorPressedSpace: NaN,
                         RESULT: {
                             TYPE: "ignored",
                             TEAM_STATE_WHY_IT_WAS_IGNORED: teamState
@@ -383,7 +384,7 @@ export class Operator {
 
     private buzzTimingPopulateRecordForActiveAnswerAndSave(answerResult: BuzzAnswerResult): void {
         if (this.presentClue && this.buzzTimingRecordForActiveAnswer && this.teamPresentlyAnswering) {
-            this.buzzTimingRecordForActiveAnswer.RESULT.timestampEnd = Date.now();
+            this.buzzTimingRecordForActiveAnswer.RESULT.timestampEndAbsolute = Date.now();
             // todo can populate timestampEndRelativeToOperatorPressedSpace here
             this.buzzTimingRecordForActiveAnswer.RESULT.answerResult = answerResult;
 
@@ -579,10 +580,12 @@ export class Operator {
 
         this.buzzTimingRecordForActiveAnswer = {
             timestampStartAbsolute: Date.now(),
+            timestampStartRelativeToOperatorPressedSpace: NaN,
             RESULT: {
                 TYPE: "start-answer",
                 answerResult: "answeredWrongOrTimedOut", //changed later if they answer right
-                timestampEnd: NaN // we do not yet know when the team finished answering
+                timestampEndAbsolute: NaN, // we do not yet know when the team finished answering
+                timestampEndRelativeToOperatorPressedSpace: NaN
             }
         };
     }
@@ -615,6 +618,7 @@ export class Operator {
 
             this.buzzTimingForCurrentClue?.RECORDS[teamIndex].push({
                 timestampStartAbsolute: Date.now(),
+                timestampStartRelativeToOperatorPressedSpace: NaN,
                 RESULT: { TYPE: "too-early-start-lockout" }
             });
         }
