@@ -60,6 +60,8 @@ export class Operator {
     private readonly DIV_GAME_END_LINE_CHART: HTMLDivElement;
     private readonly DIV_GAME_BOARD_WRAPPER: HTMLDivElement;
 
+    private readonly BUTTON_SKIP_CATEGORY_CAROUSEL: HTMLElement;
+
     private readonly GAME_ROUND_TIMER: CountdownTimer; //not readonly because it may be changed when we load a game from localStorage
     /**
     * Set of strings representing keyboard keys which are valid buzzer
@@ -130,6 +132,11 @@ export class Operator {
         this.DIV_GAME_END_LINE_CHART = querySelectorAndCheck(this.DIV_GAME_END_POPUP, "div#line-chart");
 
         this.DIV_GAME_BOARD_WRAPPER = querySelectorAndCheck(document, "div#game-board-wrapper");
+        this.BUTTON_SKIP_CATEGORY_CAROUSEL = querySelectorAndCheck(document, "button#skip-category-carousel");
+        this.BUTTON_SKIP_CATEGORY_CAROUSEL.addEventListener("click", () => {
+            this.categoryCarouselStop();
+            this.stateMachine?.goToState("showGameBoard");
+        });
 
         this.initKeyboardListenerToPause();
         this.initMouseListeners();
@@ -1128,6 +1135,7 @@ export class Operator {
         this.specialCategoryPromptHide();
         this.presentation?.headerAndFooterShow();
         this.GAME_ROUND_TIMER.start();
+        this.BUTTON_SKIP_CATEGORY_CAROUSEL.style.display = "none";
     }
 
     public categoryCarouselHasMore(): boolean {
@@ -1250,6 +1258,8 @@ export class Operator {
 
         messageLines.push("Press space to start the category carousel.");
         this.DIV_INSTRUCTIONS.innerHTML = messageLines.join("<br><br>");
+
+        this.BUTTON_SKIP_CATEGORY_CAROUSEL.style.display = "";
     }
 
     public gameRoundHasMore(): boolean {
