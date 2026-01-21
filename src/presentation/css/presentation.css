@@ -143,17 +143,23 @@ main {
 
         &#slide-final-jeopardy-wagers-table {
 
-            text-shadow: var(--text-shadow-big);
-            font-size: 60px;
-            text-wrap: nowrap;
+            table#final-jeopardy-wagers td {
+                text-shadow: var(--text-shadow-big);
+                font-size: 60px;
+                text-wrap: nowrap;
 
-            table#final-jeopardy-wagers {
+                /* top, right , bottom, left */
+                padding: 10px 20px 15px 10px;
+            }
+        }
 
-                td {
-                    /* top, right , bottom, left */
-                    padding: 10px 20px 15px 10px;
+        &#slide-final-jeopardy-wagers-table,
+        &[id^="slide-gameEnd-"] {
 
-                }
+            h1,
+            h2 {
+                text-shadow: var(--text-shadow-big);
+                text-align: center;
             }
         }
 
@@ -260,9 +266,4 @@ footer {
 
 
     }
-}
-
-h1,
-h2 {
-    text-align: center;
 }
