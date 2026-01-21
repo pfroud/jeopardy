@@ -39,7 +39,7 @@ export function downloadSVG(originalSvg: SVGSVGElement, downloadFilenameLabel: s
     /*
     To minimize the file size of the downloaded SVG, we will remove all the id and class
     attributes. Removing those attributes breaks the D3 pan/zoom controller used for the 
-    buzz history chart. To preserve the original SVG, we will clone the SVG and do all the
+    buzz timing chart. To preserve the original SVG, we will clone the SVG and do all the
     processing only on the clone.
     */
     const clonedSvg = originalSvg.cloneNode(true) as SVGSVGElement;
@@ -168,7 +168,7 @@ export function downloadSVG(originalSvg: SVGSVGElement, downloadFilenameLabel: s
             const computedCssStyle = window.getComputedStyle(child);
 
             if (computedCssStyle.display === "none" || computedCssStyle.opacity === "0") {
-                // In the buzz history chart, some grids are invisible until you zoom in.
+                // In the buzz timing chart, some grids are invisible until you zoom in.
                 child.remove();
             } else {
                 stylesToCopy.forEach(styleToCopy => {

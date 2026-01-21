@@ -1,5 +1,5 @@
 import { AudioManager } from "../AudioManager";
-import { BuzzAnswerResult, BuzzHistoryChart, BuzzHistoryForOneClue, BuzzHistoryRecord, BuzzResultStartAnswer } from "../BuzzHistoryChart";
+import { BuzzAnswerResult, BuzzTimingChart, BuzzTimingForOneClue, BuzzTimingRecord, BuzzResultStartAnswer } from "../BuzzTimingChart";
 import { CountdownTimer } from "../CountdownTimer";
 import { FinalJeopardyWagersTable } from "../FinalJeopardyWagersTable";
 import { GameBoard } from "../GameBoard";
@@ -44,7 +44,7 @@ export class Operator {
     private readonly DIV_SPECIAL_CATEGORY_PROMPT: HTMLDivElement;
     private readonly SPAN_SPECIAL_CATEGORY_PROMPT_TITLE: HTMLSpanElement;
     private readonly DIV_SPECIAL_CATEGORY_POPUP: HTMLDivElement;
-    private readonly DIV_BUZZ_HISTORY_POPUP: HTMLDivElement;
+    private readonly DIV_BUZZ_TIMING_CHART_POPUP: HTMLDivElement;
     private readonly DIV_BACKDROP_FOR_POPUPS: HTMLDivElement;
 
     private readonly SPECIAL_CATEGORY_POPUP_TITLE: HTMLElement;
@@ -81,11 +81,11 @@ export class Operator {
 
     private presentClue?: RevealedClue;
 
-    private buzzHistoryForCurrentClue?: BuzzHistoryForOneClue;
-    public buzzHistoryFor_ALL_clues: BuzzHistoryForOneClue[] = [];
+    private buzzTimingForCurrentClue?: BuzzTimingForOneClue;
+    public buzzTimingFor_ALL_clues: BuzzTimingForOneClue[] = [];
 
-    private buzzHistoryChart: BuzzHistoryChart | undefined;
-    private buzzHistoryRecordForActiveAnswer: BuzzHistoryRecord<BuzzResultStartAnswer> | undefined;
+    private buzzTimingChart: BuzzTimingChart | undefined;
+    private buzzTimingRecordForActiveAnswer: BuzzTimingRecord<BuzzResultStartAnswer> | undefined;
 
     private isPaused_ = false; // add underscore to property name so the method can be called isPaused
     private gameRoundIndex = -1;
@@ -111,7 +111,7 @@ export class Operator {
 
         this.DIV_BACKDROP_FOR_POPUPS = querySelectorAndCheck(document, "div#backdrop-for-popups");
 
-        this.DIV_BUZZ_HISTORY_POPUP = querySelectorAndCheck(document, "div#buzz-history-chart-popup");
+        this.DIV_BUZZ_TIMING_CHART_POPUP = querySelectorAndCheck(document, "div#buzz-timing-chart-popup");
 
         this.DIV_SPECIAL_CATEGORY_PROMPT = querySelectorAndCheck(document, "div#special-category-prompt");
         this.SPAN_SPECIAL_CATEGORY_PROMPT_TITLE = querySelectorAndCheck(this.DIV_SPECIAL_CATEGORY_PROMPT, "span#special-category-prompt-title");
@@ -197,9 +197,9 @@ export class Operator {
         constantSource.start();
 
         /*
-        const testBuzzHistory = false;
-        if (testBuzzHistory) {
-            this.buzzHistoryForClue = {
+        const testBuzzTiming = false;
+        if (testBuzzTiming) {
+            this.buzzTimingForCurrentClue = {
                 timestampWhenClueQuestionFinishedReading: 0,
                 RECORDS: [
                     // team 1 - buzzed too early and was locked out
@@ -224,7 +224,7 @@ export class Operator {
                     ]
                 ]
             };
-            this.stateMachine?.goToState("showBuzzHistory");
+            this.stateMachine?.goToState("showBuzzTimingChart");
         }
 
         const testGameEndStatsCharts = false;
@@ -248,7 +248,7 @@ export class Operator {
     When a team presses the buzzer, what happens depends on what state the team is in.
 
     For most of the team states, pressing the buzzer does not do anything. No functions
-    get called so we have to use this keyboard listener to record the history.
+    get called so we have to use this keyboard listener to record the buzz timing.
 
     There are only two team states in which something interesting happens when the buzzer is pressed.
     Both have dedicated methods in Operator which get called by the state machine:
@@ -284,11 +284,11 @@ export class Operator {
 
             if (this.presentClue) {
                 if (teamStatesWhereBuzzingDoesSomething.has(teamState)) {
-                    // Do not do anything. The history will be recorded by a dedicated method in Operator.
+                    // Do not do anything. The buzz timing will be recorded by a dedicated method in Operator.
                 } else if (teamState === "idle") {
-                    // Ignore, we don't need it to appear in the history chart.
+                    // Ignore, we don't need it to appear in the buzz timing chart.
                 } else {
-                    this.buzzHistoryForCurrentClue?.RECORDS[teamIndex].push({
+                    this.buzzTimingForCurrentClue?.RECORDS[teamIndex].push({
                         timestampStartAbsolute: Date.now(),
                         RESULT: {
                             TYPE: "ignored",
@@ -329,7 +329,7 @@ export class Operator {
             throw new Error("called onAnswerCorrect() when teamPresentlyAnswering is undefined");
         }
         this.teamPresentlyAnswering.onAnswerCorrect(this.presentClue);
-        this.buzzHistoryPopulateRecordForActiveAnswerAndSave("answeredRight");
+        this.buzzTimingPopulateRecordForActiveAnswerAndSave("answeredRight");
 
         if (this.SETTINGS.teamToChooseNextClue === "previousCorrectAnswer") {
             this.teamIndexToPickClue = this.teamPresentlyAnswering.getTeamIndex();
@@ -350,7 +350,7 @@ export class Operator {
         this.teamPresentlyAnswering?.onAnswerIncorrectOrAnswerTimeout(this.presentClue);
 
         // finish adding info to object which was started when the buzzer was pressed (in method startAnswer())
-        this.buzzHistoryPopulateRecordForActiveAnswerAndSave("answeredWrongOrTimedOut");
+        this.buzzTimingPopulateRecordForActiveAnswerAndSave("answeredWrongOrTimedOut");
 
         this.stateMachine?.getCountdownTimerForState("waitForTeamAnswer").showProgressBarFinished();
 
@@ -374,19 +374,19 @@ export class Operator {
         }
     }
 
-    private buzzHistoryPopulateRecordForActiveAnswerAndSave(answerResult: BuzzAnswerResult): void {
-        if (this.presentClue && this.buzzHistoryRecordForActiveAnswer && this.teamPresentlyAnswering) {
-            this.buzzHistoryRecordForActiveAnswer.RESULT.timestampEnd = Date.now();
+    private buzzTimingPopulateRecordForActiveAnswerAndSave(answerResult: BuzzAnswerResult): void {
+        if (this.presentClue && this.buzzTimingRecordForActiveAnswer && this.teamPresentlyAnswering) {
+            this.buzzTimingRecordForActiveAnswer.RESULT.timestampEnd = Date.now();
             // todo can populate timestampEndRelativeToOperatorPressedSpace here
-            this.buzzHistoryRecordForActiveAnswer.RESULT.answerResult = answerResult;
+            this.buzzTimingRecordForActiveAnswer.RESULT.answerResult = answerResult;
 
-            this.buzzHistoryForCurrentClue?.RECORDS[this.teamPresentlyAnswering.getTeamIndex()]
-                .push(this.buzzHistoryRecordForActiveAnswer);
+            this.buzzTimingForCurrentClue?.RECORDS[this.teamPresentlyAnswering.getTeamIndex()]
+                .push(this.buzzTimingRecordForActiveAnswer);
 
-            this.buzzHistoryRecordForActiveAnswer = undefined;
+            this.buzzTimingRecordForActiveAnswer = undefined;
 
-            if (this.buzzHistoryForCurrentClue) {
-                this.buzzHistoryFor_ALL_clues.push(this.buzzHistoryForCurrentClue);
+            if (this.buzzTimingForCurrentClue) {
+                this.buzzTimingFor_ALL_clues.push(this.buzzTimingForCurrentClue);
             }
         }
     }
@@ -519,7 +519,7 @@ export class Operator {
             inputTeamName.addEventListener("input", () => {
                 const newName = inputTeamName.value;
                 newTeam.setTeamName(newName);
-                this.buzzHistoryChart?.setTeamName(teamIndex, newName);
+                this.buzzTimingChart?.setTeamName(teamIndex, newName);
             });
             this.teamNameInputElements.push(inputTeamName);
             tdTeamNameInputContainer.append(inputTeamName);
@@ -530,11 +530,11 @@ export class Operator {
             this.KEYBOARD_KEYS_FOR_TEAM_NUMBERS.add(teamNumberString);
         }
 
-        this.buzzHistoryChart = new BuzzHistoryChart(
+        this.buzzTimingChart = new BuzzTimingChart(
             this.teamArray,
             this.SETTINGS.durationLockoutMillisec,
-            querySelectorAndCheck(document, "svg#buzz-history"),
-            this.presentation.getBuzzHistorySvg()
+            querySelectorAndCheck(document, "svg#buzz-timing"),
+            this.presentation.getBuzzTimingChartSvg()
         );
 
     }
@@ -570,7 +570,7 @@ export class Operator {
 
         this.AUDIO_MANAGER.TEAM_BUZZ.play();
 
-        this.buzzHistoryRecordForActiveAnswer = {
+        this.buzzTimingRecordForActiveAnswer = {
             timestampStartAbsolute: Date.now(),
             RESULT: {
                 TYPE: "start-answer",
@@ -606,7 +606,7 @@ export class Operator {
         if (team.canBeLockedOut()) {
             team.lockoutStart();
 
-            this.buzzHistoryForCurrentClue?.RECORDS[teamIndex].push({
+            this.buzzTimingForCurrentClue?.RECORDS[teamIndex].push({
                 timestampStartAbsolute: Date.now(),
                 RESULT: { TYPE: "too-early-start-lockout" }
             });
@@ -628,17 +628,17 @@ export class Operator {
     private setPresentClue(clue: RevealedClue): void {
         this.presentClue = clue;
 
-        this.buzzHistoryForCurrentClue = {
+        this.buzzTimingForCurrentClue = {
             RECORDS: getEmpty2DArray(this.teamCount),
             timestampWhenClueQuestionFinishedReading: NaN
         };
 
-        function getEmpty2DArray(size: number): BuzzHistoryRecord[][] {
+        function getEmpty2DArray(size: number): BuzzTimingRecord[][] {
             /*
              Do not use array.fill([]) because it creates one new empty array and sets
              all the elements to that empty array.
              */
-            const rv = new Array<BuzzHistoryRecord[]>(size);
+            const rv = new Array<BuzzTimingRecord[]>(size);
             for (let teamIdx = 0; teamIdx < size; teamIdx++) {
                 rv[teamIdx] = [];
             }
@@ -801,10 +801,11 @@ export class Operator {
         */
         this.stateMachine?.getCountdownTimerForState("waitForBuzzes").reset();
 
+        // todo move this resetting to when a question actually starts
         this.teamArray?.forEach(team => team.resetHasBuzzedForCurrentQuestion());
 
-        if (this.buzzHistoryForCurrentClue) {
-            this.buzzHistoryForCurrentClue.timestampWhenClueQuestionFinishedReading = Date.now();
+        if (this.buzzTimingForCurrentClue) {
+            this.buzzTimingForCurrentClue.timestampWhenClueQuestionFinishedReading = Date.now();
         }
     }
 
@@ -980,7 +981,7 @@ export class Operator {
         for (let teamIdx = 0; teamIdx < this.teamCount; teamIdx++) {
             const team = parsedJson.TEAMS[teamIdx];
             this.teamArray![teamIdx].loadFromLocalStorage(team);
-            this.buzzHistoryChart?.setTeamName(teamIdx, team.TEAM_NAME);
+            this.buzzTimingChart?.setTeamName(teamIdx, team.TEAM_NAME);
         }
 
         if (this.isGameRoundOver()) {
@@ -1055,14 +1056,14 @@ export class Operator {
     /**
      * Called from the state machine.
      * 
-     * Buzz history is for each clue. It shows a timeline of when teams buzzed in.
+     * Buzz timing is for each clue. It shows a timeline of when teams buzzed in.
      */
-    public onBuzzHistoryShow(): void {
-        if (this.buzzHistoryForCurrentClue && this.buzzHistoryChart) {
+    public onBuzzTimingChartShow(): void {
+        if (this.buzzTimingForCurrentClue && this.buzzTimingChart) {
             this.backdropForPopupsShow();
-            this.DIV_BUZZ_HISTORY_POPUP.setAttribute("data-popup-visibility", "visible");
+            this.DIV_BUZZ_TIMING_CHART_POPUP.setAttribute("data-popup-visibility", "visible");
 
-            this.buzzHistoryChart.showNewHistory(this.buzzHistoryForCurrentClue);
+            this.buzzTimingChart.showNewTimingData(this.buzzTimingForCurrentClue);
         }
     }
 
@@ -1080,11 +1081,11 @@ export class Operator {
     /**
      * Called from the state machine.
      * 
-     * Buzz history is for each clue. It shows a timeline of when teams buzzed in.
+     * Buzz timing is for each clue. It shows a timeline of when teams buzzed in.
      */
-    public onBuzzHistoryHide(): void {
+    public onBuzzTimingChartHide(): void {
         this.backdropForPopupsHide();
-        this.DIV_BUZZ_HISTORY_POPUP.setAttribute("data-popup-visibility", "hidden");
+        this.DIV_BUZZ_TIMING_CHART_POPUP.setAttribute("data-popup-visibility", "hidden");
     }
 
     public getStateMachine(): StateMachine | undefined {
@@ -1099,11 +1100,11 @@ export class Operator {
         this.DIV_INSTRUCTIONS.innerHTML = text;
     }
 
-    public buzzHistoryShouldShow(): boolean {
+    public buzzTimingChartShouldShow(): boolean {
         if (this.teamArray) {
             return this.teamArray.some(t => t.hasBuzzedForCurrentQuestion());
         } else {
-            throw new Error("called shouldShowBuzzHistory() when teamArray is undefined");
+            throw new Error("called buzzTimingChartShouldShow() when teamArray is undefined");
         }
     }
 

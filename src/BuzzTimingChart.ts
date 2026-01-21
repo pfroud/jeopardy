@@ -7,21 +7,21 @@ import { Team, TeamState } from "./Team";
 
 
 /**
- * This is history of buzzes for one single clue.
+ * This is timing data of buzzes for one single clue.
  */
-export interface BuzzHistoryForOneClue {
+export interface BuzzTimingForOneClue {
     /**
      * The first index of the array is the team index.
      * Each subarray is an array of records in the order they happened.
      */
-    readonly RECORDS: BuzzHistoryRecord[][];
+    readonly RECORDS: BuzzTimingRecord[][];
     timestampWhenClueQuestionFinishedReading: number;
 }
 
 /**
- * One BuzzHistoryRecord corresponds to one press of the physical buzzer button.
+ * One BuzzTimingRecord corresponds to one press of the physical buzzer button.
  */
-export interface BuzzHistoryRecord<R extends BuzzResult = BuzzResult> {
+export interface BuzzTimingRecord<R extends BuzzResult = BuzzResult> {
     /** Unix epoch */
     timestampStartAbsolute: number;
     timestampStartRelativeToOperatorPressedSpace?: number;
@@ -85,7 +85,7 @@ interface Annotation {
 }
 
 /*
-Simplified example of what the buzz history chart looks like:
+Simplified example of what the buzz timing chart looks like:
 
 Team 1       •═══╪═══
 Team 2           │  •═══════════════════════
@@ -109,10 +109,10 @@ dots show what the buzzer did. So in this example, from top to bottom:
 */
 
 /**
- * The buzz history chart shows the buzzes each team made relative to when the human
+ * The buzz timing chart shows the buzzes each team made relative to when the human
  * operator finished reading the clue question.
  */
-export class BuzzHistoryChart {
+export class BuzzTimingChart {
 
     private readonly SVG_MARGIN = {
         TOP: 20,
@@ -132,8 +132,8 @@ export class BuzzHistoryChart {
 
     private static readonly ROW_HEIGHT = 50;
     private static readonly DOT_RADIUS = 5;
-    private static readonly BAR_HEIGHT = BuzzHistoryChart.DOT_RADIUS * 2;
-    private static readonly Y_POSITION_FOR_BARS = (BuzzHistoryChart.ROW_HEIGHT / 2) - (BuzzHistoryChart.BAR_HEIGHT / 2);
+    private static readonly BAR_HEIGHT = BuzzTimingChart.DOT_RADIUS * 2;
+    private static readonly Y_POSITION_FOR_BARS = (BuzzTimingChart.ROW_HEIGHT / 2) - (BuzzTimingChart.BAR_HEIGHT / 2);
 
     private static readonly CLASS_NAME_FOR_BUZZER_PRESS = "buzzer-press";
     private static readonly CLASS_NAME_FOR_START_ANSWER = "start-answer";
@@ -173,7 +173,7 @@ export class BuzzHistoryChart {
     /** The SVG in the operator window needs mouse listeners */
     private readonly SVG_IN_OPERATOR_WINDOW: Selection<SVGSVGElement, unknown, null, undefined>;
 
-    private history: BuzzHistoryForOneClue | null = null;
+    private buzzTimingData: BuzzTimingForOneClue | null = null;
 
     // one for each SVG
     private readonly X_AXIS_GROUPS = new Map<
@@ -198,13 +198,13 @@ export class BuzzHistoryChart {
         this.LOCKOUT_DURATION_MILLISEC = lockoutDurationMillisec;
         this.SVG_IN_OPERATOR_WINDOW = select(svgInOperatorWindow);
 
-        const svgHeight = (teams.length * BuzzHistoryChart.ROW_HEIGHT) + this.SVG_MARGIN.TOP + this.SVG_MARGIN.BOTTOM + this.LEGEND_HEIGHT + this.LEGEND_PADDING;
+        const svgHeight = (teams.length * BuzzTimingChart.ROW_HEIGHT) + this.SVG_MARGIN.TOP + this.SVG_MARGIN.BOTTOM + this.LEGEND_HEIGHT + this.LEGEND_PADDING;
 
         // Content excludes legend and axis
         this.CONTENT_WIDTH = this.SVG_WIDTH - this.SVG_MARGIN.LEFT - this.SVG_MARGIN.RIGHT;
         this.CONTENT_HEIGHT = svgHeight - this.SVG_MARGIN.TOP - this.SVG_MARGIN.BOTTOM - this.LEGEND_HEIGHT - this.LEGEND_PADDING;
 
-        // The domain is set in the showNewHistory() function
+        // The domain is set in the showNewTimingData() function
         this.SCALE_WITHOUT_ZOOM_TRANSFORM = scaleLinear()
             .range([0, this.CONTENT_WIDTH]);
 
@@ -256,7 +256,7 @@ export class BuzzHistoryChart {
 
                 const group = createSvgElement("g");
                 group.setAttribute("id", `team-index-${teamIndex}`);
-                group.setAttribute("transform", `translate(0, ${BuzzHistoryChart.ROW_HEIGHT * teamIndex})`);
+                group.setAttribute("transform", `translate(0, ${BuzzTimingChart.ROW_HEIGHT * teamIndex})`);
                 rowsGroup.append(group);
 
                 const shadedBackground = createSvgElement("rect");
@@ -264,19 +264,19 @@ export class BuzzHistoryChart {
                 shadedBackground.setAttribute("x", "0");
                 shadedBackground.setAttribute("y", "0");
                 shadedBackground.setAttribute("width", String(this.CONTENT_WIDTH));
-                shadedBackground.setAttribute("height", String(BuzzHistoryChart.ROW_HEIGHT));
+                shadedBackground.setAttribute("height", String(BuzzTimingChart.ROW_HEIGHT));
                 group.append(shadedBackground);
 
                 const separatorLine = createSvgElement("line");
                 separatorLine.classList.add("row-separator");
                 separatorLine.setAttribute("x1", "0");
-                separatorLine.setAttribute("y1", String(BuzzHistoryChart.ROW_HEIGHT));
+                separatorLine.setAttribute("y1", String(BuzzTimingChart.ROW_HEIGHT));
                 separatorLine.setAttribute("x2", String(this.CONTENT_WIDTH));
-                separatorLine.setAttribute("y2", String(BuzzHistoryChart.ROW_HEIGHT));
+                separatorLine.setAttribute("y2", String(BuzzTimingChart.ROW_HEIGHT));
                 group.append(separatorLine);
 
                 /*
-                 The buzz history records should go underneath the team name,
+                 The buzz timing records should go underneath the team name,
                  so we need to add a group to hold the records BEFORE adding
                  the team name.
                  */
@@ -292,7 +292,7 @@ export class BuzzHistoryChart {
                 const textNode = createSvgElement("text");
                 textNode.classList.add("team-name");
                 textNode.setAttribute("x", "10");
-                textNode.setAttribute("y", String(BuzzHistoryChart.ROW_HEIGHT / 2));
+                textNode.setAttribute("y", String(BuzzTimingChart.ROW_HEIGHT / 2));
                 textNode.setAttribute("dominant-baseline", "middle");
                 textNode.innerHTML = teams[teamIndex].getTeamName();
                 group.append(textNode);
@@ -319,10 +319,10 @@ export class BuzzHistoryChart {
 
         this.initPanZoomController();
 
-        // The chart is drawn when showNewHistory() is called.
+        // The chart is drawn when showNewTimingData() is called.
 
-        querySelectorAndCheck(document, "button#download-svg-buzz-history-chart")
-            .addEventListener("click", () => downloadSVG(this.SVG_IN_OPERATOR_WINDOW.node()!, "buzz history"));
+        querySelectorAndCheck(document, "button#download-svg-buzz-timing-chart")
+            .addEventListener("click", () => downloadSVG(this.SVG_IN_OPERATOR_WINDOW.node()!, "buzz timing"));
 
     }
 
@@ -357,7 +357,7 @@ export class BuzzHistoryChart {
             theRect.classList.add("buzz-record");
             theRect.classList.add(className);
             theRect.setAttribute("width", "100");
-            theRect.setAttribute("height", String(BuzzHistoryChart.BAR_HEIGHT));
+            theRect.setAttribute("height", String(BuzzTimingChart.BAR_HEIGHT));
             theRect.setAttribute("x", String(x));
             theRect.setAttribute("y", String(yPositionForBottomRow));
             legendGroup.append(theRect);
@@ -365,10 +365,10 @@ export class BuzzHistoryChart {
 
         const createCircle = (cx: number): void => {
             const theCircle = createSvgElement("circle");
-            theCircle.classList.add(BuzzHistoryChart.CLASS_NAME_FOR_BUZZER_PRESS);
+            theCircle.classList.add(BuzzTimingChart.CLASS_NAME_FOR_BUZZER_PRESS);
             theCircle.setAttribute("cx", String(cx));
-            theCircle.setAttribute("cy", String(yPositionForBottomRow + (BuzzHistoryChart.DOT_RADIUS / 2)));
-            theCircle.setAttribute("r", String(BuzzHistoryChart.DOT_RADIUS));
+            theCircle.setAttribute("cy", String(yPositionForBottomRow + (BuzzTimingChart.DOT_RADIUS / 2)));
+            theCircle.setAttribute("r", String(BuzzTimingChart.DOT_RADIUS));
             legendGroup.append(theCircle);
         };
 
@@ -377,13 +377,13 @@ export class BuzzHistoryChart {
 
         const xPositionOfCircleLegendItem = 10;
         createText(xPositionOfCircleLegendItem, "Buzzer press");
-        createCircle(xPositionOfCircleLegendItem + (BuzzHistoryChart.DOT_RADIUS / 2) + 4);
+        createCircle(xPositionOfCircleLegendItem + (BuzzTimingChart.DOT_RADIUS / 2) + 4);
 
 
         const rectanglesToAdd = [
-            { label: "Too early (lockout)", xOffsetToLookLinedUp: 4, className: BuzzHistoryChart.CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT },
-            { label: "Answered wrong or timed out", xOffsetToLookLinedUp: 1, className: BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_WRONG_OR_TIMED_OUT },
-            { label: "Answered right", xOffsetToLookLinedUp: 1, className: BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_RIGHT },
+            { label: "Too early (lockout)", xOffsetToLookLinedUp: 4, className: BuzzTimingChart.CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT },
+            { label: "Answered wrong or timed out", xOffsetToLookLinedUp: 1, className: BuzzTimingChart.CLASS_NAME_FOR_ANSWERED_WRONG_OR_TIMED_OUT },
+            { label: "Answered right", xOffsetToLookLinedUp: 1, className: BuzzTimingChart.CLASS_NAME_FOR_ANSWERED_RIGHT },
         ];
 
         for (let i = 0; i < rectanglesToAdd.length; i++) {
@@ -412,19 +412,19 @@ export class BuzzHistoryChart {
 
 
     /** The input is the present zoom scale factor. The output is the tick count for the axis. */
-    private readonly ZOOM_TO_AXIS_TICK_COUNT_FUNCTION = BuzzHistoryChart.getClampedLineFunction(
+    private readonly ZOOM_TO_AXIS_TICK_COUNT_FUNCTION = BuzzTimingChart.getClampedLineFunction(
         4, 4,  // At 4x zoom and below, set the tick count to 4.
         6, 8   // At 6x zoom and above, set the tick count to 8.
     );
 
     /** The input is the present zoom scale factor. The output is opacity for the gridlines. */
-    private readonly ZOOM_TO_GRIDLINE_OPACITY_FUNCTION = BuzzHistoryChart.getClampedLineFunction(
+    private readonly ZOOM_TO_GRIDLINE_OPACITY_FUNCTION = BuzzTimingChart.getClampedLineFunction(
         20, 0.0, // At 20x zoom and below, set the grid opacity to 0.0.
         30, 1.0  // At 30x zoom and above, set the grid opacity to 1.0.
     );
 
     /** The input is the present zoom scale factor. The output is opacity for the annotations. */
-    private readonly ZOOM_TO_ANNOTATION_OPACITY_FUNCTION = BuzzHistoryChart.getClampedLineFunction(
+    private readonly ZOOM_TO_ANNOTATION_OPACITY_FUNCTION = BuzzTimingChart.getClampedLineFunction(
         2, 0.0, // At 2x zoom and below, set the annotation opacity to 0.0.
         4, 1.0  // At 4x zoom and above, set the annotation opacity to 1.0.
     );
@@ -514,12 +514,12 @@ export class BuzzHistoryChart {
     }
 
     private calculateAnnotations(): void {
-        if (!this.history) {
-            throw new Error("called calculateAnnotations with no history");
+        if (!this.buzzTimingData) {
+            throw new Error("called calculateAnnotations with no buzz timing data");
         }
 
         // Find the first buzz from any team which started an answer.
-        const answeringRecords = this.history.RECORDS.flat()
+        const answeringRecords = this.buzzTimingData.RECORDS.flat()
             .filter(record => record.RESULT.TYPE === "start-answer")
             .sort((a, b) => a.timestampStartAbsolute - b.timestampStartAbsolute);
         if (answeringRecords.length < 1) {
@@ -527,12 +527,12 @@ export class BuzzHistoryChart {
         }
         const firstAnswer = answeringRecords[0];
 
-        for (let teamIdx = 0; teamIdx < this.history.RECORDS.length; teamIdx++) {
+        for (let teamIdx = 0; teamIdx < this.buzzTimingData.RECORDS.length; teamIdx++) {
 
             // clear previous annotations
             this.ANNOTATIONS[teamIdx] = [];
 
-            const records = this.history.RECORDS[teamIdx];
+            const records = this.buzzTimingData.RECORDS[teamIdx];
 
             /*
             Find buzzes which were too late.
@@ -547,7 +547,7 @@ export class BuzzHistoryChart {
                 if (
                     record.RESULT.TYPE === "ignored" // buzzes that happened when someone else was answering
                     && record.RESULT.TEAM_STATE_WHY_IT_WAS_IGNORED === "other-team-is-answering"
-                    && difference <= BuzzHistoryChart.ANNOTATION_RANGE_MILLISEC
+                    && difference <= BuzzTimingChart.ANNOTATION_RANGE_MILLISEC
                 ) {
                     this.ANNOTATIONS[teamIdx].push({
                         startTimestamp: firstAnswer.timestampStartAbsolute,
@@ -568,7 +568,7 @@ export class BuzzHistoryChart {
                 const record = records[recordIdx];
                 if (
                     record.timestampStartAbsolute < 0
-                    && record.timestampStartAbsolute >= -BuzzHistoryChart.ANNOTATION_RANGE_MILLISEC
+                    && record.timestampStartAbsolute >= -BuzzTimingChart.ANNOTATION_RANGE_MILLISEC
                     && record.RESULT.TYPE === "too-early-start-lockout"
                 ) {
                     this.ANNOTATIONS[teamIdx].push({
@@ -584,14 +584,14 @@ export class BuzzHistoryChart {
 
     }
 
-    public showNewHistory(history: BuzzHistoryForOneClue): void {
+    public showNewTimingData(timingData: BuzzTimingForOneClue): void {
 
-        if (history.RECORDS.length === 0) {
-            console.warn("array of buzz history records is empty");
+        if (timingData.RECORDS.length === 0) {
+            console.warn("array of buzz timing records is empty");
             return;
         }
 
-        this.history = history;
+        this.buzzTimingData = timingData;
 
         /////////////////////////////////////////////////////////
         /////// Compute the time range for the X axis ///////////
@@ -601,11 +601,11 @@ export class BuzzHistoryChart {
 
         // Change all the timestamps so time zero is when the operator finished reading the question.
         // TODO do not change the timestamp, use a new field!!!!!
-        this.history.RECORDS.forEach(arrayOfRecordsForTeam => arrayOfRecordsForTeam.forEach(record => {
-            record.timestampStartRelativeToOperatorPressedSpace = record.timestampStartAbsolute - this.history!.timestampWhenClueQuestionFinishedReading;
+        this.buzzTimingData.RECORDS.forEach(arrayOfRecordsForTeam => arrayOfRecordsForTeam.forEach(record => {
+            record.timestampStartRelativeToOperatorPressedSpace = record.timestampStartAbsolute - this.buzzTimingData!.timestampWhenClueQuestionFinishedReading;
             allTimestamps.push(record.timestampStartAbsolute);
             if (record.RESULT.TYPE === "start-answer") {
-                record.RESULT.timestampEndRelativeToOperatorPressedSpace = record.RESULT.timestampEnd - this.history!.timestampWhenClueQuestionFinishedReading;
+                record.RESULT.timestampEndRelativeToOperatorPressedSpace = record.RESULT.timestampEnd - this.buzzTimingData!.timestampWhenClueQuestionFinishedReading;
                 allTimestamps.push(record.RESULT.timestampEnd);
             }
         }));
@@ -656,11 +656,11 @@ export class BuzzHistoryChart {
         });
 
         this.ROWS_ARRAY.forEach(rowsForSVG => {
-            if (!this.history) {
+            if (!this.buzzTimingData) {
                 return;
             }
 
-            this.history.RECORDS.forEach((recordsForTeam, teamIndex) => {
+            this.buzzTimingData.RECORDS.forEach((recordsForTeam, teamIndex) => {
 
                 const groupForTeam = rowsForSVG[teamIndex];
 
@@ -672,19 +672,19 @@ export class BuzzHistoryChart {
 
                 // Draw bars for buzzes that were too early
                 groupForTeam
-                    .selectAll(`rect.${BuzzHistoryChart.CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT}`)
+                    .selectAll(`rect.${BuzzTimingChart.CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT}`)
                     .data(recordsForTeam.filter(record => record.RESULT.TYPE === "too-early-start-lockout"))
                     .join("rect")
                     .classed("buzz-record", true)
-                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT, true)
+                    .classed(BuzzTimingChart.CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT, true)
                     .attr("x", d => this.scaleWithZoomTransform(d.timestampStartAbsolute))
-                    .attr("y", BuzzHistoryChart.Y_POSITION_FOR_BARS)
+                    .attr("y", BuzzTimingChart.Y_POSITION_FOR_BARS)
                     .attr("width", lockoutBarWidth)
-                    .attr("height", BuzzHistoryChart.BAR_HEIGHT);
+                    .attr("height", BuzzTimingChart.BAR_HEIGHT);
 
                 // Draw bars for when a team started answering
                 groupForTeam
-                    .selectAll(`rect.${BuzzHistoryChart.CLASS_NAME_FOR_START_ANSWER}`)
+                    .selectAll(`rect.${BuzzTimingChart.CLASS_NAME_FOR_START_ANSWER}`)
                     .data(
                         recordsForTeam.filter(
                             /*
@@ -693,40 +693,40 @@ export class BuzzHistoryChart {
                             https://stackoverflow.com/questions/65279417/typescript-narrow-down-type-based-on-class-property-from-filter-find-etc
                             https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates
                             */
-                            function (record: BuzzHistoryRecord): record is BuzzHistoryRecord<BuzzResultStartAnswer> {
+                            function (record: BuzzTimingRecord): record is BuzzTimingRecord<BuzzResultStartAnswer> {
                                 return record.RESULT.TYPE === "start-answer";
                             }
                         )
                     )
                     .join("rect")
                     .classed("buzz-record", true)
-                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_START_ANSWER, true)
-                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_RIGHT, d => d.RESULT.answerResult === "answeredRight")
-                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_WRONG_OR_TIMED_OUT, d => d.RESULT.answerResult === "answeredWrongOrTimedOut")
+                    .classed(BuzzTimingChart.CLASS_NAME_FOR_START_ANSWER, true)
+                    .classed(BuzzTimingChart.CLASS_NAME_FOR_ANSWERED_RIGHT, d => d.RESULT.answerResult === "answeredRight")
+                    .classed(BuzzTimingChart.CLASS_NAME_FOR_ANSWERED_WRONG_OR_TIMED_OUT, d => d.RESULT.answerResult === "answeredWrongOrTimedOut")
                     .attr("x", d => this.scaleWithZoomTransform(d.timestampStartAbsolute))
-                    .attr("y", BuzzHistoryChart.Y_POSITION_FOR_BARS)
+                    .attr("y", BuzzTimingChart.Y_POSITION_FOR_BARS)
                     .attr("width", d => this.scaleWithZoomTransform(d.RESULT.timestampEnd) - this.scaleWithZoomTransform(d.timestampStartAbsolute))
-                    .attr("height", BuzzHistoryChart.BAR_HEIGHT);
+                    .attr("height", BuzzTimingChart.BAR_HEIGHT);
 
                 // Draw a dot for every time a team pressed a buzzer
                 groupForTeam
-                    .selectAll(`circle.${BuzzHistoryChart.CLASS_NAME_FOR_BUZZER_PRESS}`)
+                    .selectAll(`circle.${BuzzTimingChart.CLASS_NAME_FOR_BUZZER_PRESS}`)
                     .data(recordsForTeam)
                     .join("circle")
-                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_BUZZER_PRESS, true)
+                    .classed(BuzzTimingChart.CLASS_NAME_FOR_BUZZER_PRESS, true)
                     .attr("cx", d => this.scaleWithZoomTransform(d.timestampStartAbsolute))
-                    .attr("cy", BuzzHistoryChart.ROW_HEIGHT / 2)
-                    .attr("r", BuzzHistoryChart.DOT_RADIUS);
+                    .attr("cy", BuzzTimingChart.ROW_HEIGHT / 2)
+                    .attr("r", BuzzTimingChart.DOT_RADIUS);
 
                 // Draw annotations
                 const annotationForThisTeam = this.ANNOTATIONS[teamIndex];
                 const annotationGroups = groupForTeam
-                    .selectAll(`g.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_GROUP}`)
+                    .selectAll(`g.${BuzzTimingChart.CLASS_NAME_FOR_ANNOTATION_GROUP}`)
                     .data(annotationForThisTeam)
                     .join("g")
-                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_GROUP, true);
+                    .classed(BuzzTimingChart.CLASS_NAME_FOR_ANNOTATION_GROUP, true);
 
-                const arrowY = (BuzzHistoryChart.ROW_HEIGHT / 2) + BuzzHistoryChart.DOT_RADIUS + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE + 2;
+                const arrowY = (BuzzTimingChart.ROW_HEIGHT / 2) + BuzzTimingChart.DOT_RADIUS + BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE + 2;
 
                 const getSvgPathDataForAnnotationArrow = (d: Annotation): string => {
                     const scaledStartTimestamp = this.scaleWithZoomTransform(d.startTimestamp);
@@ -776,9 +776,9 @@ export class BuzzHistoryChart {
                         o  (x3, y3)
                     */
                     const leftArrowHead =
-                        `M ${scaledStartTimestamp + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}\n` +
+                        `M ${scaledStartTimestamp + BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY - BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE}\n` +
                         `L ${scaledStartTimestamp}, ${arrowY}\n` +
-                        `L ${scaledStartTimestamp + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}`;
+                        `L ${scaledStartTimestamp + BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY + BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE}`;
 
                     /*
                     Left vertical tick:
@@ -792,9 +792,9 @@ export class BuzzHistoryChart {
                      o  (x3, y3)
                     */
                     const leftVerticalTick =
-                        `M ${scaledStartTimestamp}, ${arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}\n` +
+                        `M ${scaledStartTimestamp}, ${arrowY - BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE}\n` +
                         `L ${scaledStartTimestamp}, ${arrowY}\n` +
-                        `L ${scaledStartTimestamp}, ${arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}`;
+                        `L ${scaledStartTimestamp}, ${arrowY + BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE}`;
 
 
                     /*
@@ -810,9 +810,9 @@ export class BuzzHistoryChart {
                     */
 
                     const rightArrowHead =
-                        `M ${scaledEndTimestamp - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}\n` +
+                        `M ${scaledEndTimestamp - BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY - BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE}\n` +
                         `L ${scaledEndTimestamp}, ${arrowY}\n` +
-                        `L ${scaledEndTimestamp - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}`;
+                        `L ${scaledEndTimestamp - BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE}, ${arrowY + BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE}`;
 
                     /*
                     Right vertical tick:
@@ -826,19 +826,19 @@ export class BuzzHistoryChart {
                     o  (x3, y3)
                     */
                     const rightVerticalTick =
-                        `M ${scaledEndTimestamp}, ${arrowY - BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}\n` +
+                        `M ${scaledEndTimestamp}, ${arrowY - BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE}\n` +
                         `L ${scaledEndTimestamp}, ${arrowY}\n` +
-                        `L ${scaledEndTimestamp}, ${arrowY + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE}`;
+                        `L ${scaledEndTimestamp}, ${arrowY + BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE}`;
 
                     return `${leftArrowHead}\n\n${leftVerticalTick}\n\n${body}\n\n${rightArrowHead}\n\n${rightVerticalTick}`;
 
                 };
 
                 annotationGroups
-                    .selectAll(`path.${BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROW_PATH}`)
+                    .selectAll(`path.${BuzzTimingChart.CLASS_NAME_FOR_ANNOTATION_ARROW_PATH}`)
                     .data(annotationForThisTeam)
                     .join("path")
-                    .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANNOTATION_ARROW_PATH, true)
+                    .classed(BuzzTimingChart.CLASS_NAME_FOR_ANNOTATION_ARROW_PATH, true)
                     .attr("d", annotation => getSvgPathDataForAnnotationArrow(annotation));
 
 
@@ -847,7 +847,7 @@ export class BuzzHistoryChart {
                     .selectAll("text")
                     .data(annotationForThisTeam)
                     .join("text")
-                    .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp) + BuzzHistoryChart.ANNOTATION_ARROWHEAD_SIZE + 2)
+                    .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp) + BuzzTimingChart.ANNOTATION_ARROWHEAD_SIZE + 2)
                     .attr("y", arrowY + 1)
                     .attr("font-size", "12")
                     .attr("dominant-baseline", "hanging")

@@ -1,5 +1,5 @@
 import * as Chartist from "chartist";
-import { BuzzResult, BuzzResultStartAnswer } from "../BuzzHistoryChart";
+import { BuzzResult, BuzzResultStartAnswer } from "../BuzzTimingChart";
 import { createSvgElement, downloadSVG, querySelectorAndCheck } from "../commonFunctions";
 import { Operator } from "../operator/Operator";
 import { Team } from "../Team";
@@ -245,9 +245,9 @@ export function createGameEndPieChartsOfBuzzResults(operator: Operator, divForPi
         });
     }
 
-    operator.buzzHistoryFor_ALL_clues.forEach(buzzHistoryForOneClue => {
+    operator.buzzTimingFor_ALL_clues.forEach(buzzTimingForOneClue => {
         for (let teamIdx = 0; teamIdx < operator.teamCount; teamIdx++) {
-            const recordsForTeam = buzzHistoryForOneClue.RECORDS[teamIdx];
+            const recordsForTeam = buzzTimingForOneClue.RECORDS[teamIdx];
             const mapToResultsOnly = recordsForTeam.map(record => record.RESULT);
             const pieChartSlice = convertBuzzResultsToPieChartSlice(mapToResultsOnly);
             destinationAllTeams[teamIdx][pieChartSlice]++;

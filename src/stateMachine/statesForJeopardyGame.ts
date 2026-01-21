@@ -201,26 +201,26 @@ export function getStatesForJeopardyGame(operator: Operator, presentation: Prese
             TRANSITIONS: [{
                 TYPE: "keyboard",
                 KEYBOARD_KEYS: " ", //space
-                DESTINATION: "maybeShowBuzzHistory"
+                DESTINATION: "maybeShowBuzzTimingChart"
             }],
             KEYBOARD_LISTENERS: [{
                 KEYBOARD_KEYS: "q",
                 ON_KEY_DOWN: operator.toggleQuestionInAnswerSlide.bind(operator)
             }]
         }, {
-            NAME: "maybeShowBuzzHistory",
+            NAME: "maybeShowBuzzTimingChart",
             TRANSITIONS: [{
                 TYPE: "if",
-                CONDITION: operator.buzzHistoryShouldShow.bind(operator),
-                THEN: { DESTINATION: "showBuzzHistory" },
+                CONDITION: operator.buzzTimingChartShouldShow.bind(operator),
+                THEN: { DESTINATION: "showBuzzTimingChart" },
                 ELSE: { DESTINATION: "checkGameRoundOver" }
             }]
         }, {
-            NAME: "showBuzzHistory",
-            OPERATOR_INSTRUCTIONS_HTML: "Discuss the buzz history if needed, press space to continue.",
-            ON_ENTER: operator.onBuzzHistoryShow.bind(operator),
-            ON_EXIT: operator.onBuzzHistoryHide.bind(operator),
-            PRESENTATION_SLIDE_TO_SHOW: "slide-buzz-history-chart",
+            NAME: "showBuzzTimingChart",
+            OPERATOR_INSTRUCTIONS_HTML: "Discuss the buzz timing chart if needed, press space to continue.",
+            ON_ENTER: operator.onBuzzTimingChartShow.bind(operator),
+            ON_EXIT: operator.onBuzzTimingChartHide.bind(operator),
+            PRESENTATION_SLIDE_TO_SHOW: "slide-buzz-timing-chart",
             TRANSITIONS: [{
                 TYPE: "keyboard",
                 KEYBOARD_KEYS: " ", //space

@@ -94,8 +94,8 @@ div.overlay-popup {
         }
     }
 
-    /* In the presentation window, the buzz history charts are in a presentation slide not a popup. */
-    &#buzz-history-chart-popup {
+    /* In the presentation window, the buzz timing charts are in a presentation slide not a popup. */
+    &#buzz-timing-chart-popup {
         background: #88cccc;
         border: 1px solid turquoise;
 

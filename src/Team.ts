@@ -1,5 +1,5 @@
 import { AudioManager } from "./AudioManager";
-import { BuzzHistoryRecord } from "./BuzzHistoryChart";
+import { BuzzTimingRecord } from "./BuzzTimingChart";
 import { CountdownTimer } from "./CountdownTimer";
 import { Settings } from "./Settings";
 import { querySelectorAndCheck } from "./commonFunctions";
@@ -69,10 +69,10 @@ export class Team {
      * The first array is for each clue.
      * The second index is for how many times the team buzzes for that clue.
      * 
-     * WATCH OUT because in BuzzHistoryChart, the first array is the TEAM INDEX.
-     * BuzzHistoryChart does NOT keep track of multiple clues.
+     * WATCH OUT because in BuzzTimingChart, the first array is the TEAM INDEX.
+     * BuzzTimingChart does NOT keep track of multiple clues.
      * */
-    public buzzHistoryForAllClues: BuzzHistoryRecord[][] = [];
+    public buzzTimingForAllClues: BuzzTimingRecord[][] = [];
 
 
     public constructor(teamIdx: number, operator: Operator, presentation: Presentation, settings: Settings, audioManager: AudioManager) {

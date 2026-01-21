@@ -48,7 +48,7 @@ export class Presentation {
     private readonly DIV_GAME_END_PIE_CHART_CONTAINER: HTMLDivElement;
     private readonly DIV_GAME_END_LINE_CHART_CONTAINER: HTMLDivElement;
     private readonly TABLE_GAME_BOARD: HTMLTableElement;
-    private readonly SVG_BUZZ_HISTORY: SVGSVGElement;
+    private readonly SVG_BUZZ_TIMING_CHART: SVGSVGElement;
 
     private readonly CATEGORY_CAROUSEL_TABLE: HTMLTableElement;
     private readonly CATEGORY_CAROUSEL_CELLS: HTMLTableCellElement[];
@@ -82,7 +82,7 @@ export class Presentation {
         this.DIV_GAME_END_PIE_CHART_CONTAINER = querySelectorAndCheck(document, "div#slide-gameEnd-pie-charts div#pie-charts");
         this.DIV_GAME_END_LINE_CHART_CONTAINER = querySelectorAndCheck(document, "div#slide-gameEnd-line-chart div#line-chart");
 
-        this.SVG_BUZZ_HISTORY = querySelectorAndCheck(document, "div#slide-buzz-history-chart svg");
+        this.SVG_BUZZ_TIMING_CHART = querySelectorAndCheck(document, "div#slide-buzz-timing-chart svg");
 
         this.TABLE_GAME_BOARD = querySelectorAndCheck(document, "table#game-board");
 
@@ -267,8 +267,8 @@ export class Presentation {
         this.DIV_SPECIAL_CATEGORY_POPUP.setAttribute("data-popup-visibility", "hidden");
     }
 
-    public getBuzzHistorySvg(): SVGSVGElement {
-        return this.SVG_BUZZ_HISTORY;
+    public getBuzzTimingChartSvg(): SVGSVGElement {
+        return this.SVG_BUZZ_TIMING_CHART;
     }
 
     public getGameBoardTable(): HTMLTableElement {
