@@ -48,7 +48,7 @@ function convertBuzzResultsToPieChartSlice(buzzResults: BuzzResult[]): PieChartS
     } else {
         // Started answering at least once.
 
-        // Team can buzz multiple times, so they could answer wrong and buzz again to answer right.
+        // Team can buzz multiple times, so it's possible they answered wrong then buzzed again and answered right.
         const answeredWrongOrTimedOut = buzzResultsWhichStartedAnswer.some(buzzResult => buzzResult.answerResult === "answeredWrongOrTimedOut");
         const answeredRight = buzzResultsWhichStartedAnswer.some(buzzResult => buzzResult.answerResult === "answeredRight");
 
@@ -174,9 +174,9 @@ export function createGameEndPieChartsOfBuzzResults(operator: Operator, divForPi
     containerSvg.append(defs);
     */
 
-    ///////////////////////////////
-    //////// Create legend //////////
-    ////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    //////////////////////////// Create legend ///////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     const groupLegend = createSvgElement("g");
     groupLegend.id = "legend";
     groupLegend.setAttribute("transform", `translate(0 ${chartGridHeight})`);
@@ -229,9 +229,9 @@ export function createGameEndPieChartsOfBuzzResults(operator: Operator, divForPi
 
     });
 
-    ///////////////////////////////////////
-    //// Convert stats to Chartist format ////
-    ////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    ////////////////////// Convert stats to Chartist format ///////////////////
+    ////////////////////////////////////////////////////////////////////////////
 
     /** The index is the team index */
     const destinationAllTeams: HowManyOfEachPieChartSliceType[] = [];
@@ -254,9 +254,9 @@ export function createGameEndPieChartsOfBuzzResults(operator: Operator, divForPi
         }
     });
 
-    ////////////////////////////////////////
-    //////// Create pie charts ///////
-    //////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////// Create pie charts ////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
     teams.forEach((team, teamIndex) => {
 
         /*

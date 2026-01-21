@@ -22,7 +22,9 @@ export interface BuzzHistoryForOneClue {
  * One BuzzHistoryRecord corresponds to one press of the physical buzzer button.
  */
 export interface BuzzHistoryRecord<R extends BuzzResult = BuzzResult> {
-    startTimestamp: number;
+    /** Unix epoch */
+    timestampStartAbsolute: number;
+    timestampStartRelativeToOperatorPressedSpace?: number;
     readonly RESULT: R;
 }
 
@@ -47,7 +49,10 @@ export type BuzzAnswerResult = "answeredRight" | "answeredWrongOrTimedOut";
 export interface BuzzResultStartAnswer {
     readonly TYPE: "start-answer";
     answerResult: BuzzAnswerResult;
-    endTimestamp: number;
+    /** Unix epoch */
+    timestampEnd: number;
+    /** After subtracting the timestamp of when the operator pressed space */
+    timestampEndRelativeToOperatorPressedSpace?: number;
 }
 
 /**
@@ -78,6 +83,30 @@ interface Annotation {
      */
     teamIndexWhereStartTimestampHappened?: number;
 }
+
+/*
+Simplified example of what the buzz history chart looks like:
+
+Team 1       •═══╪═══
+Team 2           │  •═══════════════════════
+Team 3           │        •
+       ──────────┼───────────────────────┼────
+                0ms                    100ms
+       
+The X axis is time relative to when the human operator pressed the spacebar to
+indicate they were done reading the question out loud.
+
+Each dot • represents a buzzer being pressed. Horizontal bars ════ trailing the
+dots show what the buzzer did. So in this example, from top to bottom:
+
+- Team 1 pressed their buzzer before the operator pressed space, which caused
+  their buzzer to be locked out.
+
+- Team 2 pressed their buzzer and said an answer.
+
+- Team 3 pressed their buzzer while team 2 was answering so nothing happened.
+
+*/
 
 /**
  * The buzz history chart shows the buzzes each team made relative to when the human
@@ -492,7 +521,7 @@ export class BuzzHistoryChart {
         // Find the first buzz from any team which started an answer.
         const answeringRecords = this.history.RECORDS.flat()
             .filter(record => record.RESULT.TYPE === "start-answer")
-            .sort((a, b) => a.startTimestamp - b.startTimestamp);
+            .sort((a, b) => a.timestampStartAbsolute - b.timestampStartAbsolute);
         if (answeringRecords.length < 1) {
             return;
         }
@@ -514,15 +543,15 @@ export class BuzzHistoryChart {
             // eslint-disable-next-line @typescript-eslint/prefer-for-of
             for (let recordIdx = 0; recordIdx < records.length; recordIdx++) {
                 const record = records[recordIdx];
-                const difference = record.startTimestamp - firstAnswer.startTimestamp;
+                const difference = record.timestampStartAbsolute - firstAnswer.timestampStartAbsolute;
                 if (
                     record.RESULT.TYPE === "ignored" // buzzes that happened when someone else was answering
                     && record.RESULT.TEAM_STATE_WHY_IT_WAS_IGNORED === "other-team-is-answering"
                     && difference <= BuzzHistoryChart.ANNOTATION_RANGE_MILLISEC
                 ) {
                     this.ANNOTATIONS[teamIdx].push({
-                        startTimestamp: firstAnswer.startTimestamp,
-                        endTimestamp: record.startTimestamp,
+                        startTimestamp: firstAnswer.timestampStartAbsolute,
+                        endTimestamp: record.timestampStartAbsolute,
                         message: `${difference} millisec too late`
                     });
                     break;
@@ -538,14 +567,14 @@ export class BuzzHistoryChart {
             for (let recordIdx = records.length - 1; recordIdx >= 0; recordIdx--) {
                 const record = records[recordIdx];
                 if (
-                    record.startTimestamp < 0
-                    && record.startTimestamp >= -BuzzHistoryChart.ANNOTATION_RANGE_MILLISEC
+                    record.timestampStartAbsolute < 0
+                    && record.timestampStartAbsolute >= -BuzzHistoryChart.ANNOTATION_RANGE_MILLISEC
                     && record.RESULT.TYPE === "too-early-start-lockout"
                 ) {
                     this.ANNOTATIONS[teamIdx].push({
-                        startTimestamp: record.startTimestamp,
+                        startTimestamp: record.timestampStartAbsolute,
                         endTimestamp: 0, //the time when the operator finished reading the clue question
-                        message: `${-record.startTimestamp} millisec too early`
+                        message: `${-record.timestampStartAbsolute} millisec too early`
                     });
                     break;
                 }
@@ -571,12 +600,13 @@ export class BuzzHistoryChart {
         const allTimestamps: number[] = [];
 
         // Change all the timestamps so time zero is when the operator finished reading the question.
+        // TODO do not change the timestamp, use a new field!!!!!
         this.history.RECORDS.forEach(arrayOfRecordsForTeam => arrayOfRecordsForTeam.forEach(record => {
-            record.startTimestamp -= this.history!.timestampWhenClueQuestionFinishedReading;
-            allTimestamps.push(record.startTimestamp);
+            record.timestampStartRelativeToOperatorPressedSpace = record.timestampStartAbsolute - this.history!.timestampWhenClueQuestionFinishedReading;
+            allTimestamps.push(record.timestampStartAbsolute);
             if (record.RESULT.TYPE === "start-answer") {
-                record.RESULT.endTimestamp -= this.history!.timestampWhenClueQuestionFinishedReading;
-                allTimestamps.push(record.RESULT.endTimestamp);
+                record.RESULT.timestampEndRelativeToOperatorPressedSpace = record.RESULT.timestampEnd - this.history!.timestampWhenClueQuestionFinishedReading;
+                allTimestamps.push(record.RESULT.timestampEnd);
             }
         }));
 
@@ -647,7 +677,7 @@ export class BuzzHistoryChart {
                     .join("rect")
                     .classed("buzz-record", true)
                     .classed(BuzzHistoryChart.CLASS_NAME_FOR_TOO_EARLY_START_LOCKOUT, true)
-                    .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp))
+                    .attr("x", d => this.scaleWithZoomTransform(d.timestampStartAbsolute))
                     .attr("y", BuzzHistoryChart.Y_POSITION_FOR_BARS)
                     .attr("width", lockoutBarWidth)
                     .attr("height", BuzzHistoryChart.BAR_HEIGHT);
@@ -673,9 +703,9 @@ export class BuzzHistoryChart {
                     .classed(BuzzHistoryChart.CLASS_NAME_FOR_START_ANSWER, true)
                     .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_RIGHT, d => d.RESULT.answerResult === "answeredRight")
                     .classed(BuzzHistoryChart.CLASS_NAME_FOR_ANSWERED_WRONG_OR_TIMED_OUT, d => d.RESULT.answerResult === "answeredWrongOrTimedOut")
-                    .attr("x", d => this.scaleWithZoomTransform(d.startTimestamp))
+                    .attr("x", d => this.scaleWithZoomTransform(d.timestampStartAbsolute))
                     .attr("y", BuzzHistoryChart.Y_POSITION_FOR_BARS)
-                    .attr("width", d => this.scaleWithZoomTransform(d.RESULT.endTimestamp) - this.scaleWithZoomTransform(d.startTimestamp))
+                    .attr("width", d => this.scaleWithZoomTransform(d.RESULT.timestampEnd) - this.scaleWithZoomTransform(d.timestampStartAbsolute))
                     .attr("height", BuzzHistoryChart.BAR_HEIGHT);
 
                 // Draw a dot for every time a team pressed a buzzer
@@ -684,7 +714,7 @@ export class BuzzHistoryChart {
                     .data(recordsForTeam)
                     .join("circle")
                     .classed(BuzzHistoryChart.CLASS_NAME_FOR_BUZZER_PRESS, true)
-                    .attr("cx", d => this.scaleWithZoomTransform(d.startTimestamp))
+                    .attr("cx", d => this.scaleWithZoomTransform(d.timestampStartAbsolute))
                     .attr("cy", BuzzHistoryChart.ROW_HEIGHT / 2)
                     .attr("r", BuzzHistoryChart.DOT_RADIUS);
 

@@ -289,7 +289,7 @@ export class Operator {
                     // Ignore, we don't need it to appear in the history chart.
                 } else {
                     this.buzzHistoryForCurrentClue?.RECORDS[teamIndex].push({
-                        startTimestamp: Date.now(),
+                        timestampStartAbsolute: Date.now(),
                         RESULT: {
                             TYPE: "ignored",
                             TEAM_STATE_WHY_IT_WAS_IGNORED: teamState
@@ -376,7 +376,8 @@ export class Operator {
 
     private buzzHistoryPopulateRecordForActiveAnswerAndSave(answerResult: BuzzAnswerResult): void {
         if (this.presentClue && this.buzzHistoryRecordForActiveAnswer && this.teamPresentlyAnswering) {
-            this.buzzHistoryRecordForActiveAnswer.RESULT.endTimestamp = Date.now();
+            this.buzzHistoryRecordForActiveAnswer.RESULT.timestampEnd = Date.now();
+            // todo can populate timestampEndRelativeToOperatorPressedSpace here
             this.buzzHistoryRecordForActiveAnswer.RESULT.answerResult = answerResult;
 
             this.buzzHistoryForCurrentClue?.RECORDS[this.teamPresentlyAnswering.getTeamIndex()]
@@ -570,11 +571,11 @@ export class Operator {
         this.AUDIO_MANAGER.TEAM_BUZZ.play();
 
         this.buzzHistoryRecordForActiveAnswer = {
-            startTimestamp: Date.now(),
+            timestampStartAbsolute: Date.now(),
             RESULT: {
                 TYPE: "start-answer",
                 answerResult: "answeredWrongOrTimedOut", //changed later if they answer right
-                endTimestamp: NaN
+                timestampEnd: NaN // we do not yet know when the team finished answering
             }
         };
     }
@@ -606,7 +607,7 @@ export class Operator {
             team.lockoutStart();
 
             this.buzzHistoryForCurrentClue?.RECORDS[teamIndex].push({
-                startTimestamp: Date.now(),
+                timestampStartAbsolute: Date.now(),
                 RESULT: { TYPE: "too-early-start-lockout" }
             });
         }
