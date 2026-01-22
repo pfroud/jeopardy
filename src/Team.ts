@@ -1,5 +1,5 @@
 import { AudioManager } from "./AudioManager";
-import { BuzzTimingRecord } from "./BuzzTimingChart";
+import { SingleBuzzerPressTimingRecord } from "./BuzzTimingChart";
 import { CountdownTimer } from "./CountdownTimer";
 import { Settings } from "./Settings";
 import { querySelectorAndCheck } from "./commonFunctions";
@@ -54,26 +54,9 @@ export class Team {
             teamName?: HTMLDivElement;
             buzzerShow?: HTMLDivElement;
         };
-    } = {
-            OPERATOR: {
-            },
-            PRESENTATION: {
-            }
-        };
-
-    private hasBuzzedForCurrentQuestion_ = false;
+    } = { OPERATOR: {}, PRESENTATION: {} };
 
     public moneyAtEndOfEachRound: number[] = [];
-
-    /**
-     * The first array is for each clue.
-     * The second index is for how many times the team buzzes for that clue.
-     * 
-     * WATCH OUT because in BuzzTimingChart, the first array is the TEAM INDEX.
-     * BuzzTimingChart does NOT keep track of multiple clues.
-     * */
-    public buzzTimingForAllClues: BuzzTimingRecord[][] = [];
-
 
     public constructor(teamIdx: number, operator: Operator, presentation: Presentation, settings: Settings, audioManager: AudioManager) {
         this.SETTINGS = settings;
@@ -97,7 +80,6 @@ export class Team {
         this.answerStop();
         this.AUDIO_MANAGER.ANSWER_CORRECT.play();
         this.moneyAdd(clue.VALUE);
-        this.hasBuzzedForCurrentQuestion_ = true;
     }
 
     public onAnswerIncorrectOrAnswerTimeout(clue: RevealedClue): void {
@@ -105,7 +87,6 @@ export class Team {
         this.AUDIO_MANAGER.ANSWER_WRONG_OR_ANSWER_TIMEOUT.play();
         this.moneySubtract(clue.VALUE * this.SETTINGS.wrongAnswerPenaltyMultiplier);
         this.setState(this.SETTINGS.allowMultipleAnswersToSameQuestion ? "can-answer" : "already-answered-this-clue");
-        this.hasBuzzedForCurrentQuestion_ = true;
     }
 
     public getTeamName(): string {
@@ -447,14 +428,6 @@ export class Team {
     public choosingClueClear(): void {
         this.DIV.OPERATOR.wrapper?.classList.remove("choose-clue");
         this.DIV.PRESENTATION.wrapper?.classList.remove("choose-clue");
-    }
-
-    public hasBuzzedForCurrentQuestion(): boolean {
-        return this.hasBuzzedForCurrentQuestion_;
-    }
-
-    public resetHasBuzzedForCurrentQuestion(): void {
-        this.hasBuzzedForCurrentQuestion_ = false;
     }
 
     /*

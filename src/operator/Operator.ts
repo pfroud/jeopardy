@@ -1,5 +1,5 @@
 import { AudioManager } from "../AudioManager";
-import { BuzzAnswerResult, BuzzTimingChart, BuzzTimingForOneClue, BuzzTimingRecord, BuzzResultStartAnswer } from "../BuzzTimingChart";
+import { BuzzerPressAnswerResult, BuzzTimingChart, BuzzTiming_forAllTeams_forOneClue, SingleBuzzerPressTimingRecord, BuzzerPressResultStartAnswer } from "../BuzzTimingChart";
 import { CountdownTimer } from "../CountdownTimer";
 import { FinalJeopardyWagersTable } from "../FinalJeopardyWagersTable";
 import { GameBoard } from "../GameBoard";
@@ -83,16 +83,21 @@ export class Operator {
 
     private presentClue?: RevealedClue;
 
-    private buzzTimingForCurrentClue?: BuzzTimingForOneClue;
-    public buzzTimingFor_ALL_clues: BuzzTimingForOneClue[] = [];
+    /** This is used for BuzzTimingChart */
+    private buzzTiming_forAllTeams_forCurrentClue?: BuzzTiming_forAllTeams_forOneClue;
+
+    public buzzTiming_forAllTeams_forAllClues_forGameEndPieCharts: BuzzTiming_forAllTeams_forOneClue[] = [];
 
     private buzzTimingChart: BuzzTimingChart | undefined;
-    private buzzTimingRecordForActiveAnswer: BuzzTimingRecord<BuzzResultStartAnswer> | undefined;
+
+    private buzzTimingRecordForActiveAnswer: SingleBuzzerPressTimingRecord<BuzzerPressResultStartAnswer> | undefined;
 
     private isPaused_ = false; // add underscore to property name so the method can be called isPaused
     private gameRoundIndex = -1;
     private categoryCarouselIndex = -1;
     private teamIndexToPickClue = 0;
+
+    private timestampWhenOperatorFinishedReadingClueQuestion = NaN;
 
     public constructor(audioManager: AudioManager, settings: Settings) {
         this.AUDIO_MANAGER = audioManager;
@@ -206,31 +211,29 @@ export class Operator {
         /*
         const testBuzzTiming = false;
         if (testBuzzTiming) {
-            this.buzzTimingForCurrentClue = {
-                timestampWhenClueQuestionFinishedReading: 0,
-                RECORDS: [
+            this.buzzTiming_forAllTeams_forCurrentClue =
+                [
                     // team 1 - buzzed too early and was locked out
                     [
-                        { startTimestamp: -60, RESULT: { TYPE: "too-early-start-lockout" } },
-                        { startTimestamp: 30, RESULT: { TYPE: "ignored", TEAM_STATE_WHY_IT_WAS_IGNORED: "lockout" } },
+                        { timestampStartRelativeToWhenOperatorFinishedReadingClueQuestion: -60, RESULT: { TYPE: "too-early-start-lockout" }, timestampStartAbsolute: NaN },
+                        { timestampStartRelativeToWhenOperatorFinishedReadingClueQuestion: 30, RESULT: { TYPE: "ignored", TEAM_STATE_WHY_IT_WAS_IGNORED: "lockout" }, timestampStartAbsolute: NaN },
                     ],
 
                     //team 2 - answered wrong
                     [
-                        { startTimestamp: 90, RESULT: { TYPE: "start-answer", answerResult: "answeredWrongOrTimedOut", endTimestamp: 900 } }
+                        { timestampStartRelativeToWhenOperatorFinishedReadingClueQuestion: 90, RESULT: { TYPE: "start-answer", answerResult: "answeredWrongOrTimedOut", timestampEndRelativeToWhenOperatorFinishedReadingClueQuestion: 900, timestampEndAbsolute: NaN, }, timestampStartAbsolute: NaN }
                     ],
 
                     //team 3 - buzzed while team 2 was answering
                     [
-                        { startTimestamp: 120, RESULT: { TYPE: "ignored", TEAM_STATE_WHY_IT_WAS_IGNORED: "other-team-is-answering" } }
+                        { timestampStartRelativeToWhenOperatorFinishedReadingClueQuestion: 120, RESULT: { TYPE: "ignored", TEAM_STATE_WHY_IT_WAS_IGNORED: "other-team-is-answering" }, timestampStartAbsolute: NaN }
                     ],
 
                     //team 4 - answered right
                     [
-                        { startTimestamp: 1050, RESULT: { TYPE: "start-answer", answerResult: "answeredRight", endTimestamp: 1400 } }
+                        { timestampStartRelativeToWhenOperatorFinishedReadingClueQuestion: 1050, RESULT: { TYPE: "start-answer", answerResult: "answeredRight", timestampEndRelativeToWhenOperatorFinishedReadingClueQuestion: 1400, timestampEndAbsolute: NaN, }, timestampStartAbsolute: NaN }
                     ]
-                ]
-            };
+                ];
             this.stateMachine?.goToState("showBuzzTimingChart");
         }
 
@@ -245,8 +248,7 @@ export class Operator {
             });
             this.stateMachine?.goToState("gameEnd");
         }
-            */
-
+        */
     }
 
     /**
@@ -295,9 +297,10 @@ export class Operator {
                 } else if (teamState === "idle") {
                     // Ignore, we don't need it to appear in the buzz timing chart.
                 } else {
-                    this.buzzTimingForCurrentClue?.RECORDS[teamIndex].push({
+                    this.buzzTiming_forAllTeams_forCurrentClue?.[teamIndex].push({
                         timestampStartAbsolute: Date.now(),
-                        timestampStartRelativeToOperatorPressedSpace: NaN,
+                        // We don't know yet when the operator will finish reading the clue question. All the relative timestamps are set in onShowAnswer().
+                        timestampStartRelativeToWhenOperatorFinishedReadingClueQuestion: NaN,
                         RESULT: {
                             TYPE: "ignored",
                             TEAM_STATE_WHY_IT_WAS_IGNORED: teamState
@@ -382,20 +385,19 @@ export class Operator {
         }
     }
 
-    private buzzTimingPopulateRecordForActiveAnswerAndSave(answerResult: BuzzAnswerResult): void {
-        if (this.presentClue && this.buzzTimingRecordForActiveAnswer && this.teamPresentlyAnswering) {
+    private buzzTimingPopulateRecordForActiveAnswerAndSave(answerResult: BuzzerPressAnswerResult): void {
+        if (this.presentClue && this.buzzTimingRecordForActiveAnswer && this.teamPresentlyAnswering && this.buzzTiming_forAllTeams_forCurrentClue) {
+
             this.buzzTimingRecordForActiveAnswer.RESULT.timestampEndAbsolute = Date.now();
-            // todo can populate timestampEndRelativeToOperatorPressedSpace here
             this.buzzTimingRecordForActiveAnswer.RESULT.answerResult = answerResult;
 
-            this.buzzTimingForCurrentClue?.RECORDS[this.teamPresentlyAnswering.getTeamIndex()]
+            this.buzzTiming_forAllTeams_forCurrentClue[this.teamPresentlyAnswering.getTeamIndex()]
                 .push(this.buzzTimingRecordForActiveAnswer);
 
             this.buzzTimingRecordForActiveAnswer = undefined;
 
-            if (this.buzzTimingForCurrentClue) {
-                this.buzzTimingFor_ALL_clues.push(this.buzzTimingForCurrentClue);
-            }
+            // Save this to generate pie charts at the end of the game
+            this.buzzTiming_forAllTeams_forAllClues_forGameEndPieCharts.push(this.buzzTiming_forAllTeams_forCurrentClue);
         }
     }
 
@@ -580,12 +582,15 @@ export class Operator {
 
         this.buzzTimingRecordForActiveAnswer = {
             timestampStartAbsolute: Date.now(),
-            timestampStartRelativeToOperatorPressedSpace: NaN,
+            // We don't know yet when the operator will finish reading the clue question. All the relative timestamps are set in onShowAnswer().
+            timestampStartRelativeToWhenOperatorFinishedReadingClueQuestion: NaN,
             RESULT: {
                 TYPE: "start-answer",
-                answerResult: "answeredWrongOrTimedOut", //changed later if they answer right
-                timestampEndAbsolute: NaN, // we do not yet know when the team finished answering
-                timestampEndRelativeToOperatorPressedSpace: NaN
+                answerResult: "unknown",
+                // We don't know yet when the answer will end.
+                timestampEndAbsolute: NaN,
+                // We don't know yet when the operator will finish reading the clue question. All the relative timestamps are set in onShowAnswer().
+                timestampEndRelativeToWhenOperatorFinishedReadingClueQuestion: NaN
             }
         };
     }
@@ -616,9 +621,10 @@ export class Operator {
         if (team.canBeLockedOut()) {
             team.lockoutStart();
 
-            this.buzzTimingForCurrentClue?.RECORDS[teamIndex].push({
+            this.buzzTiming_forAllTeams_forCurrentClue?.[teamIndex].push({
                 timestampStartAbsolute: Date.now(),
-                timestampStartRelativeToOperatorPressedSpace: NaN,
+                // We don't know yet when the operator will finish reading the clue question. All the relative timestamps are set in onShowAnswer().
+                timestampStartRelativeToWhenOperatorFinishedReadingClueQuestion: NaN,
                 RESULT: { TYPE: "too-early-start-lockout" }
             });
         }
@@ -639,17 +645,14 @@ export class Operator {
     private setPresentClue(clue: RevealedClue): void {
         this.presentClue = clue;
 
-        this.buzzTimingForCurrentClue = {
-            RECORDS: getEmpty2DArray(this.teamCount),
-            timestampWhenClueQuestionFinishedReading: NaN
-        };
+        this.buzzTiming_forAllTeams_forCurrentClue = getEmpty2DArray(this.teamCount);
 
-        function getEmpty2DArray(size: number): BuzzTimingRecord[][] {
+        function getEmpty2DArray(size: number): SingleBuzzerPressTimingRecord[][] {
             /*
              Do not use array.fill([]) because it creates one new empty array and sets
              all the elements to that empty array.
              */
-            const rv = new Array<BuzzTimingRecord[]>(size);
+            const rv = new Array<SingleBuzzerPressTimingRecord[]>(size);
             for (let teamIdx = 0; teamIdx < size; teamIdx++) {
                 rv[teamIdx] = [];
             }
@@ -770,6 +773,8 @@ export class Operator {
         */
         this.setAllTeamsState("operator-is-reading-question");
 
+        this.timestampWhenOperatorFinishedReadingClueQuestion = NaN;
+
         this.DIV_CLUE_QUESTION.innerHTML = this.getQuestionHtmlWithSubjectInBold(this.presentClue.QUESTION);
         this.TR_QUESTION.style.display = ""; //show it by removing "display=none"
         this.TR_ANSWER.style.display = "none";
@@ -812,12 +817,7 @@ export class Operator {
         */
         this.stateMachine?.getCountdownTimerForState("waitForBuzzes").reset();
 
-        // todo move this resetting to when a question actually starts
-        this.teamArray?.forEach(team => team.resetHasBuzzedForCurrentQuestion());
-
-        if (this.buzzTimingForCurrentClue) {
-            this.buzzTimingForCurrentClue.timestampWhenClueQuestionFinishedReading = Date.now();
-        }
+        this.timestampWhenOperatorFinishedReadingClueQuestion = Date.now();
     }
 
     /**
@@ -852,6 +852,20 @@ export class Operator {
                 this.teamIndexToPickClue++;
             }
         }
+
+        this.buzzTiming_forAllTeams_forCurrentClue?.forEach(arrayOfRecordsForTeam => arrayOfRecordsForTeam.forEach(record => {
+
+            record.timestampStartRelativeToWhenOperatorFinishedReadingClueQuestion =
+                record.timestampStartAbsolute - this.timestampWhenOperatorFinishedReadingClueQuestion;
+
+            if (record.RESULT.TYPE === "start-answer") {
+                record.RESULT.timestampEndRelativeToWhenOperatorFinishedReadingClueQuestion =
+                    record.RESULT.timestampEndAbsolute - this.timestampWhenOperatorFinishedReadingClueQuestion;
+            }
+
+        }));
+
+
     }
 
     public setAllTeamsState(targetState: TeamState, endLockout = false): void {
@@ -1070,11 +1084,11 @@ export class Operator {
      * Buzz timing is for each clue. It shows a timeline of when teams buzzed in.
      */
     public onBuzzTimingChartShow(): void {
-        if (this.buzzTimingForCurrentClue && this.buzzTimingChart) {
+        if (this.buzzTiming_forAllTeams_forCurrentClue && this.buzzTimingChart) {
             this.backdropForPopupsShow();
             this.DIV_BUZZ_TIMING_CHART_POPUP.setAttribute("data-popup-visibility", "visible");
 
-            this.buzzTimingChart.showNewTimingData(this.buzzTimingForCurrentClue);
+            this.buzzTimingChart.showNewTimingData(this.buzzTiming_forAllTeams_forCurrentClue);
         }
     }
 
@@ -1112,10 +1126,15 @@ export class Operator {
     }
 
     public buzzTimingChartShouldShow(): boolean {
-        if (this.teamArray) {
-            return this.teamArray.some(t => t.hasBuzzedForCurrentQuestion());
+        if (this.buzzTiming_forAllTeams_forCurrentClue) {
+
+            return this.buzzTiming_forAllTeams_forCurrentClue.some(recordsForTeam =>
+                recordsForTeam.length > 0
+                // recordsForTeam.some(buzzPressResult => buzzPressResult.RESULT.TYPE === "start-answer")
+            );
+
         } else {
-            throw new Error("called buzzTimingChartShouldShow() when teamArray is undefined");
+            throw new Error("called buzzTimingChartShouldShow() when buzzTiming_forAllTeams_forCurrentClue is undefined");
         }
     }
 
@@ -1212,7 +1231,7 @@ export class Operator {
             /     end of regex literal
             g     global search flag
             
-            Then all occurrences with "$1" which inserts the capture group.
+            Then replace all occurrences with "$1" which inserts the capture group.
 
             Try it here: https://regexr.com/8cqpi
             If you get an error because the expression took too long to execute, add then remove a character in the search
@@ -1315,7 +1334,6 @@ export class Operator {
         const wagersTable = new FinalJeopardyWagersTable(this.teamArray!);
 
         const tableContainer = querySelectorAndCheck(document, "div#final-jeopardy-wagers-table-container");
-        // tableContainer.append(document.createElement("br"));
         tableContainer.append(wagersTable.getTableForOperatorWindow());
 
         this.presentation?.finalJeopardyShowWagersTable(wagersTable.getTableForPresentationWindow());

@@ -1,5 +1,5 @@
 import * as Chartist from "chartist";
-import { BuzzResult, BuzzResultStartAnswer } from "../BuzzTimingChart";
+import { BuzzerPressResult, BuzzerPressResultStartAnswer } from "../BuzzTimingChart";
 import { createSvgElement, downloadSVG, querySelectorAndCheck } from "../commonFunctions";
 import { Operator } from "../operator/Operator";
 import { Team } from "../Team";
@@ -20,7 +20,7 @@ type HowManyOfEachPieChartSliceType = { [key in PieChartSliceType]: number };
 /**
  * Converts an ARRAY of buzz results to a SINGLE pie chart slice.
  */
-function convertBuzzResultsToPieChartSlice(buzzResults: BuzzResult[]): PieChartSliceType {
+function convertBuzzResultsToPieChartSlice(buzzResults: BuzzerPressResult[]): PieChartSliceType {
     if (buzzResults.length === 0) {
         return "notPressedBuzzer";
     }
@@ -32,7 +32,7 @@ function convertBuzzResultsToPieChartSlice(buzzResults: BuzzResult[]): PieChartS
         https://stackoverflow.com/questions/65279417/typescript-narrow-down-type-based-on-class-property-from-filter-find-etc
         https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates
         */
-        function (result: BuzzResult): result is BuzzResultStartAnswer {
+        function (result: BuzzerPressResult): result is BuzzerPressResultStartAnswer {
             return result.TYPE === "start-answer";
         }
     );
@@ -245,9 +245,9 @@ export function createGameEndPieChartsOfBuzzResults(operator: Operator, divForPi
         });
     }
 
-    operator.buzzTimingFor_ALL_clues.forEach(buzzTimingForOneClue => {
+    operator.buzzTiming_forAllTeams_forAllClues_forGameEndPieCharts.forEach(buzzHistoryForOneClue => {
         for (let teamIdx = 0; teamIdx < operator.teamCount; teamIdx++) {
-            const recordsForTeam = buzzTimingForOneClue.RECORDS[teamIdx];
+            const recordsForTeam = buzzHistoryForOneClue[teamIdx];
             const mapToResultsOnly = recordsForTeam.map(record => record.RESULT);
             const pieChartSlice = convertBuzzResultsToPieChartSlice(mapToResultsOnly);
             destinationAllTeams[teamIdx][pieChartSlice]++;
