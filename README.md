@@ -29,7 +29,7 @@ I began the project using [JService](https://github.com/sottenad/jService), a we
 
 ## Operator window
 
-![Screenshot of operator window showing a clue category, value, question, and answer](images-for-readme/operator-window.png)
+![Screenshot of operator window showing a clue category, value, question, and answer](https://github.com/pfroud/jeopardy/blob/main/images-for-readme/operator-window.png)
 
 The operator window is only visible to the person operating the game. In a utilitarian design, this window shows the question *and* answer.
 
@@ -51,9 +51,9 @@ The clue in the above screenshot is from the [last game hosted by Alex Trebek](h
 
 <table>
   <tr>
-    <td><img src="images-for-readme/presentation-window-idle.png" alt="Screenshot of presentation window showing the Jeopardy logo"></td>
-    <td><img src="images-for-readme/presentation-window-game-board.png" alt="Screenshot of presentation window showing table of available clues"></td>
-    <td><img src="images-for-readme/presentation-window-question.png" alt="Screenshot of presentation window showing a question"></td>
+    <td><img src="https://github.com/pfroud/jeopardy/blob/main/images-for-readme/presentation-window-idle.png" alt="Screenshot of presentation window showing the Jeopardy logo"></td>
+    <td><img src="https://github.com/pfroud/jeopardy/blob/main/images-for-readme/presentation-window-game-board.png" alt="Screenshot of presentation window showing table of available clues"></td>
+    <td><img src="https://github.com/pfroud/jeopardy/blob/main/images-for-readme/presentation-window-question.png" alt="Screenshot of presentation window showing a question"></td>
     </tr>
 </table>
 
@@ -120,7 +120,7 @@ I tried refactoring to avoid these by using the return value of `window.open()` 
 The entire game is run by this state machine:
 
 <p align="center">
-<img src="images-for-readme/state-machine-state-diagram.svg" alt="State diagram for state machine" height="400">
+<img src="https://github.com/pfroud/jeopardy/blob/main/images-for-readme/state-machine-state-diagram.svg" alt="State diagram for state machine" height="400">
 </p>
 
 How to read the transition labels: text is always to the right of the arrow (troublesome in a few places). Each label contains up to three parts:
@@ -148,7 +148,7 @@ To copy the TV show, buzzes made before the human operator finishes reading the 
 
 This chart appears after each question to show who buzzed too early or too late. The charts in this section use simulated data to show all possible types of buzz:
 
-![Buzz timing chart overview](images-for-readme/buzz-timing-chart-overview.svg)
+![Buzz timing chart overview](https://github.com/pfroud/jeopardy/blob/main/images-for-readme/buzz-timing-chart-overview.svg)
 
 The X axis is time relative to when the human operator pressed the spacebar to indicate they were done reading the question out loud. Buzzes made before that are locked out for &frac14; second.
 
@@ -161,7 +161,7 @@ Each black dot represents a buzzer being pressed. Colored bars trailing the blac
 
 The time scale can be zoomed in to see automatically-generated numerical annotations:
 
-![Buzz timing chart zoomed in to show annotations](images-for-readme/buzz-timing-chart-zoomed-in.svg)
+![Buzz timing chart zoomed in to show annotations](https://github.com/pfroud/jeopardy/blob/main/images-for-readme/buzz-timing-chart-zoomed-in.svg)
 
 ### Game-end statistics charts
 
@@ -171,8 +171,8 @@ The charts below are from from an actual game played in early 2025:
 
 <table>
   <tr>
-    <td><img src="images-for-readme/line-chart-of-money-over-time.svg" alt="Line chart of money over time"></td>
-    <td><img src="images-for-readme/pie-charts-of-buzz-results.svg" alt="Pie chart of buzz results"></td>
+    <td><img src="https://github.com/pfroud/jeopardy/blob/main/images-for-readme/line-chart-of-money-over-time.svg" alt="Line chart of money over time"></td>
+    <td><img src="https://github.com/pfroud/jeopardy/blob/main/images-for-readme/pie-charts-of-buzz-results.svg" alt="Pie chart of buzz results"></td>
     </tr>
 </table>
 
@@ -187,7 +187,7 @@ Some categories on the Jeopardy TV show have special meaning. For example, a cat
 That means guests at my game who have seen the TV show may have an unfair advantage over players who are new to Jeopardy. To make the game more fair, my software detects special categories from [this list](https://list.fandom.com/wiki/Jeopardy!_recurring_categories), prompts the operator to show a popup to everyone, and provides an explanation with an example:
 
 <p align="center">
-<img src="images-for-readme/special-category-explanation-popup.png" alt="Screenshot of special category popup" width="600">
+<img src="https://github.com/pfroud/jeopardy/blob/main/images-for-readme/special-category-explanation-popup.png" alt="Screenshot of special category popup" width="600">
 </p>
 
 ## "Clue" vs "question" vs "answer"
