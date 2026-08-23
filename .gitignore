@@ -2,5 +2,8 @@ node_modules/
 .parcel-cache/
 dist/
 src/scrapedGame.ts
-src/scraper/scraper.js
-src/scraper/scraper.ts.*
+src/scraper/
+src/testing
+before_svg_optimization
+images-for-readme/not_used
+.idea/

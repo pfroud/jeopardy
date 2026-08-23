@@ -2,6 +2,7 @@
     "recommendations": [
         "dbaeumer.vscode-eslint",
         "streetsidesoftware.code-spell-checker",
-        "nick-lvov-dev.typescript-explicit-types"
+        "nick-lvov-dev.typescript-explicit-types",
+        "bpruitt-goddard.mermaid-markdown-syntax-highlighting"
     ]
 }
