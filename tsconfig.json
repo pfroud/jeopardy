@@ -1,8 +1,8 @@
 // https://www.typescriptlang.org/tsconfig
 {
     "compilerOptions": {
-        "moduleResolution": "Node", // https://www.typescriptlang.org/tsconfig#moduleResolution
-        "target": "ES2021", // https://www.typescriptlang.org/tsconfig#target
+        "moduleResolution": "bundler", // https://www.typescriptlang.org/tsconfig#moduleResolution
+        "target": "ES2025", // https://www.typescriptlang.org/tsconfig#target
         "strict": true, // https://www.typescriptlang.org/tsconfig#strict
         "sourceMap": true, // https://www.typescriptlang.org/tsconfig#sourceMap
         "allowUnreachableCode": false, // https://www.typescriptlang.org/tsconfig#allowUnreachableCode
@@ -18,7 +18,14 @@
         // https://parceljs.org/languages/typescript/#isolatedmodules
         // https://www.typescriptlang.org/tsconfig#isolatedModules
         "isolatedModules": true,
-        "module": "es2020"
+        "module": "es2022", // https://www.typescriptlang.org/tsconfig/#module
+        //
+        // https://www.typescriptlang.org/tsconfig/#paths
+        "paths": {
+            "@aduh95/viz.js": [
+                "./node_modules/@aduh95/viz.js/dist/index.d.ts"
+            ]
+        }
     },
     "exclude": [
         "node_modules"
